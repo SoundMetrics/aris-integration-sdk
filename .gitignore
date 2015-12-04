@@ -70,6 +70,7 @@ _Chutzpah*
 ipch/
 *.aps
 *.ncb
+*.opendb
 *.opensdf
 *.sdf
 *.cachefile
