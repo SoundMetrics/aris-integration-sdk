@@ -1,0 +1,47 @@
+package aris;
+
+message Availability {
+  optional uint32 serialNumber = 1;
+  optional SystemType systemType = 2;
+  optional SoftwareVersion softwareVersion = 3;
+  optional ConnectionState connectionState = 4;
+  optional Capabilities capabilities = 5;
+  optional uint32 reserved6 = 6; // was ack port
+  optional CommLinkPreference commLinkPreference = 7;
+  optional float cpuTemp = 8;
+  optional PowerDownReason powerDownReason = 9;
+  optional float overTempLimitDegreesC = 10;
+  optional uint32 overTempLimitSeconds = 11;
+  optional bool isDiverHeld = 12;
+
+  enum SystemType {
+    ARIS_1800 = 0;
+    ARIS_3000 = 1;
+    ARIS_1200 = 2;
+  }
+
+  message SoftwareVersion {
+    optional uint32 major = 1;
+    optional uint32 minor = 2;
+    optional uint32 buildnumber = 3;
+  }
+
+  enum ConnectionState {
+    AVAILABLE = 0;
+    BUSY = 1;
+  }
+
+  message Capabilities {
+    // KA  : TCP keepalives 
+    repeated string enabled = 1;
+  }
+
+  enum CommLinkPreference {
+    HomePlug = 0;
+    Ethernet = 1;
+  }
+
+  enum PowerDownReason {
+    OverTemp = 0;
+  }
+}
