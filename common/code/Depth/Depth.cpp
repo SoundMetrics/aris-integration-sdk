@@ -53,7 +53,7 @@ namespace Aris {
       else if (salinityPPT >= 15) {
         cf = findCF(tempToBrackishDepthCFs, temperatureC);
       }
-      else if (salinityPPT >= 0) {
+      else /* salinityPPT >= 0 */ {
         cf = findCF(tempToFreshDepthCFs, temperatureC);
       }
 
