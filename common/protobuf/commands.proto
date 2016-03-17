@@ -110,7 +110,8 @@ message Command {
   }
 
   message SetFocusPosition {
-    optional uint32 position = 1;
+    optional uint32 position = 1;   // obsolete; ARIScope will continue to use this in support of pre-2.6 firmware.
+    optional float  focusRange = 2; // in meters; this is the prefered method for firmware 2.6 and later.
   }  
 
   message ForceFocus {
