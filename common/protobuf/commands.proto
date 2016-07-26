@@ -21,6 +21,7 @@ message Command {
     PING = 14;
     SET_SYSLOG_RECEIVER = 15;
     POWER_DOWN = 16;  // For internal use by Sound Metrics only
+    RESERVED_1 = 17;  // For internal use by Sound Metrics only
   }
 
   optional SetDateTime dateTime = 2;
@@ -40,6 +41,7 @@ message Command {
   optional Ping ping = 16;
   optional SetSyslogReceiver syslogReceiver = 17;
   optional PowerDown powerDown = 18;
+  optional Reserved1 reserved1 = 19;
 
   message SetDateTime {
     optional string dateTime = 1; 
@@ -169,5 +171,9 @@ message Command {
 
   // For internal use by Sound Metrics only
   message PowerDown {
+  }
+
+  // For internal use by Sound Metrics only
+  message Reserved1 {
   }
 }
