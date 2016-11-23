@@ -1,42 +1,83 @@
 // reorder frame
 #include "Reorder.h"
+#include "FileHeader.h"
+#include <string.h>
 #include <fstream>
 #include <iostream>
 
-int main() {
-    using namespace Aris;
+bool validate_inputs(int argc, char* argv[], const char** inputPath);
+void show_usage();
+void reorder(std::ifstream &inputFile);
 
-    // Build input frame header
-    ArisFrameHeader inHeader;
-    inHeader.PingMode = 9;
-    inHeader.SamplesPerBeam = 512;
-    inHeader.ReorderedSamples = 0;
+int main(int argc, char * argv[]) {
+    const char * inputPath;
 
-    std::cout << "Reordering frame with PingMode=" << inHeader.PingMode
-              << " and SamplesPerBeam=" << inHeader.SamplesPerBeam << std::endl;
+    if (!validate_inputs(argc, argv, &inputPath)) {
+        show_usage();
+        return 1;
+    }
 
-    // Read unordered image data from input file
-    const auto dataSize = PingModeToNumBeams(inHeader.PingMode) * inHeader.SamplesPerBeam;
-    auto unorderedData = std::vector<uint8_t>(dataSize, 0xAA);
-    std::ifstream inputFile("pingmode9samples512.dat", std::ifstream::binary);
+    std::ifstream inputFile(inputPath);
 
     if (!inputFile.is_open()) {
         std::cerr << "ERROR: image data file not found" << std::endl;
         return 1;
     }
 
+    reorder(inputFile);
+
+    return 0;
+}
+
+void show_usage() {
+    std::cerr << "USAGE:" << std::endl
+              << "    reorderframe <input-path>" << std::endl
+              << std::endl;
+}
+
+bool validate_inputs(int argc, char * argv[], const char** inputPath) {
+    if (argc != 2) {
+        std::cerr << "Bad number of arguments." << std::endl;
+        return false;
+    }
+
+    *inputPath = argv[1];
+
+    if (strlen(*inputPath) == 0) {
+        std::cerr << "No input path." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+void reorder(std::ifstream &inputFile) {
+    using namespace Aris;
+
+    ArisFrameHeader inHeader;
+
+    // Skip over FileHeader.
+    inputFile.seekg(sizeof(ArisFileHeader));
+
+    // Read FrameHeader.
+    inputFile.read((char *)&inHeader, kFrameHeaderSize);
+
+    std::cout << "Reordering frame PingMode=" << inHeader.PingMode
+              << " SamplesPerBeam=" << inHeader.SamplesPerBeam << std::endl;
+
+    // Read unordered image data from input file    
+    const auto dataSize = PingModeToNumBeams(inHeader.PingMode) * inHeader.SamplesPerBeam;
+    auto unorderedData = std::vector<uint8_t>(dataSize);
     inputFile.read((char *)&unorderedData[0], dataSize);
 
-    // Copy frame header and image data to result frame
-    auto buffer = std::vector<uint8_t>(kFrameHeaderSize + dataSize, 0xAA);
+    // Copy FrameHeader and image data to result Frame
+    auto buffer = std::vector<uint8_t>(kFrameHeaderSize + dataSize);
     std::copy((uint8_t *)&inHeader, (uint8_t *)&inHeader + kFrameHeaderSize, std::begin(buffer));
     std::copy(std::begin(unorderedData), std::end(unorderedData), &buffer[kFrameHeaderSize]);
     auto result = std::make_shared<Frame>(&buffer[0], buffer.size());
 
-    // Reorder result frame
+    // Reorder result Frame
     Reorder(result);
 
-    std::cout << "Reordering complete" << std::endl;
-
-    return 0;
+    std::cout << "Reordering complete." << std::endl;
 }
