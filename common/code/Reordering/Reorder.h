@@ -5,11 +5,10 @@
 #pragma once
 
 #include "Frame.h"
-#include <memory>
 
 namespace Aris {
 
-void Reorder(std::shared_ptr<Frame> pFrame);
+void Reorder(Frame & frame);
 
 inline uint32_t PingModeToPingsPerFrame(uint32_t pingMode) {
     if (pingMode == 1) {

@@ -1,83 +1,117 @@
 // reorder frame
 #include "Reorder.h"
-#include "FileHeader.h"
 #include <string.h>
 #include <fstream>
 #include <iostream>
 
-bool validate_inputs(int argc, char* argv[], const char** inputPath);
+bool validate_inputs(int argc, char* argv[],
+                     const char** inputPath, const char** expectedFile);
 void show_usage();
-void reorder(std::ifstream &inputFile);
+std::vector<uint8_t> read_frame(std::ifstream & file);
 
 int main(int argc, char * argv[]) {
-    const char * inputPath;
+    using namespace Aris;
 
-    if (!validate_inputs(argc, argv, &inputPath)) {
+    const char * inputPath;
+    const char * expectedPath;
+
+    if (!validate_inputs(argc, argv, &inputPath, &expectedPath)) {
         show_usage();
         return 1;
     }
 
     std::ifstream inputFile(inputPath);
+    std::ifstream expectedFile(expectedPath);
 
     if (!inputFile.is_open()) {
-        std::cerr << "ERROR: image data file not found" << std::endl;
+        std::cerr << "ERROR: input data file not found" << std::endl;
         return 1;
     }
 
-    reorder(inputFile);
+    if (!expectedFile.is_open()) {
+        std::cerr << "ERROR: expected data file not found" << std::endl;
+        return 1;
+    }
+
+    std::cout << "input data: ";
+    auto inputBuf = read_frame(inputFile);
+    std::cout << "expected data: ";
+    auto expectedBuf= read_frame(expectedFile);
+
+    Frame result(&inputBuf[0], inputBuf.size());
+    Reorder(result);
+
+    const auto dataSize = expectedBuf.size() - kFrameHeaderSize;
+
+    // Compare result of reordering with expected data
+    if (memcmp(result.GetData(), &expectedBuf[kFrameHeaderSize], dataSize) != 0) {
+        std::cerr << "Result of reordering does not match expected data." << std::endl;
+        return 1;
+    }
+
+    // Copy ArisFrameHeader from result
+    const auto outHeader = result.GetHeader();
+
+    // Verify that ReorderedSamplse flag is set after reordering
+    if (outHeader.ReorderedSamples != 1) {
+        std::cerr << "ReorderedSamples flag not set in frame header for result of reordering." << std::endl;
+        return 1;
+    }
+
+    std::cout << "Reordering successful." << std::endl;
 
     return 0;
 }
 
 void show_usage() {
     std::cerr << "USAGE:" << std::endl
-              << "    reorderframe <input-path>" << std::endl
+              << "    reorderframe <input-path> <expected-path>" << std::endl
               << std::endl;
 }
 
-bool validate_inputs(int argc, char * argv[], const char** inputPath) {
-    if (argc != 2) {
+bool validate_inputs(int argc, char * argv[],
+                     const char** inputPath, const char** expectedPath) {
+    if (argc != 3) {
         std::cerr << "Bad number of arguments." << std::endl;
         return false;
     }
 
     *inputPath = argv[1];
+    *expectedPath = argv[2];
 
     if (strlen(*inputPath) == 0) {
         std::cerr << "No input path." << std::endl;
         return false;
     }
 
+    if (strlen(*expectedPath) == 0) {
+        std::cerr << "No expected path." << std::endl;
+        return false;
+    }
+
     return true;
 }
 
-void reorder(std::ifstream &inputFile) {
+std::vector<uint8_t> read_frame(std::ifstream & file) {
     using namespace Aris;
 
     ArisFrameHeader inHeader;
 
-    // Skip over FileHeader.
-    inputFile.seekg(sizeof(ArisFileHeader));
+    // Read ArisFrameHeader from file
+    file.read((char *)&inHeader, kFrameHeaderSize);
 
-    // Read FrameHeader.
-    inputFile.read((char *)&inHeader, kFrameHeaderSize);
-
-    std::cout << "Reordering frame PingMode=" << inHeader.PingMode
+    std::cout << "PingMode=" << inHeader.PingMode
               << " SamplesPerBeam=" << inHeader.SamplesPerBeam << std::endl;
 
-    // Read unordered image data from input file    
+    // Read unordered image data from file    
     const auto dataSize = PingModeToNumBeams(inHeader.PingMode) * inHeader.SamplesPerBeam;
     auto unorderedData = std::vector<uint8_t>(dataSize);
-    inputFile.read((char *)&unorderedData[0], dataSize);
+    file.read((char *)&unorderedData[0], dataSize);
 
-    // Copy FrameHeader and image data to result Frame
+    // Copy ArisFrameHeader and image data to in-memory Frame
     auto buffer = std::vector<uint8_t>(kFrameHeaderSize + dataSize);
     std::copy((uint8_t *)&inHeader, (uint8_t *)&inHeader + kFrameHeaderSize, std::begin(buffer));
     std::copy(std::begin(unorderedData), std::end(unorderedData), &buffer[kFrameHeaderSize]);
-    auto result = std::make_shared<Frame>(&buffer[0], buffer.size());
 
-    // Reorder result Frame
-    Reorder(result);
-
-    std::cout << "Reordering complete." << std::endl;
+    return buffer;
 }

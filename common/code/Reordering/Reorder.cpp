@@ -9,9 +9,9 @@
 
 namespace Aris {
 
-void Reorder(std::shared_ptr<Frame> pFrame) {
+void Reorder(Frame & frame) {
 
-    const auto header = pFrame->GetHeader();
+    const auto header = frame.GetHeader();
     const uint32_t samplesPerBeam = header.SamplesPerBeam;
     const uint32_t pingMode = header.PingMode;
     const uint32_t pingsPerFrame = PingModeToPingsPerFrame(pingMode);
@@ -27,7 +27,7 @@ void Reorder(std::shared_ptr<Frame> pFrame) {
 
     auto inputBuf = std::vector<uint8_t>(numBeams * samplesPerBeam, 0);
     uint8_t * inputByte = &(inputBuf[0]);
-    uint8_t * const outputBuf = (uint8_t * const)pFrame->GetData();
+    uint8_t * const outputBuf = (uint8_t * const)frame.GetData();
 
     memcpy(&(inputBuf[0]), outputBuf, numBeams * samplesPerBeam);
 
@@ -54,7 +54,7 @@ void Reorder(std::shared_ptr<Frame> pFrame) {
         }
     }
 
-    pFrame->GetHeader().ReorderedSamples = 1;
+    frame.GetHeader().ReorderedSamples = 1;
 }
 
 }
