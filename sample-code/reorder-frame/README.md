@@ -5,7 +5,7 @@ This sample program reorders the first frame read from a `.dat` file
 
 ### Program Usage
 
-    reorderframe <input-path>
+    reorder <input-path> <expected-path>
 
 ### C Type Definitions
 

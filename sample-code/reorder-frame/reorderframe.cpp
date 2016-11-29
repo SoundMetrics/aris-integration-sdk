@@ -45,7 +45,7 @@ int main(int argc, char * argv[]) {
 
     // Compare result of reordering with expected data
     if (memcmp(result.GetData(), &expectedBuf[kFrameHeaderSize], dataSize) != 0) {
-        std::cerr << "Result of reordering does not match expected data." << std::endl;
+        std::cerr << "ERROR: Result of reordering does not match expected data." << std::endl;
         return 1;
     }
 
@@ -54,7 +54,7 @@ int main(int argc, char * argv[]) {
 
     // Verify that ReorderedSamplse flag is set after reordering
     if (outHeader.ReorderedSamples != 1) {
-        std::cerr << "ReorderedSamples flag not set in frame header for result of reordering." << std::endl;
+        std::cerr << "ERROR: ReorderedSamples flag not set in frame header for result of reordering." << std::endl;
         return 1;
     }
 
@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
 
 void show_usage() {
     std::cerr << "USAGE:" << std::endl
-              << "    reorderframe <input-path> <expected-path>" << std::endl
+              << "    reorder <input-path> <expected-path>" << std::endl
               << std::endl;
 }
 
