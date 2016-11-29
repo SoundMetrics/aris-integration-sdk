@@ -10,7 +10,7 @@ This sample program reorders the first frame read from a `.dat` file
 ### C Type Definitions
 
 The `FrameHeader.h` C header file can be found in
-[type_definitions](https://github.com/SoundMetrics/aris-file-sdk/tree/master/type-definitions)
+[type_definitions](https://github.com/SoundMetrics/aris-file-sdk/tree/master/type-definitions/C)
 --this header file is pre-generated for ease of use. `FrameHeader.h` defines the `ArisFrameHeader` struct for use in interpreting the data in a `.dat` file.
 
 The easiest way to ensure that the C type definitions are available to the MinGW makefile is to git clone the `aris-file-sdk` repo into the same parent directory where your working `aris-integration-sdk` repo is located. 
@@ -25,7 +25,7 @@ The code in this sample is standard C++11 that should build with any modern C++ 
 
 ### ARIS Sample and Expected Data
 A sample `.dat` file containing a single frame for reordering is provided in
-[sample-code](https://github.com/SoundMetrics/aris-integration-sdk/tree/master/sample-code) along with an expected `.exp` file containing the same sample data reordered for verification purposes.
+[sample-code](https://github.com/SoundMetrics/aris-integration-sdk/tree/master/sample-code/reorder-frame) along with an expected `.exp` file containing the same sample data reordered for verification purposes.
 
 ### gcc
 
