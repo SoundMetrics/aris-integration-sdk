@@ -7,22 +7,28 @@
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 
-#define INVALID_INPUTS        -1
-#define CANT_START_WINSOCK    -2
-#define CANT_START_LISTENER   -3
-#define CANT_FIND_SONAR       -4
+#define INVALID_INPUTS          -1
+#define CANT_START_WINSOCK      -2
+#define CANT_START_LISTENER     -3
+#define CANT_FIND_SONAR         -4
+#define CANT_CONNECT_TO_SONAR   -5
 
 #define MAX_BEACON_SIZE     256 
+#define MAX_COMMAND_SIZE    1024
 #define AVAILABILITY_PORT   56124
 
 uint8_t beacon_buf[MAX_BEACON_SIZE];
+uint8_t command_buf[MAX_COMMAND_SIZE];
 
 int validate_inputs(int argc, char** argv,
                     unsigned int* serial);
 int start_listening(SOCKET* listener_socket);
-int find_sonar(int beacon_socket, uint32_t serial,
+int find_sonar(SOCKET beacon_socket, uint32_t serial,
                Aris__Availability__SystemType* system_type,
                SOCKADDR* sonar_address);
+int connect_to_sonar(SOCKET* command_socket,
+                     Aris__Availability__SystemType system_type,
+                     SOCKADDR* sonar_address);
 int32_t read_length_prefix(SOCKET socket, SOCKADDR* server_address);
 void show_usage(void);
 void show_availability(Aris__Availability* msg);
@@ -34,6 +40,7 @@ int main(int argc, char** argv) {
     struct sockaddr_in sonar_address;
     WSADATA wsa_data;
     SOCKET beacon_socket;
+    SOCKET command_socket;
 
     if (validate_inputs(argc, argv, &serial)) {
        show_usage();
@@ -48,10 +55,16 @@ int main(int argc, char** argv) {
        return CANT_START_LISTENER; 
     }
 
-    if (find_sonar(beacon_socket, serial, &system_type, (SOCKADDR *)&sonar_address)) {
+    if (find_sonar(beacon_socket, serial, &system_type, (SOCKADDR*)&sonar_address)) {
        return CANT_FIND_SONAR;
     }
 
+    if (connect_to_sonar(&command_socket, system_type, (SOCKADDR*)&sonar_address)) {
+       return CANT_CONNECT_TO_SONAR;
+    }
+
+    closesocket(beacon_socket);
+    closesocket(command_socket);
     WSACleanup();
 
     return 0;
@@ -100,7 +113,7 @@ int start_listening(SOCKET* listener_socket) {
     recv_address.sin_port = htons(AVAILABILITY_PORT);
     recv_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if (bind(*listener_socket, (SOCKADDR *) & recv_address, sizeof(recv_address)) != 0) {
+    if (bind(*listener_socket, (SOCKADDR*)&recv_address, sizeof(recv_address)) != 0) {
         fprintf(stderr, "Failed to bind listener socket.\n");
         return 2;
     }
@@ -133,7 +146,8 @@ int32_t read_length_prefix(SOCKET socket, SOCKADDR* server_address) {
     return message_length;
 }
 
-int find_sonar(int beacon_socket, uint32_t serial,
+/* Given a serial number find the corresponding sonar's system type and IP address. */ 
+int find_sonar(SOCKET beacon_socket, uint32_t serial,
                Aris__Availability__SystemType* system_type,
                SOCKADDR* sonar_address) {
 
@@ -143,8 +157,9 @@ int find_sonar(int beacon_socket, uint32_t serial,
     Aris__Availability* msg; 
 
     while (!found) {
+        /* Get sonar's IP address from incoming packet. */
         num_bytes = recvfrom(beacon_socket, beacon_buf, MAX_BEACON_SIZE, 0,
-                              sonar_address, &address_size);
+                             sonar_address, &address_size);
 
         if (num_bytes == SOCKET_ERROR) {
             fprintf(stderr, "An error occurred while receiving sonar beacon.\n");
@@ -185,5 +200,13 @@ void show_availability(Aris__Availability* msg) {
         fprintf(stdout, "is %s.\n", msg->connectionstate  ? "busy" : "available");
         fflush(stdout);
     }
+}
+
+int connect_to_sonar(SOCKET* command_socket,
+                     Aris__Availability__SystemType system_type, 
+                     SOCKADDR* sonar_address) {
+
+    // TODO
+    return 0;
 }
 
