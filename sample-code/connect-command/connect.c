@@ -145,15 +145,17 @@ int find_sonar(int beacon_socket, uint32_t serial,
     while (!found) {
         num_bytes = recvfrom(beacon_socket, beacon_buf, MAX_BEACON_SIZE, 0,
                               sonar_address, &address_size);
-	if (num_bytes == SOCKET_ERROR) {
+
+        if (num_bytes == SOCKET_ERROR) {
+            fprintf(stderr, "An error occurred while receiving sonar beacon.\n");
             return 1;
-	}
+        }
 
         msg = aris__availability__unpack(NULL, num_bytes, beacon_buf);
 
         if (msg == NULL) {
             fprintf(stderr, "Failed to unpack incoming sonar beacon.\n");
-	    return 2;
+            return 2;
         }
 
         show_availability(msg);
@@ -164,7 +166,7 @@ int find_sonar(int beacon_socket, uint32_t serial,
                 *system_type = msg->systemtype;
             }
             break;
-	}
+        }
     }
 
     return 0;
@@ -175,9 +177,9 @@ void show_availability(Aris__Availability* msg) {
     if (msg->has_serialnumber && msg->has_systemtype && msg->has_connectionstate) {
         int32_t freq = 1800;
 
-	if (msg->systemtype != ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1800) {
+        if (msg->systemtype != ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1800) {
            freq = (msg->systemtype == ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1200) ? 1200 : 3000;
-	}
+        }
 
         fprintf(stdout, "ARIS %u serial=%u ", freq, msg->serialnumber);
         fprintf(stdout, "is %s.\n", msg->connectionstate  ? "busy" : "available");
