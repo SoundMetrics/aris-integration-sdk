@@ -10,29 +10,30 @@
 #define INVALID_INPUTS        -1
 #define CANT_START_WINSOCK    -2
 #define CANT_START_LISTENER   -3
-#define CANT_RECEIVE_BEACON   -4
+#define CANT_FIND_SONAR       -4
 
 #define MAX_BEACON_SIZE     256 
 #define AVAILABILITY_PORT   56124
 
 uint8_t beacon_buf[MAX_BEACON_SIZE];
 
-int validate_inputs(int argc,
-                    char** argv,
+int validate_inputs(int argc, char** argv,
                     unsigned int* serial);
 int start_listening(SOCKET* listener_socket);
+int find_sonar(int beacon_socket, uint32_t serial,
+               Aris__Availability__SystemType* system_type,
+               SOCKADDR* sonar_address);
 int32_t read_length_prefix(SOCKET socket, SOCKADDR* server_address);
 void show_usage(void);
-void show_availability(uint8_t buf[], uint32_t length);
+void show_availability(Aris__Availability* msg);
 
 int main(int argc, char** argv) {
 
     unsigned int serial;
+    Aris__Availability__SystemType system_type;
+    struct sockaddr_in sonar_address;
     WSADATA wsa_data;
     SOCKET beacon_socket;
-    struct sockaddr_in sonar_address;
-    int address_size = sizeof(sonar_address); 
-    int numbytes;
 
     if (validate_inputs(argc, argv, &serial)) {
        show_usage();
@@ -47,12 +48,9 @@ int main(int argc, char** argv) {
        return CANT_START_LISTENER; 
     }
 
-    if ((numbytes = recvfrom(beacon_socket, beacon_buf, MAX_BEACON_SIZE, 0,
-                             (SOCKADDR *)&sonar_address, &address_size)) == SOCKET_ERROR) {
-       return CANT_RECEIVE_BEACON; 
+    if (find_sonar(beacon_socket, serial, &system_type, (SOCKADDR *)&sonar_address)) {
+       return CANT_FIND_SONAR;
     }
-
-    show_availability(beacon_buf, numbytes);
 
     WSACleanup();
 
@@ -66,8 +64,7 @@ void show_usage(void) {
     fprintf(stderr, "\n");
 }
 
-int validate_inputs(int argc,
-                    char** argv,
+int validate_inputs(int argc, char** argv,
                     unsigned int* serial) {
 
     if (argc != 2) {
@@ -136,26 +133,55 @@ int32_t read_length_prefix(SOCKET socket, SOCKADDR* server_address) {
     return message_length;
 }
 
-void show_availability(uint8_t buf[], uint32_t length) {
+int find_sonar(int beacon_socket, uint32_t serial,
+               Aris__Availability__SystemType* system_type,
+               SOCKADDR* sonar_address) {
 
-    Aris__Availability* msg;
+    BOOL found = FALSE;
+    int address_size = sizeof(*sonar_address);
+    int num_bytes;
+    Aris__Availability* msg; 
 
-    msg = aris__availability__unpack(NULL, length, buf);
+    while (!found) {
+        num_bytes = recvfrom(beacon_socket, beacon_buf, MAX_BEACON_SIZE, 0,
+                              sonar_address, &address_size);
+	if (num_bytes == SOCKET_ERROR) {
+            return 1;
+	}
 
-    if (msg == NULL) {
-        fprintf(stderr, "Failed to unpack incoming ARIS availability message.\n");
-        return;	
+        msg = aris__availability__unpack(NULL, num_bytes, beacon_buf);
+
+        if (msg == NULL) {
+            fprintf(stderr, "Failed to unpack incoming sonar beacon.\n");
+	    return 2;
+        }
+
+        show_availability(msg);
+
+        if (msg->has_serialnumber && msg->serialnumber == serial) {
+            fprintf(stdout, "Found sonar serial=%u.\n", serial);
+            if (msg->has_systemtype) {
+                *system_type = msg->systemtype;
+            }
+            break;
+	}
     }
 
-    if (msg->has_serialnumber && msg->has_systemtype && msg->has_connectionstate) {
-        uint32_t freq = 1800;
+    return 0;
+}
 
-	if (msg->systemtype) {
-           freq = (msg->systemtype == 2) ? 1200 : 3000;
+void show_availability(Aris__Availability* msg) {
+
+    if (msg->has_serialnumber && msg->has_systemtype && msg->has_connectionstate) {
+        int32_t freq = 1800;
+
+	if (msg->systemtype != ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1800) {
+           freq = (msg->systemtype == ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1200) ? 1200 : 3000;
 	}
 
         fprintf(stdout, "ARIS %u serial=%u ", freq, msg->serialnumber);
-        fprintf(stdout, "is %s.\n", msg->connectionstate  ? "busy" : "available"); 
+        fprintf(stdout, "is %s.\n", msg->connectionstate  ? "busy" : "available");
+        fflush(stdout);
     }
 }
 
