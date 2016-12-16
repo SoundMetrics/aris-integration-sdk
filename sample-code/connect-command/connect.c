@@ -27,10 +27,11 @@
 #define TOTAL_FRAME_PARTS   2200 
 
 /* Substitute shorter names for protocol symbols to improve readability. */
-#define ARIS_1200   ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1200
-#define ARIS_1800   ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1800
-#define ARIS_3000   ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_3000
-#define HIGH_FREQ   ARIS__COMMAND__SET_ACOUSTIC_SETTINGS__FREQUENCY__HIGH
+#define ARIS_1200     ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1200
+#define ARIS_1800     ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1800
+#define ARIS_3000     ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_3000
+#define HIGH_FREQ     ARIS__COMMAND__SET_ACOUSTIC_SETTINGS__FREQUENCY__HIGH
+#define FRESH_WATER   ARIS__COMMAND__SET_SALINITY__SALINITY__FRESH
 
 uint8_t beacon_buf[MAX_BEACON_SIZE];
 uint8_t command_buf[MAX_COMMAND_SIZE];
@@ -50,12 +51,14 @@ typedef struct {
     uint32_t cycle_period;
     uint32_t pulse_width;
     float frame_rate;
+    float focus_range;
 } acoustic_settings;
 
+/* FIXME: Determine precise focus ranges in meters. */
 acoustic_settings sonar_settings[3] = {
-   { HIGH_FREQ, 3, 1000, 4, 1360,  5720, 6, 12.0f },  /* ARIS 1800 */
-   { HIGH_FREQ, 9,  800, 4, 1360,  4920, 6, 12.0f },  /* ARIS 3000 */
-   { HIGH_FREQ, 1,  512, 4, 1333, 39820, 5,  8.0f }   /* ARIS 1200 */
+   { HIGH_FREQ, 3, 1000, 4, 1360,  5720, 6, 12.0f, 2.0f },  /* ARIS 1800 */
+   { HIGH_FREQ, 9,  800, 4, 1360,  4920, 6, 12.0f, 2.0f },  /* ARIS 3000 */
+   { HIGH_FREQ, 1,  512, 4, 1333, 39820, 5,  8.0f, 3.0f }   /* ARIS 1200 */
 };
 
 int validate_inputs(int argc, char** argv,
@@ -68,8 +71,12 @@ int connect_to_sonar(SOCKET* command_socket,
                      Aris__Availability__SystemType system_type,
                      SOCKADDR* sonar_address);
 int send_command(SOCKET command_socket, Aris__Command* command);
-int send_sonar_settings(SOCKET command_socket,
-                        Aris__Availability__SystemType system_type);
+int send_acoustic_settings(SOCKET command_socket,
+                           Aris__Availability__SystemType system_type);
+int send_salinity(SOCKET command_socket,
+                  Aris__Command__SetSalinity__Salinity salinity);
+int send_focus(SOCKET command_socket,
+               Aris__Availability__SystemType system_type);
 int send_frame_stream_receiver(SOCKET command_socket, uint16_t port);
 int receive_frame_part(SOCKET frame_stream_socket); 
 void show_usage(void);
@@ -114,7 +121,7 @@ int main(int argc, char** argv) {
     for (int32_t frame_part_count = 0;
          frame_part_count < TOTAL_FRAME_PARTS; 
          ++frame_part_count) {
-	    if (receive_frame_part(frame_stream_socket)) {
+        if (receive_frame_part(frame_stream_socket)) {
             break;
         }
     }
@@ -274,16 +281,28 @@ int connect_to_sonar(SOCKET* command_socket,
         return 2; 
     }
 
-    if (send_sonar_settings(*command_socket, system_type)) {
-        fprintf(stderr, "Failed to send sonar settings.\n");
+    if (send_acoustic_settings(*command_socket, system_type)) {
+        fprintf(stderr, "Failed to send acoustic settings.\n");
         closesocket(*command_socket);
         return 3;
+    }
+
+    if (send_salinity(*command_socket, FRESH_WATER)) {
+        fprintf(stderr, "Failed to send salinity.\n");
+        closesocket(*command_socket);
+        return 4;
+    }
+
+    if (send_focus(*command_socket, system_type)) {
+        fprintf(stderr, "Failed to send focus.\n");
+        closesocket(*command_socket);
+        return 5;
     }
 
     if (send_frame_stream_receiver(*command_socket, FRAME_STREAM_PORT)) {
         fprintf(stderr, "Failed to send frame stream receiver port.\n");
         closesocket(*command_socket);
-        return 4;
+        return 6;
     }
 }
 
@@ -315,7 +334,7 @@ int send_command(SOCKET command_socket, Aris__Command* command) {
     return 0;
 }
 
-int send_sonar_settings(SOCKET command_socket,
+int send_acoustic_settings(SOCKET command_socket,
                         Aris__Availability__SystemType system_type) { 
 
     Aris__Command command = ARIS__COMMAND__INIT;
@@ -360,6 +379,36 @@ int send_sonar_settings(SOCKET command_socket,
     settings.cycleperiod = acoustics.cycle_period;
     settings.pulsewidth = acoustics.pulse_width;
     settings.framerate = acoustics.frame_rate;
+
+    return send_command(command_socket, &command);
+}
+
+int send_salinity(SOCKET command_socket,
+                  Aris__Command__SetSalinity__Salinity salinity) {
+
+    Aris__Command command = ARIS__COMMAND__INIT;
+    Aris__Command__SetSalinity salmsg = ARIS__COMMAND__SET_SALINITY__INIT;
+
+    command.type = ARIS__COMMAND__COMMAND_TYPE__SET_SALINITY;
+    command.salinity = &salmsg;
+
+    salmsg.has_salinity = TRUE;
+    salmsg.salinity = salinity;
+
+    return send_command(command_socket, &command);
+}
+
+int send_focus(SOCKET command_socket,
+               Aris__Availability__SystemType system_type) {
+
+    Aris__Command command = ARIS__COMMAND__INIT;
+    Aris__Command__SetFocusPosition focus = ARIS__COMMAND__SET_FOCUS_POSITION__INIT;
+
+    command.type = ARIS__COMMAND__COMMAND_TYPE__SET_FOCUS;
+    command.focusposition = &focus;
+
+    focus.has_focusrange = TRUE;
+    focus.focusrange = sonar_settings[system_type].focus_range;
 
     return send_command(command_socket, &command);
 }
