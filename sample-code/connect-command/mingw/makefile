@@ -14,4 +14,3 @@ protocols:
 
 connect: $(SOURCES)
 	gcc $(SOURCES) $(INCLUDES) -L/usr/lib -lws2_32 -lprotobuf-c -o connect.exe 
-

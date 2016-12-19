@@ -1,6 +1,8 @@
 ## Connect C Program
 
-This sample program searches the local network for an ARIS sonar with a given serial number and connects to it.  Connecting to an ARIS requires establishing a TCP connection with the sonar and sending acoustic, salinity and focus commands in that order.  After those initial commands have been sent the program sends the sonar a target port for the UDP frame stream and begins receiving frame parts.  After 30 or so frames have been received the program exits.
+This sample program searches the local network for an ARIS sonar with a given serial number and connects to it.  Connecting to an ARIS requires establishing a TCP connection with the sonar and sending acoustic settings, salinity and focus commands in that order.  After those initial commands have been sent the program sends the sonar a target port for the UDP frame stream and begins receiving frame parts.  After 30 or so frames have been received the program exits.
+
+This sample program does nothing with the incoming frame parts except to log the frame index to the console as it increments.  The program does not assemble frame parts into complete frames nor does it reorder sonar image data for displaying.  For C++ code that can be used to receive and assemble frame parts see the [FrameStream](https://github.com/SoundMetrics/aris-integration-sdk/tree/master/common/code/FrameStream) portion of this SDK.  For an example of how to reorder sonar image data see the [reorder](https://github.com/SoundMetrics/aris-integration-sdk/tree/master/sample-code/reorder-frame) sample program also included in this SDK.
 
 ### Program Usage
 

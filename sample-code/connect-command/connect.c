@@ -462,4 +462,3 @@ void show_frame_part(FrameStream__FramePart* frame_part) {
         fflush(stdout);
     }
 }
-
