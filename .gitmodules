@@ -1,0 +1,3 @@
+[submodule "submodules/aris-file-sdk"]
+	path = submodules/aris-file-sdk
+	url = https://github.com/SoundMetrics/aris-file-sdk
