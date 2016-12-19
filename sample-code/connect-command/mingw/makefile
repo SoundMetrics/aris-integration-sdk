@@ -1,7 +1,6 @@
 PROTOCOLS_DIR=..\..\..\common\protobuf
 PROTOBUFC_DIR=..\..\..\..\protobuf-c
-FILESDK_DIR=..\..\..\..\aris-file-sdk\type-definitions\C
-INCLUDES=-I $(PROTOCOLS_DIR) -I $(PROTOBUFC_DIR) -I $(FILESDK_DIR)
+INCLUDES=-I $(PROTOCOLS_DIR) -I $(PROTOBUFC_DIR)
 SOURCES=..\connect.c ..\availability.pb-c.c ..\commands.pb-c.c ..\frame_stream.pb-c.c
 
 all: protocols connect
