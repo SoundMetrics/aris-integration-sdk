@@ -7,16 +7,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <stdbool.h>
 #include <string.h>
-#include <winsock2.h>
-#include <Ws2tcpip.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 #define INVALID_INPUTS          -1
-#define CANT_START_WINSOCK      -2
-#define CANT_RECEIVE_BEACONS    -3
-#define CANT_FIND_SONAR         -4
-#define CANT_CONNECT_TO_SONAR   -5
-#define CANT_RECEIVE_FRAMES     -6
+#define CANT_RECEIVE_BEACONS    -2
+#define CANT_FIND_SONAR         -3
+#define CANT_CONNECT_TO_SONAR   -4
+#define CANT_RECEIVE_FRAMES     -5
 
 #define MAX_BEACON_SIZE     256 
 #define MAX_COMMAND_SIZE    1024
@@ -63,22 +65,22 @@ acoustic_settings sonar_settings[3] = {
 
 int validate_inputs(int argc, char** argv,
                     unsigned int* serial);
-int start_listening(SOCKET* listener_socket, uint16_t port);
-int find_sonar(SOCKET beacon_socket, uint32_t serial,
+int start_listening(int* listener_socket, uint16_t port);
+int find_sonar(int beacon_socket, uint32_t serial,
                Aris__Availability__SystemType* system_type,
-               SOCKADDR* sonar_address);
-int connect_to_sonar(SOCKET* command_socket,
+               struct sockaddr_in* sonar_address);
+int connect_to_sonar(int* command_socket,
                      Aris__Availability__SystemType system_type,
-                     SOCKADDR* sonar_address);
-int send_command(SOCKET command_socket, Aris__Command* command);
-int send_acoustic_settings(SOCKET command_socket,
+                     struct sockaddr_in* sonar_address);
+int send_command(int command_socket, Aris__Command* command);
+int send_acoustic_settings(int command_socket,
                            Aris__Availability__SystemType system_type);
-int send_salinity(SOCKET command_socket,
+int send_salinity(int command_socket,
                   Aris__Command__SetSalinity__Salinity salinity);
-int send_focus(SOCKET command_socket,
+int send_focus(int command_socket,
                Aris__Availability__SystemType system_type);
-int send_frame_stream_receiver(SOCKET command_socket, uint16_t port);
-int receive_frame_part(SOCKET frame_stream_socket); 
+int send_frame_stream_receiver(int command_socket, uint16_t port);
+int receive_frame_part(int frame_stream_socket); 
 void show_usage(void);
 void show_availability(Aris__Availability* beacon);
 void show_frame_part(FrameStream__FramePart* frame_part);
@@ -88,29 +90,28 @@ int main(int argc, char** argv) {
     unsigned int serial;
     Aris__Availability__SystemType system_type;
     struct sockaddr_in sonar_address;
-    WSADATA wsa_data;
-    SOCKET beacon_socket;
-    SOCKET command_socket;
-    SOCKET frame_stream_socket;
+    int beacon_socket;
+    int command_socket;
+    int frame_stream_socket;
 
     if (validate_inputs(argc, argv, &serial)) {
         show_usage();
         return INVALID_INPUTS;
     }
 
-    if (WSAStartup(MAKEWORD(2,2), &wsa_data) != NO_ERROR) {
-        return CANT_START_WINSOCK;
-    } 
-
     if (start_listening(&beacon_socket, AVAILABILITY_PORT)) {
         return CANT_RECEIVE_BEACONS; 
     }
 
-    if (find_sonar(beacon_socket, serial, &system_type, (SOCKADDR*)&sonar_address)) {
+    fprintf(stdout, "Listening for beacons.\n");  // FIXME
+
+    if (find_sonar(beacon_socket, serial, &system_type, &sonar_address)) {
         return CANT_FIND_SONAR;
     }
 
-    if (connect_to_sonar(&command_socket, system_type, (SOCKADDR*)&sonar_address)) {
+    fprintf(stdout, "Found sonar?!\n");  // FIXME
+
+    if (connect_to_sonar(&command_socket, system_type, &sonar_address)) {
         return CANT_CONNECT_TO_SONAR;
     }
 
@@ -126,10 +127,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    closesocket(beacon_socket);
-    closesocket(command_socket);
-    closesocket(frame_stream_socket);
-    WSACleanup();
+    close(beacon_socket);
+    close(command_socket);
+    close(frame_stream_socket);
 
     return 0;
 }
@@ -162,13 +162,13 @@ int validate_inputs(int argc, char** argv,
     return 0;
 }
 
-int start_listening(SOCKET* listener_socket, uint16_t port) {
+int start_listening(int* listener_socket, uint16_t port) {
 
     struct sockaddr_in recv_address;
 
     *listener_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-    if (*listener_socket == INVALID_SOCKET) {
+    if (*listener_socket == -1) {
         fprintf(stderr, "Failed to create listener socket.\n");
         return 1;
     }
@@ -177,9 +177,9 @@ int start_listening(SOCKET* listener_socket, uint16_t port) {
     recv_address.sin_port = htons(port);
     recv_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if (bind(*listener_socket, (SOCKADDR*)&recv_address, sizeof(recv_address)) != 0) {
+    if (bind(*listener_socket, (struct sockaddr*)&recv_address, sizeof(recv_address)) != 0) {
         fprintf(stderr, "Failed to bind listener socket.\n");
-        closesocket(*listener_socket);
+        close(*listener_socket);
         return 2;
     }
 
@@ -187,11 +187,11 @@ int start_listening(SOCKET* listener_socket, uint16_t port) {
 }
 
 /* Given a serial number find the corresponding sonar's system type and IP address. */ 
-int find_sonar(SOCKET beacon_socket, uint32_t serial,
+int find_sonar(int beacon_socket, uint32_t serial,
                Aris__Availability__SystemType* system_type,
-               SOCKADDR* sonar_address) {
+               struct sockaddr_in* sonar_address) {
 
-    BOOL found = FALSE;
+    bool found = false;
     int address_size = sizeof(*sonar_address);
     int num_bytes;
     Aris__Availability* beacon; 
@@ -199,9 +199,9 @@ int find_sonar(SOCKET beacon_socket, uint32_t serial,
     while (!found) {
         /* Get sonar's IP address from incoming packet. */
         num_bytes = recvfrom(beacon_socket, beacon_buf, MAX_BEACON_SIZE, 0,
-                             sonar_address, &address_size);
+                             (struct sockaddr*)sonar_address, &address_size);
 
-        if (num_bytes == SOCKET_ERROR) {
+        if (num_bytes == -1) {
             fprintf(stderr, "An error occurred while receiving sonar beacon.\n");
             return 1;
         }
@@ -221,7 +221,7 @@ int find_sonar(SOCKET beacon_socket, uint32_t serial,
             if (beacon->has_systemtype) {
                 *system_type = beacon->systemtype;
             }
-            found = TRUE;
+            found = true;
         }
 
         aris__availability__free_unpacked(beacon, NULL);
@@ -262,51 +262,51 @@ void show_availability(Aris__Availability* beacon) {
     }
 }
 
-int connect_to_sonar(SOCKET* command_socket,
+int connect_to_sonar(int* command_socket,
                      Aris__Availability__SystemType system_type, 
-                     SOCKADDR* sonar_address) {
+                     struct sockaddr_in* sonar_address) {
 
     *command_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (*command_socket == INVALID_SOCKET) {
+    if (*command_socket == -1) {
         fprintf(stderr, "Failed to create command socket.\n");
         return 1;
     }
 
-    ((struct sockaddr_in*)(sonar_address))->sin_port = htons(COMMAND_PORT);
+    sonar_address->sin_port = htons(COMMAND_PORT);
 
-    if (connect(*command_socket, sonar_address, sizeof(*sonar_address)) == SOCKET_ERROR) {
+    if (connect(*command_socket, (struct sockaddr*)sonar_address, sizeof(*sonar_address)) == -1) {
         fprintf(stderr, "Failed to connect to sonar.\n");
-        closesocket(*command_socket);
+        close(*command_socket);
         return 2; 
     }
 
     if (send_acoustic_settings(*command_socket, system_type)) {
         fprintf(stderr, "Failed to send acoustic settings.\n");
-        closesocket(*command_socket);
+        close(*command_socket);
         return 3;
     }
 
     if (send_salinity(*command_socket, FRESH_WATER)) {
         fprintf(stderr, "Failed to send salinity.\n");
-        closesocket(*command_socket);
+        close(*command_socket);
         return 4;
     }
 
     if (send_focus(*command_socket, system_type)) {
         fprintf(stderr, "Failed to send focus.\n");
-        closesocket(*command_socket);
+        close(*command_socket);
         return 5;
     }
 
     if (send_frame_stream_receiver(*command_socket, FRAME_STREAM_PORT)) {
         fprintf(stderr, "Failed to send frame stream receiver port.\n");
-        closesocket(*command_socket);
+        close(*command_socket);
         return 6;
     }
 }
 
-int send_command(SOCKET command_socket, Aris__Command* command) {
+int send_command(int command_socket, Aris__Command* command) {
 
     /* Determine packed size and encode it into length prefix.
      * Packed size needs to be measured after the message is entirely defined
@@ -323,7 +323,7 @@ int send_command(SOCKET command_socket, Aris__Command* command) {
 
     const int numbytes = send(command_socket, command_buf, total_length, 0);
 
-    if (numbytes == SOCKET_ERROR) {
+    if (numbytes == -1) {
         fprintf(stderr, "An error occurred while sending command.\n");
         return 1;
     } else if (numbytes < total_length) {
@@ -334,7 +334,7 @@ int send_command(SOCKET command_socket, Aris__Command* command) {
     return 0;
 }
 
-int send_acoustic_settings(SOCKET command_socket,
+int send_acoustic_settings(int command_socket,
                         Aris__Availability__SystemType system_type) { 
 
     Aris__Command command = ARIS__COMMAND__INIT;
@@ -349,25 +349,25 @@ int send_acoustic_settings(SOCKET command_socket,
      * C++ (or other language) implementations may use a protobuf library that
      * does this for you.
      */ 
-    settings.has_cookie = TRUE;
-    settings.has_enabletransmit = TRUE;
-    settings.has_enable150volts = TRUE;
-    settings.has_receivergain = TRUE;
-    settings.has_frequency = TRUE;
-    settings.has_pingmode = TRUE;
-    settings.has_samplesperbeam = TRUE; 
-    settings.has_sampleperiod = TRUE;
-    settings.has_samplestartdelay = TRUE;
-    settings.has_cycleperiod = TRUE;
-    settings.has_pulsewidth = TRUE;
-    settings.has_framerate = TRUE;
+    settings.has_cookie = true;
+    settings.has_enabletransmit = true;
+    settings.has_enable150volts = true;
+    settings.has_receivergain = true;
+    settings.has_frequency = true;
+    settings.has_pingmode = true;
+    settings.has_samplesperbeam = true; 
+    settings.has_sampleperiod = true;
+    settings.has_samplestartdelay = true;
+    settings.has_cycleperiod = true;
+    settings.has_pulsewidth = true;
+    settings.has_framerate = true;
 
     /* Increment cookie every time settings are sent during a session. */
     settings.cookie = 1;
 
     /* fixed */
-    settings.enabletransmit = TRUE;
-    settings.enable150volts = TRUE;
+    settings.enabletransmit = true;
+    settings.enable150volts = true;
     settings.receivergain = 12.0f;
 
     /* system or range-dependent */
@@ -383,7 +383,7 @@ int send_acoustic_settings(SOCKET command_socket,
     return send_command(command_socket, &command);
 }
 
-int send_salinity(SOCKET command_socket,
+int send_salinity(int command_socket,
                   Aris__Command__SetSalinity__Salinity salinity) {
 
     Aris__Command command = ARIS__COMMAND__INIT;
@@ -392,13 +392,13 @@ int send_salinity(SOCKET command_socket,
     command.type = ARIS__COMMAND__COMMAND_TYPE__SET_SALINITY;
     command.salinity = &salmsg;
 
-    salmsg.has_salinity = TRUE;
+    salmsg.has_salinity = true;
     salmsg.salinity = salinity;
 
     return send_command(command_socket, &command);
 }
 
-int send_focus(SOCKET command_socket,
+int send_focus(int command_socket,
                Aris__Availability__SystemType system_type) {
 
     Aris__Command command = ARIS__COMMAND__INIT;
@@ -407,13 +407,13 @@ int send_focus(SOCKET command_socket,
     command.type = ARIS__COMMAND__COMMAND_TYPE__SET_FOCUS;
     command.focusposition = &focus;
 
-    focus.has_focusrange = TRUE;
+    focus.has_focusrange = true;
     focus.focusrange = sonar_settings[system_type].focus_range;
 
     return send_command(command_socket, &command);
 }
 
-int send_frame_stream_receiver(SOCKET command_socket, uint16_t port) {
+int send_frame_stream_receiver(int command_socket, uint16_t port) {
 
     Aris__Command command = ARIS__COMMAND__INIT;
     Aris__Command__SetFrameStreamReceiver receiver = ARIS__COMMAND__SET_FRAME_STREAM_RECEIVER__INIT;
@@ -421,21 +421,20 @@ int send_frame_stream_receiver(SOCKET command_socket, uint16_t port) {
     command.type = ARIS__COMMAND__COMMAND_TYPE__SET_FRAMESTREAM_RECEIVER;
     command.framestreamreceiver = &receiver;
 
-    receiver.ip = NULL;
-    receiver.has_port = TRUE;
+    receiver.has_port = true;
     receiver.port = port;
 
     return send_command(command_socket, &command);
 }
 
-int receive_frame_part(SOCKET frame_stream_socket) {
+int receive_frame_part(int frame_stream_socket) {
 
     FrameStream__FramePart* frame_part;
 
     int numbytes = recvfrom(frame_stream_socket, frame_buf, MAX_DATAGRAM_SIZE,
                             0, NULL, NULL);
 
-    if (numbytes == SOCKET_ERROR) {
+    if (numbytes == -1) {
         fprintf(stderr, "An error occurred while receiving frame parts.\n");
         return 1;
     }
