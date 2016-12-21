@@ -103,13 +103,9 @@ int main(int argc, char** argv) {
         return CANT_RECEIVE_BEACONS; 
     }
 
-    fprintf(stdout, "Listening for beacons.\n");  // FIXME
-
     if (find_sonar(beacon_socket, serial, &system_type, &sonar_address)) {
         return CANT_FIND_SONAR;
     }
-
-    fprintf(stdout, "Found sonar?!\n");  // FIXME
 
     if (connect_to_sonar(&command_socket, system_type, &sonar_address)) {
         return CANT_CONNECT_TO_SONAR;
