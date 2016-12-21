@@ -26,7 +26,7 @@
 #define AVAILABILITY_PORT   56124
 #define COMMAND_PORT        56888 
 #define FRAME_STREAM_PORT   56444 
-#define TOTAL_FRAME_PARTS   2200 
+#define TOTAL_FRAME_PARTS   700 
 
 /* Substitute shorter names for protocol symbols to improve readability. */
 #define ARIS_1200     ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1200
@@ -56,11 +56,10 @@ typedef struct {
     float focus_range;
 } acoustic_settings;
 
-/* FIXME: Determine precise focus ranges in meters. */
 acoustic_settings sonar_settings[3] = {
-   { HIGH_FREQ, 3, 1000, 4, 1360,  5720, 6, 12.0f, 2.0f },  /* ARIS 1800 */
-   { HIGH_FREQ, 9,  800, 4, 1360,  4920, 6, 12.0f, 2.0f },  /* ARIS 3000 */
-   { HIGH_FREQ, 1,  512, 4, 1333, 39820, 5,  8.0f, 3.0f }   /* ARIS 1200 */
+   { HIGH_FREQ, 3, 1000, 4, 1360, 5720, 6, 12.0f, 2.5f  },  /* ARIS 1800 */
+   { HIGH_FREQ, 9,  800, 4, 1360, 4920, 6, 12.0f, 2.2f  },  /* ARIS 3000 */
+   { HIGH_FREQ, 1,  512, 4, 1333, 3750, 5,  8.0f, 1.75f }   /* ARIS 1200 */
 };
 
 int validate_inputs(int argc, char** argv,
@@ -212,7 +211,7 @@ int find_sonar(int beacon_socket, uint32_t serial,
         show_availability(beacon);
 
         if (beacon->has_serialnumber && beacon->serialnumber == serial) {
-            fprintf(stdout, "Found ARIS serial=%u.\n", serial);
+            fprintf(stdout, "Found ARIS serial=%u at %s\n", serial, inet_ntoa(sonar_address->sin_addr));
             fflush(stdout);
             if (beacon->has_systemtype) {
                 *system_type = beacon->systemtype;
