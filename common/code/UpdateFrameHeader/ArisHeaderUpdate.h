@@ -34,6 +34,9 @@ ArisFrameHeaderUpdateMsg struct and send it to port 700 of the ARIS via UDP.
 Unlike the ARIS 2 command stream, this is a UDP message and requires no length
 prefix. The entire ArisFrameHeaderUpdateMsg and nothing more must be sent.
 
+Sample functions for intiializing and settings udpated fields are given below in
+functions InitializeArisFrameHeaderUpdateMsg() and SetArisFrameHeader_LatLong().
+
 Assuming a local variable of type ArisHeaderUpdateMsg named 'data' the following
 must hold true for the ARIS to accept the update message:
 
