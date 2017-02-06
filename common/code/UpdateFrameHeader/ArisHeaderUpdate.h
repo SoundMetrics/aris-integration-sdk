@@ -29,10 +29,10 @@ There are several types below:
     ArisHeaderUpdateMessage combines the FrameHeaderUpdatePrefix and FrameHeaderUpdate
     structs to form a complete message.
 
-    To update ARIS frame header fields, you must initialize and populate an
-    ArisFrameHeaderUpdateMsg struct and send it to port 700 of the ARIS via UDP.
-    Unlike the ARIS 2 command stream, this is a UDP message and requires no length
-    prefix. The entire ArisFrameHeaderUpdateMsg and nothing more must be sent.
+To update ARIS frame header fields, you must initialize and populate an
+ArisFrameHeaderUpdateMsg struct and send it to port 700 of the ARIS via UDP.
+Unlike the ARIS 2 command stream, this is a UDP message and requires no length
+prefix. The entire ArisFrameHeaderUpdateMsg and nothing more must be sent.
 
 Assuming a local variable of type ArisHeaderUpdateMsg named 'data' the following
 must hold true for the ARIS to accept the update message:
