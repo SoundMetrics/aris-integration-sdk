@@ -37,8 +37,20 @@ This SDK, beginning with version 2.0, supersedes a previous ARIS 1.x SDK. The ol
 This git repository includes the submodule `aris-file-sdk`. If you intend to clone this repo
 you'll want to use the `--recursive` flag.
 
-
 ## Miscellaneous
+
+### Releases
+
+Releases of this SDK are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
+
+### Reporting Bugs
+
+Whether it's a big or small bug, please read the
+[Contributions Guideline](CONTRIBUTING.md) for how to address it to us.
+
+### Requesting Features
+
+Please read the [Contributions Guideline](CONTRIBUTING.md) for help on requesting a feature.
 
 ### Obsolete
 The focus maps in aris-integration-sdk/common/focus-maps/ are no longer necessary for new ARIS controller applications. In their place, please use the `focusRange` field of the `SetFocusPosition` messages to set the focus range in meters.
