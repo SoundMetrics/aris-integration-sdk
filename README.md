@@ -7,15 +7,17 @@ For information on ARIS frame formats, see [ARIS File SDK](https://github.com/So
 ### Documentation
 The following documentation is provided:
 
-**aris-integration-sdk/documents/ARIS-Integration-SDK.pdf**: Describes the mechanisms necessary to build an application to control an ARIS.
+**[aris-integration-sdk/documents/ARIS-Integration-SDK.pdf](documents/ARIS-Integration-SDK.pdf)**:
+Describes the mechanisms necessary to build an application to control an ARIS.
 
-**aris-integration-sdk/documents/Integration SDK suggested settings.xlsx**: An Excel spreadsheet that provides rudimentary support in choosing valid acoustic settings.
+**[aris-integration-sdk/documents/Integration SDK suggested settings.xlsx](documents/Integration SDK suggested settings.xlsx)**:
+An Excel spreadsheet that provides rudimentary support in choosing valid acoustic settings.
 
 Documentation of file formats and frame headers can be found in our repo `aris-file-sdk`.
 
 ### Common Code
 
-**aris-integration-sdk/common/code/**: These folders contain the following:
+**[aris-integration-sdk/common/code/](common/code/)**: These folders contain the following:
 
 - **FrameStream** - reference code to receive parts of images over the network and assemble them into complete frames.
 - **Reordering** - sample code to reorder received frame parts; the reordering code should be treated as immutable reference code.
@@ -23,7 +25,10 @@ Documentation of file formats and frame headers can be found in our repo `aris-f
 - **Depth** - sample code to calculate depth from pressure, salinity, and temperature.
 - **UpdateFrameHeader** - reference code for injecting values into ARISframe headers; this is not a common operation.
 
-**aris-integration-sdk/sample-code/**: These folders contain the following:
+**[aris-integration-sdk/common/protobuf/](common/protobuf/)**:
+Contains Protocol Buffer files describing messages sent to/received from the ARIS.
+
+**[aris-integration-sdk/sample-code/](sample-code/)**: These folders contain the following:
 
 - **connect-command** - sample program illustrating how to establish a connection to the ARIS and send commands.
 - **reorder-frame** - sample program/unit test that illustrates reordering an ARIS frame; this makes use of the reordering code in aris-integration-sdk/common/code/.
@@ -51,9 +56,6 @@ Whether it's a big or small bug, please read the
 ### Requesting Features
 
 Please read the [Contributions Guideline](CONTRIBUTING.md) for help on requesting a feature.
-
-### Obsolete
-The focus maps in aris-integration-sdk/common/focus-maps/ are no longer necessary for new ARIS controller applications. In their place, please use the `focusRange` field of the `SetFocusPosition` messages to set the focus range in meters.
 
 ### Version Numbers
 The stated version number of this SDK does not track with Sound Metrics' other software applications' minor version numbers.
