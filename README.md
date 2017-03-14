@@ -10,7 +10,7 @@ The following documentation is provided:
 **[aris-integration-sdk/documents/ARIS-Integration-SDK.pdf](documents/ARIS-Integration-SDK.pdf)**:
 Describes the mechanisms necessary to build an application to control an ARIS.
 
-**[aris-integration-sdk/documents/Integration SDK suggested settings.xlsx](documents/Integration SDK suggested settings.xlsx)**:
+**[aris-integration-sdk/documents/Integration-SDK-suggested-settings.xlsx](documents/Integration-SDK-suggested-settings.xlsx)**:
 An Excel spreadsheet that provides rudimentary support in choosing valid acoustic settings.
 
 Documentation of file formats and frame headers can be found in our repo `aris-file-sdk`.
