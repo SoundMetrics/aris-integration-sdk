@@ -15,9 +15,6 @@ An Excel spreadsheet that provides rudimentary support in choosing valid acousti
 
 Documentation of file formats and frame headers can be found in our repo `aris-file-sdk`.
 
-### Release History
-The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
-
 ### Common Code
 
 **[aris-integration-sdk/common/code/](common/code/)**: These folders contain the following:
@@ -37,6 +34,9 @@ Contains Protocol Buffer files describing messages sent to/received from the ARI
 
 - **connect-command** - sample program illustrating how to establish a connection to the ARIS and send commands.
 - **reorder-frame** - sample program/unit test that illustrates reordering an ARIS frame; this makes use of the reordering code in aris-integration-sdk/common/code/.
+
+### Release History
+The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
 
 ## Exclusions
 This SDK provides capabilities for controlling an ARIS Explorer. ARIS Defender cannot be controlled with this SDK, only the built-in supervisor functionality is available for ARIS Defender.
