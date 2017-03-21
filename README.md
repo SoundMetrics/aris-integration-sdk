@@ -15,6 +15,9 @@ An Excel spreadsheet that provides rudimentary support in choosing valid acousti
 
 Documentation of file formats and frame headers can be found in our repo `aris-file-sdk`.
 
+### Release History
+The release history of this SDK is tracked [here](release-history.md).
+
 ### Common Code
 
 **[aris-integration-sdk/common/code/](common/code/)**: These folders contain the following:
