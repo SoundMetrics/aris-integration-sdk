@@ -28,6 +28,8 @@ Documentation of file formats and frame headers can be found in our repo `aris-f
 **[aris-integration-sdk/common/protobuf/](common/protobuf/)**:
 Contains Protocol Buffer files describing messages sent to/received from the ARIS.
 
+### Sample Code
+
 **[aris-integration-sdk/sample-code/](sample-code/)**: These folders contain the following:
 
 - **connect-command** - sample program illustrating how to establish a connection to the ARIS and send commands.
