@@ -20,9 +20,9 @@
 #define CANT_CONNECT_TO_SONAR   -4
 #define CANT_RECEIVE_FRAMES     -5
 
-#define MAX_BEACON_SIZE     256 
-#define MAX_COMMAND_SIZE    1024
-#define MAX_DATAGRAM_SIZE   1400 
+#define BEACON_SIZE     256 
+#define COMMAND_SIZE    1024
+#define DATAGRAM_SIZE   1500
 #define AVAILABILITY_PORT   56124
 #define COMMAND_PORT        56888 
 #define FRAME_STREAM_PORT   56444 
@@ -35,9 +35,9 @@
 #define HIGH_FREQ     ARIS__COMMAND__SET_ACOUSTIC_SETTINGS__FREQUENCY__HIGH
 #define FRESH_WATER   ARIS__COMMAND__SET_SALINITY__SALINITY__FRESH
 
-uint8_t beacon_buf[MAX_BEACON_SIZE];
-uint8_t command_buf[MAX_COMMAND_SIZE];
-uint8_t frame_buf[MAX_DATAGRAM_SIZE];
+uint8_t beacon_buf[BEACON_SIZE];
+uint8_t command_buf[COMMAND_SIZE];
+uint8_t frame_buf[DATAGRAM_SIZE];
 
 /* See the Integration SDK documentation for information on how to determine
  * valid acoustic settings.
@@ -194,7 +194,7 @@ int find_sonar(int beacon_socket, uint32_t serial,
 
     while (!found) {
         /* Get sonar's IP address from incoming packet. */
-        num_bytes = recvfrom(beacon_socket, beacon_buf, MAX_BEACON_SIZE, 0,
+        num_bytes = recvfrom(beacon_socket, beacon_buf, BEACON_SIZE, 0,
                              (struct sockaddr*)sonar_address, &address_size);
 
         if (num_bytes == -1) {
@@ -429,7 +429,7 @@ int receive_frame_part(int frame_stream_socket) {
     
     FrameStream__FramePart* frame_part;
 
-    int numbytes = recvfrom(frame_stream_socket, frame_buf, MAX_DATAGRAM_SIZE,
+    int numbytes = recvfrom(frame_stream_socket, frame_buf, DATAGRAM_SIZE,
                             0, NULL, NULL);
 
     if (numbytes == -1) {
