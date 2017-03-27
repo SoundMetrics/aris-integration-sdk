@@ -23,7 +23,31 @@
 #include "SlidingWindowFrameAssembler.h"
 #include "frame_stream.h"
 #include <boost/asio/buffer.hpp>
-#include <myboost/scoped_guard.h>
+#include <boost/function.hpp>
+
+namespace {
+// Execute the lambda expression at the end of the scope.
+class scoped_guard : boost::noncopyable
+{
+    boost::function<void()> lambda;
+
+public:
+    scoped_guard(boost::function<void()> action)
+        : lambda(action)
+    {
+    }
+
+    ~scoped_guard()
+    {
+        try {
+            lambda();
+        }
+        catch (...) {
+            // Ignore.
+        }
+    }
+};
+}
 
 namespace Aris {
 namespace Network {
