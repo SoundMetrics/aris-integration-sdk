@@ -47,6 +47,11 @@ This SDK, beginning with version 2.0, supersedes a previous ARIS 1.x SDK. The ol
 This git repository includes the submodule `aris-file-sdk`. If you intend to clone this repo
 you'll want to use the `--recursive` flag.
 
+**NOTE:**
+The .zip and .tar.gz bundle files available from GitHub are incomplete--the submodules are not populated. In order to successfully build, please consider cloning directly:
+
+    git clone --recursive https://github.com/SoundMetrics/aris-integration-sdk.git
+
 ## Miscellaneous
 
 ### Releases
