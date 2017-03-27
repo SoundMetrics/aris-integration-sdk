@@ -53,13 +53,14 @@ typedef struct {
     uint32_t cycle_period;
     uint32_t pulse_width;
     float frame_rate;
+    float receiver_gain;
     float focus_range;
 } acoustic_settings;
 
 acoustic_settings sonar_settings[3] = {
-   { HIGH_FREQ, 3, 1000, 4, 1360, 5720, 6, 12.0f, 2.5f  },  /* ARIS 1800 */
-   { HIGH_FREQ, 9,  800, 4, 1360, 4920, 6, 12.0f, 2.2f  },  /* ARIS 3000 */
-   { HIGH_FREQ, 1,  512, 4, 1333, 3750, 5,  8.0f, 1.75f }   /* ARIS 1200 */
+   { HIGH_FREQ, 3, 1000, 4, 1360, 5720, 6, 12.0f, 18.0f, 2.5f  },  /* ARIS 1800 */
+   { HIGH_FREQ, 9,  800, 4, 1360, 4920, 6, 12.0f, 12.0f, 2.2f  },  /* ARIS 3000 */
+   { HIGH_FREQ, 1,  512, 4, 1333, 3750, 5,  8.0f, 20.0f, 1.75f }   /* ARIS 1200 */
 };
 
 int validate_inputs(int argc, char** argv,
@@ -276,6 +277,12 @@ int connect_to_sonar(int* command_socket,
         return 2; 
     }
 
+    if (send_frame_stream_receiver(*command_socket, FRAME_STREAM_PORT)) {
+        fprintf(stderr, "Failed to send frame stream receiver port.\n");
+        close(*command_socket);
+        return 6;
+    }
+
     if (send_acoustic_settings(*command_socket, system_type)) {
         fprintf(stderr, "Failed to send acoustic settings.\n");
         close(*command_socket);
@@ -292,12 +299,6 @@ int connect_to_sonar(int* command_socket,
         fprintf(stderr, "Failed to send focus.\n");
         close(*command_socket);
         return 5;
-    }
-
-    if (send_frame_stream_receiver(*command_socket, FRAME_STREAM_PORT)) {
-        fprintf(stderr, "Failed to send frame stream receiver port.\n");
-        close(*command_socket);
-        return 6;
     }
 }
 
@@ -363,7 +364,6 @@ int send_acoustic_settings(int command_socket,
     /* fixed */
     settings.enabletransmit = true;
     settings.enable150volts = true;
-    settings.receivergain = 12.0f;
 
     /* system or range-dependent */
     settings.frequency = acoustics.frequency;
@@ -374,6 +374,7 @@ int send_acoustic_settings(int command_socket,
     settings.cycleperiod = acoustics.cycle_period;
     settings.pulsewidth = acoustics.pulse_width;
     settings.framerate = acoustics.frame_rate;
+    settings.receivergain = acoustics.receiver_gain;
 
     return send_command(command_socket, &command);
 }
@@ -419,11 +420,13 @@ int send_frame_stream_receiver(int command_socket, uint16_t port) {
     receiver.has_port = true;
     receiver.port = port;
 
+    /* target IP address string is optional */
+
     return send_command(command_socket, &command);
 }
 
 int receive_frame_part(int frame_stream_socket) {
-
+    
     FrameStream__FramePart* frame_part;
 
     int numbytes = recvfrom(frame_stream_socket, frame_buf, MAX_DATAGRAM_SIZE,
