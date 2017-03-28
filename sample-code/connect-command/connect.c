@@ -354,19 +354,18 @@ int send_frame_stream_receiver(int command_socket, uint16_t port) {
 
 int send_date_time(int command_socket) {
 
-    time_t rawtime = time(NULL);
-    struct tm now = *localtime(&rawtime);
-    char now_str[64];
-
     Aris__Command command = ARIS__COMMAND__INIT;
     Aris__Command__SetDateTime datetime = ARIS__COMMAND__SET_DATE_TIME__INIT;
 
     command.type = ARIS__COMMAND__COMMAND_TYPE__SET_DATETIME;
     command.datetime = &datetime;
 
+    time_t rawtime = time(NULL);
+    struct tm now = *localtime(&rawtime);
+    char now_str[64];
+
     /* Format date as %Y-%m-%d */
     strftime(now_str, sizeof(now_str), "%F", &now);
-
     datetime.datetime = now_str;
 
     return send_command(command_socket, &command);
