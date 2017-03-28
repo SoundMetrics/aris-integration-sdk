@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #define INVALID_INPUTS          -1
 #define CANT_RECEIVE_BEACONS    -2
@@ -24,9 +25,8 @@
 #define COMMAND_SIZE    1024
 #define DATAGRAM_SIZE   1500
 #define AVAILABILITY_PORT   56124
-#define COMMAND_PORT        56888 
-#define FRAME_STREAM_PORT   56444 
-#define TOTAL_FRAME_PARTS   700 
+#define COMMAND_PORT        56888
+#define FRAME_STREAM_PORT   56444
 
 /* Substitute shorter names for protocol symbols to improve readability. */
 #define ARIS_1200     ARIS__AVAILABILITY__SYSTEM_TYPE__ARIS_1200
@@ -73,14 +73,17 @@ int connect_to_sonar(int* command_socket,
                      Aris__Availability__SystemType system_type,
                      struct sockaddr_in* sonar_address);
 int send_command(int command_socket, Aris__Command* command);
+int send_date_time(int command_socket);
+int send_frame_stream_receiver(int command_socket, uint16_t port);
 int send_acoustic_settings(int command_socket,
                            Aris__Availability__SystemType system_type);
 int send_salinity(int command_socket,
                   Aris__Command__SetSalinity__Salinity salinity);
 int send_focus(int command_socket,
                Aris__Availability__SystemType system_type);
-int send_frame_stream_receiver(int command_socket, uint16_t port);
-int receive_frame_part(int frame_stream_socket); 
+int send_ping(int command_socket);
+int receive_frame_part(int frame_stream_socket, int command_socket,
+                       Aris__Availability__SystemType system_type); 
 void show_usage(void);
 void show_availability(Aris__Availability* beacon);
 void show_frame_part(FrameStream__FramePart* frame_part);
@@ -93,6 +96,7 @@ int main(int argc, char** argv) {
     int beacon_socket;
     int command_socket;
     int frame_stream_socket;
+    int rc;
 
     if (validate_inputs(argc, argv, &serial)) {
         show_usage();
@@ -115,13 +119,9 @@ int main(int argc, char** argv) {
         return CANT_RECEIVE_FRAMES;
     }
 
-    for (int32_t frame_part_count = 0;
-         frame_part_count < TOTAL_FRAME_PARTS; 
-         ++frame_part_count) {
-        if (receive_frame_part(frame_stream_socket)) {
-            break;
-        }
-    }
+    do {
+        rc = receive_frame_part(frame_stream_socket, command_socket, system_type);
+    } while (rc == 0);
 
     close(beacon_socket);
     close(command_socket);
@@ -241,7 +241,7 @@ void show_availability(Aris__Availability* beacon) {
             case ARIS_3000:
                 freq = 3000;
                 break;
-	    default:
+            default:
                 freq = 0;
                 break;
         }
@@ -277,28 +277,34 @@ int connect_to_sonar(int* command_socket,
         return 2; 
     }
 
+    if (send_date_time(*command_socket)) {
+        fprintf(stderr, "Failed to send date and time.\n");
+        close(*command_socket);
+        return 3;
+    }
+
     if (send_frame_stream_receiver(*command_socket, FRAME_STREAM_PORT)) {
         fprintf(stderr, "Failed to send frame stream receiver port.\n");
         close(*command_socket);
-        return 6;
+        return 4;
     }
 
     if (send_acoustic_settings(*command_socket, system_type)) {
         fprintf(stderr, "Failed to send acoustic settings.\n");
         close(*command_socket);
-        return 3;
+        return 5;
     }
 
     if (send_salinity(*command_socket, FRESH_WATER)) {
         fprintf(stderr, "Failed to send salinity.\n");
         close(*command_socket);
-        return 4;
+        return 6;
     }
 
     if (send_focus(*command_socket, system_type)) {
         fprintf(stderr, "Failed to send focus.\n");
         close(*command_socket);
-        return 5;
+        return 7;
     }
 }
 
@@ -328,6 +334,42 @@ int send_command(int command_socket, Aris__Command* command) {
     }
 
     return 0;
+}
+
+int send_frame_stream_receiver(int command_socket, uint16_t port) {
+
+    Aris__Command command = ARIS__COMMAND__INIT;
+    Aris__Command__SetFrameStreamReceiver receiver = ARIS__COMMAND__SET_FRAME_STREAM_RECEIVER__INIT;
+
+    command.type = ARIS__COMMAND__COMMAND_TYPE__SET_FRAMESTREAM_RECEIVER;
+    command.framestreamreceiver = &receiver;
+
+    receiver.has_port = true;
+    receiver.port = port;
+
+    /* target IP address string is optional */
+
+    return send_command(command_socket, &command);
+}
+
+int send_date_time(int command_socket) {
+
+    time_t rawtime = time(NULL);
+    struct tm now = *localtime(&rawtime);
+    char now_str[64];
+
+    Aris__Command command = ARIS__COMMAND__INIT;
+    Aris__Command__SetDateTime datetime = ARIS__COMMAND__SET_DATE_TIME__INIT;
+
+    command.type = ARIS__COMMAND__COMMAND_TYPE__SET_DATETIME;
+    command.datetime = &datetime;
+
+    /* Format date as %Y-%m-%d */
+    strftime(now_str, sizeof(now_str), "%F", &now);
+
+    datetime.datetime = now_str;
+
+    return send_command(command_socket, &command);
 }
 
 int send_acoustic_settings(int command_socket,
@@ -409,24 +451,23 @@ int send_focus(int command_socket,
     return send_command(command_socket, &command);
 }
 
-int send_frame_stream_receiver(int command_socket, uint16_t port) {
+int send_ping(int command_socket) {
 
     Aris__Command command = ARIS__COMMAND__INIT;
-    Aris__Command__SetFrameStreamReceiver receiver = ARIS__COMMAND__SET_FRAME_STREAM_RECEIVER__INIT;
+    Aris__Command__Ping ping = ARIS__COMMAND__PING__INIT;
 
-    command.type = ARIS__COMMAND__COMMAND_TYPE__SET_FRAMESTREAM_RECEIVER;
-    command.framestreamreceiver = &receiver;
-
-    receiver.has_port = true;
-    receiver.port = port;
-
-    /* target IP address string is optional */
+    command.type = ARIS__COMMAND__COMMAND_TYPE__PING;
+    command.ping = &ping;
 
     return send_command(command_socket, &command);
 }
 
-int receive_frame_part(int frame_stream_socket) {
-    
+int receive_frame_part(int frame_stream_socket, int command_socket,
+                       Aris__Availability__SystemType system_type) {
+
+    const int frame_rate = sonar_settings[system_type].frame_rate + 0.5;
+    const int total_frames = 30 * sonar_settings[system_type].frame_rate + 0.5;
+    static int frame_index = 0;
     FrameStream__FramePart* frame_part;
 
     int numbytes = recvfrom(frame_stream_socket, frame_buf, DATAGRAM_SIZE,
@@ -445,6 +486,22 @@ int receive_frame_part(int frame_stream_socket) {
     }
 
     show_frame_part(frame_part);
+
+    if (frame_part->has_frame_index && frame_part->frame_index != frame_index) {
+        frame_index = frame_part->frame_index;
+
+        if (frame_index > total_frames) {
+            fprintf(stdout, "Done receiving %d frames.\n", total_frames);
+            frame_stream__frame_part__free_unpacked(frame_part, NULL);
+            return 3;
+        }
+
+        /* Send a ping message once every second to maintain connection. */
+        if (frame_index % frame_rate == 0) {
+            /* Makes more sense to use a timer to drive pings. */
+            send_ping(command_socket);
+        }
+    }
 
     frame_stream__frame_part__free_unpacked(frame_part, NULL);
 
