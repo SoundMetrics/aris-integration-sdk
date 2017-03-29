@@ -34,9 +34,9 @@ class FrameBuilder;
 
 class FrameStreamListener : boost::noncopyable {
 public:
-  FrameStreamListener(boost::asio::io_service &io,
-                      boost::function<void(FrameBuilder &)> onFrameComplete,
-                      boost::function<size_t()> getReadBufferSize);
+  FrameStreamListener(boost::asio::io_service &io
+                      , boost::function<void(FrameBuilder &)> onFrameComplete
+                      , boost::function<size_t()> getReadBufferSize);
   ~FrameStreamListener();
 
   boost::asio::ip::udp::endpoint LocalEndpoint() const {

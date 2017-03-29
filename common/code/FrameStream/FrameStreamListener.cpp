@@ -33,9 +33,9 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 
 FrameStreamListener::FrameStreamListener(
-    boost::asio::io_service &io,
-    boost::function<void(FrameBuilder &)> onFrameComplete,
-    boost::function<size_t()> getReadBufferSize)
+    boost::asio::io_service &io
+    , boost::function<void(FrameBuilder &)> onFrameComplete
+    , boost::function<size_t()> getReadBufferSize)
     : socket(io), readBuffer(getReadBufferSize()),
       frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
                      onFrameComplete) {
