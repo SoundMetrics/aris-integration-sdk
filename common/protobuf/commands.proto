@@ -67,7 +67,7 @@ message Command {
     }
 
     optional SetInterpacketDelay interpacketDelay = 1;
-    optional PacketLossMitigation packetLossMitigation = 2;
+    optional PacketLossMitigation packetLossMitigation = 2; // Not currently supported.
   }
 
   message SetInterpacketDelay {

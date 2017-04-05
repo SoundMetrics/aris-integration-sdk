@@ -13,6 +13,7 @@ message Availability {
   optional float overTempLimitDegreesC = 10;
   optional uint32 overTempLimitSeconds = 11;
   optional bool isDiverHeld = 12;
+  optional SystemVariants systemVariants = 13;
 
   enum SystemType {
     ARIS_1800 = 0;
@@ -44,4 +45,10 @@ message Availability {
   enum PowerDownReason {
     OverTemp = 0;
   }
+  
+  message SystemVariants {
+    // DF : Defender
+    repeated string enabled = 1;
+  }
+
 }

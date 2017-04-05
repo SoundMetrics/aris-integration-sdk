@@ -1,5 +1,5 @@
 PROTOCOLS_DIR=../../../common/protobuf
-PROTOBUFC_DIR=../../../../protobuf-c
+PROTOBUFC_DIR=../../../../protobuf-c  # path where protobuf-c repo was cloned
 INCLUDES=-I $(PROTOCOLS_DIR) -I $(PROTOBUFC_DIR)
 SOURCES=../connect.c ../availability.pb-c.c ../commands.pb-c.c ../frame_stream.pb-c.c
 
