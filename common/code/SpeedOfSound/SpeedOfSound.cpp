@@ -1,4 +1,4 @@
-// Copyright 2015 Sound Metrics corporation
+// Copyright 2015-2017 Sound Metrics corporation
 
 #include "SpeedOfSound.h"
 
