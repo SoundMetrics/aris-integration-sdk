@@ -104,7 +104,6 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
   if (!framePart.ParseFromArray(buffer_cast<const uint8_t *>(data),
                                 buffer_size(data))) {
     invalidPacket = true;
-    // TODO log
     return;
   }
 
