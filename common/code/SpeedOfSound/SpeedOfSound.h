@@ -1,4 +1,4 @@
-// Copyright 2015 Sound Metrics corporation
+// Copyright 2015-2017 Sound Metrics corporation
 
 #ifndef __SPEED_OF_SOUND_H__
 #define __SPEED_OF_SOUND_H__

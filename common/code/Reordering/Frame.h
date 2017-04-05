@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2016 Sound Metrics Corp.  All rights reserverd.
+// Copyright (c) 2010-2017 Sound Metrics Corp.  All rights reserverd.
 //
 //
 
