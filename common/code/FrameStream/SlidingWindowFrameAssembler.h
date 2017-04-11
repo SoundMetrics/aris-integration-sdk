@@ -23,8 +23,8 @@
 #pragma once
 
 #include "FrameBuilder.h"
-#include <boost/function.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+#include <functional>
 
 namespace Aris {
 namespace Network {
@@ -35,8 +35,8 @@ namespace Network {
 class SlidingWindowFrameAssembler : boost::noncopyable {
 public:
   SlidingWindowFrameAssembler(
-      boost::function<void(int, int)> sendAck,
-      boost::function<void(FrameBuilder &)> onFrameFinished);
+      std::function<void(int, int)> sendAck,
+      std::function<void(FrameBuilder &)> onFrameFinished);
 
   void ProcessPacket(boost::asio::const_buffer data);
   void Flush();
@@ -58,8 +58,8 @@ public:
   Metrics GetMetrics();
 
 private:
-  const boost::function<void(int, int)> sendAck;
-  const boost::function<void(FrameBuilder &)> onFrameFinished;
+  const std::function<void(int, int)> sendAck;
+  const std::function<void(FrameBuilder &)> onFrameFinished;
 
   boost::recursive_mutex stateGuard, metricsGuard;
   int currentFrameIndex, lastFinishedFrameIndex;

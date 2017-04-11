@@ -23,16 +23,16 @@
 #include "SlidingWindowFrameAssembler.h"
 #include "frame_stream.h"
 #include <boost/asio/buffer.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace {
 // Execute the lambda expression at the end of the scope.
 class scoped_guard : boost::noncopyable
 {
-    boost::function<void()> lambda;
+    std::function<void()> lambda;
 
 public:
-    scoped_guard(boost::function<void()> action)
+    scoped_guard(std::function<void()> action)
         : lambda(action)
     {
     }
@@ -76,8 +76,8 @@ operator+(const SlidingWindowFrameAssembler::Metrics &a,
 }
 
 SlidingWindowFrameAssembler::SlidingWindowFrameAssembler(
-    boost::function<void(int, int)> sendAck,
-    boost::function<void(FrameBuilder &)> onFrameFinished)
+    std::function<void(int, int)> sendAck,
+    std::function<void(FrameBuilder &)> onFrameFinished)
     : sendAck(sendAck), onFrameFinished(onFrameFinished), currentFrameIndex(-1),
       lastFinishedFrameIndex(-1), expectedDataOffset(0) {
   Metrics emptyMetrics = {};

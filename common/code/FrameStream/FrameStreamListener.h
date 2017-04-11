@@ -32,11 +32,38 @@ namespace Network {
 
 class FrameBuilder;
 
+// Helper class. optional<T> is in the C++17 standard, but may not be
+// available on an integrator's toolchain. This is not intended to be
+// functionally identical to std::optional.
+template <typename T>
+class optional {
+public:
+  optional() : hasValue_(false) { }
+  optional(const T &value) : hasValue_(true), value_(value) { }
+
+  bool has_value() const { return hasValue_; }
+  const T& value() const { return value_; }
+
+private:
+  bool hasValue_;
+  T value_;
+};
+
 class FrameStreamListener : boost::noncopyable {
 public:
   FrameStreamListener(boost::asio::io_service &io
-                      , boost::function<void(FrameBuilder &)> onFrameComplete
-                      , boost::function<size_t()> getReadBufferSize);
+                      , std::function<void(FrameBuilder &)> onFrameComplete
+                      , std::function<size_t()> getReadBufferSize
+                      , optional<boost::asio::ip::address> receiveFrom
+#if FRAMESTREAMLISTENER_FIXED_RECV_PORT
+    // NOTE:
+    // FRAMESTREAMLISTENER_FIXED_RECV_PORT is used internally.
+    // It is recommended that you do not use a fixed receive port;
+    // the default behavior of FrameStreamListener is to use a
+    // dynamically allocated port number.
+                      , optional<uint16_t> fixedRecvPort
+#endif
+                      );
   ~FrameStreamListener();
 
   boost::asio::ip::udp::endpoint LocalEndpoint() const {
@@ -47,6 +74,7 @@ public:
   Metrics GetMetrics() { return frameAssembler.GetMetrics(); }
 
 private:
+  const optional<boost::asio::ip::address> sonarFilter;
   std::vector<uint8_t> readBuffer;
   boost::asio::ip::udp::socket socket;
   boost::asio::ip::udp::endpoint remoteEndpoint;

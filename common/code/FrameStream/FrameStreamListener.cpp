@@ -34,13 +34,25 @@ using namespace boost::asio::ip;
 
 FrameStreamListener::FrameStreamListener(
     boost::asio::io_service &io
-    , boost::function<void(FrameBuilder &)> onFrameComplete
-    , boost::function<size_t()> getReadBufferSize)
-    : socket(io), readBuffer(getReadBufferSize()),
+    , std::function<void(FrameBuilder &)> onFrameComplete
+    , std::function<size_t()> getReadBufferSize
+    , optional<boost::asio::ip::address> receiveFrom
+#ifdef FRAMESTREAMLISTENER_FIXED_RECV_PORT
+    , optional<uint16_t> fixedRecvPort
+#endif
+    )
+    : socket(io), readBuffer(getReadBufferSize()), sonarFilter(receiveFrom),
       frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
                      onFrameComplete) {
   socket.open(udp::v4());
-  socket.bind(udp::endpoint(udp::v4(), 0));
+  const uint16_t listenerRecvPort =
+#ifdef FRAMESTREAMLISTENER_FIXED_RECV_PORT
+    fixedRecvPort.has_value() ? fixedRecvPort.value() : 0;
+#else
+    0; // dynamically allocated
+#endif
+
+  socket.bind(udp::endpoint(udp::v4(), listenerRecvPort));
   socket.set_option(socket_base::reuse_address(true));
 
   boost::asio::socket_base::receive_buffer_size option(readBuffer.size());
@@ -69,7 +81,9 @@ FrameStreamListener::HandlePacketFrom(const boost::system::error_code &error,
                                       size_t bytesRead) {
   switch (error.value()) {
   case boost::system::errc::success: {
-    frameAssembler.ProcessPacket(const_buffers_1(readBuffer.data(), bytesRead));
+    if (!sonarFilter.has_value() || remoteEndpoint.address() == sonarFilter.value()) {
+      frameAssembler.ProcessPacket(const_buffers_1(readBuffer.data(), bytesRead));
+    }
     StartReceiveAsync();
   } break;
 
