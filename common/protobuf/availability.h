@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2014 Sound Metrics Corporation. All Rights Reserved.
+// Copyright (c) 2013-2017 Sound Metrics Corporation. All Rights Reserved.
 // availability.h
 
 #pragma warning(push)

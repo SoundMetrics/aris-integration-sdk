@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 // 
-// Copyright (c) 2013-2014 Sound Metrics Corporation. All Rights Reserved.
+// Copyright (c) 2013-2017 Sound Metrics Corporation. All Rights Reserved.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -104,7 +104,6 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
   if (!framePart.ParseFromArray(buffer_cast<const uint8_t *>(data),
                                 buffer_size(data))) {
     invalidPacket = true;
-    // TODO log
     return;
   }
 

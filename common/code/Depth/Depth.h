@@ -1,4 +1,4 @@
-// Copyright 2015 Sound Metrics corporation
+// Copyright 2015-2017 Sound Metrics corporation
 
 #ifndef __DEPTH_H__
 #define __DEPTH_H__
