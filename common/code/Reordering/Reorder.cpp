@@ -3,6 +3,7 @@
 //
 
 #include "Reorder.h"
+#include <assert.h>
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -23,7 +24,7 @@ inline uint32_t PingModeToPingsPerFrame(uint32_t pingMode) {
     return 0;
 }
 
-inline uint32_t PingModeToNumBeams(uint32_t pingMode) {
+uint32_t PingModeToNumBeams(uint32_t pingMode) {
     if (pingMode == 1) {
         return 48;
     } else if (pingMode == 3) {
@@ -37,7 +38,7 @@ inline uint32_t PingModeToNumBeams(uint32_t pingMode) {
     return 0;
 }
 
-void Reorder(const ArisFrameHeader & header, uint8_t * samples) {
+void Reorder(ArisFrameHeader & header, uint8_t * samples) {
 
     assert(samples != nullptr);
 

@@ -8,6 +8,7 @@
 
 namespace Aris {
 
-void Reorder(const ArisFrameHeader & header,  uint8_t * samples);
+void Reorder(ArisFrameHeader & header,  uint8_t * samples);
+uint32_t PingModeToNumBeams(uint32_t pingMode);
 
 }
