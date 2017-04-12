@@ -11,15 +11,15 @@ This sample program reorders the first frame read from a `.dat` file
 
 The `FrameHeader.h` C header file can be found in
 [type_definitions](https://github.com/SoundMetrics/aris-file-sdk/tree/master/type-definitions/C)
---this header file is pre-generated for ease of use. `FrameHeader.h` defines the `ArisFrameHeader` struct for use in interpreting the data in a `.dat` file. 
+--this header file is pre-generated for ease of use. `FrameHeader.h` defines the `ArisFrameHeader` struct for use in interpreting the data in a `.dat` file.
 
 ### C++ Headers
 
-There are two C++ header files, `Frame.h` and `Reorder.h`, which can be found in [Reordering](https://github.com/SoundMetrics/aris-integration-sdk/tree/master/common/code/Reordering). The `Frame.h` header file provides a `Frame` class for easy access to the `ArisFrameHeader` and sonar image data. The `Reorder.h` header file provides a `Reorder` function for reordering the sonar image data in a `Frame`.
+There are two additional C++ header files, `Reorder.h`, which can be found in [Reordering](https://github.com/SoundMetrics/aris-integration-sdk/tree/master/common/code/Reordering), and provides a `Reorder` function for reordering the sonar image data; and the `Frame.h` header file provides a `Frame` class for easy access to the `ArisFrameHeader` and sonar image data, and can be found in this same folder.
 
 ### C++ Code
 
-The code in this sample is standard C++11 that should build with any modern C++ compiler.
+The code in this sample should build with any modern C++ compiler.
 
 ### ARIS Sample and Expected Data
 A sample `.dat` file containing a single frame for reordering is provided in

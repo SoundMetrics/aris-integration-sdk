@@ -9,9 +9,38 @@
 
 namespace Aris {
 
-void Reorder(Frame & frame) {
+inline uint32_t PingModeToPingsPerFrame(uint32_t pingMode) {
+    if (pingMode == 1) {
+        return 3;
+    } else if (pingMode == 3) {
+        return 6;
+    } else if (pingMode == 6) {
+        return 4;
+    } else if (pingMode == 9) {
+        return 8;
+    }
 
-    const auto header = frame.GetHeader();
+    return 0;
+}
+
+inline uint32_t PingModeToNumBeams(uint32_t pingMode) {
+    if (pingMode == 1) {
+        return 48;
+    } else if (pingMode == 3) {
+        return 96;
+    } else if (pingMode == 6) {
+        return 64;
+    } else if (pingMode == 9) {
+        return 128;
+    }
+
+    return 0;
+}
+
+void Reorder(const ArisFrameHeader & header, uint8_t * samples) {
+
+    assert(samples != nullptr);
+
     const uint32_t samplesPerBeam = header.SamplesPerBeam;
     const uint32_t pingMode = header.PingMode;
     const uint32_t pingsPerFrame = PingModeToPingsPerFrame(pingMode);
@@ -27,7 +56,7 @@ void Reorder(Frame & frame) {
 
     auto inputBuf = std::vector<uint8_t>(numBeams * samplesPerBeam, 0);
     uint8_t * inputByte = &(inputBuf[0]);
-    uint8_t * const outputBuf = (uint8_t * const)frame.GetData();
+    uint8_t * const outputBuf = samples;
 
     memcpy(&(inputBuf[0]), outputBuf, numBeams * samplesPerBeam);
 
@@ -54,7 +83,7 @@ void Reorder(Frame & frame) {
         }
     }
 
-    frame.GetHeader().ReorderedSamples = 1;
+    header.ReorderedSamples = 1;
 }
 
 }
