@@ -42,6 +42,10 @@ void Reorder(ArisFrameHeader & header, uint8_t * samples) {
 
     assert(samples != nullptr);
 
+    if (header.ReorderedSamples) {
+        return;
+    }
+
     const uint32_t samplesPerBeam = header.SamplesPerBeam;
     const uint32_t pingMode = header.PingMode;
     const uint32_t pingsPerFrame = PingModeToPingsPerFrame(pingMode);
