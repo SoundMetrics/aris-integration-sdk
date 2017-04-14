@@ -179,6 +179,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\common\code\ArisBasics.h" />
     <ClInclude Include="..\..\..\common\code\CommandBuilder\CommandBuilder.h" />
     <ClInclude Include="..\..\..\common\code\FrameStream\FrameBuilder.h" />
     <ClInclude Include="..\..\..\common\code\FrameStream\FrameStreamListener.h" />

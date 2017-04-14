@@ -1,8 +1,8 @@
 // vc-using-framestream.cpp : Defines the entry point for the console application.
 //
 
+#include "ArisBasics.h"
 #include "ArisBeacons.h"
-#include "ArisConstants.h"
 #include "args.h"
 #include "Connection.h"
 #include "ArisRecording.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ArisConstants.h"
+#include "ArisBasics.h"
 #include "availability.h"
 #include <boost/asio.hpp>
 
