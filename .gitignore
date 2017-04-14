@@ -198,4 +198,4 @@ FakesAssemblies/
 *.opt
 
 # Miscellaneous build output files
-sample-code\vc-using-framestream\vc-using-framestream/output.aris
+sample-code/vc-using-framestream/vc-using-framestream/output.aris
