@@ -8,8 +8,8 @@ using CommandBuilder = Aris::Network::CommandBuilder;
 // This helps ferret out zombie connections.
 const auto kPingTimerPeriod = boost::posix_time::seconds(2);
 
-// ARIS 2 avoids fragmenting UDP packets on Ethernet, so we can use a buffer
-// size of  1500 (Ethernet MTU).
+// ARIS 2 avoids sending fragmented UDP packets on Ethernet, so we can use
+// a buffer size of 1500 (Ethernet MTU size).
 constexpr size_t kFramePartBufferSize = 1500;
 
 /* static */
@@ -17,11 +17,13 @@ std::unique_ptr<Connection> Connection::Create(
   boost::asio::io_service & io,
   const boost::asio::ip::tcp::endpoint & ep,
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
-  uint32_t systemType,
+  SystemType systemType,
   aris::Command::SetSalinity::Salinity salinity,
   float initialFocusRange,
   std::string & errorMessage)
 {
+  assert(onFrameCompletion);
+
   boost::asio::ip::tcp::socket socket(io);
 
   errorMessage.clear();
@@ -45,7 +47,7 @@ Connection::Connection(
   boost::asio::ip::tcp::socket && commandSocket,
   boost::asio::ip::address receiveFrom,
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
-  uint32_t systemType,
+  SystemType systemType,
   aris::Command::SetSalinity::Salinity salinity,
   float initialFocusRange)
   : commandSocket_(std::move(commandSocket))
@@ -61,6 +63,8 @@ Connection::Connection(
   , frameStreamListener_(io, onFrameCompletion_, []() { return kFramePartBufferSize; }, receiveFrom)
   , shutting_down_(false)
 {
+  assert(onFrameCompletion);
+
   // Initialize the sonar appropriately.
   SendCommand(CommandBuilder::SetTime());
   SendCommand(
@@ -70,7 +74,7 @@ Connection::Connection(
   SendCommand(
     CommandBuilder::RequestAcousticSettings(
       SetCookie(
-        DefaultAcousticSettingsForSystem[systemType_])));
+        DefaultAcousticSettingsForSystem[static_cast<unsigned>(systemType_)])));
   SendCommand(CommandBuilder::SetSalinity(salinity));
   SendCommand(CommandBuilder::SetFocusRange(initialFocusRange));
 
@@ -94,13 +98,6 @@ void Connection::HandlePingTimer(const boost::system::error_code& e) {
 
   ping_timer_.expires_from_now(kPingTimerPeriod);
   ping_timer_.async_wait(sendPing_);
-}
-
-void Connection::HandleCompletedFrame(Aris::Network::FrameBuilder & frameBuilder)
-{
-  if (frameBuilder.IsComplete()) {
-    printf("Received frame %d\n", frameBuilder.FrameIndex());
-  }
 }
 
 AcousticSettings Connection::SetCookie(const AcousticSettings & settings)

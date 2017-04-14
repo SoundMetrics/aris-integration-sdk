@@ -80,6 +80,9 @@ SlidingWindowFrameAssembler::SlidingWindowFrameAssembler(
     std::function<void(FrameBuilder &)> onFrameFinished)
     : sendAck(sendAck), onFrameFinished(onFrameFinished), currentFrameIndex(-1),
       lastFinishedFrameIndex(-1), expectedDataOffset(0) {
+  assert(sendAck);
+  assert(onFrameFinished);
+
   Metrics emptyMetrics = {};
   metrics = emptyMetrics;
 }

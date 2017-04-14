@@ -44,6 +44,8 @@ public:
   bool has_value() const { return hasValue_; }
   const T& value() const { return value_; }
 
+  static optional<T> none() { return optional<T>(); }
+
 private:
   bool hasValue_;
   T value_;

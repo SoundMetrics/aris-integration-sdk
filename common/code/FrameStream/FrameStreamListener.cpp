@@ -44,6 +44,9 @@ FrameStreamListener::FrameStreamListener(
     : socket(io), readBuffer(getReadBufferSize()), sonarFilter(receiveFrom),
       frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
                      onFrameComplete) {
+  assert(onFrameComplete);
+  assert(getReadBufferSize);
+
   socket.open(udp::v4());
   const uint16_t listenerRecvPort =
 #ifdef FRAMESTREAMLISTENER_FIXED_RECV_PORT

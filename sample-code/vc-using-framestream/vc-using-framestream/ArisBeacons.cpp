@@ -1,17 +1,16 @@
 #include "ArisBeacons.h"
+#include "ArisConstants.h"
 #include "UdpListener.h"
 #include <iostream>
 
-constexpr uint16_t kArisBeaconPort = 56124;
-
 /* static */
-std::pair<ArisBeacons::endpoint, uint32_t> ArisBeacons::FindBySerialNumber(uint32_t serialNumber)
+std::pair<ArisBeacons::endpoint, SystemType> ArisBeacons::FindBySerialNumber(uint32_t serialNumber)
 {
   boost::asio::io_service io;
 
-  endpoint targetEndpoint; // assignment on the endpoint type doesn't like volatile
-  uint32_t systemType;
   volatile bool found = false;
+  endpoint targetEndpoint; // assignment on the endpoint type doesn't like volatile
+  SystemType systemType;
 
   UdpListener udpListener(io, kArisBeaconPort, true, 1024,
     [&targetEndpoint, &systemType, &found, serialNumber](auto error, auto ep, auto buffer, auto bufferSize) {
@@ -25,7 +24,7 @@ std::pair<ArisBeacons::endpoint, uint32_t> ArisBeacons::FindBySerialNumber(uint3
       if (message.ParseFromArray(buffer, bufferSize) && message.has_serialnumber()) {
         if (message.serialnumber() == serialNumber) {
           targetEndpoint = ep;
-          systemType = message.systemtype();
+          systemType = static_cast<SystemType>(message.systemtype());
           found = true;
         }
       }

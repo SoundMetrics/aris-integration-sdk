@@ -7,6 +7,8 @@ UdpListener::UdpListener(boost::asio::io_service & io, uint16_t port, bool reuse
   , handler_(handler)
   , shuttingDown_(false)
 {
+  assert(handler_);
+
   socket_.open(udp::v4());
   socket_.set_option(boost::asio::socket_base::reuse_address(reuseAddress));
   socket_.bind(udp::endpoint(udp::v4(), port));

@@ -19,6 +19,9 @@
     <Filter Include="common/code/FrameStream">
       <UniqueIdentifier>{b762bc23-14aa-497a-a70a-87eb4e898921}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common/code/Reordering">
+      <UniqueIdentifier>{6c348a3f-77cf-4147-b129-e370531755e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -63,6 +66,12 @@
     <ClInclude Include="Frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\common\code\Reordering\Reorder.h">
+      <Filter>common/code/Reordering</Filter>
+    </ClInclude>
+    <ClInclude Include="ArisRecording.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="generated\availability.pb.cc">
@@ -102,6 +111,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Frame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\code\Reordering\Reorder.cpp">
+      <Filter>common/code/Reordering</Filter>
+    </ClCompile>
+    <ClCompile Include="ArisRecording.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

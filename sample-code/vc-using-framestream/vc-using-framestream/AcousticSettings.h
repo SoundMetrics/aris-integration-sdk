@@ -1,8 +1,24 @@
 #pragma once
 
+#include "ArisConstants.h"
 #include <cstdint>
 
-enum class SonarFrequency : uint32_t { Low = 0, High = 1 };
+constexpr uint32_t kFirstSettingsCookie = 1;
+constexpr uint32_t kNoSettingsCookie = 0;
+
+// Generates a monotonically increasing sequence for use as cookies
+// in the "request settings" command.
+class CookieSequence {
+public:
+  CookieSequence() : nextCookie_(kFirstSettingsCookie) { }
+
+  uint32_t Next() { return nextCookie_++; }
+
+private:
+  uint32_t nextCookie_;
+};
+
+//-----------------------------------------------------------------------------
 
 struct AcousticSettings {
   uint32_t        cookie;
@@ -18,6 +34,8 @@ struct AcousticSettings {
   bool            enable150Volts;
   float           receiverGain;
 };
+
+//-----------------------------------------------------------------------------
 
 // Default acoustic settings for initial integrator bring-up per the SDK
 // document, ordered by system type:
@@ -69,14 +87,4 @@ constexpr AcousticSettings DefaultAcousticSettingsForSystem[3] = {
     true,     // enable150Volts
     20,       // receiverGain
   },
-};
-
-class CookieSequence {
-public:
-  CookieSequence() : nextCookie_(1) { }
-
-  uint32_t Next() { return nextCookie_++; }
-
-private:
-  uint32_t nextCookie_;
 };

@@ -196,3 +196,6 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+
+# Miscellaneous build output files
+sample-code\vc-using-framestream\vc-using-framestream/output.aris

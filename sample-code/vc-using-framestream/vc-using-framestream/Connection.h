@@ -18,7 +18,7 @@ public:
     boost::asio::io_service & io, 
     const boost::asio::ip::tcp::endpoint & ep,
     std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
-    uint32_t systemType,
+    SystemType systemType,
     aris::Command::SetSalinity::Salinity salinity,
     float initialFocusRange,
     std::string & errorMessage);
@@ -29,7 +29,7 @@ public:
     boost::asio::ip::tcp::socket && commandSocket,
     boost::asio::ip::address receiveFrom,
     std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
-    uint32_t systemType,
+    SystemType systemType,
     aris::Command::SetSalinity::Salinity salinity,
     float initialFocusRange);
   ~Connection();
@@ -40,7 +40,7 @@ private:
   const std::vector<uint8_t> ping_template_;
   const std::function<void(const boost::system::error_code&)> sendPing_;
   const std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion_;
-  const uint32_t systemType_;
+  const SystemType systemType_;
 
   bool shutting_down_;
   CookieSequence cookie_;
@@ -51,7 +51,6 @@ private:
   Aris::Network::FrameStreamListener frameStreamListener_;
 
   void HandlePingTimer(const boost::system::error_code& e);
-  void HandleCompletedFrame(Aris::Network::FrameBuilder & frameBuilder);
   AcousticSettings SetCookie(const AcousticSettings & settings);
 
   static std::vector<uint8_t> CreatePingTemplate();
