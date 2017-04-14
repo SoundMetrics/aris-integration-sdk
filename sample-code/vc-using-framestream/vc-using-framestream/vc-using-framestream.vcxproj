@@ -89,7 +89,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/CommandBuilder;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
@@ -111,7 +111,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/CommandBuilder;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
@@ -135,7 +135,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/CommandBuilder;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
@@ -161,7 +161,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../common/code;../../../common/code/CommandBuilder;../../../common/code/FrameStream;../../../common/code/Reordering;../../../submodules/aris-file-sdk/type-definitions/C;../../../common/protobuf;./generated;../../../submodules/protobuf/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
@@ -179,6 +179,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\common\code\CommandBuilder\CommandBuilder.h" />
     <ClInclude Include="..\..\..\common\code\FrameStream\FrameBuilder.h" />
     <ClInclude Include="..\..\..\common\code\FrameStream\FrameStreamListener.h" />
     <ClInclude Include="..\..\..\common\code\FrameStream\SlidingWindowFrameAssembler.h" />
@@ -187,7 +188,6 @@
     <ClInclude Include="args.h" />
     <ClInclude Include="ArisBeacons.h" />
     <ClInclude Include="ArisRecording.h" />
-    <ClInclude Include="CommandBuilder.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="generated\availability.pb.h" />
@@ -197,6 +197,7 @@
     <ClInclude Include="UdpListener.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\common\code\CommandBuilder\CommandBuilder.cpp" />
     <ClCompile Include="..\..\..\common\code\FrameStream\FrameBuilder.cpp" />
     <ClCompile Include="..\..\..\common\code\FrameStream\FrameStreamListener.cpp" />
     <ClCompile Include="..\..\..\common\code\FrameStream\SlidingWindowFrameAssembler.cpp" />
@@ -204,7 +205,6 @@
     <ClCompile Include="args.cpp" />
     <ClCompile Include="ArisBeacons.cpp" />
     <ClCompile Include="ArisRecording.cpp" />
-    <ClCompile Include="CommandBuilder.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="generated\availability.pb.cc">

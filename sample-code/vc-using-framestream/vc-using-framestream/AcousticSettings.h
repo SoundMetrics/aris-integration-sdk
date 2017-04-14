@@ -20,23 +20,6 @@ private:
 
 //-----------------------------------------------------------------------------
 
-struct AcousticSettings {
-  uint32_t        cookie;
-  float           frameRate;
-  uint32_t        pingMode;
-  SonarFrequency  frequency;
-  uint32_t        samplesPerBeam;
-  uint32_t        sampleStartDelay;
-  uint32_t        cyclePeriod;
-  uint32_t        samplePeriod;
-  uint32_t        pulseWidth;
-  bool            enableTransmit;
-  bool            enable150Volts;
-  float           receiverGain;
-};
-
-//-----------------------------------------------------------------------------
-
 // Default acoustic settings for initial integrator bring-up per the SDK
 // document, ordered by system type:
 //  1800: 0

@@ -18,3 +18,20 @@ constexpr uint16_t kArisCommandPort = 56888;
 
 // ARIS accepts platform header updates on this port.
 constexpr uint16_t kArisPlatformHeaderUpdatePort = 700;
+
+//-----------------------------------------------------------------------------
+
+typedef struct {
+  uint32_t        cookie;
+  float           frameRate;
+  uint32_t        pingMode;
+  SonarFrequency  frequency;
+  uint32_t        samplesPerBeam;
+  uint32_t        sampleStartDelay;
+  uint32_t        cyclePeriod;
+  uint32_t        samplePeriod;
+  uint32_t        pulseWidth;
+  bool            enableTransmit;
+  bool            enable150Volts;
+  float           receiverGain;
+} AcousticSettings;

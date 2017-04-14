@@ -22,6 +22,12 @@
     <Filter Include="common/code/Reordering">
       <UniqueIdentifier>{6c348a3f-77cf-4147-b129-e370531755e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common/code/CommandBuilder">
+      <UniqueIdentifier>{e3efac63-03af-4b6c-9bd7-fbbb95cb4de0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common/code">
+      <UniqueIdentifier>{d02abe23-58d2-4eea-8940-fbafe6558b73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -60,9 +66,6 @@
     <ClInclude Include="AcousticSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CommandBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -71,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="ArisRecording.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\code\CommandBuilder\CommandBuilder.h">
+      <Filter>common/code/CommandBuilder</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,9 +113,6 @@
     <ClCompile Include="..\..\..\common\code\FrameStream\SlidingWindowFrameAssembler.cpp">
       <Filter>common/code/FrameStream</Filter>
     </ClCompile>
-    <ClCompile Include="CommandBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="ArisRecording.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\code\CommandBuilder\CommandBuilder.cpp">
+      <Filter>common/code/CommandBuilder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

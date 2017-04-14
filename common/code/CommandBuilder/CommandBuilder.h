@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "AcousticSettings.h"
+#include "ArisConstants.h"
 #include "commands.h"
 
 namespace Aris {
