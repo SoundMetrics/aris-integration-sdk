@@ -16,8 +16,8 @@ ArgParseResults parseArgs(int argc, char **argv) {
     int sn;
     auto sArg = std::string(arg);
 
-    if (sArg == "-b") {
-      results.args.useBroadcast = true;
+    if (sArg == "-m") {
+      results.args.useMulticast = true;
     }
     else if ((sn = atoi(arg)) != 0) {
       if (foundSN) {

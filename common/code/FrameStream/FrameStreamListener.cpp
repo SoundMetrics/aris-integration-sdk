@@ -33,33 +33,32 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 
 FrameStreamListener::FrameStreamListener(
-    boost::asio::io_service &io
+    io_service &io
     , std::function<void(FrameBuilder &)> onFrameComplete
     , std::function<size_t()> getReadBufferSize
-    , optional<boost::asio::ip::address> receiveFrom
-#ifdef FRAMESTREAMLISTENER_FIXED_RECV_PORT
-    , optional<uint16_t> fixedRecvPort
-#endif
+    , address targetSonar
+    , optional<udp::endpoint> receiveFrom
     )
-    : socket(io), readBuffer(getReadBufferSize()), sonarFilter(receiveFrom),
+    : socket(io), readBuffer(getReadBufferSize()), sonarFilter(targetSonar),
       frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
                      onFrameComplete) {
   assert(onFrameComplete);
   assert(getReadBufferSize);
 
   socket.open(udp::v4());
-  const uint16_t listenerRecvPort =
-#ifdef FRAMESTREAMLISTENER_FIXED_RECV_PORT
-    fixedRecvPort.has_value() ? fixedRecvPort.value() : 0;
-#else
-    0; // dynamically allocated
-#endif
 
-  socket.bind(udp::endpoint(udp::v4(), listenerRecvPort));
+  const bool useMulticast =
+    receiveFrom.has_value() ? receiveFrom.value().address().is_multicast() : false;
+  const auto bindEndpoint =
+    useMulticast ? udp::endpoint(udp::v4(), receiveFrom.value().port()) : udp::endpoint(udp::v4(), 0);
+
+  socket.bind(bindEndpoint);
   socket.set_option(socket_base::reuse_address(true));
+  socket.set_option(socket_base::receive_buffer_size(readBuffer.size()));
 
-  boost::asio::socket_base::receive_buffer_size option(readBuffer.size());
-  socket.set_option(option);
+  if (useMulticast) {
+    socket.set_option(multicast::join_group(receiveFrom.value().address()));
+  }
 
   StartReceiveAsync();
 }

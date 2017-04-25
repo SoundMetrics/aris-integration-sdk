@@ -8,17 +8,24 @@ using CommandBuilder = Aris::Network::CommandBuilder;
 // This helps ferret out zombie connections.
 const auto kPingTimerPeriod = boost::posix_time::seconds(2);
 
-// ARIS 2 avoids sending fragmented UDP packets on Ethernet, so we can use
-// a buffer size of 1500 (Ethernet MTU size).
-constexpr size_t kFramePartBufferSize = 1500;
+// Buffer size for the network stack. If you are missing packets
+// you may need a bigger buffer. During development this sample
+// program ran fine with a 16KB buffer, but all it does is wrangle
+// packets.
+// 
+// You probably want a substantial buffer; more if your hardware
+// spec is slow or there's a lot going on in your system (context
+// switching, for example).
+constexpr size_t kNetworkBufferSize = 1024 * 1024;
 
 /* static */
 std::unique_ptr<Connection> Connection::Create(
   boost::asio::io_service & io,
-  const boost::asio::ip::tcp::endpoint & ep,
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
   SystemType systemType,
   aris::Command::SetSalinity::Salinity salinity,
+  boost::asio::ip::tcp::endpoint targetSonar,
+  const Aris::Network::optional<boost::asio::ip::udp::endpoint> & multicastEndpoint,
   float initialFocusRange,
   std::string & errorMessage)
 {
@@ -28,30 +35,34 @@ std::unique_ptr<Connection> Connection::Create(
 
   errorMessage.clear();
   try {
-    socket.connect(ep);
+    socket.connect(targetSonar);
     boost::asio::socket_base::keep_alive option(true);
     socket.set_option(option);
+
+    // In case the command connection goes down during construction,
+    // build the Connection here.
+    return std::make_unique<Connection>(
+      io, std::move(socket), onFrameCompletion, systemType, salinity,
+      targetSonar.address(), multicastEndpoint, initialFocusRange);
   }
-  catch (boost::system::system_error ec) {
+  catch (const boost::system::system_error & ec) {
     errorMessage = ec.what();
     return std::unique_ptr<Connection>(); // Unassociated unique_ptr
   }
-
-  return std::make_unique<Connection>(
-    io, std::move(socket), ep.address(), onFrameCompletion,
-    systemType, salinity, initialFocusRange);
 }
 
 Connection::Connection(
   boost::asio::io_service & io,
   boost::asio::ip::tcp::socket && commandSocket,
-  boost::asio::ip::address receiveFrom,
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
   SystemType systemType,
   aris::Command::SetSalinity::Salinity salinity,
+  boost::asio::ip::address targetSonar,
+  const Aris::Network::optional<boost::asio::ip::udp::endpoint> & multicastEndpoint,
   float initialFocusRange)
   : commandSocket_(std::move(commandSocket))
   , io_(io)
+  , hasConnectionError_(false)
   , ping_timer_(io, kPingTimerPeriod)
   , ping_template_(std::move(CreatePingTemplate()))
   , sendPing_([this](auto e) { this->HandlePingTimer(e); })
@@ -60,17 +71,20 @@ Connection::Connection(
   , onFrameCompletion_(onFrameCompletion)
   // Note that framePartListener_ is initialized AFTER onFrameCompletion_ due to declaration
   // order in the class declaration.
-  , frameStreamListener_(io, onFrameCompletion_, []() { return kFramePartBufferSize; }, receiveFrom)
-  , shutting_down_(false)
+  , frameStreamListener_(io, onFrameCompletion_, []() { return kNetworkBufferSize; },
+      targetSonar, multicastEndpoint)
 {
   assert(onFrameCompletion);
 
   // Initialize the sonar appropriately.
   SendCommand(CommandBuilder::SetTime());
   SendCommand(
-    CommandBuilder::SetFrameStreamReceiver(
-      //frameStreamListener_.LocalEndpoint().address().to_string().c_str(),
-      frameStreamListener_.LocalEndpoint().port()));
+    multicastEndpoint.has_value()
+    ? CommandBuilder::SetFrameStreamReceiver(
+        multicastEndpoint.value().address().to_string().c_str(),
+        multicastEndpoint.value().port())
+    : CommandBuilder::SetFrameStreamReceiver(frameStreamListener_.LocalEndpoint().port())
+  );
   SendCommand(
     CommandBuilder::RequestAcousticSettings(
       SetCookie(
@@ -84,20 +98,28 @@ Connection::Connection(
 
 Connection::~Connection()
 {
-  shutting_down_ = true;
+  ping_timer_.cancel();
 }
 
-void Connection::HandlePingTimer(const boost::system::error_code& e) {
-  if (e || shutting_down_) {
+void Connection::HandlePingTimer(const boost::system::error_code & e) {
+  if (e) {
     return;
   }
 
   const void * buf = &ping_template_[0];
   size_t size = ping_template_.capacity();
-  commandSocket_.send(boost::asio::buffer(buf, size));
 
-  ping_timer_.expires_from_now(kPingTimerPeriod);
-  ping_timer_.async_wait(sendPing_);
+  try {
+    commandSocket_.send(boost::asio::buffer(buf, size));
+
+    ping_timer_.expires_from_now(kPingTimerPeriod);
+    ping_timer_.async_wait(sendPing_);
+  }
+  catch (const std::exception & e) {
+    hasConnectionError_ = true;
+    std::cerr << "An error occurred while sending a ping: " << e.what() << '\n';
+    std::cerr << "No further pings can be sent.\n";
+  }
 }
 
 AcousticSettings Connection::SetCookie(const AcousticSettings & settings)
@@ -123,7 +145,7 @@ std::vector<uint8_t> Connection::CreatePingTemplate() {
 
   // Normally you would just send the command to the ARIS rather than
   // storing it, but the ping doesn't have any content that changes.
-  return std::move(buf);
+  return buf;
 }
 
 void Connection::SerializeCommand(const aris::Command & cmd, std::vector<uint8_t>& buffer)
@@ -142,6 +164,8 @@ void Connection::SerializeCommand(const aris::Command & cmd, std::vector<uint8_t
 
 void Connection::SendCommand(const aris::Command & cmd)
 {
+  std::cout << "Connection::SendCommand: " << cmd.DebugString() << '\n';
+
   std::vector<uint8_t> buffer(128);
   SerializeCommand(cmd, buffer);
   commandSocket_.send(boost::asio::buffer(buffer.data(), buffer.size()));

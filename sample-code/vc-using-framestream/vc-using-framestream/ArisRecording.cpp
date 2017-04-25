@@ -58,7 +58,7 @@ bool WriteableArisRecording::WriteFileHeader(std::ofstream & outfile)
   memset(&header, 0, sizeof header);
   header.Version = ARIS_FILE_SIGNATURE;
 
-  assert(outfile.tellp() == 0);
+  assert(outfile.tellp() == std::streampos(0));
 
   outfile.write(reinterpret_cast<const char*>(&header), sizeof header);
   return !outfile.fail();

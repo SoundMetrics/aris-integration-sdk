@@ -55,16 +55,13 @@ class FrameStreamListener : boost::noncopyable {
 public:
   FrameStreamListener(boost::asio::io_service &io
                       , std::function<void(FrameBuilder &)> onFrameComplete
-                      , std::function<size_t()> getReadBufferSize
-                      , optional<boost::asio::ip::address> receiveFrom
-#if FRAMESTREAMLISTENER_FIXED_RECV_PORT
-    // NOTE:
-    // FRAMESTREAMLISTENER_FIXED_RECV_PORT is used internally.
-    // It is recommended that you do not use a fixed receive port;
-    // the default behavior of FrameStreamListener is to use a
-    // dynamically allocated port number.
-                      , optional<uint16_t> fixedRecvPort
-#endif
+                      , std::function<size_t()> getReadBufferSize // network buffer size
+                      , boost::asio::ip::address targetSonar
+                      // Most applications do not need to specify the receiveFrom
+                      // endpoint. This is primarily used for multicasting where
+                      // the multicast group and port number must be decided ahead
+                      // of time. Otherwise, pass an empty optional<>().
+                      , optional<boost::asio::ip::udp::endpoint> receiveFrom
                       );
   ~FrameStreamListener();
 

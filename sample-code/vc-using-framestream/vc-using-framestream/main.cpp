@@ -38,6 +38,8 @@ void wire_ctrlc_handler() {
 
 //---------------------------------------------------------------------------
 
+void logFrameStreamMetrics(Connection &);
+
 int main(int argc, char **argv) {
 
   //---------------------------------------------------------------------------
@@ -52,16 +54,26 @@ int main(int argc, char **argv) {
 
   const auto & args = argParseResult.args;
 
+  // When multicasting, the cooperating applications will likely want to
+  // choose a receive port in advance so the non-controlling application
+  // knows where to listen for packets.
+  const bool useMulticast = args.useMulticast.has_value() && args.useMulticast.value();
+  const auto receiveFromAddr =
+    useMulticast
+    ? boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string("239.0.0.42"), 59595)
+    : Aris::Network::optional<boost::asio::ip::udp::endpoint>();
+
   std::cout << "Target SN: " << args.serialNumber << '\n';
-  if (args.useBroadcast.has_value()) {
-    std::cout << "  (broadcast setting)" << '\n';
+  if (useMulticast) {
+    std::cout << "  (multicast to " << receiveFromAddr.value().address().to_string()
+      << " port " << receiveFromAddr.value().port() << ")\n";
   }
 
   //---------------------------------------------------------------------------
   // Here we look up a sonar's IP address (endpoint) by serial number.
   // This relies on waiting for a beacon from the sonar of interest.
 
-  const auto SN = 24u;
+  const auto SN = args.serialNumber;
   ArisBeacons::endpoint targetEndpoint;
   SystemType systemType;
 
@@ -79,28 +91,30 @@ int main(int argc, char **argv) {
   auto writingFile = true;
 
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion =
-    [&writingFile, &file](Aris::Network::FrameBuilder& fb) {
-    // Log every tenth frame to stdout
-    if ((fb.FrameIndex() % 10) == 0) {
-      std::cout << "Frame " << fb.FrameIndex() << '\n';
-    }
+    [&writingFile, &file](Aris::Network::FrameBuilder & fb) {
+
+    std::cout << (fb.IsComplete() ? "+" : "-");
 
     // Write the .aris file
-    if (writingFile) {
+    if (writingFile && fb.IsComplete()) {
       const Frame frame(fb.TakeHeader(), fb.TakeFrameData());
-      if (writingFile) {
-        writingFile = file->WriteFrame(frame);
-      }
+      writingFile = file->WriteFrame(frame);
     }
   };
 
   auto connection = std::move(
-    Connection::Create(io, tcpEndpoint, onFrameCompletion, systemType, salinity,
-      initialFocusRange, errorMessage));
+    Connection::Create(io, onFrameCompletion, systemType, salinity,
+      tcpEndpoint, receiveFromAddr, initialFocusRange, errorMessage));
 
   if (!connection) {
+    std::cerr << '\n';
     std::cerr << "*** No connection could be made: '" << errorMessage << "'." << '\n';
-    std::cerr << "*** ep: " << tcpEndpoint.address().to_string() << " port " << tcpEndpoint.port() << '\n';
+    std::cerr << "*** target sonar: " << tcpEndpoint.address().to_string() << '\n';
+
+    if (useMulticast) {
+      std::cerr << "*** multicast: " << receiveFromAddr.value().address().to_string() << " port " << receiveFromAddr.value().port() << '\n';
+    }
+
     return -1;
   }
 
@@ -108,5 +122,30 @@ int main(int argc, char **argv) {
   io.reset();
   io.run();
 
+  logFrameStreamMetrics(*connection);
+
   return 0;
+}
+
+void logFrameStreamMetrics(Connection & connection) {
+
+  const auto metrics = connection.GetMetrics();
+
+  const auto droppedFrames = metrics.finishedFrameCount - metrics.completeFrameCount;
+  const auto droppedFramesRatio = (double)droppedFrames / metrics.finishedFrameCount;
+  const auto acceptedPacketsRatio = (double)metrics.totalPacketsAccepted / metrics.totalPacketsReceived;
+
+  std::cout
+    << '\n'
+    << "frame stream: unique frame indices: " << metrics.uniqueFrameIndexCount
+    << "; finished frames: " << metrics.finishedFrameCount
+    << "; complete frames: " << metrics.completeFrameCount
+    << "; skipped frames: " << metrics.skippedFrameCount
+    << "; dropped frames: " << droppedFrames << " (" << (100.0 * droppedFramesRatio) << " %)"
+    << "; packets received: " << metrics.totalPacketsReceived
+    << "; packets accepted: " << metrics.totalPacketsAccepted << " (" << (100.0 * acceptedPacketsRatio) << " %)"
+    << "; packets ignored: " << metrics.totalPacketsIgnored
+    << "; invalid packets: " << metrics.invalidPacketCount
+    << '\n'
+    ;
 }

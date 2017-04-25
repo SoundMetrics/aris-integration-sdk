@@ -2,6 +2,9 @@
 
 #include <cstdint>
 
+// These enumerations are essentially duplicates of what was generated
+// by your protoc compiler; however, these serve the purpose of preventing
+// ingress of those generated types into our code base.
 enum class SonarFrequency : uint32_t { Low = 0, High = 1 };
 
 enum class SystemType : uint32_t {
@@ -21,7 +24,7 @@ constexpr uint16_t kArisPlatformHeaderUpdatePort = 700;
 
 //-----------------------------------------------------------------------------
 
-typedef struct {
+struct AcousticSettings {
   uint32_t        cookie;
   float           frameRate;
   uint32_t        pingMode;
@@ -34,4 +37,4 @@ typedef struct {
   bool            enableTransmit;
   bool            enable150Volts;
   float           receiverGain;
-} AcousticSettings;
+};

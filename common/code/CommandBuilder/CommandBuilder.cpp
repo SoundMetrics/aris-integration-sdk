@@ -21,6 +21,18 @@ namespace Aris {
       return command;
     }
 
+    aris::Command CommandBuilder::SetFrameStreamReceiver(const char * ipv4Address, unsigned int port)
+    {
+      Command command;
+      command.set_type(Command::SET_FRAMESTREAM_RECEIVER);
+
+      auto receiver = command.mutable_framestreamreceiver();
+      receiver->set_port(port);
+      receiver->set_ip(ipv4Address);
+
+      return command;
+    }
+
     aris::Command CommandBuilder::SetFrameStreamSettings(bool interpacketDelayEnable, unsigned interpacketDelayMicroseconds)
     {
       Command command;

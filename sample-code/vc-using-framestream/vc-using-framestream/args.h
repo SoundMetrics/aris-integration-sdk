@@ -5,7 +5,7 @@
 
 struct Args {
   int serialNumber;
-  std::optional<bool> useBroadcast; // internal test use
+  std::optional<bool> useMulticast;
 };
 
 struct ArgParseResults {
