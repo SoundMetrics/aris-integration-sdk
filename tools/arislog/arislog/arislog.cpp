@@ -70,7 +70,7 @@ WORD map_severity_to_color(unsigned severity) {
 // that need it, and is outside the scope of main() only so crtc_handler()
 // can stop it when the user wishes to exit.
 //
-// We have only one thread servicing hte io_service object, so every packet
+// We have only one thread servicing the io_service object, so every packet
 // receipt and so on are, by default, nicely synchronized.
 
 static boost::asio::io_service io;

@@ -89,7 +89,7 @@ unsigned AvailabilityListener::ParseBeacon(const char * buffer, size_t bufferSiz
 
 void AvailabilityListener::HandleExpiration(const boost::system::error_code & e) {
 
-  if (e) {
+  if (e.value() == boost::asio::error::operation_aborted) {
     return;
   }
 
