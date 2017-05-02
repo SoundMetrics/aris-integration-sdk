@@ -175,7 +175,7 @@ void write_initial_output() {
   } initialOutput[] = {
     { meta.Info, "arislog" },
     { meta.LowKey, dividerDashes },
-    { meta.LowKey, "This application logs messages received from syslog relays." },
+    { meta.LowKey, "This application displays messages received from syslog relays." },
     { meta.LowKey, "Messages are displayed here only after the first connection from this PC." },
     { meta.LowKey, "Messages displayed may be from ARIS and additional sources." },
     { meta.LowKey, dividerDashes },
