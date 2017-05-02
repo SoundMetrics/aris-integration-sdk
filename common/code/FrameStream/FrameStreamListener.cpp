@@ -52,9 +52,9 @@ FrameStreamListener::FrameStreamListener(
   const auto bindEndpoint =
     useMulticast ? udp::endpoint(udp::v4(), receiveFrom.value().port()) : udp::endpoint(udp::v4(), 0);
 
-  socket.bind(bindEndpoint);
   socket.set_option(socket_base::reuse_address(true));
   socket.set_option(socket_base::receive_buffer_size(readBuffer.size()));
+  socket.bind(bindEndpoint);
 
   if (useMulticast) {
     socket.set_option(multicast::join_group(receiveFrom.value().address()));

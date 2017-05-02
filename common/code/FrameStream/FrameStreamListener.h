@@ -38,7 +38,7 @@ class FrameBuilder;
 template <typename T>
 class optional {
 public:
-  optional() : hasValue_(false) { }
+  optional() : hasValue_(false), value_{} { }
   optional(const T &value) : hasValue_(true), value_(value) { }
 
   bool has_value() const { return hasValue_; }

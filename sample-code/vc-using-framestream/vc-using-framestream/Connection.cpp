@@ -16,7 +16,7 @@ const auto kPingTimerPeriod = boost::posix_time::seconds(2);
 // You probably want a substantial buffer; more if your hardware
 // spec is slow or there's a lot going on in your system (context
 // switching, for example).
-constexpr size_t kNetworkBufferSize = 1024 * 1024;
+constexpr size_t kNetworkBufferSize = 16 * 1024 * 1024;
 
 /* static */
 std::unique_ptr<Connection> Connection::Create(

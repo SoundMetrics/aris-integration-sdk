@@ -91,6 +91,9 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
 
   bool acceptedPacket = false, invalidPacket = false;
   uint32_t skippedFrameCount = 0;
+
+  // RIAA-based scope that upgrades the metrics at the end
+  // of this function:
   scoped_guard updateMetrics([&]() {
     Metrics update = {};
     update.skippedFrameCount = skippedFrameCount;

@@ -56,7 +56,8 @@ int main(int argc, char **argv) {
 
   // When multicasting, the cooperating applications will likely want to
   // choose a receive port in advance so the non-controlling application
-  // knows where to listen for packets.
+  // knows where to listen for packets. Please see README.md for more on
+  // multicasting. (Multicasting of ARIS frames is uncommon.)
   const bool useMulticast = args.useMulticast.has_value() && args.useMulticast.value();
   const auto receiveFromAddr =
     useMulticast
@@ -89,14 +90,20 @@ int main(int argc, char **argv) {
 
   auto file = std::move(WriteableArisRecording::Create(".\\output.aris"));
   auto writingFile = true;
+  uint32_t totalFrames = 0, completeFrames = 0;
 
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion =
-    [&writingFile, &file](Aris::Network::FrameBuilder & fb) {
+    [&writingFile, &file, &totalFrames, &completeFrames](Aris::Network::FrameBuilder & fb) {
 
-    std::cout << (fb.IsComplete() ? "+" : "-");
+    const bool isComplete = fb.IsComplete();
+    ++totalFrames;
+    completeFrames += (isComplete ? 1 : 0);
+
+    // Provide a visual indicator of whether we're getting good throughput.
+    std::cout << (isComplete ? "+" : "-");
 
     // Write the .aris file
-    if (writingFile && fb.IsComplete()) {
+    if (writingFile && isComplete) {
       const Frame frame(fb.TakeHeader(), fb.TakeFrameData());
       writingFile = file->WriteFrame(frame);
     }
@@ -121,6 +128,11 @@ int main(int argc, char **argv) {
   wire_ctrlc_handler();
   io.reset();
   io.run();
+
+  std::cout
+    << '\n'
+    << "totalFrames=" << totalFrames << '\n'
+    << "completeFrames=" << completeFrames << '\n';
 
   logFrameStreamMetrics(*connection);
 
