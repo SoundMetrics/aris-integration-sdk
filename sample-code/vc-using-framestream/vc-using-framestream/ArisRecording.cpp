@@ -5,11 +5,50 @@
 #include <assert.h>
 #include <functional>
 
+#ifdef DEBUG_RECORDING
+#include <iostream>
+#endif
+
+//-----------------------------------------------------------------------------
+// Helpers for write & restore stream position
+
+struct FileOpContext {
+  std::fstream & outfile;
+  std::streampos basePos;
+};
+
+template <typename T>
+void writeAtOffset(const FileOpContext & context, std::streamoff offset, const T & value) {
+  context.outfile.seekp(context.basePos + offset);
+  context.outfile.write(reinterpret_cast<const char*>(&value), sizeof T);
+}
+
+template <typename T>
+T readAtOffset(const FileOpContext & context, std::streamoff offset) {
+  context.outfile.seekp(context.basePos + offset);
+  T t;
+  context.outfile.read(reinterpret_cast<char*>(&t), sizeof t);
+  return t;
+}
+
+static void doAndRestorePos(
+  std::fstream & outfile,
+  std::streampos basePos,
+  std::function<void(const FileOpContext&)> f)
+{
+  const auto startPos = outfile.tellp();
+  const FileOpContext context = { outfile, basePos };
+  f(context);
+  outfile.seekp(startPos); // our own copy of startPos, so no shenanigans
+}
+
+
 std::unique_ptr<WriteableArisRecording> WriteableArisRecording::Create(const char * path)
 {
   try {
     // Overwrite the file if it exists.
-    std::ofstream outfile(path, std::ios::binary | std::ios::out | std::ios::trunc);
+    std::fstream outfile(path, 
+      std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
     if (outfile) {
       if (WriteFileHeader(outfile)) {
         return std::make_unique<WriteableArisRecording>(path, std::move(outfile));
@@ -30,15 +69,93 @@ std::unique_ptr<WriteableArisRecording> WriteableArisRecording::Create(const cha
   return std::unique_ptr<WriteableArisRecording>();
 }
 
-WriteableArisRecording::WriteableArisRecording(const char * path, std::ofstream && initializedOutfile)
+WriteableArisRecording::WriteableArisRecording(const char * path, std::fstream && initializedOutfile)
   : path_(path)
   , outfile_(std::move(initializedOutfile))
   , frameCount_(0)
+#ifdef DEBUG_RECORDING
+  , beamCount_(0)
+  , sampleCount_(0)
+#endif
 {
 }
 
+#ifdef DEBUG_RECORDING
+
+template <class _InIt, class _Fn1> inline
+void pairwise(_InIt first, _InIt last, _Fn1 func) {
+  for (; first != last; ++first) {
+    auto right = first;
+
+    if (++right == last)
+      break;
+
+    func(*first, *right);
+  }
+
+}
+
+static inline void DumpFileInfo(std::fstream & file, unsigned beamCount, unsigned sampleCount) {
+  const auto pos = file.tellp();
+
+  std::cout << "beamCount=" << beamCount << "; sampleCount=" << sampleCount << '\n';
+
+  file.seekp(0, std::ios_base::end);
+  if (file.tellp() == std::streampos(0)) {
+    std::cout << "File is empty.\n";
+    return;
+  }
+
+  const uint64_t fileLength = file.tellp();
+  const uint64_t framesLength = fileLength - 1024;
+
+  const unsigned frameSize = 1024 + beamCount * sampleCount;
+  const double calculatedFrameCount = (double)framesLength / frameSize;
+  const auto lastFramePos = 1024 + (((uint64_t)calculatedFrameCount - 1) * frameSize);
+  std::cout << "There are " << calculatedFrameCount << " frames.\n";
+  std::cout << "File length is " << fileLength << '\n';
+
+  doAndRestorePos(file, 0, [&](auto & context) {
+    const auto frameCount = readAtOffset<uint32_t>(context, ArisFileHeaderOffset_FrameCount);
+    std::cout << "Recorded frame count: " << frameCount << '\n';
+
+    const auto frameIndexInFirstFrame =
+      readAtOffset<uint32_t>(context, 1024 + ArisFrameHeaderOffset_FrameIndex);
+    const auto frameIndexInLastFrame =
+      readAtOffset<uint32_t>(context, lastFramePos + ArisFrameHeaderOffset_FrameIndex);
+    std::cout << "Frame index in first frame: " << frameIndexInFirstFrame << '\n';
+    std::cout << "Frame index in last frame: " << frameIndexInLastFrame << '\n';
+
+    auto loadFrameIndexes = [&]() {
+      // Very clunky to collect all the frame indexes at once, but
+      // quick enough for debugging.
+      std::vector<uint32_t> frameIndexes;
+      for (auto framePos = 1024; framePos <= lastFramePos; framePos += frameSize) {
+        const auto fi = readAtOffset<uint32_t>(context, framePos + ArisFrameHeaderOffset_FrameIndex);
+        frameIndexes.push_back(fi);
+      }
+
+      return frameIndexes;
+    };
+
+    auto frameIndexes = std::move(loadFrameIndexes());
+    pairwise(frameIndexes.cbegin(), frameIndexes.cend(), [](auto left, auto right) {
+      if ((right - left) != 1) {
+        std::cout << "*** Discontinuity at [" << left << "," << right << "]\n";
+      }
+    });
+  });
+
+  file.seekp(pos);
+}
+#endif
+
 WriteableArisRecording::~WriteableArisRecording()
 {
+#ifdef DEBUG_RECORDING
+  DumpFileInfo(outfile_, beamCount_, sampleCount_);
+#endif
+
   if (outfile_.is_open()) {
     outfile_.seekp(0, std::ios_base::end);
     const bool hasFrames = outfile_.tellp() > sizeof ArisFileHeader;
@@ -52,7 +169,7 @@ WriteableArisRecording::~WriteableArisRecording()
 }
 
 /* static */
-bool WriteableArisRecording::WriteFileHeader(std::ofstream & outfile)
+bool WriteableArisRecording::WriteFileHeader(std::fstream & outfile)
 {
   ArisFileHeader header;
   memset(&header, 0, sizeof header);
@@ -62,31 +179,6 @@ bool WriteableArisRecording::WriteFileHeader(std::ofstream & outfile)
 
   outfile.write(reinterpret_cast<const char*>(&header), sizeof header);
   return !outfile.fail();
-}
-
-//-----------------------------------------------------------------------------
-// Helpers for write & restore stream position
-
-struct WriteContext {
-  std::ofstream & outfile;
-  std::streampos basePos;
-};
-
-template <typename T>
-void writeAtOffset(const WriteContext & context, std::streamoff offset, const T & value) {
-  context.outfile.seekp(context.basePos + offset);
-  context.outfile.write(reinterpret_cast<const char*>(&value), sizeof T);
-}
-
-static void doAndRestorePos(
-  std::ofstream & outfile,
-  std::streampos basePos,
-  std::function<void(const WriteContext&)> f)
-{
-  const auto startPos = outfile.tellp();
-  const WriteContext context = { outfile, basePos };
-  f(context);
-  outfile.seekp(startPos); // our own copy of startPos, so no shenanigans
 }
 
 //-----------------------------------------------------------------------------
@@ -106,9 +198,9 @@ bool WriteableArisRecording::WriteFrame(const Frame & frame)
   // sample data ensures that if an error occurs while updating the file header,
   // the file will be recognized as empty and deleted later.
 
-  if (frameCount == 1) {
+  if (frameIndex == 0) {
     doAndRestorePos(outfile_, 0, // file header, offset from the start of the file
-      [hdr](auto & context) {
+      [this, hdr, &frame](auto & context) {
       writeAtOffset(context, ArisFileHeaderOffset_SamplesPerChannel,
         hdr.SamplesPerBeam);
 
@@ -117,13 +209,16 @@ bool WriteableArisRecording::WriteFrame(const Frame & frame)
 
       writeAtOffset(context, ArisFileHeaderOffset_SN,
         hdr.SonarSerialNumber);
+
+#ifdef DEBUG_RECORDING
+      sampleCount_ = frame.Header().SamplesPerBeam;
+      beamCount_ = frame.Samples().size() / sampleCount_;
+#endif
     });
   }
 
   // Write sample data
   if (outfile_) {
-    const auto frameDataStartPos = outfile_.tellp();
-
     const auto & samples = frame.Samples();
     outfile_.write(reinterpret_cast<const char*>(samples.data()), samples.size());
 
@@ -138,7 +233,7 @@ bool WriteableArisRecording::WriteFrame(const Frame & frame)
 
       // Be sure to write your own frame index (zero-based) to accommodate
       // incomplete/missing frames.
-      doAndRestorePos(outfile_, frameDataStartPos,
+      doAndRestorePos(outfile_, frameHeaderStartPos,
         [frameIndex](auto & context) {
         writeAtOffset(context, ArisFrameHeaderOffset_FrameIndex,
           frameIndex);
