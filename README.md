@@ -34,6 +34,13 @@ Contains Protocol Buffer files describing messages sent to/received from the ARI
 
 - **connect-command** - sample program illustrating how to establish a connection to the ARIS and send commands.
 - **reorder-frame** - sample program/unit test that illustrates reordering an ARIS frame; this makes use of the reordering code in aris-integration-sdk/common/code/.
+- **vc-using-framestream** - sample program that implements a full range of commands, records frames to a file, and, optionally, uses multicast for frame acquisition.
+
+### Tools
+
+**[aris-integration-sdk/tools](tools/)**: contains the following:
+
+- **arislog** - this Windows console application displays messages received from syslog relays, which may be useful for debugging client code. Note that a successful connection must be made after power on to set up forwarding of ARIS syslog messages to the client PC. Note also that this program will display **all** syslog messages forwarded to the PC, even from other applications.
 
 ### Release History
 The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
