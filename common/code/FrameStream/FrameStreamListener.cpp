@@ -33,18 +33,32 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 
 FrameStreamListener::FrameStreamListener(
-    boost::asio::io_service &io,
-    boost::function<void(FrameBuilder &)> onFrameComplete,
-    boost::function<size_t()> getReadBufferSize)
-    : socket(io), readBuffer(getReadBufferSize()),
+    io_service &io
+    , std::function<void(FrameBuilder &)> onFrameComplete
+    , std::function<size_t()> getReadBufferSize
+    , address targetSonar
+    , optional<udp::endpoint> receiveFrom
+    )
+    : socket(io), readBuffer(getReadBufferSize()), sonarFilter(targetSonar),
       frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
                      onFrameComplete) {
-  socket.open(udp::v4());
-  socket.bind(udp::endpoint(udp::v4(), 0));
-  socket.set_option(socket_base::reuse_address(true));
+  assert(onFrameComplete);
+  assert(getReadBufferSize);
 
-  boost::asio::socket_base::receive_buffer_size option(readBuffer.size());
-  socket.set_option(option);
+  socket.open(udp::v4());
+
+  const bool useMulticast =
+    receiveFrom.has_value() ? receiveFrom.value().address().is_multicast() : false;
+  const auto bindEndpoint =
+    useMulticast ? udp::endpoint(udp::v4(), receiveFrom.value().port()) : udp::endpoint(udp::v4(), 0);
+
+  socket.set_option(socket_base::reuse_address(true));
+  socket.set_option(socket_base::receive_buffer_size(readBuffer.size()));
+  socket.bind(bindEndpoint);
+
+  if (useMulticast) {
+    socket.set_option(multicast::join_group(receiveFrom.value().address()));
+  }
 
   StartReceiveAsync();
 }
@@ -69,7 +83,9 @@ FrameStreamListener::HandlePacketFrom(const boost::system::error_code &error,
                                       size_t bytesRead) {
   switch (error.value()) {
   case boost::system::errc::success: {
-    frameAssembler.ProcessPacket(const_buffers_1(readBuffer.data(), bytesRead));
+    if (!sonarFilter.has_value() || remoteEndpoint.address() == sonarFilter.value()) {
+      frameAssembler.ProcessPacket(const_buffers_1(readBuffer.data(), bytesRead));
+    }
     StartReceiveAsync();
   } break;
 

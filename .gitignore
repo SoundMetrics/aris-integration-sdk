@@ -21,6 +21,7 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+generated/
 *.exe
 
 # Visual Studo 2015 cache/options directory
@@ -196,3 +197,6 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+
+# Miscellaneous build output files
+sample-code/vc-using-framestream/vc-using-framestream/output.aris

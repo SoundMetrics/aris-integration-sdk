@@ -1,8 +1,10 @@
 // reorder frame
 #include "Reorder.h"
+#include "Frame.h"
 #include <string.h>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 bool validate_inputs(int argc, char* argv[],
                      const char** inputPath, const char** expectedFile);
@@ -39,7 +41,7 @@ int main(int argc, char * argv[]) {
     auto expectedBuf= read_frame(expectedFile);
 
     Frame result(&inputBuf[0], inputBuf.size());
-    Reorder(result);
+    Reorder(result.GetHeader(), result.GetData());
 
     const auto dataSize = expectedBuf.size() - kFrameHeaderSize;
 
@@ -103,7 +105,7 @@ std::vector<uint8_t> read_frame(std::ifstream & file) {
     std::cout << "PingMode=" << inHeader.PingMode
               << " SamplesPerBeam=" << inHeader.SamplesPerBeam << std::endl;
 
-    // Read unordered image data from file    
+    // Read unordered image data from file
     const auto dataSize = PingModeToNumBeams(inHeader.PingMode) * inHeader.SamplesPerBeam;
     auto unorderedData = std::vector<uint8_t>(dataSize);
     file.read((char *)&unorderedData[0], dataSize);

@@ -32,11 +32,37 @@ namespace Network {
 
 class FrameBuilder;
 
+// Helper class. optional<T> is in the C++17 standard, but may not be
+// available on an integrator's toolchain. This is not intended to be
+// functionally identical to std::optional.
+template <typename T>
+class optional {
+public:
+  optional() : hasValue_(false), value_{} { }
+  optional(const T &value) : hasValue_(true), value_(value) { }
+
+  bool has_value() const { return hasValue_; }
+  const T& value() const { return value_; }
+
+  static optional<T> none() { return optional<T>(); }
+
+private:
+  bool hasValue_;
+  T value_;
+};
+
 class FrameStreamListener : boost::noncopyable {
 public:
-  FrameStreamListener(boost::asio::io_service &io,
-                      boost::function<void(FrameBuilder &)> onFrameComplete,
-                      boost::function<size_t()> getReadBufferSize);
+  FrameStreamListener(boost::asio::io_service &io
+                      , std::function<void(FrameBuilder &)> onFrameComplete
+                      , std::function<size_t()> getReadBufferSize // network buffer size
+                      , boost::asio::ip::address targetSonar
+                      // Most applications do not need to specify the receiveFrom
+                      // endpoint. This is primarily used for multicasting where
+                      // the multicast group and port number must be decided ahead
+                      // of time. Otherwise, pass an empty optional<>().
+                      , optional<boost::asio::ip::udp::endpoint> receiveFrom
+                      );
   ~FrameStreamListener();
 
   boost::asio::ip::udp::endpoint LocalEndpoint() const {
@@ -47,6 +73,7 @@ public:
   Metrics GetMetrics() { return frameAssembler.GetMetrics(); }
 
 private:
+  const optional<boost::asio::ip::address> sonarFilter;
   std::vector<uint8_t> readBuffer;
   boost::asio::ip::udp::socket socket;
   boost::asio::ip::udp::endpoint remoteEndpoint;
