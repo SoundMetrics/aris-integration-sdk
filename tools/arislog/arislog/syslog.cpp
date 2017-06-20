@@ -13,7 +13,7 @@ namespace {
 
     size_t suffixSize = 0;
 
-    for (int idx = size - 1; idx >= 0; --idx) {
+    for (int idx = static_cast<int>(size) - 1; idx >= 0; --idx) {
       if (isspace(buf[idx])) {
         ++suffixSize;
       }
@@ -72,7 +72,7 @@ Syslog::Syslog(boost::asio::io_service & io, OnMeta onMeta, OnError onError, OnM
 void Syslog::Initialize() {
   syslogRecvSocket_.open(udp::v4());
   syslogRecvSocket_.set_option(socket_base::reuse_address(true));
-  syslogRecvSocket_.set_option(socket_base::receive_buffer_size(syslogBuf_.size()));
+  syslogRecvSocket_.set_option(socket_base::receive_buffer_size(static_cast<int>(syslogBuf_.size())));
   syslogRecvSocket_.bind(udp::endpoint(udp::v4(), SyslogPort));
 
   if (!syslogRecvSocket_.is_open()) {
