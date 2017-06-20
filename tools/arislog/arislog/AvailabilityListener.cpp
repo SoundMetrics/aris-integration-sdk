@@ -32,7 +32,7 @@ AvailabilityListener::AvailabilityListener(
 void AvailabilityListener::Initialize() {
   availabilitySocket_.open(udp::v4());
   availabilitySocket_.set_option(socket_base::reuse_address(true));
-  availabilitySocket_.set_option(socket_base::receive_buffer_size(availabilityBuf_.size()));
+  availabilitySocket_.set_option(socket_base::receive_buffer_size(static_cast<int>(availabilityBuf_.size())));
   availabilitySocket_.bind(udp::endpoint(udp::v4(), Aris2AvailabilityPort));
 
   if (!availabilitySocket_.is_open()) {
@@ -79,7 +79,7 @@ unsigned AvailabilityListener::ParseBeacon(const char * buffer, size_t bufferSiz
 
   aris::Availability message;
 
-  if (message.ParseFromArray(buffer, bufferSize) && message.has_serialnumber()) {
+  if (message.ParseFromArray(buffer, static_cast<int>(bufferSize)) && message.has_serialnumber()) {
     return message.serialnumber();
   }
   else {
