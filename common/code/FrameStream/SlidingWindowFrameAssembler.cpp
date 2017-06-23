@@ -108,7 +108,7 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
 
   frame_stream::FramePart framePart;
   if (!framePart.ParseFromArray(buffer_cast<const uint8_t *>(data),
-                                buffer_size(data))) {
+                                static_cast<int>(buffer_size(data)))) {
     invalidPacket = true;
     return;
   }
@@ -133,7 +133,7 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
           buffer(framePart.header().c_str(), framePart.header().size()),
           buffer(framePart.data().c_str(), framePart.data().size()),
           framePart.total_data_size()));
-      expectedDataOffset = framePart.data().size();
+      expectedDataOffset = static_cast<int>(framePart.data().size());
       acceptedPacket = true;
     } else {
       // Ack will go out asking for the first part of the frame to be resent.
@@ -143,7 +143,7 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
       currentFrame->AppendFrameData(
           incomingDataOffset,
           buffer(framePart.data().c_str(), framePart.data().size()));
-      expectedDataOffset += framePart.data().size();
+      expectedDataOffset += static_cast<int>(framePart.data().size());
       acceptedPacket = true;
     } else {
       // Missed a part.

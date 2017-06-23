@@ -4,3 +4,6 @@
 [submodule "submodules/protobuf"]
 	path = submodules/protobuf
 	url = https://github.com/google/protobuf.git
+[submodule "submodules/vcpkg"]
+	path = submodules/vcpkg
+	url = https://github.com/Microsoft/vcpkg

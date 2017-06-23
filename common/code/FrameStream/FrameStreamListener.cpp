@@ -53,7 +53,7 @@ FrameStreamListener::FrameStreamListener(
     useMulticast ? udp::endpoint(udp::v4(), receiveFrom.value().port()) : udp::endpoint(udp::v4(), 0);
 
   socket.set_option(socket_base::reuse_address(true));
-  socket.set_option(socket_base::receive_buffer_size(readBuffer.size()));
+  socket.set_option(socket_base::receive_buffer_size(static_cast<int>(readBuffer.size())));
   socket.bind(bindEndpoint);
 
   if (useMulticast) {
@@ -105,7 +105,7 @@ void FrameStreamListener::SendAck(int frameIndex, int dataOffset) {
   ack.set_data_offset(dataOffset);
 
   std::vector<uint8_t> buf(ack.ByteSize());
-  ack.SerializeToArray(buf.data(), buf.size());
+  ack.SerializeToArray(buf.data(), static_cast<int>(buf.size()));
 
   // BUG: found in rev 7046 via Windows Error Reporting.
   // If the socket is closed before we send the ack we suffer from
