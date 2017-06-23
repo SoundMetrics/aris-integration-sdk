@@ -27,6 +27,10 @@ pushd submodules\vcpkg
 call .\bootstrap-vcpkg.bat
 ECHO Build completed.
 
+REM per https://github.com/Microsoft/vcpkg/issues/645
+echo "." > downloads\AlwaysAllowEverything
+dir downloads\Always*
+
 vcpkg install protobuf:x86-windows-static
 vcpkg install protobuf:x64-windows-static
 ECHO Installs completed.
