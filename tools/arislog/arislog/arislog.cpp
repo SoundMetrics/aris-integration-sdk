@@ -250,6 +250,8 @@ std::string get_timestamp() {
     "Dec",
   };
   ss << month[lt.tm_mon] << ' ' << lt.tm_mday << ' '
-    << std::setw(2) << lt.tm_hour << ':' << std::setw(2) << lt.tm_min << ':' << std::setw(2) << lt.tm_sec;
+    << std::setw(2) << std::setfill('0') << lt.tm_hour
+    << ':' << std::setw(2) << std::setfill('0') << lt.tm_min
+    << ':' << std::setw(2) << std::setfill('0') << lt.tm_sec;
   return ss.str();
 }
