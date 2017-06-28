@@ -75,11 +75,13 @@ WORD map_severity_to_color(unsigned severity) {
 
 static boost::asio::io_service io;
 
+constexpr auto snFieldWidth = 5;
 bool terminated = false;
 
 void write_initial_output();
 BOOL WINAPI ctrlc_handler(DWORD /*dwCtrlType*/);
 void wire_ctrlc_handler();
+std::string get_timestamp();
 
 //-----------------------------------------------------------------------------
 
@@ -95,20 +97,20 @@ int main()
     // onAdd:
     [](auto sn, auto addr) {
       tempcolor(meta.Info, [sn, &addr]() {
-        std::cout << "Found ARIS " << sn << " at " << addr.to_string() << '\n';
+        std::cout << get_timestamp() << " ARIS " << std::setw(snFieldWidth) << sn << " + found at " << addr.to_string() << '\n';
       });
     },
     // onUpdate:
     [](auto sn, auto oldAddr, auto newAddr) {
       tempcolor(meta.Info, [sn, &oldAddr, &newAddr]() {
-        std::cout << "Sonar " << sn << " moved from " << oldAddr.to_string()
+        std::cout << get_timestamp() << " ARIS " << std::setw(snFieldWidth) << sn << " moved from " << oldAddr.to_string()
           << " to " << newAddr.to_string() << '\n';
       });
     },
     // onExpired:
     [](auto sn) {
       tempcolor(meta.Info, [sn] {
-        std::cout << "No longer hearing from ARIS " << sn << '\n';
+        std::cout << get_timestamp() << " ARIS " << std::setw(snFieldWidth) << sn << " - no longer heard\n";
       });
     },
     // onError:
@@ -220,4 +222,34 @@ void wire_ctrlc_handler() {
   // http://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event-c
 
   SetConsoleCtrlHandler(ctrlc_handler, TRUE);
+}
+
+//-----------------------------------------------------------------------------
+
+std::string get_timestamp() {
+  // Aiming for 'Jun 28 12:09:58'
+
+  const auto now = std::time(nullptr);
+  tm lt;
+  localtime_s(&lt, &now);
+
+  std::stringstream ss;
+
+  static constexpr char * const month[12] = {
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  };
+  ss << month[lt.tm_mon] << ' ' << lt.tm_mday << ' '
+    << std::setw(2) << lt.tm_hour << ':' << std::setw(2) << lt.tm_min << ':' << std::setw(2) << lt.tm_sec;
+  return ss.str();
 }
