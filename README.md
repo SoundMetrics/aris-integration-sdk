@@ -44,7 +44,7 @@ Contains Protocol Buffer files describing messages sent to/received from the ARI
 
 ### External Tools
 
-This repository now makes use of **vcpkg** for building **arislog** and **vc-using-framestream**. **vcpkg** is an external tool that cannot be pinned to a specific version when fetching a library, so there is a slight chance you may find an issue when building these files. That said, our daily build should catch any issue pretty quickly.
+This repository makes use of **vcpkg** for building **arislog** and **vc-using-framestream**. **vcpkg** is an external tool that downloads the source code for `protobuf` and builds it. The version of protobuf downloaded is coded within the `vcpkg` submodule and, therefore, won't change unless we update that submodule.
 
 ### Release History
 The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
