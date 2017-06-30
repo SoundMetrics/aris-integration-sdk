@@ -12,7 +12,7 @@ UdpListener::UdpListener(boost::asio::io_service & io, uint16_t port, bool reuse
   socket_.open(udp::v4());
   socket_.set_option(boost::asio::socket_base::reuse_address(reuseAddress));
   socket_.bind(udp::endpoint(udp::v4(), port));
-  socket_.set_option(boost::asio::socket_base::receive_buffer_size(recvBuffer_.capacity()));
+  socket_.set_option(boost::asio::socket_base::receive_buffer_size(static_cast<int>(recvBuffer_.capacity())));
 
   StartAsyncReceive();
 }

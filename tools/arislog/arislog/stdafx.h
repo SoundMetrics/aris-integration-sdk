@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <iostream>
+#include <iomanip>
 #include <map>
 #include <vector>
 #include <boost/asio.hpp> // Before windows.h!
