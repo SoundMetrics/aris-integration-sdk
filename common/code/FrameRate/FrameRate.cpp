@@ -6,7 +6,7 @@
 namespace Aris {
     namespace AcousticMath {
 
-        const max_cycle_periods[3] = {
+        const uint32_t max_cycle_periods[3] = {
             80000, 40000, 150000  // ARIS1800, ARIS3000, ARIS1200
         };
 
@@ -28,36 +28,37 @@ namespace Aris {
 
             double cyclePeriodFactor = (samplesPerBeam > samplesPerBeamThreshold)
                 ? minFactor + boostFactor * minFactor
-                    * (double)(samplesPerBeam - samplesPerBeamThreshold)
-                    / (double)samplesPerBeamThreshold
-                : minFactor 
-                    * (double)samplesPerBeam / (double)samplesPerBeamThreshold;
+                * (double)(samplesPerBeam - samplesPerBeamThreshold)
+                / (double)samplesPerBeamThreshold
+                : minFactor
+                * (double)samplesPerBeam / (double)samplesPerBeamThreshold;
 
             // Add some additional delay at samplePeriod == [4, 5, 6] based on samplePeriod value
             // to account for observed performance loss at these sample periods
             cyclePeriodFactor += (samplePeriod < fastSamplePeriodLimit)
-                ? fastSamplePeriodFactor / (double)samplePeriod 
+                ? fastSamplePeriodFactor / (double)samplePeriod
                 : 0.0;
 
             // Add more delay at shortest samplePeriod == 4 to constrain to achievable frame rates
             cyclePeriodFactor += (samplePeriod == fastestSamplePeriodLimit)
-                ? fastestSamplePeriodFactor 
+                ? fastestSamplePeriodFactor
                 : 0.0;
 
             return cyclePeriodFactor;
         }
 
         double CalculateMaxFrameRate(const SystemType systemType,
-                                     const uint32_t samplePeriod,
-                                     const uint32_t samplesPerBeam,
-                                     const uint32_t cyclePeriod,
-                                     const uint32_t pingsPerFrame)
+            const uint32_t samplePeriod,
+            const uint32_t samplesPerBeam,
+            const uint32_t cyclePeriod,
+            const uint32_t pingsPerFrame)
         {
-            const uint32_t maxAllowedCyclePeriod = max_cycle_periods[systemType];
+            const uint32_t maxAllowedCyclePeriod = max_cycle_periods[(int32_t)systemType];
             const uint32_t cyclePeriodFactor = CalcCyclePeriodFactor(samplePeriod, samplesPerBeam);
             const uint32_t unboundedCyclePeriod = cyclePeriod + cyclePeriodFactor;
             const uint32_t minCyclePeriod = std::min(maxAllowedCyclePeriod, unboundedCyclePeriod);
 
             return 1000000.0 / (double)(minCyclePeriod * pingsPerFrame);
         }
+    }
 }
