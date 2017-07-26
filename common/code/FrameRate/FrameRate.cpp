@@ -6,10 +6,6 @@
 namespace Aris {
     namespace AcousticMath {
 
-        const uint32_t max_cycle_periods[3] = {
-            80000, 40000, 150000  // ARIS1800, ARIS3000, ARIS1200
-        };
-
         // The cyclePeriodFactor is a value based on measured maximum frame rates as a function of
         // samplePeriod and samplesPerBeam.
         //
@@ -53,6 +49,10 @@ namespace Aris {
             const uint32_t cyclePeriod,
             const uint32_t pingsPerFrame)
         {
+            static const uint32_t max_cycle_periods[3] = {
+                80000, 40000, 150000  // ARIS1800, ARIS3000, ARIS1200
+            };
+
             const uint32_t maxAllowedCyclePeriod = max_cycle_periods[(int32_t)systemType];
             const uint32_t cyclePeriodFactor = CalcCyclePeriodFactor(samplePeriod, samplesPerBeam);
             const uint32_t unboundedCyclePeriod = cyclePeriod + cyclePeriodFactor;
@@ -60,5 +60,6 @@ namespace Aris {
 
             return 1000000.0 / (double)(minCyclePeriod * pingsPerFrame);
         }
+
     }
 }
