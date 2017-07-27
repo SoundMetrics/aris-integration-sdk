@@ -50,39 +50,54 @@ namespace UnitTests
 
     TEST_CLASS(ReorderTests)
     {
+    private:
+
+        // x64 DLL is one level deeper
+        const std::string dataDir = (sizeof(int32_t *) == 8) ? "../../data/" : "../data/";
+
     public:
 
         TEST_METHOD(PingMode1Freq1200ReorderTest)
         {
-            bool success = ReorderTest(1, 512, "../../data/input_pingmode_1_1200.dat", "../../data/expected_pingmode_1_1200.dat");
+            const auto inputPath = dataDir + "input_pingmode_1_1200.dat";
+            const auto expectedPath = dataDir + "expected_pingmode_1_1200.dat";
+            bool success = ReorderTest(1, 512, inputPath.c_str(), expectedPath.c_str());
 
             Assert::IsTrue(success);
         }
 
         TEST_METHOD(PingMode1Freq1800ReorderTest)
         {
-            bool success = ReorderTest(1, 544, "../../data/input_pingmode_1_1800.dat", "../../data/expected_pingmode_1_1800.dat");
+            const auto inputPath = dataDir + "input_pingmode_1_1800.dat";
+            const auto expectedPath = dataDir + "expected_pingmode_1_1800.dat";
+            bool success = ReorderTest(1, 544, inputPath.c_str(), expectedPath.c_str());
 
             Assert::IsTrue(success);
         }
 
         TEST_METHOD(PingMode3ReorderTest)
         {
-            bool success = ReorderTest(3, 512, "../../data/input_pingmode_3.dat", "../../data/expected_pingmode_3.dat");
+            const auto inputPath = dataDir + "input_pingmode_3.dat";
+            const auto expectedPath = dataDir + "expected_pingmode_3.dat";
+            bool success = ReorderTest(3, 512, inputPath.c_str(), expectedPath.c_str());
 
             Assert::IsTrue(success);
         }
 
         TEST_METHOD(PingMode6ReorderTest)
         {
-            bool success = ReorderTest(6, 410, "../../data/input_pingmode_6.dat", "../../data/expected_pingmode_6.dat");
+            const auto inputPath = dataDir + "input_pingmode_6.dat";
+            const auto expectedPath = dataDir + "expected_pingmode_6.dat";
+            bool success = ReorderTest(6, 410, inputPath.c_str(), expectedPath.c_str());
 
             Assert::IsTrue(success);
         }
 
         TEST_METHOD(PingMode9ReorderTest)
         {
-            bool success = ReorderTest(9, 512, "../../data/input_pingmode_9.dat", "../../data/expected_pingmode_9.dat");
+            const auto inputPath = dataDir + "input_pingmode_9.dat";
+            const auto expectedPath = dataDir + "expected_pingmode_9.dat";
+            bool success = ReorderTest(9, 512, inputPath.c_str(), expectedPath.c_str());
 
             Assert::IsTrue(success);
         }
