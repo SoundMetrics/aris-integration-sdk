@@ -19,10 +19,11 @@ Documentation of file formats and frame headers can be found in our repo `aris-f
 
 **[aris-integration-sdk/common/code/](common/code/)**: These folders contain the following:
 
+- **Depth** - sample code to calculate depth from pressure, salinity, and temperature.
 - **FrameStream** - reference code to receive parts of images over the network and assemble them into complete frames.
+- **ManagedProtocolSupport** - contains `SoundMetrics.Aris2.Protocols`, a managed C# assembly project that provides helper functions to correctly construct the most common ARIS 2 commands. See [the readme](common/code/ManagedProtocolSupport/README.md) for more information.
 - **Reordering** - sample code to reorder received frame parts; the reordering code should be treated as immutable reference code.
 - **SpeedOfSound** - reference code to calculate the speed of sound from water temperature, salinity, and depth; includes references on such calculations.
-- **Depth** - sample code to calculate depth from pressure, salinity, and temperature.
 - **UpdateFrameHeader** - reference code for injecting values into ARISframe headers; this is not a common operation.
 
 **[aris-integration-sdk/common/protobuf/](common/protobuf/)**:

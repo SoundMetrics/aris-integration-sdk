@@ -8,7 +8,7 @@ namespace SoundMetrics.Aris2.Protocols
     /// <summary>
     /// Provides static methods for the correct construction of ARIS 2 commands.
     /// Contains functions to create the most commonly used commands that may be sent to
-    /// and ARIS 2.
+    /// an ARIS 2.
     /// </summary>
     public static class ArisCommands
     {
