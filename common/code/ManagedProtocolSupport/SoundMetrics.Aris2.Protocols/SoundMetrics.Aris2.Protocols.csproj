@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{792D6B79-C5E3-4D4E-97DA-8C7667504ED1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SoundMetrics.Aris2.Protocols</RootNamespace>
+    <AssemblyName>SoundMetrics.Aris2.Protocols</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Google.ProtocolBuffers, Version=2.4.1.555, Culture=neutral, PublicKeyToken=55f7125234beb589, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.ProtocolBuffers.2.4.1.555\lib\net40\Google.ProtocolBuffers.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.ProtocolBuffers.Serialization, Version=2.4.1.555, Culture=neutral, PublicKeyToken=55f7125234beb589, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.ProtocolBuffers.2.4.1.555\lib\net40\Google.ProtocolBuffers.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArisCommands.cs" />
+    <Compile Include="generated\Availability.cs" />
+    <Compile Include="generated\Commands.cs" />
+    <Compile Include="generated\FrameStream.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\protobuf\availability.proto">
+      <Link>proto-files\availability.proto</Link>
+    </None>
+    <None Include="..\..\..\protobuf\commands.proto">
+      <Link>proto-files\commands.proto</Link>
+    </None>
+    <None Include="..\..\..\protobuf\frame_stream.proto">
+      <Link>proto-files\frame_stream.proto</Link>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>SETLOCAL
+
+IF NOT EXIST $(ProjectDir)\generated MKDIR $(ProjectDir)\generated
+
+ECHO Generating protobuf output...
+
+set PGEN=$(SolutionDir)\packages\Google.ProtocolBuffers.2.4.1.555\tools\protogen --protoc_dir=$(SolutionDir)packages\Google.ProtocolBuffers.2.4.1.555\tools -output_directory=$(ProjectDir)\generated --error_format=msvs %251 %252
+
+set PBARIS=$(SolutionDir)..\..\protobuf
+
+%25PGEN%25 -namespace=SoundMetrics.Aris2.Protocols.Availability %25PBARIS%25\availability.proto  --proto_path=%25PBARIS%25
+%25PGEN%25 -namespace=SoundMetrics.Aris2.Protocols.Commands %25PBARIS%25\commands.proto  --proto_path=%25PBARIS%25
+%25PGEN%25 -namespace=SoundMetrics.Aris2.Protocols.FrameStream %25PBARIS%25\frame_stream.proto  --proto_path=%25PBARIS%25
+
+dir $(ProjectDir)generated
+
+ENDLOCAL
+</PreBuildEvent>
+  </PropertyGroup>
+</Project>
