@@ -10,8 +10,6 @@ extern "C"
 INT_PTR __stdcall CreateFrameListener(
   const char * ipAddress, PFN_FRAMECALLBACK frameCallback, /* out */ uint16_t * listenerPort) {
 
-  printf("CreateFrameListener for %s\n", ipAddress);
-
   // This code creates the listener and promptly forgets the pointer.
   // This is unsupported test code and has no clean-up strategy other than exiting the process.
   // Please don't write production code like this!

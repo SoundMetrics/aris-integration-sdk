@@ -29,8 +29,3 @@ ListenerWrapper::ListenerWrapper(boost::asio::ip::address targetSonar, PFN_FRAME
     Aris::Network::optional<boost::asio::ip::udp::endpoint>::none()
     );
 }
-
-
-ListenerWrapper::~ListenerWrapper()
-{
-}

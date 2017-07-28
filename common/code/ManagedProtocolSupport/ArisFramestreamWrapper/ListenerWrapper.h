@@ -15,7 +15,6 @@ class ListenerWrapper
 {
 public:
   ListenerWrapper(boost::asio::ip::address targetSonar, PFN_FRAMECALLBACK frameCallback);
-  ~ListenerWrapper();
 
   ListenerWrapper(const ListenerWrapper &) = delete;
   ListenerWrapper(ListenerWrapper &&) = delete;

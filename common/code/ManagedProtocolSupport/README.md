@@ -11,6 +11,10 @@ You may wish to use this assembly in your own project, or examine the code in [S
 
 > Note that this project depends on NuGet package Google.ProtocolBuffers, which supports the version 2 syntax used in our `.proto` files, and makes use of some C# 7 syntax.
 
+## Build Notes
+
+The C++ project (`ArisFrameWrapper`) depends on a protobuf library in the `vcpkg` submodule. You'll need to run `./submodules/vcpkg/bootstrap-vcpkg.bat` to use it. (If you don't have a `vcpkg` submodule, you probably forgot to clone recursively, as noted in the main repo [README](../../../README.md).)
+
 ## Warnings
 
 Parts which you may not find useful:

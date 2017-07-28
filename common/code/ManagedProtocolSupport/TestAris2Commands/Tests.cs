@@ -381,7 +381,6 @@ namespace TestAris2Commands
                 return VerifySeries(frameListener,
                     hdr =>
                     {
-                        var newValue = map(hdr);
                         var areEqual = Object.Equals(map(hdr), initialValue);
                         if (areEqual)
                         {
