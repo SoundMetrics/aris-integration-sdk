@@ -46,7 +46,7 @@ namespace Aris {
       return command;
     }
 
-    aris::Command CommandBuilder::RequestAcousticSettings(const AcousticSettings & settings)
+    aris::Command CommandBuilder::RequestAcousticSettings(const Aris::Common::AcousticSettings & settings)
     {
       Command command;
       command.set_type(Command::SET_ACOUSTICS);

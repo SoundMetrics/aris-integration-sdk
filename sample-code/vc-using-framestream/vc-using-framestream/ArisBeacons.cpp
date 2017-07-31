@@ -24,7 +24,7 @@ std::pair<ArisBeacons::endpoint, Aris::Common::SystemType> ArisBeacons::FindBySe
       if (message.ParseFromArray(buffer, static_cast<int>(bufferSize)) && message.has_serialnumber()) {
         if (message.serialnumber() == serialNumber) {
           targetEndpoint = ep;
-          systemType = static_cast<SystemType>(message.systemtype());
+          systemType = static_cast<Aris::Common::SystemType>(message.systemtype());
           found = true;
         }
       }

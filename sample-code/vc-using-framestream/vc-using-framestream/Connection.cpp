@@ -122,7 +122,7 @@ void Connection::HandlePingTimer(const boost::system::error_code & e) {
   }
 }
 
-AcousticSettings Connection::SetCookie(const AcousticSettings & settings)
+Aris::Common::AcousticSettings Connection::SetCookie(const Aris::Common::AcousticSettings & settings)
 {
   auto adjustedSettings = settings;
   adjustedSettings.cookie = cookie_.Next();
