@@ -7,7 +7,7 @@
 namespace Aris {
     namespace AcousticMath {
 
-        double CalculateMaxFrameRate(const SystemType systemType,
+        double CalculateMaxFrameRate(const Aris::Common::SystemType systemType,
                                      const uint32_t samplePeriod,
                                      const uint32_t samplesPerBeam,
                                      const uint32_t cyclePeriod,
