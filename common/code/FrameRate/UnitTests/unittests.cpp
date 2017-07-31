@@ -69,7 +69,7 @@ namespace UnitTests
         // most cycle period delay
         TEST_METHOD(SamplePeriod4FrameRateTest)
         {
-            const double expected = 13.055;
+            const double expected = 13.07;
             const double actual = CalculateMaxFrameRate(SystemType::Aris3000,
                 4,     // samplePeriod
                 1518,  // samplesPerBeam
