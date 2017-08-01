@@ -2,6 +2,9 @@
 
 #include <cstdint>
 
+namespace Aris {
+  namespace Common {
+
 // These enumerations are essentially duplicates of what was generated
 // by your protoc compiler; however, these serve the purpose of preventing
 // ingress of those generated types into our code base.
@@ -38,3 +41,6 @@ struct AcousticSettings {
   bool            enable150Volts;
   float           receiverGain;
 };
+
+}
+}

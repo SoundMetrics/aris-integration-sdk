@@ -14,7 +14,7 @@ namespace Aris {
       static aris::Command SetFrameStreamReceiver(unsigned int port);
       static aris::Command SetFrameStreamReceiver(const char * ipv4Address, unsigned int port);
       static aris::Command SetFrameStreamSettings(bool interpacketDelayEnable, unsigned interpacketDelayMicroseconds);
-      static aris::Command RequestAcousticSettings(const AcousticSettings & settings);
+      static aris::Command RequestAcousticSettings(const Aris::Common::AcousticSettings & settings);
       static aris::Command Ping();
       static aris::Command SetTelephotoLens(bool present);
       static aris::Command SetFocusRange(float range); // range is in meters

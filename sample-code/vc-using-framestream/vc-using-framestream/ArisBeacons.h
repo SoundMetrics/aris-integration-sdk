@@ -15,6 +15,6 @@ public:
 
   // Blocks until it finds it's target. You could probably add a timeout.
   // Returns endpoint and system type.
-  static std::pair<endpoint, SystemType> FindBySerialNumber(uint32_t serialNumber);
+  static std::pair<endpoint, Aris::Common::SystemType> FindBySerialNumber(uint32_t serialNumber);
 };
 

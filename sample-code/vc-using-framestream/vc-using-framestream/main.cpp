@@ -76,14 +76,14 @@ int main(int argc, char **argv) {
 
   const auto SN = args.serialNumber;
   ArisBeacons::endpoint targetEndpoint;
-  SystemType systemType;
+  Aris::Common::SystemType systemType;
 
   std::tie(targetEndpoint, systemType) = ArisBeacons::FindBySerialNumber(SN);
   std::cout << "  Found target endpoint for SN " << SN << ": " << targetEndpoint.address().to_string() << '\n';
 
   //---------------------------------------------------------------------------
 
-  const auto tcpEndpoint = boost::asio::ip::tcp::endpoint(targetEndpoint.address(), kArisCommandPort);
+  const auto tcpEndpoint = boost::asio::ip::tcp::endpoint(targetEndpoint.address(), Aris::Common::kArisCommandPort);
   std::string errorMessage;
   const auto salinity = aris::Command::SetSalinity::Salinity::Command_SetSalinity_Salinity_SALTWATER;
   const float initialFocusRange = 5.0f;

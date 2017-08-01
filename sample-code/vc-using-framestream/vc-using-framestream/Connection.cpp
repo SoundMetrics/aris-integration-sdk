@@ -22,7 +22,7 @@ constexpr size_t kNetworkBufferSize = 16 * 1024 * 1024;
 std::unique_ptr<Connection> Connection::Create(
   boost::asio::io_service & io,
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
-  SystemType systemType,
+  Aris::Common::SystemType systemType,
   aris::Command::SetSalinity::Salinity salinity,
   boost::asio::ip::tcp::endpoint targetSonar,
   const Aris::Network::optional<boost::asio::ip::udp::endpoint> & multicastEndpoint,
@@ -55,7 +55,7 @@ Connection::Connection(
   boost::asio::io_service & io,
   boost::asio::ip::tcp::socket && commandSocket,
   std::function<void(Aris::Network::FrameBuilder&)> onFrameCompletion,
-  SystemType systemType,
+  Aris::Common::SystemType systemType,
   aris::Command::SetSalinity::Salinity salinity,
   boost::asio::ip::address targetSonar,
   const Aris::Network::optional<boost::asio::ip::udp::endpoint> & multicastEndpoint,
@@ -122,7 +122,7 @@ void Connection::HandlePingTimer(const boost::system::error_code & e) {
   }
 }
 
-AcousticSettings Connection::SetCookie(const AcousticSettings & settings)
+Aris::Common::AcousticSettings Connection::SetCookie(const Aris::Common::AcousticSettings & settings)
 {
   auto adjustedSettings = settings;
   adjustedSettings.cookie = cookie_.Next();

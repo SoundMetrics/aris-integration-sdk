@@ -25,12 +25,12 @@ private:
 //  1800: 0
 //  3000: 1
 //  1200: 2
-constexpr AcousticSettings DefaultAcousticSettingsForSystem[3] = {
+constexpr Aris::Common::AcousticSettings DefaultAcousticSettingsForSystem[3] = {
   { // 1800
     0,        // cookie
     15.0,     // frameRate
     3,        // pingMode
-    SonarFrequency::High, // frequency
+    Aris::Common::SonarFrequency::High, // frequency
     1024,     // samplesPerBeam
     2028,     // sampleStartDelay
     10500,    // cyclePeriod
@@ -45,7 +45,7 @@ constexpr AcousticSettings DefaultAcousticSettingsForSystem[3] = {
     0,        // cookie
     15.0,     // frameRate
     9,        // pingMode
-    SonarFrequency::High, // frequency
+    Aris::Common::SonarFrequency::High, // frequency
     946,      // samplesPerBeam
     2028,     // sampleStartDelay
     7118,     // cyclePeriod
@@ -60,7 +60,7 @@ constexpr AcousticSettings DefaultAcousticSettingsForSystem[3] = {
     0,        // cookie
     10.0,     // frameRate
     1,        // pingMode
-    SonarFrequency::High, // frequency
+    Aris::Common::SonarFrequency::High, // frequency
     1082,     // samplesPerBeam
     5408,     // sampleStartDelay
     32818,    // cyclePeriod
