@@ -20,6 +20,7 @@ Documentation of file formats and frame headers can be found in our repo `aris-f
 **[aris-integration-sdk/common/code/](common/code/)**: These folders contain the following:
 
 - **Depth** - sample code to calculate depth from pressure, salinity, and temperature.
+- **FrameRate** - sample code to calculate the maximum frame rate based on given acoustic settings.
 - **FrameStream** - reference code to receive parts of images over the network and assemble them into complete frames.
 - **ManagedProtocolSupport** - contains `SoundMetrics.Aris2.Protocols`, a managed C# assembly project that provides helper functions to correctly construct the most common ARIS 2 commands. See [the readme](common/code/ManagedProtocolSupport/README.md) for more information.
 - **Reordering** - sample code to reorder received frame parts; the reordering code should be treated as immutable reference code.
