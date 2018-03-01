@@ -1,4 +1,5 @@
-@ECHO OFF
+REM @ECHO OFF
+cd
 
 ECHO Generating protobuf source files...
 IF EXIST generated del/q generated\*.pb.*
