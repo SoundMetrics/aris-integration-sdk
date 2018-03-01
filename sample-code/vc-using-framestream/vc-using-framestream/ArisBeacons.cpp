@@ -21,7 +21,7 @@ std::pair<ArisBeacons::endpoint, Aris::Common::SystemType> ArisBeacons::FindBySe
 
       aris::Availability message;
 
-      if (message.ParseFromArray(buffer, static_cast<int>(bufferSize)) && message.has_serialnumber()) {
+      if (message.ParseFromArray(buffer, static_cast<int>(bufferSize))) {
         if (message.serialnumber() == serialNumber) {
           targetEndpoint = ep;
           systemType = static_cast<Aris::Common::SystemType>(message.systemtype());
