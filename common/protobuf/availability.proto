@@ -1,19 +1,21 @@
+syntax = "proto3";
+
 package aris;
 
 message Availability {
-  optional uint32 serialNumber = 1;
-  optional SystemType systemType = 2;
-  optional SoftwareVersion softwareVersion = 3;
-  optional ConnectionState connectionState = 4;
-  optional Capabilities capabilities = 5;
-  optional uint32 reserved6 = 6; // was ack port
-  optional CommLinkPreference commLinkPreference = 7;
-  optional float cpuTemp = 8;
-  optional PowerDownReason powerDownReason = 9;
-  optional float overTempLimitDegreesC = 10;
-  optional uint32 overTempLimitSeconds = 11;
-  optional bool isDiverHeld = 12;
-  optional SystemVariants systemVariants = 13;
+  uint32 serialNumber = 1;
+  SystemType systemType = 2;
+  SoftwareVersion softwareVersion = 3;
+  ConnectionState connectionState = 4;
+  Capabilities capabilities = 5;
+  uint32 reserved6 = 6; // was ack port
+  CommLinkPreference commLinkPreference = 7;
+  float cpuTemp = 8;
+  PowerDownReason powerDownReason = 9;
+  float overTempLimitDegreesC = 10;
+  uint32 overTempLimitSeconds = 11;
+  bool isDiverHeld = 12;
+  SystemVariants systemVariants = 13;
 
   enum SystemType {
     ARIS_1800 = 0;
@@ -22,9 +24,9 @@ message Availability {
   }
 
   message SoftwareVersion {
-    optional uint32 major = 1;
-    optional uint32 minor = 2;
-    optional uint32 buildnumber = 3;
+    uint32 major = 1;
+    uint32 minor = 2;
+    uint32 buildnumber = 3;
   }
 
   enum ConnectionState {

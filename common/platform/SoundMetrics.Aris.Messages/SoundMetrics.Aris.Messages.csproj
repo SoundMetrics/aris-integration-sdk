@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\protobuf\availability.proto" Link="availability.proto" />
+    <None Include="..\..\protobuf\commands.proto" Link="commands.proto" />
+    <None Include="..\..\protobuf\frame_stream.proto" Link="frame_stream.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.5.1" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="REM call &quot;$(ProjectDir)build-protobuf.cmd&quot;" />
+  </Target>
+
+</Project>
