@@ -120,7 +120,7 @@ message Command {
 
   message ForceFocus {
     enum Direction {
-      INVALID = 0; // proto3 forces this.
+      INVALID0 = 0; // Solely to please proto3 syntax.
       FORWARD = 1;
       REVERSE = 2;
     }
