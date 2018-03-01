@@ -16,7 +16,11 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="REM call &quot;$(ProjectDir)build-protobuf.cmd&quot;" />
+    <Exec Command="call &quot;$(ProjectDir)build-protobuf.cmd&quot;&#xD;&#xA;" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="REM Assumes building on Windows.&#xD;&#xA;&#xD;&#xA;SETLOCAL&#xD;&#xA;&#xD;&#xA;SET SIGN_SCRIPT=$(ProjectDir)..\..\..\submodules\build-tools\SignBinary.cmd&#xD;&#xA;call &quot;%SIGN_SCRIPT%&quot; &quot;&quot; $(Configuration) $(TargetPath)&#xD;&#xA;&#xD;&#xA;ENDLOCAL&#xD;&#xA;" />
   </Target>
 
 </Project>
