@@ -79,7 +79,7 @@ unsigned AvailabilityListener::ParseBeacon(const char * buffer, size_t bufferSiz
 
   aris::Availability message;
 
-  if (message.ParseFromArray(buffer, static_cast<int>(bufferSize)) && message.has_serialnumber()) {
+  if (message.ParseFromArray(buffer, static_cast<int>(bufferSize))) {
     return message.serialnumber();
   }
   else {

@@ -1,7 +1,9 @@
+syntax = "proto3";
+
 package aris;
 
 message Command {
-  required CommandType type = 1;
+  CommandType type = 1;
 
   enum CommandType {
     SET_DATETIME = 0;
@@ -24,27 +26,27 @@ message Command {
     RESERVED_1 = 17;  // For internal use by Sound Metrics only
   }
 
-  optional SetDateTime dateTime = 2;
-  optional SetFrameStreamReceiver frameStreamReceiver = 3;
-  optional SetFrameStreamSettings frameStreamSettings = 4;
-  optional SetAcousticSettings settings = 5;
-  optional SetSalinity salinity = 6;
-  optional SetTelephotoLens telephoto = 7;
-  optional SetFocusPosition focusPosition = 8;
-  optional ForceFocus focusForce = 9;
-  optional HomeFocus focusHome = 10;
-  optional SetRotatorMount mount = 11;
-  optional SetRotatorVelocity rotatorVelocity = 12;
-  optional SetRotatorAcceleration rotatorAcceleration = 13;
-  optional SetRotatorPosition rotatorPosition = 14;
-  optional StopRotator rotatorStop = 15;
-  optional Ping ping = 16;
-  optional SetSyslogReceiver syslogReceiver = 17;
-  optional PowerDown powerDown = 18;
-  optional Reserved1 reserved1 = 19;
+  SetDateTime dateTime = 2;
+  SetFrameStreamReceiver frameStreamReceiver = 3;
+  SetFrameStreamSettings frameStreamSettings = 4;
+  SetAcousticSettings settings = 5;
+  SetSalinity salinity = 6;
+  SetTelephotoLens telephoto = 7;
+  SetFocusPosition focusPosition = 8;
+  ForceFocus focusForce = 9;
+  HomeFocus focusHome = 10;
+  SetRotatorMount mount = 11;
+  SetRotatorVelocity rotatorVelocity = 12;
+  SetRotatorAcceleration rotatorAcceleration = 13;
+  SetRotatorPosition rotatorPosition = 14;
+  StopRotator rotatorStop = 15;
+  Ping ping = 16;
+  SetSyslogReceiver syslogReceiver = 17;
+  PowerDown powerDown = 18;
+  Reserved1 reserved1 = 19;
 
   message SetDateTime {
-    optional string dateTime = 1; 
+    string dateTime = 1; 
   }
 
   // Sets the address and port of the target machine to which frames are sent.
@@ -52,8 +54,8 @@ message Command {
   // the course of a session in a tethered diver-held environment.
   // Sending an IP address of 0.0.0.0 closes down the network frame stream.
   message SetFrameStreamReceiver {
-    optional uint32 port = 1;
-    optional string ip = 2;
+    uint32 port = 1;
+    string ip = 2;
   }
 
   message SetFrameStreamSettings {
@@ -66,15 +68,15 @@ message Command {
                               // from outgoing queue (but not the one in progress).
     }
 
-    optional SetInterpacketDelay interpacketDelay = 1;
-    optional PacketLossMitigation packetLossMitigation = 2; // Not currently supported.
+    SetInterpacketDelay interpacketDelay = 1;
+    PacketLossMitigation packetLossMitigation = 2; // Not currently supported.
   }
 
   message SetInterpacketDelay {
-    optional bool enable = 1;
+    bool enable = 1;
 
     // The delay is specified in microseconds.
-    optional uint32 delayPeriod = 2;
+    uint32 delayPeriod = 2;
   }
 
   message SetAcousticSettings {
@@ -83,18 +85,18 @@ message Command {
       HIGH = 1;
     }
 
-    optional uint32 cookie = 1;
-    optional float frameRate = 2;
-    optional uint32 samplesPerBeam = 3;
-    optional uint32 sampleStartDelay = 4;
-    optional uint32 cyclePeriod = 5;
-    optional uint32 samplePeriod = 6;
-    optional uint32 pulseWidth = 7;
-    optional uint32 pingMode = 8;
-    optional bool enableTransmit = 9;
-    optional Frequency frequency = 10;
-    optional bool enable150Volts = 11;
-    optional float receiverGain = 12;
+    uint32 cookie = 1;
+    float frameRate = 2;
+    uint32 samplesPerBeam = 3;
+    uint32 sampleStartDelay = 4;
+    uint32 cyclePeriod = 5;
+    uint32 samplePeriod = 6;
+    uint32 pulseWidth = 7;
+    uint32 pingMode = 8;
+    bool enableTransmit = 9;
+    Frequency frequency = 10;
+    bool enable150Volts = 11;
+    float receiverGain = 12;
   }
 
   message SetSalinity {
@@ -104,25 +106,26 @@ message Command {
       SALTWATER = 35;
     }
 
-    optional Salinity salinity = 1;
+    Salinity salinity = 1;
   }
 
   message SetTelephotoLens {
-    optional bool telephoto = 1;
+    bool telephoto = 1;
   }
 
   message SetFocusPosition {
-    optional uint32 position = 1;   // obsolete; ARIScope will continue to use this in support of pre-2.6 firmware.
-    optional float  focusRange = 2; // in meters; this is the prefered method for firmware 2.6 and later.
+    uint32 position = 1;   // obsolete; ARIScope will continue to use this in support of pre-2.6 firmware.
+    float  focusRange = 2; // in meters; this is the prefered method for firmware 2.6 and later.
   }  
 
   message ForceFocus {
     enum Direction {
+      INVALID0 = 0; // Solely to please proto3 syntax.
       FORWARD = 1;
       REVERSE = 2;
     }
 
-    optional Direction direction = 1;
+    Direction direction = 1;
   }
 
   message HomeFocus {}
@@ -134,7 +137,7 @@ message Command {
       ROV = 2;
     }
 
-    optional Mount mount = 1;
+    Mount mount = 1;
   }
 
   enum Axis {
@@ -144,29 +147,29 @@ message Command {
   }
 
   message SetRotatorVelocity {
-    optional Axis axis = 1;
-    optional float velocity = 2;
+    Axis axis = 1;
+    float velocity = 2;
   }
 
   message SetRotatorAcceleration {
-    optional Axis axis = 1;
-    optional float acceleration = 2;
+    Axis axis = 1;
+    float acceleration = 2;
   }
 
   message SetRotatorPosition {
-    optional Axis axis = 1;
-    optional float position = 2;
+    Axis axis = 1;
+    float position = 2;
   }
 
   message StopRotator {
-    optional Axis axis = 1;
+    Axis axis = 1;
   }
 
   message Ping {
   }
 
   message SetSyslogReceiver {
-    optional string ip = 1;
+    string ip = 1;
   }
 
   // For internal use by Sound Metrics only
