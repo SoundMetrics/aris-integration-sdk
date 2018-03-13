@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="LanguageUtils.fs" />
+    <Compile Include="UnitOfMeasure.fs" />
+    <Compile Include="TypeAliases.fs" />
+    <Compile Include="NetworkSupport.fs" />
+    <Compile Include="UdpListener.fs" />
+    <Compile Include="Beacons.fs" />
+    <Compile Include="SonarConfig.fs" />
+    <Compile Include="AcousticSettings.fs" />
+    <Compile Include="AcousticMath.fs" />
+    <Compile Include="Rotator.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="fracas" Version="1.0.0-beta" />
+    <PackageReference Include="System.Reactive" Version="3.1.1" />
+  </ItemGroup>
+
+</Project>
