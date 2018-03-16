@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.0.0-alpha</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>Sound Metrics Corporation</Company>
+    <Authors />
+    <Product>ARIS 2 Communications</Product>
+    <Description>Provides a low-level communications implementation for ARIS 2.</Description>
+    <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
+    <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
