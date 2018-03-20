@@ -12,8 +12,18 @@ open System.Runtime.InteropServices
 
 module private NativeMemoryImpl =
 
+    //-------------------------------------------------------------------------
     // This allows cross-platform execution of native memory copies.
     // Windows uses the CopyMemory API; others differ.
+    //
+    // More on native p/invoke across platforms
+    //-----------------------------------------
+    // Discussion of the topic in the dotnet coreclr repo:
+    // https://github.com/dotnet/coreclr/issues/930
+    //
+    // A discussion of the Marshaling Code Generator (MCG) exists here:
+    // https://blogs.msdn.microsoft.com/dotnet/2014/05/09/the-net-native-tool-chain/
+    //-------------------------------------------------------------------------
 
     type CopyMemoryFn = (nativeptr<byte> * nativeptr<byte> * int) -> unit
 
