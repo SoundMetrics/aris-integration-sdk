@@ -39,7 +39,7 @@ type ArisFrameHeaderExtensions =
     static member SystemType(hdr : ArisFrameHeader ref) = enum<SystemType> (int (!hdr).TheSystemType)
 
     [<Extension>]
-    static member HeaderFrom buf (timestamp: DateTimeOffset) frameIndex =
+    static member HeaderFrom(buf, (timestamp: DateTimeOffset), frameIndex) =
         let h = GCHandle.Alloc(buf, GCHandleType.Pinned)
         try
             let mutable hdr =
