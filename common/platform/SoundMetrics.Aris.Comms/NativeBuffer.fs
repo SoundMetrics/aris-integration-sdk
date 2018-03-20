@@ -60,14 +60,12 @@ module private NativeBufferImpl =
         use bytes = fixed source
         CopyMemory(buffer, bytes, source.Length)
 
-    let copyByteArraysToBuffer (arrays : (byte array) seq) (buffer : nativeptr<byte>) =
+    let copyByteArraysToBuffer (arrays : (int * byte array) seq) (buffer : nativeptr<byte>) =
         
-        let mutable offset = 0
-        for arr in arrays do
-            use source = fixed arr
+        for (offset, data) in arrays do
+            use source = fixed data
             let dest = NativePtr.add<byte> buffer offset
-            CopyMemory(dest, source, arr.Length)
-            offset <- offset + arr.Length
+            CopyMemory(dest, source, data.Length)
 
     let byteArrayToNative (bytes : byte array) =
         let length = bytes.Length
@@ -76,13 +74,19 @@ module private NativeBufferImpl =
         copyByteArrayToBuffer bytes buffer
         (buffer, length)
 
-    let byteArraysToNative (arrays : (byte array) seq) =
-        let cached = arrays |> Seq.cache
-        let totalLength = cached |> Seq.sumBy (fun bytes -> bytes.Length)
+    let byteArraysToNative (arrays : (int * byte array) seq) =
 
-        let buffer = allocBuffer totalLength
-        copyByteArraysToBuffer cached buffer
-        (buffer, totalLength)
+        let cached = arrays |> Seq.cache
+
+        if cached |> Seq.isEmpty then
+            (allocBuffer 0, 0)
+        else
+            let maxOffsetFragment = cached |> Seq.maxBy (fun (offset, _data) -> offset)
+            let totalLength = fst maxOffsetFragment + (snd maxOffsetFragment).Length
+
+            let buffer = allocBuffer totalLength
+            copyByteArraysToBuffer cached buffer
+            (buffer, totalLength)
 
 
 open NativeBufferImpl
@@ -136,6 +140,8 @@ type NativeBuffer private (source : nativeptr<byte>, length : int) as self =
     static member FromByteArray(bytes : byte array) : NativeBuffer =
         new NativeBuffer(byteArrayToNative bytes)
 
-    static member FromByteArrays(arrays : (byte array) seq) : NativeBuffer =
+    /// Copies sample data into an immutable container. This allows for a sparsely-populated
+    /// buffer.
+    static member FromByteArrays(fragments: (int * byte array) seq) : NativeBuffer =
 
-        new NativeBuffer(byteArraysToNative arrays)
+        new NativeBuffer(byteArraysToNative fragments)

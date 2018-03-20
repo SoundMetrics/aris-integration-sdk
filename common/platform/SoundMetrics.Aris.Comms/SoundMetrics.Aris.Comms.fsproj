@@ -27,6 +27,7 @@
     <Compile Include="AcousticMath.fs" />
     <Compile Include="Rotator.fs" />
     <Compile Include="NativeBuffer.fs" />
+    <Compile Include="FrameAccumulator.fs" />
   </ItemGroup>
 
   <ItemGroup>
