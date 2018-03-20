@@ -10,21 +10,6 @@ open System.Runtime.InteropServices
 // warning FS0009: Uses of this construct may result in the generation of unverifiable .NET IL code. This warning can be disabled using '--nowarn:9' or '#nowarn "9"'.
 #nowarn "9"
 
-//module private FrameAccumulatorImpl =
-
-//    [<DllImport("kernel32.dll", EntryPoint="CopyMemory")>]
-//    extern void CopyMemory(byte* _destination, byte* _source, uint32 _size);
-
-//    // About 32% faster than Array.Copy
-//    let nativeCopyMemory (input: byte[]) (output: NativeMemory) offset =
-//        let inputHandle = GCHandle.Alloc(input, GCHandleType.Pinned)
-//        try
-//            let inPtr = inputHandle.AddrOfPinnedObject() |> NativePtr.ofNativeInt<byte>
-//            let outPtr = NativePtr.add (output.Buffer |> NativePtr.ofNativeInt<byte>) offset
-//            CopyMemory(outPtr, inPtr, uint32 input.Length)
-//        finally
-//            inputHandle.Free()
-
 /// Accumulates multiple packets which make up a frame.
 /// Mutable.
 /// Contents and frame index may change.

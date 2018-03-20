@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssemblyAttributes.fs" />
     <Compile Include="LanguageUtils.fs" />
     <Compile Include="UnitOfMeasure.fs" />
     <Compile Include="TypeAliases.fs" />
@@ -28,10 +29,12 @@
     <Compile Include="Rotator.fs" />
     <Compile Include="NativeBuffer.fs" />
     <Compile Include="FrameAccumulator.fs" />
+    <Compile Include="Frame.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="fracas" Version="1.0.0-beta" />
+    <PackageReference Include="SoundMetrics.Aris.Headers" Version="1.0.0-beta" />
     <PackageReference Include="System.Reactive" Version="3.1.1" />
   </ItemGroup>
 

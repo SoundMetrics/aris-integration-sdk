@@ -10,7 +10,7 @@ open System.Runtime.InteropServices
 // warning FS0009: Uses of this construct may result in the generation of unverifiable .NET IL code. This warning can be disabled using '--nowarn:9' or '#nowarn "9"'.
 #nowarn "9"
 
-module private NativeMemoryImpl =
+module private NativeMemoryDetails =
 
     //-------------------------------------------------------------------------
     // This allows cross-platform execution of native memory copies.
@@ -49,7 +49,7 @@ module private NativeMemoryImpl =
         copy(destination, source, length)
         copyMemoryFn.Value(destination, source, length)
 
-open NativeMemoryImpl
+open NativeMemoryDetails
 
 module private NativeBufferImpl =
 
@@ -136,6 +136,8 @@ type NativeBuffer private (source : nativeptr<byte>, length : int) as self =
 
     member __.Dispose() = dispose true
     override __.Finalize() = dispose false
+
+    member __.Length = length
 
     static member FromByteArray(bytes : byte array) : NativeBuffer =
         new NativeBuffer(byteArrayToNative bytes)
