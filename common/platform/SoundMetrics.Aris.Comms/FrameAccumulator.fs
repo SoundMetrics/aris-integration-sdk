@@ -16,7 +16,7 @@ open System.Runtime.InteropServices
 /// Does not track missing frame segments.
 [<Sealed(true)>]
 type internal FrameAccumulator(frameIndex : FrameIndex,
-                               header : byte array,
+                               headerBytes : byte array,
                                timestamp : DateTimeOffset,
                                firstDataFragment : byte array,
                                totalDataSize : int) =
@@ -30,7 +30,7 @@ type internal FrameAccumulator(frameIndex : FrameIndex,
 
     let validateInputs () =
         if frameIndex < 0 then invalidArg "frameIndex" "must be >= zero"
-        if header.Length = 0 then invalidArg "header.Length" "must be > zero"
+        if headerBytes.Length = 0 then invalidArg "headerBytes.Length" "must be > zero"
 
     let appendFrameData (dataOffset: int) (dataFragment: byte[]) =
         // The sliding window code elsewhere deals with whether we succeed or
@@ -50,7 +50,7 @@ type internal FrameAccumulator(frameIndex : FrameIndex,
     member __.BytesReceived = dataReceived
     member __.ExpectedSize = totalDataSize
 
-    member __.Header = header
+    member __.HeaderBytes = headerBytes
 
     /// Copies sample data into an immutable container.
     member __.SampleData = NativeBuffer.FromByteArrays(fragments)

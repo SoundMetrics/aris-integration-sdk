@@ -38,7 +38,13 @@ type ArisFrameHeaderExtensions =
     [<Extension>]
     static member SystemType(hdr : ArisFrameHeader ref) = enum<SystemType> (int (!hdr).TheSystemType)
 
-    [<Extension>]
+type Frame = {
+    Header : ArisFrameHeader
+    SampleData : NativeBuffer
+}
+with
+    member f.BeamCount = uint32 f.SampleData.Length / f.Header.SamplesPerBeam // only available by calculating it
+
     static member HeaderFrom(buf, (timestamp: DateTimeOffset), frameIndex) =
         let h = GCHandle.Alloc(buf, GCHandleType.Pinned)
         try
@@ -61,10 +67,3 @@ type ArisFrameHeaderExtensions =
             hdr
         finally
             h.Free()
-
-type Frame = {
-    Header : ArisFrameHeader
-    SampleData : NativeBuffer
-}
-with
-    member f.BeamCount = uint32 f.SampleData.Length / f.Header.SamplesPerBeam // only available by calculating it

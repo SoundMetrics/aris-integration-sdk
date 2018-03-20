@@ -32,6 +32,7 @@
     <Compile Include="Frame.fs" />
     <Compile Include="ProtocolMetrics.fs" />
     <Compile Include="SlidingWindowFrameAssembler.fs" />
+    <Compile Include="FrameStreamListener.fs" />
   </ItemGroup>
 
   <ItemGroup>
