@@ -215,7 +215,7 @@ zero ArisHeaderUpdate flags:
         memset(msg, 0, sizeof(ArisFrameHeaderUpdateMsg));
 
         msg->header.nCommand = ArisHeaderUpdate::C_DATA;
-        msg->header.nPktNum = 1;
+        msg->header.nPktNum = 0;
         msg->header.nPktType = ArisHeaderUpdate::UPDATE_FRAME_HEADER;
         msg->header.nSize = sizeof(ArisHeaderUpdate::FrameHeaderUpdate);
     }
