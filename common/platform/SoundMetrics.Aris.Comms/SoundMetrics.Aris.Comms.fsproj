@@ -33,6 +33,7 @@
     <Compile Include="ProtocolMetrics.fs" />
     <Compile Include="SlidingWindowFrameAssembler.fs" />
     <Compile Include="FrameStreamListener.fs" />
+    <Compile Include="Sonar.fs" />
   </ItemGroup>
 
   <ItemGroup>
