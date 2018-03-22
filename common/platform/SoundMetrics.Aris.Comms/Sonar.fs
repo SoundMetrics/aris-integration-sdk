@@ -22,14 +22,14 @@ module private SonarLogging =
                 sn, addr1, addr2)
 
     module DefenderLog =
-        let logSonarDetected (sn : SerialNumber) (ipAddr : IPAddress) =
+        let logDefenderDetected (sn : SerialNumber) (ipAddr : IPAddress) =
             Log.Information("Defender {SerialNumber} detected at {IPAddress}", sn, ipAddr)
 
-        let logSonarExpired (sn : int) (lastHeard : DateTimeOffset) (ipAddr : IPAddress) =
+        let logDefenderExpired (sn : int) (lastHeard : DateTimeOffset) (ipAddr : IPAddress) =
             Log.Information("Defender {SerialNumber} expired from available table; last heard {LastHeader} on {IPAddr}",
                 sn, lastHeard, ipAddr)
 
-        let logSonarChangedAddress (sn : int) (addr1 : IPAddress) (addr2 : IPAddress) =
+        let logDefenderChangedAddress (sn : int) (addr1 : IPAddress) (addr2 : IPAddress) =
             Log.Information("Defender {SerialNumber} changed IP address from {OldIPAddress} to {NewIPAddress}",
                 sn, addr1, addr2)
 
@@ -60,15 +60,15 @@ module SystemVariant =
     let Voyager = "VG"
 
 type SonarBeacon = {
-    timestamp: DateTime
-    srcIpAddr: IPAddress
-    serialNumber: SerialNumber
-    systemType: SystemType
-    softwareVersion: SoftwareVersion
-    connectionState: AvailabilityState
-    cpuTemp: float32 option
-    isDiverHeld: bool
-    isVoyager: bool
+    Timestamp: DateTime
+    SrcIpAddr: IPAddress
+    SerialNumber: SerialNumber
+    SystemType: SystemType
+    SoftwareVersion: SoftwareVersion
+    ConnectionState: AvailabilityState
+    CpuTemp: float32 option
+    IsDiverHeld: bool
+    IsVoyager: bool
 }
 
 // Defender beacon
@@ -91,17 +91,17 @@ type OnBoardBatteryState =
     | OnTetherPower = 4
 
 type DefenderBeacon = {
-    timestamp: DateTime
-    srcIpAddr: IPAddress
-    serialNumber: SerialNumber
-    systemType: SystemType
-    softwareVersion: SoftwareVersion
-    connectionState: AvailabilityState
-    recordState : OnBoardRecordState option
-    storageState : OnBoardStorageState option
-    storageLevel : float32 option
-    batteryState : OnBoardBatteryState option
-    batteryLevel : float32 option
+    Timestamp: DateTime
+    SrcIpAddr: IPAddress
+    SerialNumber: SerialNumber
+    SystemType: SystemType
+    SoftwareVersion: SoftwareVersion
+    ConnectionState: AvailabilityState
+    RecordState : OnBoardRecordState
+    StorageState : OnBoardStorageState
+    StorageLevel : float32
+    BatteryState : OnBoardBatteryState
+    BatteryLevel : float32
 }
 
 // Command Module Beacon
@@ -117,16 +117,19 @@ type CommandModuleBeacon = {
     Revision : uint32 option
 }
 with
-    static member From(pkt : Udp.UdpReceived) =
+    static member inline ValueOrNone<'T when 'T : equality> (v : 'T)
+        = if (v = Unchecked.defaultof<'T>) then None else Some v
 
-        let cms = Aris.ProtocolMessages.CommandModule.CommandModuleBeacon.ParseFrom(pkt.udpResult.Buffer)
+    static member internal From(pkt : Udp.UdpReceived) =
+
+        let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(pkt.udpResult.Buffer)
         {
             SrcIpAddr = pkt.udpResult.RemoteEndPoint.Address
-            ArisCurrent =   if cms.HasArisCurrent       then Some cms.ArisCurrent       else None
-            ArisPower =     if cms.HasArisPower         then Some cms.ArisPower         else None
-            ArisVoltage =   if cms.HasArisVoltage       then Some cms.ArisVoltage       else None
-            CpuTemp =       if cms.HasCpuTemp           then Some cms.CpuTemp           else None
-            Revision =      if cms.HasRevision          then Some cms.Revision          else None
+            ArisCurrent =   CommandModuleBeacon.ValueOrNone cms.ArisCurrent
+            ArisPower =     CommandModuleBeacon.ValueOrNone cms.ArisPower
+            ArisVoltage =   CommandModuleBeacon.ValueOrNone cms.ArisVoltage
+            CpuTemp =       CommandModuleBeacon.ValueOrNone cms.CpuTemp
+            Revision =      CommandModuleBeacon.ValueOrNone cms.Revision
         }
 
 
@@ -154,9 +157,9 @@ type AvailableSonarStatus = {
 type StatusHolder = { mutable status: AvailableSonarStatus }
 
 module BeaconListeners =
-    type SonarAvailability  = Aris.ProtocolMessages.Sonar.Availability
-    type DefenderAvailability = Aris.ProtocolMessages.DefenderAvailability.Availability
-    type CMBeacon = Aris.ProtocolMessages.CommandModule.CommandModuleBeacon
+    type SonarAvailability  = Aris.Availability
+    type DefenderAvailability = Defender.Availability
+    type CMBeacon = Aris.CommandModuleBeacon
 
     open Beacons
 
@@ -195,18 +198,17 @@ module BeaconListeners =
 
         let toBeacon (pkt : Udp.UdpReceived) =
             try
-                let av = SonarAvailability.ParseFrom(pkt.udpResult.Buffer)
+                let av = SonarAvailability.Parser.ParseFrom(pkt.udpResult.Buffer)
                 let beacon =
-                    { timestamp = pkt.timestamp
-                      srcIpAddr = pkt.udpResult.RemoteEndPoint.Address
-                      serialNumber = int av.SerialNumber
-                      systemType = enum (int av.SystemType)
-                      softwareVersion = toSoftwareVersion av.SoftwareVersion
-                      connectionState = enum (int av.ConnectionState)
-                      cpuTemp = Some(av.CpuTemp)
-                      isDiverHeld = av.HasIsDiverHeld && av.IsDiverHeld
-                      isVoyager = av.HasSystemVariants
-                                    && av.SystemVariants.EnabledList |> Seq.contains SystemVariant.Voyager
+                    { Timestamp = pkt.timestamp
+                      SrcIpAddr = pkt.udpResult.RemoteEndPoint.Address
+                      SerialNumber = int av.SerialNumber
+                      SystemType = enum (int av.SystemType)
+                      SoftwareVersion = toSoftwareVersion av.SoftwareVersion
+                      ConnectionState = enum (int av.ConnectionState)
+                      CpuTemp = Some(av.CpuTemp)
+                      IsDiverHeld = av.IsDiverHeld
+                      IsVoyager = av.SystemVariants.Enabled |> Seq.contains SystemVariant.Voyager
                     }
                 Some beacon
             with
@@ -217,23 +219,23 @@ module BeaconListeners =
 
                 // Beacon management
 
-                member __.GetKey beacon = beacon.serialNumber
+                member __.GetKey beacon = beacon.SerialNumber
 
-                member __.IsChanged old newer = old.srcIpAddr <> newer.srcIpAddr
+                member __.IsChanged old newer = old.SrcIpAddr <> newer.SrcIpAddr
 
                 // Logging
 
                 member __.Added beacon =
 
-                    arisLog.SonarDetected beacon.serialNumber beacon.srcIpAddr
+                    ArisLog.logSonarDetected beacon.SerialNumber beacon.SrcIpAddr
 
                 member __.Expired beacon lastUpdate =
 
-                    arisLog.SonarExpired beacon.serialNumber lastUpdate beacon.srcIpAddr
+                    ArisLog.logSonarExpired beacon.SerialNumber lastUpdate beacon.SrcIpAddr
 
                 member __.Replaced old newer =
 
-                    arisLog.SonarChangedAddress old.serialNumber old.srcIpAddr newer.srcIpAddr
+                    ArisLog.logSonarChangedAddress old.SerialNumber old.SrcIpAddr newer.SrcIpAddr
         }
 
         let combinedNotifications = match callbacks with
@@ -253,19 +255,19 @@ module BeaconListeners =
 
         let toBeacon (pkt : Udp.UdpReceived) =
             try
-                let av = DefenderAvailability.ParseFrom(pkt.udpResult.Buffer)
+                let av = DefenderAvailability.Parser.ParseFrom(pkt.udpResult.Buffer)
                 let beacon =
-                    { timestamp = pkt.timestamp
-                      srcIpAddr = pkt.udpResult.RemoteEndPoint.Address
-                      serialNumber = int av.SerialNumber
-                      systemType = enum (int av.SystemType)
-                      softwareVersion = toSoftwareVersion av.SoftwareVersion
-                      connectionState = enum (int av.ConnectionState)
-                      recordState = if av.HasRecordState then Some (enum (int av.RecordState)) else None
-                      storageState = if av.HasStorageState then Some (enum (int av.StorageState)) else None
-                      storageLevel = if av.HasStorageLevel then Some av.StorageLevel else None
-                      batteryState = if av.HasBatteryState then Some (enum (int av.BatteryState)) else None
-                      batteryLevel = if av.HasBatteryLevel then Some av.BatteryLevel else None }
+                    { Timestamp = pkt.timestamp
+                      SrcIpAddr = pkt.udpResult.RemoteEndPoint.Address
+                      SerialNumber = int av.SerialNumber
+                      SystemType = enum (int av.SystemType)
+                      SoftwareVersion = toSoftwareVersion av.SoftwareVersion
+                      ConnectionState = enum (int av.ConnectionState)
+                      RecordState =  enum (int av.RecordState)
+                      StorageState = enum (int av.StorageState)
+                      StorageLevel = av.StorageLevel
+                      BatteryState = enum (int av.BatteryState)
+                      BatteryLevel = av.BatteryLevel }
                 Some beacon
             with
                 _ -> None
@@ -275,23 +277,23 @@ module BeaconListeners =
 
                 // Beacon management
 
-                member __.GetKey beacon = beacon.serialNumber
+                member __.GetKey beacon = beacon.SerialNumber
 
-                member __.IsChanged old newer = old.srcIpAddr <> newer.srcIpAddr
+                member __.IsChanged old newer = old.SrcIpAddr <> newer.SrcIpAddr
 
                 // Logging
 
                 member __.Added beacon =
 
-                    defenderLog.DefenderDetected beacon.serialNumber beacon.srcIpAddr
+                    DefenderLog.logDefenderDetected beacon.SerialNumber beacon.SrcIpAddr
 
                 member __.Expired beacon lastUpdate =
 
-                    defenderLog.DefenderExpired beacon.serialNumber lastUpdate beacon.srcIpAddr
+                    DefenderLog.logDefenderExpired beacon.SerialNumber lastUpdate beacon.SrcIpAddr
 
                 member __.Replaced old newer =
 
-                    defenderLog.DefenderChangedAddress old.serialNumber old.srcIpAddr newer.srcIpAddr
+                    DefenderLog.logDefenderChangedAddress old.SerialNumber old.SrcIpAddr newer.SrcIpAddr
         }
 
         let combinedNotifications = match callbacks with
@@ -336,11 +338,11 @@ module BeaconListeners =
 
                 member __.Added beacon =
 
-                    cmLog.CMDetected beacon.SrcIpAddr
+                    CMLog.logCMDetected beacon.SrcIpAddr
 
                 member __.Expired beacon lastUpdate =
 
-                    cmLog.CMExpired lastUpdate beacon.SrcIpAddr
+                    CMLog.logCMExpired lastUpdate beacon.SrcIpAddr
 
                 member __.Replaced old newer =
 
