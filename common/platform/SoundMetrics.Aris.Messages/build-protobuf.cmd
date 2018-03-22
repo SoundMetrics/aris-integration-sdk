@@ -12,12 +12,13 @@ set PGEN=%PROTOC% --csharp_out=%DEST% --error_format=msvs %1 %2
 
 set PBARIS=..\..\protobuf
 
-REM %PGEN% --proto_path=%PBARIS% -namespace=SoundMetrics.Aris.Messages.Availability %PBARIS%\availability.proto
-REM %PGEN% --proto_path=%PBARIS% -namespace=SoundMetrics.Aris.Messages.Commands     %PBARIS%\commands.proto
-REM %PGEN% --proto_path=%PBARIS% -namespace=SoundMetrics.Aris.Messages.FrameStream  %PBARIS%\frame_stream.proto
 %PGEN% --proto_path=%PBARIS% %PBARIS%\availability.proto
 %PGEN% --proto_path=%PBARIS% %PBARIS%\commands.proto
 %PGEN% --proto_path=%PBARIS% %PBARIS%\frame_stream.proto
+
+%PGEN% --proto_path=%PBARIS% %PBARIS%\command_module_beacon.proto
+%PGEN% --proto_path=%PBARIS% %PBARIS%\defender_availability.proto
+%PGEN% --proto_path=%PBARIS% %PBARIS%\defender_settings.proto
 
 dir %DEST%
 

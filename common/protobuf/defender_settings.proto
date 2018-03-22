@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package defender;
+
+// Commands and reports for communicating with an ARIS Defender.
+// Note that little is available to control via this interface, as
+// the diver is intended to have primary control.
+
+message DefenderSet {
+  string dateTime = 1;
+  Frequency frequency = 2;
+  uint32 range = 3;
+  Units units = 4;
+  uint32 antialiasing = 5;
+  FrameStreamReceiver receiver = 6;
+}
+
+message DefenderReport {
+  string dateTime = 1;
+  Frequency frequency = 2;
+  uint32 range = 3;
+  Units units = 4;
+  uint32 antialiasing = 5;
+  FrameStreamReceiver receiver = 6;
+}
+
+enum Frequency {
+  AUTO = 0;
+  LOW = 1;
+  HIGH = 2;
+}
+
+// for depth and range markers
+enum Units {
+  METERS = 0;
+  FEET = 1;
+}
+
+message FrameStreamReceiver {
+  string ip = 1;
+  uint32 port = 2;
+}
+

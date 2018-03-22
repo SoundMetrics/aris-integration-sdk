@@ -18,6 +18,9 @@
   <ItemGroup>
     <None Include="..\..\protobuf\availability.proto" Link="availability.proto" />
     <None Include="..\..\protobuf\commands.proto" Link="commands.proto" />
+    <None Include="..\..\protobuf\command_module_beacon.proto" Link="command_module_beacon.proto" />
+    <None Include="..\..\protobuf\defender_availability.proto" Link="defender_availability.proto" />
+    <None Include="..\..\protobuf\defender_settings.proto" Link="defender_settings.proto" />
     <None Include="..\..\protobuf\frame_stream.proto" Link="frame_stream.proto" />
   </ItemGroup>
 

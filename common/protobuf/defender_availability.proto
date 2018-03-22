@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package defender;
+
+// This is the beacon emitted by ARIS Defender.
+// Not that Defender also emits the standard ARIS Explorer beacon,
+// but will always appear "busy" in the latter.
+
+message Availability {
+  uint32 serialNumber = 1;
+  SystemType systemType = 2;
+  SoftwareVersion softwareVersion = 3;
+  ConnectionState connectionState = 4;
+  RecordState recordState = 5;
+  StorageState storageState = 6;
+  float batteryLevel = 7;
+  float storageLevel = 8;
+  BatteryState batteryState = 9;
+
+  enum SystemType {
+    ARIS_1800 = 0;
+    ARIS_3000 = 1;
+    ARIS_1200 = 2;
+  }
+
+  message SoftwareVersion {
+    uint32 major = 1;
+    uint32 minor = 2;
+    uint32 buildnumber = 3;
+  }
+
+  enum ConnectionState {
+    AVAILABLE = 0;
+    BUSY = 1;
+  }
+
+  enum RecordState {
+    READY = 0;
+    RECORDING = 1;
+  }
+
+  enum StorageState {
+    STORAGE_NOMINAL = 0;
+    STORAGE_FULL = 1;
+    STORAGE_ERROR = 2;
+    STORAGE_MISSING = 3;
+    STORAGE_CHECKING = 4;
+  }
+
+  enum BatteryState {
+    BATTERY_NOMINAL = 0;
+    BATTERY_LOW = 1;
+    BATTERY_NO_POWER = 2;
+    BATTERY_MISSING = 3;
+    BATTERY_ON_TETHER_POWER = 4;
+  }
+}
