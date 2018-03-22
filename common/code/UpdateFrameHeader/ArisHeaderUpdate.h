@@ -42,7 +42,7 @@ must hold true for the ARIS to accept the update message:
 
     data.header.nCommand must equal ArisHeaderUpdate::C_DATA.
 
-    data.header.nPktNum must be non-zero.
+    data.header.nPktNum must be zero.
 
     data.header.nPktType must set the ArisHeaderUpdate::UPDATE_FRAME_HEADER flag.
 
