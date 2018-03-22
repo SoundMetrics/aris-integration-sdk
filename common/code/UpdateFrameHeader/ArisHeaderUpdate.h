@@ -42,7 +42,7 @@ must hold true for the ARIS to accept the update message:
 
     data.header.nCommand must equal ArisHeaderUpdate::C_DATA.
 
-    data.header.nPktNum must be non-zero.
+    data.header.nPktNum must be zero.
 
     data.header.nPktType must set the ArisHeaderUpdate::UPDATE_FRAME_HEADER flag.
 
@@ -215,7 +215,7 @@ zero ArisHeaderUpdate flags:
         memset(msg, 0, sizeof(ArisFrameHeaderUpdateMsg));
 
         msg->header.nCommand = ArisHeaderUpdate::C_DATA;
-        msg->header.nPktNum = 1;
+        msg->header.nPktNum = 0;
         msg->header.nPktType = ArisHeaderUpdate::UPDATE_FRAME_HEADER;
         msg->header.nSize = sizeof(ArisHeaderUpdate::FrameHeaderUpdate);
     }

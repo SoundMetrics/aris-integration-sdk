@@ -36,6 +36,7 @@ Contains Protocol Buffer files describing messages sent to/received from the ARI
 
 - **connect-command** - sample program illustrating how to establish a connection to the ARIS and send commands.
 - **reorder-frame** - sample program/unit test that illustrates reordering an ARIS frame; this makes use of the reordering code in aris-integration-sdk/common/code/.
+- **send-header-update** - a brief example of sending a header update that injects latitude & longitude.
 - **vc-using-framestream** - sample program that implements a full range of commands, records frames to a file, and, optionally, uses multicast for frame acquisition.
 
 ### ARIS Tools
