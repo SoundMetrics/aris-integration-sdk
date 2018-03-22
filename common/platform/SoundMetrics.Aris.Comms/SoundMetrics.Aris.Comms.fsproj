@@ -34,6 +34,7 @@
     <Compile Include="SlidingWindowFrameAssembler.fs" />
     <Compile Include="FrameStreamListener.fs" />
     <Compile Include="Sonar.fs" />
+    <Compile Include="NetworkConstants.fs" />
   </ItemGroup>
 
   <ItemGroup>
