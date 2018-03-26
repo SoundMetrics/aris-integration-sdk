@@ -136,8 +136,8 @@ module internal FocusMapTypes =
 
 
     type FocusMap = {
-        FocusDistances : float array
-        Temperatures : float array
+        FocusDistances : float32 array
+        Temperatures : float32 array
         FocusUnitsByTemp : FocusUnitList array
     }
     with
