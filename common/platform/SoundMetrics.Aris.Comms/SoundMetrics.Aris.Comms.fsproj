@@ -35,6 +35,7 @@
     <Compile Include="FrameStreamListener.fs" />
     <Compile Include="Sonar.fs" />
     <Compile Include="NetworkConstants.fs" />
+    <Compile Include="FocusMapTypes.fs" />
   </ItemGroup>
 
   <ItemGroup>
