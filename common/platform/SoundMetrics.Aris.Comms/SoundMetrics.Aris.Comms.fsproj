@@ -36,6 +36,7 @@
     <Compile Include="Sonar.fs" />
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="FocusMapTypes.fs" />
+    <Compile Include="FocusMapData.fs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -149,3 +149,11 @@ module internal FocusMapTypes =
         BrackishMap     : FocusMap
         SaltwaterMap    : FocusMap
     }
+    with
+        /// Helper to ease integration with generated code.
+        static member From(fresh : FocusMap, brackish : FocusMap, saltwater : FocusMap) =
+            {
+                FreshMap = fresh
+                BrackishMap = brackish
+                SaltwaterMap = saltwater
+            }
