@@ -105,13 +105,13 @@ type FocusMapsTypeTest () =
 
         let cases = [|
             // Inputs                                       // Expected
-            (0.0, struct (0.0, 1.0), struct (10.0, 11.0)),  10.0
-            (0.1, struct (0.0, 1.0), struct (10.0, 11.0)),  10.1
-            (0.1, struct (0.0, 1.0), struct (10.0, 20.0)),  11.0
+            (0.0f, struct (0.0f, 1.0f), struct (10.0f, 11.0f)),  10.0f
+            (0.1f, struct (0.0f, 1.0f), struct (10.0f, 11.0f)),  10.1f
+            (0.1f, struct (0.0f, 1.0f), struct (10.0f, 20.0f)),  11.0f
 
-            (0.0, struct (0.0, 1.0), struct (11.0, 10.0)),  11.0
-            (0.1, struct (0.0, 1.0), struct (11.0, 10.0)),  10.9
-            (0.1, struct (0.0, 1.0), struct (20.0, 10.0)),  19.0
+            (0.0f, struct (0.0f, 1.0f), struct (11.0f, 10.0f)),  11.0f
+            (0.1f, struct (0.0f, 1.0f), struct (11.0f, 10.0f)),  10.9f
+            (0.1f, struct (0.0f, 1.0f), struct (20.0f, 10.0f)),  19.0f
         |]
 
         for (input, inputRange, outputRange), expected in cases do

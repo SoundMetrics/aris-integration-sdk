@@ -2,8 +2,6 @@
 
 namespace SoundMetrics.Aris.Comms
 
-type ABC = | A | B
-
 // DESIGN NOTE
 //
 // As of this writing we have 3 focus maps for ARIS: 3000, 1200/1800, and telephoto.
@@ -101,7 +99,7 @@ module internal FocusMapTypes =
                     getEnclosingRange t values
 
 
-        let interpolate (input : float) struct (inputL : float, inputR : float) struct (outputL : float, outputR : float) =
+        let interpolate (input : float32) struct (inputL : float32, inputR : float32) struct (outputL : float32, outputR : float32) =
 
             let inputRange = inputR - inputL
             let outputRange = outputR - outputL
@@ -125,24 +123,38 @@ module internal FocusMapTypes =
     type FU = uint16
     type FocusUnitList = FU array
 
-    let buildFocusUnitMinMaxes (focusUnitsByTemp : FocusUnitList array) : struct (FU * FU) array =
+    let buildFocusUnitMinMaxes (focusUnitsByTemp : FocusUnitList array) : (FU * FU) array =
 
         focusUnitsByTemp
         |> Seq.map (fun fus ->
                     let struct (f, b) = frontback fus
                     let minmax = minmax f b
-                    struct (minmax.Min, minmax.Max))
+                    (minmax.Min, minmax.Max) )
         |> Seq.toArray
-
 
     type FocusMap = {
         FocusDistances : float32 array
         Temperatures : float32 array
         FocusUnitsByTemp : FocusUnitList array
+        FocusUnitsMinMaxByTemp : (FU * FU) array
     }
     with
         member m.MinRange = m.FocusDistances.[0]
         member m.MaxRange = m.FocusDistances.[m.FocusDistances.Length - 1]
+
+    type FocusMapInputs = {
+        FocusDistances : float32 array
+        Temperatures : float32 array
+        FocusUnitsByTemp : FocusUnitList array
+    }
+    with
+        member i.ToFocusMap() =
+            {
+                FocusDistances = i.FocusDistances
+                Temperatures = i.Temperatures
+                FocusUnitsByTemp = i.FocusUnitsByTemp
+                FocusUnitsMinMaxByTemp = buildFocusUnitMinMaxes i.FocusUnitsByTemp
+            }
 
     type FocusMapTriplet = {
         FreshMap        : FocusMap
@@ -151,9 +163,9 @@ module internal FocusMapTypes =
     }
     with
         /// Helper to ease integration with generated code.
-        static member From(fresh : FocusMap, brackish : FocusMap, saltwater : FocusMap) =
+        static member From(fresh : FocusMapInputs, brackish : FocusMapInputs, saltwater : FocusMapInputs) =
             {
-                FreshMap = fresh
-                BrackishMap = brackish
-                SaltwaterMap = saltwater
+                FreshMap = fresh.ToFocusMap()
+                BrackishMap = brackish.ToFocusMap()
+                SaltwaterMap = saltwater.ToFocusMap()
             }

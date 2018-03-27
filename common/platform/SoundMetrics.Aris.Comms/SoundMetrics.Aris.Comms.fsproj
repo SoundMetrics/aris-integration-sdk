@@ -37,6 +37,7 @@
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="FocusMapTypes.fs" />
     <Compile Include="FocusMapData.fs" />
+    <Compile Include="FocusMap.fs" />
   </ItemGroup>
 
   <ItemGroup>
