@@ -39,6 +39,13 @@ namespace SoundMetrics.Aris.Comms
 
 module internal FocusMapTypes =
 
+    open System.Diagnostics
+
+    [<Sealed>]
+    type Log =
+        [<Conditional("LOGVERBOSE")>]
+        static member Verbose msg = printfn "%s" msg
+
     module NumericHelpers =
 
         [<Struct>]
@@ -99,13 +106,16 @@ module internal FocusMapTypes =
                     getEnclosingRange t values
 
 
-        let interpolate (input : float32) struct (inputL : float32, inputR : float32) struct (outputL : float32, outputR : float32) =
+        let interpolate (input : float32) struct (inputL : float32, outputL : float32) struct (inputR : float32, outputR : float32) =
 
             let inputRange = inputR - inputL
             let outputRange = outputR - outputL
 
             let inputRatio = (input - inputL) / inputRange
             let value = outputL + (inputRatio * outputRange)
+
+            Log.Verbose (sprintf "interpolate %A inputRange=[%A - %A]; outputRange=[%A - %A] -> %A"
+                            input inputL inputR outputL outputR value)
 
             value
 
@@ -133,6 +143,7 @@ module internal FocusMapTypes =
         |> Seq.toArray
 
     type FocusMap = {
+        Name : string
         FocusDistances : float32 array
         Temperatures : float32 array
         FocusUnitsByTemp : FocusUnitList array
@@ -148,8 +159,9 @@ module internal FocusMapTypes =
         FocusUnitsByTemp : FocusUnitList array
     }
     with
-        member i.ToFocusMap() =
+        member i.ToFocusMap(name) =
             {
+                Name = name
                 FocusDistances = i.FocusDistances
                 Temperatures = i.Temperatures
                 FocusUnitsByTemp = i.FocusUnitsByTemp
@@ -165,7 +177,7 @@ module internal FocusMapTypes =
         /// Helper to ease integration with generated code.
         static member From(fresh : FocusMapInputs, brackish : FocusMapInputs, saltwater : FocusMapInputs) =
             {
-                FreshMap = fresh.ToFocusMap()
-                BrackishMap = brackish.ToFocusMap()
-                SaltwaterMap = saltwater.ToFocusMap()
+                FreshMap = fresh.ToFocusMap("fresh")
+                BrackishMap = brackish.ToFocusMap("brackish")
+                SaltwaterMap = saltwater.ToFocusMap("saltwater")
             }

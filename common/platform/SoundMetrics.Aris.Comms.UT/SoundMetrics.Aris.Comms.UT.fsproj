@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="FocusMapTypesTest.fs" />
+    <Compile Include="FocusMapTest.fs" />
   </ItemGroup>
 
   <ItemGroup>

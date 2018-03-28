@@ -15,6 +15,10 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0;LOGVERBOSE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="AssemblyAttributes.fs" />
     <Compile Include="LanguageUtils.fs" />

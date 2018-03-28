@@ -104,14 +104,14 @@ type FocusMapsTypeTest () =
     member __.interpolate_test() =
 
         let cases = [|
-            // Inputs                                       // Expected
-            (0.0f, struct (0.0f, 1.0f), struct (10.0f, 11.0f)),  10.0f
-            (0.1f, struct (0.0f, 1.0f), struct (10.0f, 11.0f)),  10.1f
-            (0.1f, struct (0.0f, 1.0f), struct (10.0f, 20.0f)),  11.0f
+            // Inputs      inL   outL            inR   outR      Expected
+            (0.0f, struct (0.0f, 10.0f), struct (1.0f, 11.0f)),  10.0f
+            (0.1f, struct (0.0f, 10.0f), struct (1.0f, 11.0f)),  10.1f
+            (0.1f, struct (0.0f, 10.0f), struct (1.0f, 20.0f)),  11.0f
 
-            (0.0f, struct (0.0f, 1.0f), struct (11.0f, 10.0f)),  11.0f
-            (0.1f, struct (0.0f, 1.0f), struct (11.0f, 10.0f)),  10.9f
-            (0.1f, struct (0.0f, 1.0f), struct (20.0f, 10.0f)),  19.0f
+            (0.0f, struct (0.0f, 11.0f), struct (1.0f, 10.0f)),  11.0f
+            (0.1f, struct (0.0f, 11.0f), struct (1.0f, 10.0f)),  10.9f
+            (0.1f, struct (0.0f, 20.0f), struct (1.0f, 10.0f)),  19.0f
         |]
 
         for (input, inputRange, outputRange), expected in cases do
