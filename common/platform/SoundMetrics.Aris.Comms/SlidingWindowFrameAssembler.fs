@@ -11,30 +11,30 @@ open System.Threading.Tasks.Dataflow
 [<AutoOpen>]
 module private SlidingWindowFrameAssemblerLogging =
 
-    let logSkippedFrame (currentFrame : int) (incomingFrame : int) (incomingDataOffset : int)
+    let logSkippedFrame (currentFrame : FrameIndex) (incomingFrame : FrameIndex) (incomingDataOffset : uint32)
                         (gap : uint64) (cause : string) =
         Log.Information("Skipped frame currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
             + "incomingDataOffset={IncomingDataOffset}; gap={Gap}; cause={Cause}",
             currentFrame, incomingFrame, incomingDataOffset, gap, cause)
 
-    let logDuplicatePacket (lastFinishedFrame : int) (incomingFrame : int) (incomingDataOffset : int) =
+    let logDuplicatePacket (lastFinishedFrame : FrameIndex) (incomingFrame : FrameIndex) (incomingDataOffset : uint32) =
         Log.Verbose("Duplicate packet lastFinishedFrame={LastFinishedFrame}; incomingFrame={IncomingFrame}; incomingDataOffset={IncomingDataOffset}",
             lastFinishedFrame, incomingFrame, incomingDataOffset)
 
-    let logMissedPacket (currentFrame : int) (incomingFrame : int) (expectedOffset : int) (incomingOffset : int) =
+    let logMissedPacket (currentFrame : FrameIndex) (incomingFrame : FrameIndex) (expectedOffset : uint32) (incomingOffset : uint32) =
         Log.Verbose("Missed packet currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
             + "expectedOffset={ExpectedOffset}; incomingOffset={IncomingOffset}",
             currentFrame, incomingFrame, expectedOffset, incomingOffset)
 
-    let logFinishedFrame (currentFrame : int) (isComplete : bool) =
+    let logFinishedFrame (currentFrame : FrameIndex) (isComplete : bool) =
         Log.Verbose("Finished frame currentFrame={CurrentFrame}; isComplete={IsComplete}",
             currentFrame, isComplete)
 
-    let logAcceptedPacket (currentFrame : int) (incomingOffset : int) =
+    let logAcceptedPacket (currentFrame : FrameIndex) (incomingOffset : uint32) =
         Log.Verbose("Accepted packet currentFrame={CurrentFrame}; incomingOffset={IncomingOffset}",
             currentFrame, incomingOffset)
 
-    let logResetFrameIndexes (lastFinishedFrame : int) =
+    let logResetFrameIndexes (lastFinishedFrame : FrameIndex) =
         Log.Information("Reset last finished frame index to {LastFinishedFrame}", lastFinishedFrame)
 
     let logReceivedWorkUnit (workUnitType : string) =
@@ -46,26 +46,26 @@ module private SlidingWindowFrameAssemblerLogging =
     let logCouldNotParseOrProcessFramePart (msg : string) =
         Log.Warning("Couldn't parse or process FramePart: {Message}", msg)
 
-    let logIncomingFrameIndexAdvanced (currentFI : int) (incomingFI : int) =
+    let logIncomingFrameIndexAdvanced (currentFI : FrameIndex) (incomingFI : FrameIndex) =
         Log.Verbose("Incoming frame index advanced from {CurrentFI} to {IncomingFI}",
             currentFI, incomingFI)
 
-    let logFirstKnownFrame (fi : int) =
+    let logFirstKnownFrame (fi : FrameIndex) =
         Log.Verbose("First known frame; fi={FrameIndex}", fi)
 
-    let logSenderMovedOnToNextFrame (fi : int) =
+    let logSenderMovedOnToNextFrame (fi : FrameIndex) =
         Log.Verbose("Sender moved on to next frame; fi= {FrameIndex}", fi)
 
-    let logResetCurrentFrameIndexTo (fi : int) =
+    let logResetCurrentFrameIndexTo (fi : FrameIndex) =
         Log.Verbose("Reset current frame index; fi={FrameIndex}", fi)
 
-    let logReceivedPacketFromPreviousFrame (fi : int) =
+    let logReceivedPacketFromPreviousFrame (fi : FrameIndex) =
         Log.Verbose("Received packet from previous frame; fi={FrameIndex}", fi)
 
-    let logSendingFramePartAck (fi : int) (offset : int) =
+    let logSendingFramePartAck (fi : FrameIndex) (offset : uint32) =
         Log.Verbose("Sending frame part ack; fi={FrameIndex}; offset={Offset}", fi, offset)
 
-    let logFrameComplete (fi : int) (offset : int) =
+    let logFrameComplete (fi : FrameIndex) (offset : uint32) =
         Log.Verbose("Frame complete; fi={FrameIndex}; offset={Offset}", fi, offset)
 
 (*
@@ -73,7 +73,7 @@ module private SlidingWindowFrameAssemblerLogging =
     while assembling frames of packets received.
 *)
 
-type internal SendAck = FrameIndex -> int -> unit
+type internal SendAck = FrameIndex -> uint32 -> unit
 type internal FrameFinishedHandler = FrameAccumulator -> unit
 
 [<AutoOpen>]
@@ -113,7 +113,7 @@ module private SlidingWindowFrameAssemblerImpl =
         System.Diagnostics.Trace.TraceInformation(sprintf "Reset currentFrameIndex to %d" !currentFrameIndex)
         logResetCurrentFrameIndexTo incomingFrameIndex
         currentFrameIndex := incomingFrameIndex
-        expectedDataOffset := 0
+        expectedDataOffset := 0u
 
     let onReceivedPacketFromPreviousFrame incomingFrameIndex
                                           currentFrameIndex
@@ -132,7 +132,7 @@ module private SlidingWindowFrameAssemblerImpl =
 
         // Sonar may have reset; resync on first frame of a packet; we just checked
         // for incomingDataOffset <> 0 a few lines above.
-        assert (incomingDataOffset = 0)
+        assert (incomingDataOffset = 0u)
 
         // Flush first (side effect), then reset indexes.
         flush true
@@ -146,7 +146,7 @@ module private SlidingWindowFrameAssemblerImpl =
 
         if incomingDataOffset = !expectedDataOffset then
             accum.AppendFrameData incomingDataOffset (framePart.Data.ToByteArray())
-            expectedDataOffset := !expectedDataOffset + framePart.Data.Length
+            expectedDataOffset := !expectedDataOffset + uint32 framePart.Data.Length
             acceptedPacket := true
             logAcceptedPacket incomingFrameIndex incomingDataOffset
         else
@@ -158,17 +158,17 @@ module private SlidingWindowFrameAssemblerImpl =
                             currentFrame
                             (framePart: FramePart) =
 
-        if incomingDataOffset = 0 then
+        if incomingDataOffset = 0u then
             let accum = FrameAccumulator(
                                     incomingFrameIndex, framePart.Header.ToByteArray(), timestamp,
-                                    framePart.Data.ToByteArray(), framePart.TotalDataSize)
+                                    framePart.Data.ToByteArray(), uint32 framePart.TotalDataSize)
             currentFrame := Some accum
-            expectedDataOffset := framePart.Data.Length
+            expectedDataOffset := uint32 framePart.Data.Length
             acceptedPacket := true
             logAcceptedPacket incomingFrameIndex incomingDataOffset
         else
             // Ack will go out asking for the first part of the frame to be resent.
-            logMissedPacket !currentFrameIndex incomingFrameIndex 0 incomingDataOffset
+            logMissedPacket !currentFrameIndex incomingFrameIndex 0u incomingDataOffset
 
 
 
@@ -180,7 +180,7 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
     let disposed = ref false
     let currentFrameIndex = ref -1
     let lastFinishedFrameIndex = ref -1
-    let expectedDataOffset = ref 0
+    let expectedDataOffset = ref 0u
     let currentFrame: FrameAccumulator option ref = ref None
     let metrics = ref ProtocolMetrics.Empty
 
@@ -192,11 +192,11 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
 
     let getMetricsForFinishedFrame (frame: FrameAccumulator) =
         { ProtocolMetrics.Empty with
-            uniqueFrameIndexCount = 1UL;
-            processedFrameCount = 1UL;
-            completeFrameCount = if frame.IsComplete then 1UL else 0UL;
-            totalExpectedFrameSize = uint64 frame.ExpectedSize;
-            totalReceivedFrameSize = uint64 frame.BytesReceived; }
+            UniqueFrameIndexCount = 1UL;
+            ProcessedFrameCount = 1UL;
+            CompleteFrameCount = if frame.IsComplete then 1UL else 0UL;
+            TotalExpectedFrameSize = uint64 frame.ExpectedSize;
+            TotalReceivedFrameSize = uint64 frame.BytesReceived; }
 
     /// Assigns a new frame index to the frame (mutation!)
     let assignNewFrameIndex = (* FrameAccumulator -> unit *)
@@ -241,7 +241,8 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
 
                 lock stateGuard (fun () ->
                     let incomingFrameIndex = framePart.FrameIndex
-                    let incomingDataOffset = framePart.DataOffset
+                    let incomingDataOffset = uint32 framePart.DataOffset
+
                     let setSkipCount () =
                         let gap = uint64(incomingFrameIndex - !currentFrameIndex - 1)
                         let newValue = !skippedFrameCount + gap
@@ -254,7 +255,7 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
                         onFrameIndexAdvanced currentFrameIndex incomingFrameIndex incomingDataOffset expectedDataOffset
                                              setSkipCount flush
 
-                    if incomingFrameIndex < !currentFrameIndex && incomingDataOffset <> 0 then
+                    if incomingFrameIndex < !currentFrameIndex && incomingDataOffset <> 0u then
                         onReceivedPacketFromPreviousFrame incomingFrameIndex currentFrameIndex incomingDataOffset
                                                           setSkipCount
                     else
@@ -276,7 +277,7 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
                         logSendingFramePartAck incomingFrameIndex !expectedDataOffset
                         sendAck incomingFrameIndex !expectedDataOffset
 
-                        if !expectedDataOffset = framePart.TotalDataSize then
+                        if !expectedDataOffset = uint32 framePart.TotalDataSize then
                             logFrameComplete incomingFrameIndex !expectedDataOffset
                             flush false
                     )
@@ -284,10 +285,10 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
                 e -> logCouldNotParseOrProcessFramePart e.Message
         finally
             updateMetrics { ProtocolMetrics.Empty with
-                                skippedFrameCount = skippedFrameCount.Value
-                                totalPacketsReceived = 1UL
-                                totalPacketsAccepted = if acceptedPacket.Value then 1UL else 0UL
-                                unparsablePackets = if parsedOkay.Value then 0UL else 1UL }
+                                SkippedFrameCount = skippedFrameCount.Value
+                                TotalPacketsReceived = 1UL
+                                TotalPacketsAccepted = if acceptedPacket.Value then 1UL else 0UL
+                                UnparsablePackets = if parsedOkay.Value then 0UL else 1UL }
 
 
     let processWorkUnit workUnit =

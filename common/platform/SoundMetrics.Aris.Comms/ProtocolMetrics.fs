@@ -3,38 +3,38 @@
 namespace SoundMetrics.Aris.Comms
 
 type ProtocolMetrics =
-    { uniqueFrameIndexCount:  uint64
-      processedFrameCount:    uint64
+    { UniqueFrameIndexCount:  uint64
+      ProcessedFrameCount:    uint64
       /// Fully complete frames processed.
-      completeFrameCount:     uint64
-      skippedFrameCount:      uint64
-      totalExpectedFrameSize: uint64
-      totalReceivedFrameSize: uint64
-      totalPacketsReceived:   uint64
-      totalPacketsAccepted:   uint64
-      unparsablePackets:      uint64 }
+      CompleteFrameCount:     uint64
+      SkippedFrameCount:      uint64
+      TotalExpectedFrameSize: uint64
+      TotalReceivedFrameSize: uint64
+      TotalPacketsReceived:   uint64
+      TotalPacketsAccepted:   uint64
+      UnparsablePackets:      uint64 }
 
 module private ProtocolMetricsImpl =
     let empty = 
-        { uniqueFrameIndexCount  = 0UL
-          processedFrameCount    = 0UL
-          completeFrameCount     = 0UL
-          skippedFrameCount      = 0UL
-          totalExpectedFrameSize = 0UL
-          totalReceivedFrameSize = 0UL
-          totalPacketsReceived   = 0UL
-          totalPacketsAccepted   = 0UL
-          unparsablePackets      = 0UL }
+        { UniqueFrameIndexCount  = 0UL
+          ProcessedFrameCount    = 0UL
+          CompleteFrameCount     = 0UL
+          SkippedFrameCount      = 0UL
+          TotalExpectedFrameSize = 0UL
+          TotalReceivedFrameSize = 0UL
+          TotalPacketsReceived   = 0UL
+          TotalPacketsAccepted   = 0UL
+          UnparsablePackets      = 0UL }
 
 type ProtocolMetrics with
     static member Empty = ProtocolMetricsImpl.empty
     static member (+) (a, b) =
-        { uniqueFrameIndexCount   = a.uniqueFrameIndexCount   + b.uniqueFrameIndexCount;
-          processedFrameCount     = a.processedFrameCount     + b.processedFrameCount;
-          completeFrameCount      = a.completeFrameCount      + b.completeFrameCount;
-          skippedFrameCount       = a.skippedFrameCount       + b.skippedFrameCount;
-          totalExpectedFrameSize  = a.totalExpectedFrameSize  + b.totalExpectedFrameSize;
-          totalReceivedFrameSize  = a.totalReceivedFrameSize  + b.totalReceivedFrameSize;
-          totalPacketsReceived    = a.totalPacketsReceived    + b.totalPacketsReceived;
-          totalPacketsAccepted    = a.totalPacketsAccepted    + b.totalPacketsAccepted;
-          unparsablePackets       = a.unparsablePackets       + b.unparsablePackets; }
+        { UniqueFrameIndexCount   = a.UniqueFrameIndexCount   + b.UniqueFrameIndexCount
+          ProcessedFrameCount     = a.ProcessedFrameCount     + b.ProcessedFrameCount
+          CompleteFrameCount      = a.CompleteFrameCount      + b.CompleteFrameCount
+          SkippedFrameCount       = a.SkippedFrameCount       + b.SkippedFrameCount
+          TotalExpectedFrameSize  = a.TotalExpectedFrameSize  + b.TotalExpectedFrameSize
+          TotalReceivedFrameSize  = a.TotalReceivedFrameSize  + b.TotalReceivedFrameSize
+          TotalPacketsReceived    = a.TotalPacketsReceived    + b.TotalPacketsReceived
+          TotalPacketsAccepted    = a.TotalPacketsAccepted    + b.TotalPacketsAccepted
+          UnparsablePackets       = a.UnparsablePackets       + b.UnparsablePackets }

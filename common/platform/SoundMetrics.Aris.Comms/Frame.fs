@@ -3,7 +3,6 @@
 namespace SoundMetrics.Aris.Comms
 
 open Aris.FileTypes
-open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
@@ -38,6 +37,8 @@ type ArisFrameHeaderExtensions =
     [<Extension>]
     static member SystemType(hdr : ArisFrameHeader ref) = enum<SystemType> (int (!hdr).TheSystemType)
 
+/// Note that the SampleData must be disposed. This record does not do so as
+/// buffers are recomposed in new Frame instances.
 type Frame = {
     Header : ArisFrameHeader
     SampleData : NativeBuffer

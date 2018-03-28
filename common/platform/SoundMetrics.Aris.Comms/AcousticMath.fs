@@ -19,14 +19,14 @@ module AcousticMath =
     [<CompiledName("CalculateCyclePeriod")>]
     let calculateCyclePeriod systemType
                              (sampleStartDelay: int<Us>)
-                             sampleCount
+                             (sampleCount : uint32)
                              (samplePeriod: int<Us>)
                              (antiAliasing: int<Us>)
             : int<Us> =
         let ranges = systemTypeRangeMap.[systemType]
         let maxAllowedCyclePeriod = ranges.cyclePeriodRange.max
         let unboundedCyclePeriod = sampleStartDelay
-                                    + (sampleCount * samplePeriod)
+                                    + (int sampleCount * samplePeriod)
                                     + antiAliasing
                                     + cyclePeriodMargin
         min maxAllowedCyclePeriod unboundedCyclePeriod
@@ -118,7 +118,7 @@ module AcousticMath =
         // SamplesPerBeam is greater than 2000, and a lower slope for SamplesPerBeam < 2000
 
         let cyclePeriodFactor = let minFactor = 1400.0<Us>
-                                let samplesPerBeamThreshold = 2000
+                                let samplesPerBeamThreshold = 2000u
                                 if sampleCount > samplesPerBeamThreshold then
                                     let boostFactor = 2.0
                                     minFactor + boostFactor * minFactor
@@ -156,11 +156,12 @@ module AcousticMath =
 
     [<CompiledName("ConstrainAcousticSettings")>]
     let constrainAcousticSettings systemType (s: AcousticSettings) antiAliasing : AcousticSettings * bool =
-        let maximumFrameRate = calculateMaximumFrameRate  systemType s.pingMode s.sampleStartDelay s.sampleCount s.samplePeriod antiAliasing
-        let adjustedFrameRate = min s.frameRate maximumFrameRate
+        let maximumFrameRate =
+            calculateMaximumFrameRate  systemType s.PingMode s.SampleStartDelay s.SampleCount s.SamplePeriod antiAliasing
+        let adjustedFrameRate = min s.FrameRate maximumFrameRate
 
-        let isConstrained = s.frameRate <> adjustedFrameRate
-        let constrainedSettings = { s with frameRate = adjustedFrameRate }
+        let isConstrained = s.FrameRate <> adjustedFrameRate
+        let constrainedSettings = { s with FrameRate = adjustedFrameRate }
         if isConstrained then Trace.TraceInformation("constrainAcousticSettings: constrained; " + (AcousticSettings.diff s constrainedSettings))
         constrainedSettings, isConstrained
 

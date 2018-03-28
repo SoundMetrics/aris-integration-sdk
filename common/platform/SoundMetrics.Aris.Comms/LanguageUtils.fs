@@ -4,6 +4,25 @@ namespace SoundMetrics.Aris.Comms
 
 open System
 
+[<AutoOpen>]
+module ExceptionHelpers =
+
+    // Extension methods for System.Exception
+    type System.Exception with
+        /// Returns the Message of this exception joined with the
+        /// Messages of its inner exceptions.
+        member ex.NestedMessage =
+
+                let buf = System.Text.StringBuilder()
+
+                let rec loop (ex : System.Exception) =
+                    buf.Append(ex.Message) |> ignore
+                    match ex.InnerException with
+                    | null -> buf.ToString()
+                    | inner -> loop inner
+                loop ex
+
+
 /// Functions to facilitate the disposal of disposable resources.
 [<RequireQualifiedAccess>]
 module Dispose =

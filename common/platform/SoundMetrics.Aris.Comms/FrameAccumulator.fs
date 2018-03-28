@@ -19,28 +19,28 @@ type internal FrameAccumulator(frameIndex : FrameIndex,
                                headerBytes : byte array,
                                timestamp : DateTimeOffset,
                                firstDataFragment : byte array,
-                               totalDataSize : int) =
+                               totalDataSize : uint32) =
     let mutable fi = frameIndex
 
     [<Literal>]
     let TypicalMaxFragmentCount = 200 // more than enough for 128 beams, 2000 samples.
-    let fragments = ResizeArray<int * byte array>(capacity = 200)
+    let fragments = ResizeArray<uint32 * byte array>(capacity = 200)
 
-    let mutable dataReceived = 0
+    let mutable dataReceived = 0u
 
     let validateInputs () =
         if frameIndex < 0 then invalidArg "frameIndex" "must be >= zero"
         if headerBytes.Length = 0 then invalidArg "headerBytes.Length" "must be > zero"
 
-    let appendFrameData (dataOffset: int) (dataFragment: byte[]) =
+    let appendFrameData (dataOffset: uint32) (dataFragment: byte[]) =
         // The sliding window code elsewhere deals with whether we succeed or
         // fail on missing data; here we just store it away.
         fragments.Add((dataOffset, dataFragment))
-        dataReceived <- dataReceived + dataFragment.Length
+        dataReceived <- dataReceived + uint32 dataFragment.Length
 
     do
         validateInputs ()
-        appendFrameData 0 firstDataFragment
+        appendFrameData 0u firstDataFragment
 
     member __.SetFrameIndex newFrameIndex = fi <- newFrameIndex
 
@@ -55,5 +55,5 @@ type internal FrameAccumulator(frameIndex : FrameIndex,
     /// Copies sample data into an immutable container.
     member __.SampleData = NativeBuffer.FromByteArrays(fragments)
 
-    member __.AppendFrameData (dataOffset: int) (dataFragment: byte[]) =
+    member __.AppendFrameData (dataOffset: uint32) (dataFragment: byte[]) =
         appendFrameData dataOffset dataFragment

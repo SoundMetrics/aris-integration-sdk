@@ -53,36 +53,37 @@ open NativeMemoryDetails
 
 module private NativeBufferImpl =
 
-    let allocBuffer length : nativeptr<byte> = Marshal.AllocHGlobal(int length) |> NativePtr.ofNativeInt<byte>
+    let allocBuffer (length : uint32) : nativeptr<byte> =
+        Marshal.AllocHGlobal(int length) |> NativePtr.ofNativeInt<byte>
 
     let copyByteArrayToBuffer (source : byte array) (buffer : nativeptr<byte>) =
         
         use bytes = fixed source
         CopyMemory(buffer, bytes, source.Length)
 
-    let copyByteArraysToBuffer (arrays : (int * byte array) seq) (buffer : nativeptr<byte>) =
+    let copyByteArraysToBuffer (arrays : (uint32 * byte array) seq) (buffer : nativeptr<byte>) =
         
         for (offset, data) in arrays do
             use source = fixed data
-            let dest = NativePtr.add<byte> buffer offset
+            let dest = NativePtr.add<byte> buffer (int offset)
             CopyMemory(dest, source, data.Length)
 
     let byteArrayToNative (bytes : byte array) =
-        let length = bytes.Length
+        let length = uint32 bytes.Length
         let buffer = allocBuffer length
 
         copyByteArrayToBuffer bytes buffer
         (buffer, length)
 
-    let byteArraysToNative (arrays : (int * byte array) seq) =
+    let byteArraysToNative (arrays : (uint32 * byte array) seq) =
 
         let cached = arrays |> Seq.cache
 
         if cached |> Seq.isEmpty then
-            (allocBuffer 0, 0)
+            (allocBuffer 0u, 0u)
         else
             let maxOffsetFragment = cached |> Seq.maxBy (fun (offset, _data) -> offset)
-            let totalLength = fst maxOffsetFragment + (snd maxOffsetFragment).Length
+            let totalLength = fst maxOffsetFragment + uint32 (snd maxOffsetFragment).Length
 
             let buffer = allocBuffer totalLength
             copyByteArraysToBuffer cached buffer
@@ -94,7 +95,7 @@ open NativeBufferImpl
 
 /// Immutable buffer, backed by native memory in order to avoid the LOH.
 [<Sealed>]
-type NativeBuffer private (source : nativeptr<byte>, length : int) as self =
+type NativeBuffer private (source : nativeptr<byte>, length : uint32) as self =
 
     let mutable disposed = false
 
@@ -102,7 +103,7 @@ type NativeBuffer private (source : nativeptr<byte>, length : int) as self =
         if source = NativePtr.ofNativeInt(nativeint 0) then
             invalidArg "source" "must not be null"
 
-        if length = 0 then
+        if length = 0u then
             invalidArg "length" "cannot be zero"
 
         Marshal.AllocHGlobal(int length)
@@ -122,15 +123,6 @@ type NativeBuffer private (source : nativeptr<byte>, length : int) as self =
         // Clean up native resources
         Marshal.FreeHGlobal(buffer)
 
-    do
-        // Only the secondary constructors allocate a buffer, the primary does not.
-
-        if source = NativePtr.ofNativeInt(nativeint 0) then
-            invalidArg "source" "must not be null"
-
-        if length = 0 then
-            invalidArg "length" "cannot be zero"
-
     interface IDisposable with
         member s.Dispose() = dispose true
 
@@ -138,12 +130,32 @@ type NativeBuffer private (source : nativeptr<byte>, length : int) as self =
     override __.Finalize() = dispose false
 
     member __.Length = length
+    member private __.Buffer = buffer
+
+    member __.Transform(f : (nativeint * nativeint) -> unit) : NativeBuffer =
+
+        let source = buffer
+        let destination = new NativeBuffer(allocBuffer length, length)
+        f(source, destination.Buffer)
+        destination
+
+    member __.Read(f : nativeint -> unit) : unit = f(buffer)
+
+
+    // Only the secondary constructors allocate a buffer, the primary does not.
 
     static member FromByteArray(bytes : byte array) : NativeBuffer =
         new NativeBuffer(byteArrayToNative bytes)
 
     /// Copies sample data into an immutable container. This allows for a sparsely-populated
     /// buffer.
-    static member FromByteArrays(fragments: (int * byte array) seq) : NativeBuffer =
+    static member FromByteArrays(fragments: (uint32 * byte array) seq) : NativeBuffer =
 
         new NativeBuffer(byteArraysToNative fragments)
+
+module NativeBuffer = 
+
+    /// Transforms into a new copy; assumes the output is the same size as the source.
+    let transform f (source : NativeBuffer) : NativeBuffer = source.Transform(f)
+
+    let iter f (source : NativeBuffer) : unit = source.Read(f)

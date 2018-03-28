@@ -6,9 +6,9 @@ namespace SoundMetrics.Aris.Comms
 //          Type aliases are not visible outside the compiled assembly, so
 //          this file may be included in multiple projects.
 
-type AcousticSettingsCookie = int
+type AcousticSettingsCookie = uint32
 type FrameIndex = int
 type Port = int
 type SerialNumber = int
-type PingMode = int
+type PingMode = uint32
 type FocusUnits = uint32

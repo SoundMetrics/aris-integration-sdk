@@ -42,6 +42,10 @@
     <Compile Include="FocusMapTypes.fs" />
     <Compile Include="FocusMapData.fs" />
     <Compile Include="FocusMap.fs" />
+    <Compile Include="ArisCommands.fs" />
+    <Compile Include="SonarConnectionImpl.fs" />
+    <Compile Include="ProcessingCommands.fs" />
+    <Compile Include="FrameProcessing.fs" />
   </ItemGroup>
 
   <ItemGroup>

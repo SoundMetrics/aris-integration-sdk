@@ -19,15 +19,14 @@ module SonarConfig =
     with
         override rng.ToString() = sprintf "%s %A-%A" rng.name rng.min rng.max
 
+    let contains value range =
+        assert (range.min <= range.max)
+        range.min <= value && value <= range.max
+
 
     module internal RangeImpl =
 
         let inline range<'T when 'T : comparison> name (min: 'T) (max: 'T) = { name = name; min = min; max = max }
-
-
-        let contains value range =
-            assert (range.min <= range.max)
-            range.min <= value && value <= range.max
 
 
         let inline isSubrangeOf<'T when 'T : comparison> (original : Range<'T>) subrange =
@@ -50,9 +49,9 @@ module SonarConfig =
 
     // Min/max values per ARIS Engineering Test Command List
 
-    let sampleCountRange =      range "SampleCount"          128          4096
-    let focusPositionRange =    range "FocusPosition"          0          1000
-    let receiverGainRange =     range "ReceiverGain"           0            24
+    let sampleCountRange =      range "SampleCount"          128u         4096u
+    let focusPositionRange =    range "FocusPosition"          0u         1000u
+    let receiverGainRange =     range "ReceiverGain"           0u           24u
     let frameRateRange =        range "FrameRate"           1.0f</s>     15.0f</s>
 
     let sampleStartDelayRange = range "SampleStartDelay"     930<Us>     60000<Us>
@@ -106,23 +105,23 @@ module SonarConfig =
     type PingModeConfig = {
         pingMode: PingMode
         isSupported: bool
-        channelCount: int
-        pingsPerFrame: int
+        channelCount: uint32
+        pingsPerFrame: uint32
     }
 
     let pingModeConfigurations =
-        [ { pingMode =  1; isSupported = true ; channelCount =  48; pingsPerFrame = 3 }
-          { pingMode =  2; isSupported = false; channelCount =  48; pingsPerFrame = 1 }
-          { pingMode =  3; isSupported = true ; channelCount =  96; pingsPerFrame = 6 }
-          { pingMode =  4; isSupported = false; channelCount =  96; pingsPerFrame = 2 }
-          { pingMode =  5; isSupported = false; channelCount =  96; pingsPerFrame = 1 }
-          { pingMode =  6; isSupported = true ; channelCount =  64; pingsPerFrame = 4 }
-          { pingMode =  7; isSupported = false; channelCount =  64; pingsPerFrame = 2 }
-          { pingMode =  8; isSupported = false; channelCount =  64; pingsPerFrame = 1 }
-          { pingMode =  9; isSupported = true ; channelCount = 128; pingsPerFrame = 8 }
-          { pingMode = 10; isSupported = false; channelCount = 128; pingsPerFrame = 4 }
-          { pingMode = 11; isSupported = false; channelCount = 128; pingsPerFrame = 2 }
-          { pingMode = 12; isSupported = false; channelCount = 128; pingsPerFrame = 1 } ]
+        [ { pingMode =  1u; isSupported = true ; channelCount =  48u; pingsPerFrame = 3u }
+          { pingMode =  2u; isSupported = false; channelCount =  48u; pingsPerFrame = 1u }
+          { pingMode =  3u; isSupported = true ; channelCount =  96u; pingsPerFrame = 6u }
+          { pingMode =  4u; isSupported = false; channelCount =  96u; pingsPerFrame = 2u }
+          { pingMode =  5u; isSupported = false; channelCount =  96u; pingsPerFrame = 1u }
+          { pingMode =  6u; isSupported = true ; channelCount =  64u; pingsPerFrame = 4u }
+          { pingMode =  7u; isSupported = false; channelCount =  64u; pingsPerFrame = 2u }
+          { pingMode =  8u; isSupported = false; channelCount =  64u; pingsPerFrame = 1u }
+          { pingMode =  9u; isSupported = true ; channelCount = 128u; pingsPerFrame = 8u }
+          { pingMode = 10u; isSupported = false; channelCount = 128u; pingsPerFrame = 4u }
+          { pingMode = 11u; isSupported = false; channelCount = 128u; pingsPerFrame = 2u }
+          { pingMode = 12u; isSupported = false; channelCount = 128u; pingsPerFrame = 1u } ]
           |> List.map (fun elem -> elem.pingMode, elem)
           |> Map.ofList
 
@@ -130,9 +129,9 @@ module SonarConfig =
         { systemType: SystemType; defaultPingMode: PingMode; validPingModes: PingMode list }
 
     let systemTypeToPingModeMap = 
-        [ { systemType = SystemType.Aris1200;  defaultPingMode = 1; validPingModes = [ 1 ] }
-          { systemType = SystemType.Aris1800;  defaultPingMode = 3; validPingModes = [ 1; 3 ] }
-          { systemType = SystemType.Aris3000;  defaultPingMode = 9; validPingModes = [ 6; 9 ] }
+        [ { systemType = SystemType.Aris1200;  defaultPingMode = 1u; validPingModes = [ 1u ] }
+          { systemType = SystemType.Aris1800;  defaultPingMode = 3u; validPingModes = [ 1u; 3u ] }
+          { systemType = SystemType.Aris3000;  defaultPingMode = 9u; validPingModes = [ 6u; 9u ] }
           // { systemType = SystemType.DidsonStd; defaultPingMode = 1; validPingModes = [ 1; 2 ] }
           // { systemType = SystemType.DidsonLR;  defaultPingMode = 1; validPingModes = [ 1; 2 ] }
           ]
