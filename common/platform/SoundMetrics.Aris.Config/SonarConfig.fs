@@ -19,35 +19,35 @@ type SystemType =
 
 module SonarConfig =
 
-    type Range<'t> = { name: string; min: 't; max: 't }
+    type Range<'t> = { Name: string; Min: 't; Max: 't }
     with
-        override rng.ToString() = sprintf "%s %A-%A" rng.name rng.min rng.max
+        override rng.ToString() = sprintf "%s %A-%A" rng.Name rng.Min rng.Max
 
     [<CompiledName("RangeContains")>]
     let contains value range =
-        assert (range.min <= range.max)
-        range.min <= value && value <= range.max
+        assert (range.Min <= range.Max)
+        range.Min <= value && value <= range.Max
 
     module internal RangeImpl =
 
-        let inline range<'T when 'T : comparison> name (min: 'T) (max: 'T) = { name = name; min = min; max = max }
+        let inline range<'T when 'T : comparison> name (min: 'T) (max: 'T) = { Name = name; Min = min; Max = max }
 
 
         let inline isSubrangeOf<'T when 'T : comparison> (original : Range<'T>) subrange =
 
-            original |> contains subrange.min && original |> contains subrange.max
+            original |> contains subrange.Min && original |> contains subrange.Max
 
 
         let inline subrangeOf<'T when 'T : comparison> range (min : 'T) (max : 'T) =
 
-            let subrange = { name = range.name; min = min; max = max }
+            let subrange = { Name = range.Name; Min = min; Max = max }
             if not (subrange |> isSubrangeOf range) then
                 invalidArg "min" "subrange falls outside original range"
 
             subrange
 
 
-        let inline constrainRangeMax<'T when 'T : comparison> range (max : 'T) = subrangeOf range range.min max
+        let inline constrainRangeMax<'T when 'T : comparison> range (max : 'T) = subrangeOf range range.Min max
 
     open RangeImpl
 
