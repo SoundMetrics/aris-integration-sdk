@@ -72,3 +72,52 @@ type FocusMapTest () =
             printfn "input=%f; expected=%u; actual=%u" range expected actual
 
             Assert.AreEqual(expected, actual)
+
+    //---------------------------------------------------------------------
+    // There should be no reversal of slope (retrograde) in the ranges
+    // produced by iterating over the focus units from 0-1000.
+    [<TestMethod>]
+    member __.``Test slope of range to focus units``() =
+
+        let systemTests = [|
+            SystemType.Aris1200, false
+            SystemType.Aris1800, false
+            SystemType.Aris1800, true
+            SystemType.Aris3000, false
+        |]
+
+        let salinities = [| Salinity.Fresh; Salinity.Brackish; Salinity.Seawater |];
+        let temperatures = [| 0.0f; 2.5f; 5.0f; 10.0f; 15.0f; 20.0f; 25.0f; 30.0f; 35.0f |]
+
+        let getSlopeDirection (a : float32) (b : float32) =
+            match a, b with
+            | a, b when a < b -> -1
+            | a, b when a > b -> +1
+            | _ -> 0 // IsNaN(b - a) winds up here
+
+        let allFocusUnits = [| 0us .. 1000us |]
+
+        for systemType, isTelephoto in systemTests do
+            for salinity in salinities do
+                for temp in temperatures do
+
+                    // Convert focus units to range
+                    let ranges =
+                        allFocusUnits
+                            |> Seq.map (fun fu ->
+                                mapFocusUnitsToRange systemType fu temp salinity isTelephoto)
+                            |> Seq.toArray
+
+                    let slopeDirections =
+                        ranges
+                        |> Seq.pairwise
+                        |> Seq.map (fun (a, b) -> getSlopeDirection a b)
+                        |> Seq.toArray
+                    printfn "Slope directions:"
+                    slopeDirections |> Seq.iter (printf "%d ")
+                    printfn ""
+
+                    let expectedSlope = slopeDirections |> Seq.filter (fun s -> s <> 0) |> Seq.head
+                    let allSameSlope = slopeDirections |> Seq.forall (fun s -> s = 0 || s = expectedSlope)
+
+                    Assert.IsTrue(allSameSlope)
