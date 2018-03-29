@@ -9,8 +9,8 @@ open System
 
 type RecordingNamingPolicyInput = {
     RecordingTime: DateTime
-    BeamCount: int
-    SampleCount: int
+    BeamCount: uint32
+    SampleCount: uint32
 }
 
 type RecordingFailure = {

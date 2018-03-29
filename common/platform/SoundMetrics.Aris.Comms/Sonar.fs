@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Serilog
+open SoundMetrics.Aris.Config
 open System
 open System.Net
 

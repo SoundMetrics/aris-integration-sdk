@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.NativeInterop
+open SoundMetrics.Aris.Config
 open System
 open System.Diagnostics
 open System.Reactive.Subjects
@@ -75,9 +76,9 @@ module internal FrameProcessing =
             let cfg = SonarConfig.getPingModeConfig f.Header.PingMode
             {
                 FrameIndex = int f.Header.FrameIndex
-                BeamCount  = cfg.channelCount
+                BeamCount  = cfg.ChannelCount
                 SampleCount = f.Header.SamplesPerBeam
-                PingsPerFrame = cfg.pingsPerFrame
+                PingsPerFrame = cfg.PingsPerFrame
                 SampleData = f.SampleData
             }
 

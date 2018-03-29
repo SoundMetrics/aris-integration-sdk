@@ -2,6 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open SoundMetrics.Aris.Config
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
 open System.Text
@@ -110,38 +111,38 @@ module internal SettingsImpl =
                                  ReceiverGain = 12.0f } ]
         |> Map.ofList
 
-open RangeImpl
+open SonarConfig
  
 type AcousticSettings with
     static member DefaultAcousticSettingsFor systemType = SettingsImpl.defaultSettingsMap.[systemType]
 
     member s.Validate () =
-        let pingsPerFrame = pingModeConfigurations.[s.PingMode].pingsPerFrame
+        let pingsPerFrame = pingModeConfigurations.[s.PingMode].PingsPerFrame
         let framePeriod = int (ceil (1000000.0f / float32 s.FrameRate)) * 1<Us>
         let adjustedCyclePeriod = s.SampleStartDelay + (s.SamplePeriod * int s.SampleCount) + 360<Us>
 
         let NoError = ""
         let rawResults = 
             [
-                (if sampleCountRange |> contains s.SampleCount 
+                (if SampleCountRange |> contains s.SampleCount 
                     then NoError
                     else sprintf "sampleCount '%d' is out-of-range" s.SampleCount)
-                (if sampleCountRange |> contains s.SampleCount
+                (if SampleCountRange |> contains s.SampleCount
                     then NoError
                     else sprintf "sampleCount '%d' is out-of-range" s.SampleCount)
-                (if sampleStartDelayRange |> contains s.SampleStartDelay
+                (if SampleStartDelayRange |> contains s.SampleStartDelay
                     then NoError
                     else sprintf "sampleStartDelay '%d' is out-of-range" (int s.SampleStartDelay))
-                (if cyclePeriodRange |> contains s.CyclePeriod
+                (if CyclePeriodRange |> contains s.CyclePeriod
                     then NoError
                     else sprintf "cyclePeriod '%d' is out-of-range" (int s.CyclePeriod))
-                (if samplePeriodRange |> contains s.SamplePeriod
+                (if SamplePeriodRange |> contains s.SamplePeriod
                     then NoError
                     else sprintf "samplePeriod '%d' is out-of-range" (int s.SamplePeriod))
-                (if pulseWidthRange |> contains s.PulseWidth
+                (if PulseWidthRange |> contains s.PulseWidth
                     then NoError
                     else sprintf "pulseWidth '%d' is out-of-range" (int s.PulseWidth))
-                (if receiverGainRange |> contains (uint32 s.ReceiverGain)
+                (if ReceiverGainRange |> contains (uint32 s.ReceiverGain)
                     then NoError
                     else sprintf "receiverGain '%f' is out-of-range" s.ReceiverGain)
                 (if framePeriod > s.CyclePeriod * int pingsPerFrame

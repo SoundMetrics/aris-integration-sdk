@@ -7,6 +7,22 @@ open System
 [<AutoOpen>]
 module ExceptionHelpers =
 
+
+    [<Literal>]
+    let private MinJustificationLength = 5
+
+    /// Ignores exceptions that happen in f; some critical exceptions, such as
+    /// StackOverflowException, can't be ignored.
+    let ignoreException (justification : string) (f : unit -> unit) =
+
+        if String.IsNullOrWhiteSpace(justification) || justification.Length < MinJustificationLength then
+            failwith (sprintf "Missing justification, %d or more characters" MinJustificationLength)
+
+        try
+            f()
+        with
+            _ -> ()
+
     // Extension methods for System.Exception
     type System.Exception with
         /// Returns the Message of this exception joined with the

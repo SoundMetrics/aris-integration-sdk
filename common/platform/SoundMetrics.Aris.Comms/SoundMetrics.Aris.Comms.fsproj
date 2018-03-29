@@ -17,6 +17,8 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0;LOGVERBOSE</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +29,6 @@
     <Compile Include="NetworkSupport.fs" />
     <Compile Include="UdpListener.fs" />
     <Compile Include="Beacons.fs" />
-    <Compile Include="SonarConfig.fs" />
     <Compile Include="AcousticSettings.fs" />
     <Compile Include="AcousticMath.fs" />
     <Compile Include="Rotator.fs" />
@@ -46,6 +47,8 @@
     <Compile Include="SonarConnectionImpl.fs" />
     <Compile Include="ProcessingCommands.fs" />
     <Compile Include="FrameProcessing.fs" />
+    <Compile Include="FileRecording.fs" />
+    <Compile Include="Recording.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +60,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
   </ItemGroup>
 

@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Aris.FileTypes
+open SoundMetrics.Aris.Config
 open System
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices

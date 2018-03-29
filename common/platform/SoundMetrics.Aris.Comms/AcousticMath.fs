@@ -2,8 +2,8 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open SoundMetrics.Aris.Config
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open SonarConfig
 open System.Diagnostics
 
 module AcousticMath =
@@ -23,12 +23,12 @@ module AcousticMath =
                              (samplePeriod: int<Us>)
                              (antiAliasing: int<Us>)
             : int<Us> =
-        let ranges = systemTypeRangeMap.[systemType]
-        let maxAllowedCyclePeriod = ranges.cyclePeriodRange.max
+        let ranges = SonarConfig.systemTypeRangeMap.[systemType]
+        let maxAllowedCyclePeriod = ranges.CyclePeriodRange.Max
         let unboundedCyclePeriod = sampleStartDelay
                                     + (int sampleCount * samplePeriod)
                                     + antiAliasing
-                                    + cyclePeriodMargin
+                                    + SonarConfig.CyclePeriodMargin
         min maxAllowedCyclePeriod unboundedCyclePeriod
 
     module private Native =
@@ -149,9 +149,9 @@ module AcousticMath =
                                         0.0<Us>
 
         let cyclePeriod = calculateCyclePeriod systemType sampleStartDelay sampleCount samplePeriod antiAliasing
-        let pingsPerFrame = pingModeConfigurations.[pingMode].pingsPerFrame
+        let pingsPerFrame = SonarConfig.pingModeConfigurations.[pingMode].PingsPerFrame
         let cycleTimeUsec = (1.0<Us> * (float cyclePeriod) + cyclePeriodFactor) * float pingsPerFrame
-        let rate = min (frameRateRange.max) (float32 (1000000.0<Us> / cycleTimeUsec) * 1.0f</s>)
+        let rate = min (SonarConfig.FrameRateRange.Max) (float32 (1000000.0<Us> / cycleTimeUsec) * 1.0f</s>)
         rate
 
     [<CompiledName("ConstrainAcousticSettings")>]

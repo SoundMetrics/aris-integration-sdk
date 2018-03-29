@@ -12,6 +12,7 @@ type SonarConnectionMetrics = {
 
 module internal SonarConnectionImpl =
 
+    open SoundMetrics.Aris.Config
     open System.Net
     open System.Net.Sockets
     open System.Reflection
@@ -60,13 +61,13 @@ module internal SonarConnectionImpl =
                     Some (sprintf "Value %A is out of range %s" value (range.ToString()))
 
             [
-                fun settings -> simpleRangeCheck settings.FrameRate             SonarConfig.frameRateRange
-                fun settings -> simpleRangeCheck settings.SampleCount           SonarConfig.sampleCountRange
-                fun settings -> simpleRangeCheck settings.SampleStartDelay      SonarConfig.sampleStartDelayRange
-                fun settings -> simpleRangeCheck settings.CyclePeriod           SonarConfig.cyclePeriodRange
-                fun settings -> simpleRangeCheck settings.SamplePeriod          SonarConfig.samplePeriodRange
-                fun settings -> simpleRangeCheck settings.PulseWidth            SonarConfig.pulseWidthRange
-                fun settings -> simpleRangeCheck (uint32 settings.ReceiverGain) SonarConfig.receiverGainRange
+                fun settings -> simpleRangeCheck settings.FrameRate             SonarConfig.FrameRateRange
+                fun settings -> simpleRangeCheck settings.SampleCount           SonarConfig.SampleCountRange
+                fun settings -> simpleRangeCheck settings.SampleStartDelay      SonarConfig.SampleStartDelayRange
+                fun settings -> simpleRangeCheck settings.CyclePeriod           SonarConfig.CyclePeriodRange
+                fun settings -> simpleRangeCheck settings.SamplePeriod          SonarConfig.SamplePeriodRange
+                fun settings -> simpleRangeCheck settings.PulseWidth            SonarConfig.PulseWidthRange
+                fun settings -> simpleRangeCheck (uint32 settings.ReceiverGain) SonarConfig.ReceiverGainRange
 
                 fun settings -> match settings.Frequency with
                                 | Frequency.Low | Frequency.High -> None

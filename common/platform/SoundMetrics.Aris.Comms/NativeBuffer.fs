@@ -141,6 +141,12 @@ type NativeBuffer private (source : nativeptr<byte>, length : uint32) as self =
 
     member __.Read(f : nativeint -> unit) : unit = f(buffer)
 
+    member __.ToArray() =
+
+        let arr = Array.zeroCreate<byte> (int length)
+        Marshal.Copy(buffer, arr, 0, int length)
+        arr
+
 
     // Only the secondary constructors allocate a buffer, the primary does not.
 

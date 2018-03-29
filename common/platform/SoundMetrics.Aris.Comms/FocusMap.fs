@@ -2,6 +2,8 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open SoundMetrics.Aris.Config
+
 module internal FocusMapDetails =
     open FocusMapData
     open FocusMapTypes
