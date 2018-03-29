@@ -10,13 +10,11 @@ type SonarConnectionMetrics = {
     ProtocolMetrics: ProtocolMetrics
 }
 
-module internal SonarConnectionImpl =
+module internal SonarConnectionDetails =
 
     open SoundMetrics.Aris.Config
     open System.Net
     open System.Net.Sockets
-    open System.Reflection
-    open System.Resources
     open System.Threading.Tasks.Dataflow
 
     type ValidatedSettings =
@@ -29,7 +27,7 @@ module internal SonarConnectionImpl =
             let last: AcousticSettingsCookie ref = ref 0u
             let next() = last := !last + 1u ; !last
     
-            member __.ApplyNewCookie settings = { cookie = next(); settings = settings }
+            member __.ApplyNewCookie settings = { Cookie = next(); Settings = settings }
 
             type AcousticSettingsVersioned with
                 member __.FromCommand (cmd: Aris.Command) =
@@ -37,15 +35,15 @@ module internal SonarConnectionImpl =
                         invalidArg "cmd" "not of type SET_ACOUSTICS"
 
                     let settings = cmd.Settings
-                    { cookie = settings.Cookie
-                      settings =
+                    { Cookie = settings.Cookie
+                      Settings =
                           { FrameRate = settings.FrameRate * 1.0f</s>
                             SampleCount = settings.SamplesPerBeam
                             SampleStartDelay = int settings.SampleStartDelay * 1<Us>
                             CyclePeriod = int settings.CyclePeriod * 1<Us>
                             SamplePeriod = int settings.SamplePeriod * 1<Us>
                             PulseWidth = int settings.PulseWidth * 1<Us>
-                            PingMode = settings.PingMode
+                            PingMode = PingMode.From (uint32 settings.PingMode)
                             EnableTransmit = settings.EnableTransmit
                             Frequency = enum (int32 settings.Frequency)
                             Enable150Volts = settings.Enable150Volts

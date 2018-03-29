@@ -49,6 +49,14 @@
     <Compile Include="FrameProcessing.fs" />
     <Compile Include="FileRecording.fs" />
     <Compile Include="Recording.fs" />
+    <Compile Include="GraphBinding.fs" />
+    <Compile Include="Graphs.fs" />
+    <Compile Include="FrameIndexMapper.fs" />
+    <Compile Include="SonarConnectionMachineState.fs" />
+    <Compile Include="FramedMessageReader.fs" />
+    <Compile Include="DeviceConnection.fs" />
+    <Compile Include="ConduitState.fs" />
+    <Compile Include="SonarConduit.fs" />
   </ItemGroup>
 
   <ItemGroup>

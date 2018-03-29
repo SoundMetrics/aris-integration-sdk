@@ -10,5 +10,4 @@ type AcousticSettingsCookie = uint32
 type FrameIndex = int
 type Port = int
 type SerialNumber = int
-type PingMode = uint32
-type FocusUnits = uint32
+type FU = uint32

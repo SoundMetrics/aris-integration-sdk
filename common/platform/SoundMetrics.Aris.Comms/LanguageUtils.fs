@@ -4,6 +4,16 @@ namespace SoundMetrics.Aris.Comms
 
 open System
 
+module Log =
+    open System.Diagnostics
+
+    /// Use to log the first loading of an assembly. Useful when managed code is
+    /// hosted by native code.
+    let logLoad name =
+        let callerStackFrame = StackFrame(1)
+        let assyName = callerStackFrame.GetMethod().DeclaringType.Assembly.FullName
+        Trace.TraceInformation(sprintf "Loading %s - %A - %s" name DateTime.Now assyName)
+
 [<AutoOpen>]
 module ExceptionHelpers =
 

@@ -63,7 +63,35 @@ with
 
 /// Represents a versioned AcoustincSettings; a cookie is used to uniquely identify
 /// a specific AcousticSettings so the protocols can refer to settings commands.
-type AcousticSettingsVersioned = { cookie: AcousticSettingsCookie; settings: AcousticSettings }
+type AcousticSettingsVersioned = {
+    Cookie : AcousticSettingsCookie
+    Settings: AcousticSettings
+}
+
+/// Constants for initializing values.
+module AcousticSettingsConstants =
+    [<CompiledName("InvalidAcousticSettings")>]
+    let invalidAcousticSettings = {
+        FrameRate = 1.0f</s>
+        SampleCount = 0u
+        SampleStartDelay = 0<Us>
+        CyclePeriod = 0<Us>
+        SamplePeriod = 0<Us>
+        PulseWidth = 0<Us>
+        PingMode = SoundMetrics.Aris.Config.InvalidPingMode 0u
+        EnableTransmit = false
+        Frequency = Frequency.Low
+        Enable150Volts = false
+        ReceiverGain = 0.0f }
+
+    [<CompiledName("InvalidAcousticSettingsCookie")>]
+    let invalidAcousticSettingsCookie = 0u
+
+    [<CompiledName("InvalidAcousticSettingsVersioned")>]
+    let invalidAcousticSettingsVersioned = {
+        Cookie = invalidAcousticSettingsCookie
+        Settings = invalidAcousticSettings
+    }
 
 /// Used to track the latest acoustic settings applied.
 type AcousticSettingsApplied =
@@ -110,8 +138,6 @@ module internal SettingsImpl =
                                  Enable150Volts = true
                                  ReceiverGain = 12.0f } ]
         |> Map.ofList
-
-open SonarConfig
  
 type AcousticSettings with
     static member DefaultAcousticSettingsFor systemType = SettingsImpl.defaultSettingsMap.[systemType]

@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Aris.FileTypes
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.Aris.Config
 open System
 open System.Runtime.CompilerServices
@@ -69,3 +70,54 @@ with
             hdr
         finally
             h.Free()
+
+exception IndeterminateSettingsException
+
+[<Struct>]
+type AcousticSettingsFromFrame = {
+    CurrentSettings : AcousticSettingsVersioned
+    AppliedSettings : AcousticSettingsApplied
+}
+
+[<Extension>]
+type ArisFrameExtensions =
+
+    [<Extension>]
+    static member GetAcousticSettings (f : Frame) =
+
+        let currentSettings = { FrameRate =         f.Header.FrameRate * 1.0f</s>
+                                SampleCount =       f.Header.SamplesPerBeam
+                                SampleStartDelay =  int f.Header.SampleStartDelay * 1<Us>
+                                CyclePeriod =       int f.Header.CyclePeriod * 1<Us>
+                                SamplePeriod =      int f.Header.SamplePeriod * 1<Us>
+                                PulseWidth =        int f.Header.PulseWidth * 1<Us>
+                                PingMode =          PingMode.From (uint32 f.Header.PingMode)
+                                EnableTransmit =    f.Header.TransmitEnable <> 0u
+                                Frequency =         enum (int f.Header.FrequencyHiLow)
+                                Enable150Volts =    f.Header.Enable150V <> 0u
+                                ReceiverGain =      float32 f.Header.ReceiverGain }
+        let cookie, appliedSettings =
+            if f.Header.AppliedSettings > f.Header.ConstrainedSettings && f.Header.AppliedSettings > f.Header.InvalidSettings then
+                f.Header.AppliedSettings, Applied { Cookie = f.Header.AppliedSettings; Settings = currentSettings }
+            else if f.Header.ConstrainedSettings > f.Header.AppliedSettings && f.Header.ConstrainedSettings > f.Header.InvalidSettings then
+                f.Header.ConstrainedSettings, Constrained { Cookie = f.Header.ConstrainedSettings; Settings = currentSettings }
+            else if f.Header.InvalidSettings > f.Header.AppliedSettings && f.Header.InvalidSettings > f.Header.ConstrainedSettings then
+                f.Header.InvalidSettings, Invalid (f.Header.InvalidSettings, currentSettings)
+            else
+                raise IndeterminateSettingsException
+
+        let versionedCurrentSettings =
+            { Cookie = cookie
+              Settings = { FrameRate =          f.Header.FrameRate * 1.0f</s>
+                           SampleCount =        f.Header.SamplesPerBeam
+                           SampleStartDelay =   int f.Header.SampleStartDelay * 1<Us>
+                           CyclePeriod =        int f.Header.CyclePeriod * 1<Us>
+                           SamplePeriod =       int f.Header.SamplePeriod * 1<Us>
+                           PulseWidth =         int f.Header.PulseWidth * 1<Us>
+                           PingMode =           PingMode.From(f.Header.PingMode)
+                           EnableTransmit =     f.Header.TransmitEnable <> 0u
+                           Frequency =          enum (int f.Header.FrequencyHiLow)
+                           Enable150Volts =     f.Header.Enable150V <> 0u
+                           ReceiverGain =       float32 f.Header.ReceiverGain } }
+
+        { CurrentSettings = versionedCurrentSettings; AppliedSettings = appliedSettings }

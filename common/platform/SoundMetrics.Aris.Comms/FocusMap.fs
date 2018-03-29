@@ -2,7 +2,14 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.Aris.Config
+
+module FocusUnits =
+    open FocusMapTypes
+
+    let Minimum : FU = 0us
+    let Maximum : FU = 1000us
 
 module internal FocusMapDetails =
     open FocusMapData
@@ -100,8 +107,7 @@ module internal FocusMapDetails =
 
         let focusMap = getFocusMap systemType constrainedSalinity telephotoLens
         let constrainedTemp = constrainTemperature focusMap temp
-        let maxFocusUnits = uint16 1000
-        let constrainedUnits = min maxFocusUnits focusUnits
+        let constrainedUnits = min FocusUnits.Maximum focusUnits
 
         {
             FocusUnits = constrainedUnits
@@ -147,7 +153,7 @@ module internal FocusMapDetails =
         Log.Verbose (sprintf "lookUpFocusUnits: result=%A" fu)
         fu
 
-    let lookUpRange (inputs : ConstrainedRangeLookup) =
+    let lookUpRange (inputs : ConstrainedRangeLookup) : float<m> =
 
         let map = inputs.FocusMap;
 
@@ -174,31 +180,69 @@ module internal FocusMapDetails =
                           interpolate (float32 (constrainFocusUnits inputs.FocusUnits map.FocusUnitsMinMaxByTemp.[tempIdxB]))
                                       b1 b2)
 
-        interpolate inputs.Temperature c1 c2
+        float (interpolate inputs.Temperature c1 c2) * 1.0<m>
 
 open FocusMapDetails
 
 module FocusMap =
     open FocusMapTypes
 
-    let mapFocusRangeToFocusUnits (systemType: SystemType)
-                                  (range : float32)
-                                  (temperature : float32)
-                                  (salinity : Salinity)
-                                  (telephotoLens : bool) : FU =
+    type MappedFocusUnits = {
+        RequestedFocusRange: float<m>
+        TemperatureC: float<degC>
+        Salinity: Salinity
+        Telephoto: bool
+        FocusUnits: FU
+        ActualFocusDistance: float<m>
+    }
 
-        let constrainedUnitsLookup =
-            lookUpConstrainUnits systemType range temperature salinity telephotoLens
-        lookUpFocusUnits constrainedUnitsLookup
 
     let mapFocusUnitsToRange (systemType : SystemType)
                              (focusUnits : FU)
-                             (temperature : float32)
+                             (temperatureC : float<degC>)
                              (salinity : Salinity)
-                             (telephotoLens : bool) : float32 =
+                             (telephotoLens : bool) : float<m> =
 
+        let temp = single (temperatureC / 1.0<degC>)
         let constrainedRangeLookup =
-            lookUpConstrainRange systemType focusUnits temperature salinity telephotoLens
+            lookUpConstrainRange systemType focusUnits temp salinity telephotoLens
         let range = lookUpRange constrainedRangeLookup
 
         range
+
+    let mapRangeToFocusUnits (systemType: SystemType)
+                             (range : float<m>)
+                             (temperatureC : float<degC>)
+                             (salinity : Salinity)
+                             (telephotoLens : bool) : MappedFocusUnits =
+
+        let temp = single (temperatureC / 1.0<degC>)
+        let constrainedUnitsLookup =
+            lookUpConstrainUnits systemType (single (range / 1.0<m>)) temp salinity telephotoLens
+        let focusUnits = lookUpFocusUnits constrainedUnitsLookup
+
+        { RequestedFocusRange = range
+          TemperatureC = temperatureC
+          Salinity = salinity
+          Telephoto = telephotoLens
+          FocusUnits = focusUnits
+          ActualFocusDistance = mapFocusUnitsToRange systemType focusUnits temperatureC salinity telephotoLens
+        }
+
+
+    type AvailableFocusRange = {
+        Min: float<m>
+        Max: float<m>
+    }
+
+    [<CompiledName("CalculateAvailableFocusRange")>]
+    let calculateAvailableFocusRange systemType temperatureC salinity telephoto =
+        let min = mapFocusUnitsToRange systemType FocusUnits.Minimum temperatureC salinity telephoto
+        let max = mapFocusUnitsToRange systemType FocusUnits.Maximum temperatureC salinity telephoto
+
+        // Focus maps go both directions: from 0-1000 and 1000-0, so put the min
+        // and max ranges in the right order.
+        if min < max then
+            { Min = min; Max = max }
+        else
+            { Min = max; Max = min }

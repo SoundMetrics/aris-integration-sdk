@@ -73,7 +73,7 @@ module internal FrameProcessing =
     }
     with
         static member FromFrame (f: Frame) =
-            let cfg = SonarConfig.getPingModeConfig f.Header.PingMode
+            let cfg = SonarConfig.getPingModeConfig (PingMode.From (uint32 f.Header.PingMode))
             {
                 FrameIndex = int f.Header.FrameIndex
                 BeamCount  = cfg.ChannelCount

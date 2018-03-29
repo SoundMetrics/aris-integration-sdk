@@ -172,7 +172,7 @@ module internal FileRecording =
 
         /// Writes the frame and returns the recorded frame index offset
         /// (vs the incoming frame index).
-        member __.WriteFrame (frame: Frame) =
+        member __.WriteFrame (frame: Frame) : int =
 
             let startPosition = stream.Position
 
@@ -188,7 +188,7 @@ module internal FileRecording =
 
                 let newFrameIndex = fi
                 fi <- fi + 1u
-                newFrameIndex - initialFrameIndex
+                int newFrameIndex - int initialFrameIndex
             with
                 | :? IOException as ex ->
                     ignoreException

@@ -6,7 +6,28 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
 [<Measure>] type Us // Microseconds
 
-type PingMode = uint32
+type PingMode = PingMode1 | PingMode3 | PingMode6 | PingMode9 | InvalidPingMode of uint32
+with
+    member pm.IsSupported =
+        match pm with
+        | PingMode1 | PingMode3 | PingMode6 | PingMode9 -> true
+        | InvalidPingMode _ -> false
+
+    member pm.ToUInt32 () =
+        match pm with
+        | PingMode1 -> 1u
+        | PingMode3 -> 3u
+        | PingMode6 -> 6u
+        | PingMode9 -> 9u
+        | InvalidPingMode pingMode -> failwithf "Unexpected use of InvalidPingMode: %u" pingMode
+
+    static member From (pingMode : uint32) =
+        match pingMode with
+        | 1u -> PingMode1
+        | 3u -> PingMode3
+        | 6u -> PingMode6
+        | 9u -> PingMode9
+        | _ -> invalidArg "pingMode" "Unsupported ping mode"
 
 type Frequency = Low = 0 | High = 1
 
@@ -108,24 +129,23 @@ module SonarConfig =
 
     type PingModeConfig = {
         PingMode: PingMode
-        IsSupported: bool
         ChannelCount: uint32
         PingsPerFrame: uint32
     }
 
     let pingModeConfigurations =
-        [ { PingMode =  1u; IsSupported = true ; ChannelCount =  48u; PingsPerFrame = 3u }
-          { PingMode =  2u; IsSupported = false; ChannelCount =  48u; PingsPerFrame = 1u }
-          { PingMode =  3u; IsSupported = true ; ChannelCount =  96u; PingsPerFrame = 6u }
-          { PingMode =  4u; IsSupported = false; ChannelCount =  96u; PingsPerFrame = 2u }
-          { PingMode =  5u; IsSupported = false; ChannelCount =  96u; PingsPerFrame = 1u }
-          { PingMode =  6u; IsSupported = true ; ChannelCount =  64u; PingsPerFrame = 4u }
-          { PingMode =  7u; IsSupported = false; ChannelCount =  64u; PingsPerFrame = 2u }
-          { PingMode =  8u; IsSupported = false; ChannelCount =  64u; PingsPerFrame = 1u }
-          { PingMode =  9u; IsSupported = true ; ChannelCount = 128u; PingsPerFrame = 8u }
-          { PingMode = 10u; IsSupported = false; ChannelCount = 128u; PingsPerFrame = 4u }
-          { PingMode = 11u; IsSupported = false; ChannelCount = 128u; PingsPerFrame = 2u }
-          { PingMode = 12u; IsSupported = false; ChannelCount = 128u; PingsPerFrame = 1u } ]
+        [ { PingMode = PingMode1;           ChannelCount =  48u; PingsPerFrame = 3u }
+          { PingMode = InvalidPingMode 2u;  ChannelCount =  48u; PingsPerFrame = 1u }
+          { PingMode = PingMode3;           ChannelCount =  96u; PingsPerFrame = 6u }
+          { PingMode = InvalidPingMode 4u;  ChannelCount =  96u; PingsPerFrame = 2u }
+          { PingMode = InvalidPingMode 5u;  ChannelCount =  96u; PingsPerFrame = 1u }
+          { PingMode = PingMode6;           ChannelCount =  64u; PingsPerFrame = 4u }
+          { PingMode = InvalidPingMode 7u;  ChannelCount =  64u; PingsPerFrame = 2u }
+          { PingMode = InvalidPingMode 8u;  ChannelCount =  64u; PingsPerFrame = 1u }
+          { PingMode = PingMode9;           ChannelCount = 128u; PingsPerFrame = 8u }
+          { PingMode = InvalidPingMode 10u; ChannelCount = 128u; PingsPerFrame = 4u }
+          { PingMode = InvalidPingMode 11u; ChannelCount = 128u; PingsPerFrame = 2u }
+          { PingMode = InvalidPingMode 12u; ChannelCount = 128u; PingsPerFrame = 1u } ]
           |> List.map (fun elem -> elem.PingMode, elem)
           |> Map.ofList
 
@@ -133,9 +153,9 @@ module SonarConfig =
         { systemType: SystemType; defaultPingMode: PingMode; validPingModes: PingMode list }
 
     let systemTypeToPingModeMap = 
-        [ { systemType = SystemType.Aris1200;  defaultPingMode = 1u; validPingModes = [ 1u ] }
-          { systemType = SystemType.Aris1800;  defaultPingMode = 3u; validPingModes = [ 1u; 3u ] }
-          { systemType = SystemType.Aris3000;  defaultPingMode = 9u; validPingModes = [ 6u; 9u ] }
+        [ { systemType = SystemType.Aris1200;  defaultPingMode = PingMode1; validPingModes = [ PingMode1 ] }
+          { systemType = SystemType.Aris1800;  defaultPingMode = PingMode3; validPingModes = [ PingMode1; PingMode3 ] }
+          { systemType = SystemType.Aris3000;  defaultPingMode = PingMode9; validPingModes = [ PingMode6; PingMode9 ] }
           // { systemType = SystemType.DidsonStd; defaultPingMode = 1; validPingModes = [ 1; 2 ] }
           // { systemType = SystemType.DidsonLR;  defaultPingMode = 1; validPingModes = [ 1; 2 ] }
           ]

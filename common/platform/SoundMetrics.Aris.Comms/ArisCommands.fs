@@ -20,9 +20,9 @@ module ArisCommands =
         if Double.IsNaN(float range) || Double.IsInfinity(float range) then
             invalidArg "range" (sprintf "Value '%f' is invalid" (float range))
 
-        FocusMap.mapFocusRangeToFocusUnits systemType range degreesC salinity telephoto
+        FocusMap.mapRangeToFocusUnits systemType range degreesC salinity telephoto
 
-    let makeFocusCmd (requestedFocus: FocusUnits) =
+    let makeFocusCmd (requestedFocus: FU) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetFocus,
             FocusPosition = Aris.Command.Types.SetFocusPosition(
@@ -73,11 +73,11 @@ module ArisCommands =
             )
         )
 
-    let makeSalinityCmd salinity =
+    let makeSalinityCmd (salinity : Salinity) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetSalinity,
             Salinity = Aris.Command.Types.SetSalinity(
-                Salinity = enum salinity
+                Salinity = enum (int salinity)
             )
         )
 
@@ -94,17 +94,17 @@ module ArisCommands =
             Type = Aris.Command.Types.CommandType.SetAcoustics,
             Settings =
                 Aris.Command.Types.SetAcousticSettings(
-                    Cookie = uint32 v.cookie,
-                    FrameRate = float32 v.settings.FrameRate,
-                    SamplesPerBeam = uint32 v.settings.SampleCount,
-                    SampleStartDelay = uint32 v.settings.SampleStartDelay,
-                    CyclePeriod = uint32 v.settings.CyclePeriod,
-                    SamplePeriod = uint32 v.settings.SamplePeriod,
-                    PulseWidth = uint32 v.settings.PulseWidth,
-                    PingMode = uint32 v.settings.PingMode,
-                    EnableTransmit = v.settings.EnableTransmit,
-                    Frequency = enum (int32 v.settings.Frequency),
-                    Enable150Volts = v.settings.Enable150Volts,
-                    ReceiverGain = float32 v.settings.ReceiverGain)
+                    Cookie = uint32 v.Cookie,
+                    FrameRate = float32 v.Settings.FrameRate,
+                    SamplesPerBeam = uint32 v.Settings.SampleCount,
+                    SampleStartDelay = uint32 v.Settings.SampleStartDelay,
+                    CyclePeriod = uint32 v.Settings.CyclePeriod,
+                    SamplePeriod = uint32 v.Settings.SamplePeriod,
+                    PulseWidth = uint32 v.Settings.PulseWidth,
+                    PingMode = v.Settings.PingMode.ToUInt32(),
+                    EnableTransmit = v.Settings.EnableTransmit,
+                    Frequency = enum (int32 v.Settings.Frequency),
+                    Enable150Volts = v.Settings.Enable150Volts,
+                    ReceiverGain = float32 v.Settings.ReceiverGain)
         )
 
