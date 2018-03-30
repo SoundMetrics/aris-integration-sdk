@@ -15,11 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms", "SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj", "{74B8EB49-4248-43CB-9D69-AF71B4D68E66}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT", "SoundMetrics.Aris.Comms.UT\SoundMetrics.Aris.Comms.UT.fsproj", "{9538C3ED-F06C-4B7F-A079-1C0CDD8F7AFB}"
-EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Config", "SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj", "{7274DF9E-EC20-4BE8-A24F-16BBC8E164D0}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.FrameHeaderInjection", "SoundMetrics.Aris.FrameHeaderInjection\SoundMetrics.Aris.FrameHeaderInjection.fsproj", "{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{41D1886B-1540-4597-A6AA-6D9CFC1EE247}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT", "test\SoundMetrics.Aris.Comms.UT\SoundMetrics.Aris.Comms.UT.fsproj", "{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +41,6 @@ Global
 		{74B8EB49-4248-43CB-9D69-AF71B4D68E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74B8EB49-4248-43CB-9D69-AF71B4D68E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74B8EB49-4248-43CB-9D69-AF71B4D68E66}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9538C3ED-F06C-4B7F-A079-1C0CDD8F7AFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9538C3ED-F06C-4B7F-A079-1C0CDD8F7AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9538C3ED-F06C-4B7F-A079-1C0CDD8F7AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9538C3ED-F06C-4B7F-A079-1C0CDD8F7AFB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7274DF9E-EC20-4BE8-A24F-16BBC8E164D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7274DF9E-EC20-4BE8-A24F-16BBC8E164D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7274DF9E-EC20-4BE8-A24F-16BBC8E164D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,9 +49,16 @@ Global
 		{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}

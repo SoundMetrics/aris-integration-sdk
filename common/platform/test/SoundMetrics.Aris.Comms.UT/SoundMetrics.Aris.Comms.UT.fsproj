@@ -14,6 +14,7 @@
   <ItemGroup>
     <Compile Include="FocusMapTypesTest.fs" />
     <Compile Include="FocusMapTest.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj" />
+    <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj" />
+    <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
   </ItemGroup>
 
 </Project>
