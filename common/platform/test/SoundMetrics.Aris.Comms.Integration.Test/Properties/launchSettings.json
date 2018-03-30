@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SoundMetrics.Aris.Comms.Integration.Test": {
+      "commandName": "Project",
+      "commandLineArgs": "--verbose --all"
+    }
+  }
+}

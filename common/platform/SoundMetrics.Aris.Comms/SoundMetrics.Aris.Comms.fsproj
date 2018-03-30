@@ -61,7 +61,7 @@
 
   <ItemGroup>
     <PackageReference Include="fracas" Version="1.0.0-beta" />
-    <PackageReference Include="Serilog" Version="2.7.1-dev-00963" />
+    <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="SoundMetrics.Aris.Headers" Version="1.0.0-beta" />
     <PackageReference Include="System.Reactive" Version="3.1.1" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0-preview1-26216-02" />

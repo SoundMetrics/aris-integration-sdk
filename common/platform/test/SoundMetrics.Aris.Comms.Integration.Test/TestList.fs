@@ -1,0 +1,62 @@
+﻿module TestList
+
+open Microsoft.FSharp.Quotations
+open Microsoft.FSharp.Quotations.Patterns
+open Serilog
+open System
+open TestInputs
+
+module private TestListDetails =
+
+    type TestFunc = TestInputs -> unit
+    type TestEntry = Expr<TestFunc>
+
+    let tests : TestEntry array =
+        [|
+            <@ BasicConnection.testBasicConnection @>
+        |]
+
+    let getTestName testEntry =
+
+        match testEntry with
+        | Lambda (var, expr) ->
+            match expr with
+            | Call (_, methodInfo, _) -> methodInfo.Name
+            | _ -> failwith "Unexpected result from Call"
+        | _ -> failwith "Unexpected result from Lambda"
+
+    let separator = String('-', 80)
+
+    let runTestEntry testEntry (inputs : TestInputs) =
+
+        match testEntry with
+        | Lambda (var, expr) ->
+            match expr with
+            | Call (_, methodInfo, _) ->
+                let testName = getTestName testEntry
+                Log.Information(separator)
+                Log.Information("Starting test {testName}", testName)
+                methodInfo.Invoke(null, [| inputs |]) |> ignore
+                Log.Information("Ending test {testName}", testName)
+            | _ -> failwith "Unexpected result from Call"
+        | _ -> failwith "Unexpected result from Lambda"
+
+    let testMap = tests |> Seq.map (fun entry -> (getTestName entry, entry))
+                        |> Map.ofSeq
+
+open TestListDetails
+
+let getTestNames () =
+
+    tests |> Seq.map getTestName
+
+let runTest name inputs =
+
+    match testMap.TryFind(name) with
+    | Some entry -> runTestEntry entry inputs
+    | None -> failwithf "Couldn't find a test named '%s'" name
+
+let runAllTests inputs =
+
+    for entry in tests do
+        runTestEntry entry inputs

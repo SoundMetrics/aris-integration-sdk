@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{41D1886B-1
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT", "test\SoundMetrics.Aris.Comms.UT\SoundMetrics.Aris.Comms.UT.fsproj", "{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}"
 EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.Integration.Test", "test\SoundMetrics.Aris.Comms.Integration.Test\SoundMetrics.Aris.Comms.Integration.Test.fsproj", "{0515F65D-AE6A-4943-9B75-84C41A6C65EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,12 +55,17 @@ Global
 		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
+		{0515F65D-AE6A-4943-9B75-84C41A6C65EF} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}
