@@ -2,7 +2,7 @@
   "profiles": {
     "SoundMetrics.Aris.Comms.Integration.Test": {
       "commandName": "Project",
-      "commandLineArgs": "--verbose --all"
+      "commandLineArgs": "--all -sn 24"
     }
   }
 }

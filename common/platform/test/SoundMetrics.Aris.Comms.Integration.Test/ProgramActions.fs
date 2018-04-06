@@ -5,6 +5,7 @@
 open Argu
 open ProgramArgs
 open Serilog
+open TestInputs
 open TestList
 
 type ProgramActionResult = Skipped | Performed
@@ -23,7 +24,13 @@ let runAllTests (args : ParseResults<ProgramArgs>) =
 
     if args.Contains All then
         Log.Information("Run all tests")
-        TestList.runAllTests { TestInputs.SerialNumber = None }
+        let inputs = {
+            SerialNumber = if args.Contains Serial_Number then
+                                Some (int (args.GetResult(Serial_Number)))
+                           else
+                                None
+        }
+        TestList.runAllTests inputs
         Performed
     else
         Skipped

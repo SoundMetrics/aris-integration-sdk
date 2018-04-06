@@ -42,9 +42,9 @@ type FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabilityPolicy:
     let frameSubject = new Subject<Frame>()
     let completeSignal = new ManualResetEventSlim()
 
-    let sendAck frameIndex dataOffset =
+    let sendAck (frameIndex : FrameIndex) (dataOffset : uint32) =
         let ack = FramePartAck(FrameIndex = frameIndex,
-                               DataOffset = dataOffset)
+                               DataOffset = int dataOffset)
         let buf =
             let b = Array.zeroCreate<byte> (ack.CalculateSize())
             use stream = new CodedOutputStream(b)

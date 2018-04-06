@@ -43,8 +43,8 @@ module private SlidingWindowFrameAssemblerLogging =
     let logReceivingPacket (byteCount : int) =
         Log.Verbose("Receiving packet of {ByteCount} bytes", byteCount)
 
-    let logCouldNotParseOrProcessFramePart (msg : string) =
-        Log.Warning("Couldn't parse or process FramePart: {Message}", msg)
+    let logCouldNotParseOrProcessFramePart (msg : string) stackTrace =
+        Log.Warning("Couldn't parse or process FramePart: {Message}; {stackTrace}", msg, stackTrace)
 
     let logIncomingFrameIndexAdvanced (currentFI : FrameIndex) (incomingFI : FrameIndex) =
         Log.Verbose("Incoming frame index advanced from {CurrentFI} to {IncomingFI}",
@@ -175,8 +175,8 @@ module private SlidingWindowFrameAssemblerImpl =
 /// Assembles packets into frames. See FrameStreamListener for policy regarding
 /// packet retries and dropping partial frames.
 [<Sealed(true)>]
-type SlidingWindowFrameAssembler private (sendAck: SendAck,
-                                          onFrameFinished: FrameFinishedHandler) =
+type SlidingWindowFrameAssembler (sendAck: SendAck,
+                                  onFrameFinished: FrameFinishedHandler) =
     let disposed = ref false
     let currentFrameIndex = ref -1
     let lastFinishedFrameIndex = ref -1
@@ -282,7 +282,7 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
                             flush false
                     )
             with
-                e -> logCouldNotParseOrProcessFramePart e.Message
+                e -> logCouldNotParseOrProcessFramePart e.Message e.StackTrace
         finally
             updateMetrics { ProtocolMetrics.Empty with
                                 SkippedFrameCount = skippedFrameCount.Value
@@ -301,9 +301,6 @@ type SlidingWindowFrameAssembler private (sendAck: SendAck,
                         | None -> ()
         
     let workQueue, pktQueueLink = makeWorkQueue processWorkUnit
-
-    internal new (sendAck, onFrameFinished) =
-        new SlidingWindowFrameAssembler(sendAck, onFrameFinished)
 
     interface IDisposable with
         member __.Dispose() =

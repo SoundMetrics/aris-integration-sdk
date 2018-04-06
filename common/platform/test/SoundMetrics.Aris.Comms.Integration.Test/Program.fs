@@ -27,6 +27,9 @@ let main argv =
 
     let args = argParser.Parse(argv)
 
+#if DEBUG
+    printfn "args=%A" args
+#endif
 
     let loggingLevel = if args.Contains Verbose then LogEventLevel.Verbose else LogEventLevel.Information
     Log.Logger <-

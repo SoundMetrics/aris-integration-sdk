@@ -3,9 +3,14 @@
 open Serilog
 open SoundMetrics.Aris.Comms
 open System
+open System.Threading
 open TestInputs
 
 let testBasicConnection (inputs : TestInputs) =
+
+    let sn = match inputs.SerialNumber with
+             | Some sn -> sn
+             | None -> failwith "No serial number was provided"
 
     // Console doesn't have a sync context by default, we need one for the beacon listener.
     let syncContext = Threading.SynchronizationContext()
@@ -17,15 +22,22 @@ let testBasicConnection (inputs : TestInputs) =
                 Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
                 None // callbacks
 
-    use sub = availability.Beacons
-                |> Observable.filter (fun beacon -> beacon.serialNumber = sn)
-                |> Observable.timeout timeoutPeriod
-                |> Observable.subscribe (fun beacon ->
-                    targetIpAddr <- beacon.srcIpAddr
-                    softwareVersion <- beacon.softwareVersion
-                    readySignal.Set() |> ignore
-                    )
-    if readySignal.WaitOne(timeoutPeriod : TimeSpan) then
-        Some (targetIpAddr, softwareVersion)
-    else
-        None
+    let timeoutPeriod = TimeSpan.FromSeconds(5.0)
+
+    match FindSonar.findAris availability timeoutPeriod sn with
+    | Some beacon ->
+        Log.Information("ARIS {sn}, software version {softwareVersion}, found at {targetIpAddr}",
+                        sn, beacon.SoftwareVersion, beacon.SrcIpAddr)
+
+        let initialSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
+        use conduit = new SonarConduit(initialSettings, sn, availability, FrameStreamReliabilityPolicy.DropPartialFrames)
+
+        use readySignal = new ManualResetEvent(false)
+
+        Log.Information("Waiting on a frame...")
+        use frames = conduit.Frames.Subscribe(fun _frame -> readySignal.Set() |> ignore)
+        if readySignal.WaitOne(TimeSpan.FromSeconds(5.0)) then
+            Ok ()
+        else
+            Error "Timed out waiting for a frame"
+    | None -> Error (sprintf "Timed out waiting to find ARIS %d" sn)

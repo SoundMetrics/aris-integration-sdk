@@ -61,15 +61,15 @@ module SystemVariant =
     let Voyager = "VG"
 
 type SonarBeacon = {
-    Timestamp: DateTime
-    SrcIpAddr: IPAddress
-    SerialNumber: SerialNumber
-    SystemType: SystemType
-    SoftwareVersion: SoftwareVersion
-    ConnectionState: AvailabilityState
-    CpuTemp: float32 option
-    IsDiverHeld: bool
-    IsVoyager: bool
+    Timestamp :         DateTime
+    SrcIpAddr :         IPAddress
+    SerialNumber :      SerialNumber
+    SystemType :        SystemType
+    SoftwareVersion :   SoftwareVersion
+    ConnectionState :   AvailabilityState
+    CpuTemp :           float32 option
+    IsDiverHeld :       bool
+    IsVoyager :         bool
 }
 
 // Defender beacon

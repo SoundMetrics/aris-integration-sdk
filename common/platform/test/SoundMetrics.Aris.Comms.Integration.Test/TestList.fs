@@ -8,8 +8,9 @@ open TestInputs
 
 module private TestListDetails =
 
-    type TestFunc = TestInputs -> unit
-    type TestEntry = Expr<TestFunc>
+    type TestResult =   Result<unit, string>
+    type TestFunc =     TestInputs -> TestResult
+    type TestEntry =    Expr<TestFunc>
 
     let tests : TestEntry array =
         [|
@@ -36,7 +37,10 @@ module private TestListDetails =
                 let testName = getTestName testEntry
                 Log.Information(separator)
                 Log.Information("Starting test {testName}", testName)
-                methodInfo.Invoke(null, [| inputs |]) |> ignore
+                let result = methodInfo.Invoke(null, [| inputs |]) :?> TestResult
+                match result with
+                | Ok () -> Log.Information("Test {testName} succeeded", testName)
+                | Error msg -> Log.Error("Test {testName} failed: '{msg}'", testName, msg)
                 Log.Information("Ending test {testName}", testName)
             | _ -> failwith "Unexpected result from Call"
         | _ -> failwith "Unexpected result from Lambda"
