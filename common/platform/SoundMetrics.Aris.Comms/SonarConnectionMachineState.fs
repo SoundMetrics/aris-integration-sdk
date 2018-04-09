@@ -153,6 +153,7 @@ module internal SonarConnectionMachineState =
                     SonarConnectionDetails.sendCmd
                         cmdLink ArisCommands.pingCommandSingleton
                     |> ignore
+                    Serilog.Log.Information("*** ping ***")
                 | _ -> ()
 
             | Beacon beacon ->

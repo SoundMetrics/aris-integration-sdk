@@ -35,8 +35,16 @@ let testBasicConnection (inputs : TestInputs) =
         use readySignal = new ManualResetEvent(false)
 
         Log.Information("Waiting on a frame...")
-        use frames = conduit.Frames.Subscribe(fun _frame -> readySignal.Set() |> ignore)
-        if readySignal.WaitOne(TimeSpan.FromSeconds(5.0)) then
+        use frames = conduit.Frames.Subscribe(fun processedFrame ->
+            readySignal.Set() |> ignore
+            match processedFrame.work with
+            | Frame (frame, _histogram, _isRecording) ->
+                Log.Information("Received frame {fi} from SN {sn}",
+                    frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
+            | _ -> ()
+        )
+
+        if readySignal.WaitOne(TimeSpan.FromSeconds(15.0)) then
             Ok ()
         else
             Error "Timed out waiting for a frame"

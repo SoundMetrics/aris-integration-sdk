@@ -96,12 +96,18 @@ module internal SonarConnectionDetails =
         BitConverter.GetBytes msgLengthNetworkOrder
 
     let sendCmd (socket: TcpClient) (cmd: Aris.Command) =
-        let stm = socket.GetStream()
+        // Let's not assume we're the only writer to the socket.
+        // Put the prefix in the same buffer as the message.
         let prefix = getCommandLengthPrefix (cmd.CalculateSize())
-        stm.Write(prefix, 0, prefix.Length)
 
-        use cos = new CodedOutputStream(stm, leaveOpen = true)
+        use memstream = new System.IO.MemoryStream()
+        memstream.Write(prefix, 0, prefix.Length)
+        use cos = new CodedOutputStream(memstream, leaveOpen = true)
         cmd.WriteTo(cos)
+        cos.Flush()
+
+        memstream.Position <- 0L
+        socket.Client.Send(memstream.ToArray())
 
     let makeTimeCmd (dateTime: DateTime) =
         Aris.Command(

@@ -8,6 +8,7 @@ open SoundMetrics.Aris.Config
 open System
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
+open SoundMetrics.NativeMemory
 
 //exception IndeterminateSettingsException
 

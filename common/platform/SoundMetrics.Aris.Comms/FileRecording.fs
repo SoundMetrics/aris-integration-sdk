@@ -180,7 +180,7 @@ module internal FileRecording =
                 let initialFrameIndex = frame.Header.FrameIndex
                 if firstFrame then
                     firstFrame <- false
-                    frameSize <- frame.SampleData.Length
+                    frameSize <- uint32 frame.SampleData.Length
                     writeFileHeader stream (Some frame)
 
                 assert (stream.Position = int64(ArisFileHeaderSize + (int fi * (ArisFrameHeaderSize + int frameSize))))

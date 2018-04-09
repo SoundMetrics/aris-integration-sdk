@@ -25,6 +25,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.Integration.Test", "test\SoundMetrics.Aris.Comms.Integration.Test\SoundMetrics.Aris.Comms.Integration.Test.fsproj", "{0515F65D-AE6A-4943-9B75-84C41A6C65EF}"
 EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.NativeMemory", "SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj", "{178917D9-6103-4A65-85A3-E7C1048775FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{178917D9-6103-4A65-85A3-E7C1048775FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{178917D9-6103-4A65-85A3-E7C1048775FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{178917D9-6103-4A65-85A3-E7C1048775FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{178917D9-6103-4A65-85A3-E7C1048775FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

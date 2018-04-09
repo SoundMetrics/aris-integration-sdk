@@ -271,8 +271,13 @@ type SonarConduit private (initialAcousticSettings: AcousticSettings,
     let inputGraphLinks = wireUpInputEvents cxnEvQueue keepAliveTimer available matchBeacon
 
     let quitCxnMgr () = cxnEvQueue.Post(mkEventNoCallback Quit) |> ignore
-    let queueCmd cmd = cxnEvQueue.Post(mkEventNoCallback (Command cmd)) |> ignore
-    // TODO mkEventNoCallback determine if we really want callbacks; how to implement in API
+    let queueCmd (cmd : Aris.Command) =
+        if Serilog.Log.IsEnabled(Serilog.Events.LogEventLevel.Verbose) then
+            let commandType = cmd.Type.ToString()
+            Serilog.Log.Verbose("Queuing command type {commandType}", commandType)
+
+        cxnEvQueue.Post(mkEventNoCallback (Command cmd)) |> ignore
+        // TODO mkEventNoCallback determine if we really want callbacks; how to implement in API
 
     let focusRequestSink, focusInputSubscription =
         mkFocusQueue (earlyFrameSubject :> ISubject<ProcessedFrame>)

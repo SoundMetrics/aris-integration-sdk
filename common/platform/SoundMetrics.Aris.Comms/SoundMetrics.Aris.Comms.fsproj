@@ -32,7 +32,6 @@
     <Compile Include="AcousticSettings.fs" />
     <Compile Include="AcousticMath.fs" />
     <Compile Include="Rotator.fs" />
-    <Compile Include="NativeBuffer.fs" />
     <Compile Include="FrameAccumulator.fs" />
     <Compile Include="Frame.fs" />
     <Compile Include="ProtocolMetrics.fs" />
@@ -71,6 +70,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
+    <ProjectReference Include="..\SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

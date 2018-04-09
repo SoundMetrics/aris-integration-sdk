@@ -2,13 +2,9 @@
 
 namespace SoundMetrics.Aris.Comms
 
-open Microsoft.FSharp.NativeInterop
 open System
-open System.Runtime.InteropServices
 
-// For native pointers:
-// warning FS0009: Uses of this construct may result in the generation of unverifiable .NET IL code. This warning can be disabled using '--nowarn:9' or '#nowarn "9"'.
-#nowarn "9"
+open SoundMetrics.NativeMemory
 
 /// Accumulates multiple packets which make up a frame.
 /// Mutable.
@@ -24,7 +20,7 @@ type internal FrameAccumulator(frameIndex : FrameIndex,
 
     [<Literal>]
     let TypicalMaxFragmentCount = 200 // more than enough for 128 beams, 2000 samples.
-    let fragments = ResizeArray<uint32 * byte array>(capacity = 200)
+    let fragments = ResizeArray<int * byte array>(capacity = 200)
 
     let mutable dataReceived = 0u
 
@@ -35,7 +31,7 @@ type internal FrameAccumulator(frameIndex : FrameIndex,
     let appendFrameData (dataOffset: uint32) (dataFragment: byte[]) =
         // The sliding window code elsewhere deals with whether we succeed or
         // fail on missing data; here we just store it away.
-        fragments.Add((dataOffset, dataFragment))
+        fragments.Add((int dataOffset, dataFragment))
         dataReceived <- dataReceived + uint32 dataFragment.Length
 
     do

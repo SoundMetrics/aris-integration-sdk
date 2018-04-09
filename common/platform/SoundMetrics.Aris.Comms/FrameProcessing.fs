@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.NativeInterop
 open SoundMetrics.Aris.Config
+open SoundMetrics.NativeMemory
 open System
 open System.Diagnostics
 open System.Reactive.Subjects
@@ -100,10 +101,10 @@ module internal FrameProcessing =
 
     let inline reorderSampleBuffer (fb : FrameBuffer)
                                    (histogram : Histogram)
-                                   (source : nativeint, destination : nativeint) =
+                                   (source : nativeptr<byte>, destination : nativeptr<byte>) =
 
-        let outbuf = destination |> NativePtr.ofNativeInt<byte>
-        let inputW = source |> NativePtr.ofNativeInt<uint32>
+        let outbuf = destination
+        let inputW = NativePtr.ofNativeInt<uint32> (NativePtr.toNativeInt source)
 
         let beamsPerPing = int (fb.BeamCount / fb.PingsPerFrame)
         let channelReverseMultipledMap = buildChannelReverseMultiples beamsPerPing (int fb.PingsPerFrame)
@@ -187,7 +188,7 @@ module internal FrameProcessing =
             fb.SampleData |> NativeBuffer.transform reorder
 
         sw.Stop()
-        //System.Diagnostics.Trace.TraceInformation(sprintf "#### F# reordering ~%09d ticks; %d bytes written" sw.ElapsedTicks !bytesWritten)
+        Log.Verbose("F# reordering {ticks} ticks", sw.ElapsedTicks)
 
         reorderedSampleData, histogram
 
@@ -195,8 +196,8 @@ module internal FrameProcessing =
         let histogram = Histogram.Create ()
         let updateHisto, disposeHistoUpdater = histogram.CreateUpdater ()
 
-        let buildHistogram (source : nativeint) =
-            let bytes = source |> NativePtr.ofNativeInt<byte>
+        let buildHistogram (source : nativeptr<byte>) =
+            let bytes = source
             for offset = 0 to int fb.SampleData.Length - 1 do
                 let sample = NativePtr.get bytes offset
                 updateHisto (int sample)
