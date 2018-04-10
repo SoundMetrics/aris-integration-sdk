@@ -102,7 +102,7 @@ type AcousticSettingsApplied =
 
 open SonarConfig
 
-module internal SettingsImpl =
+module internal SettingsDetails =
     let defaultSettingsMap =
         [ SystemType.Aris1200, { FrameRate = 1.0f</s>
                                  SampleCount = 1000u
@@ -140,7 +140,7 @@ module internal SettingsImpl =
         |> Map.ofList
  
 type AcousticSettings with
-    static member DefaultAcousticSettingsFor systemType = SettingsImpl.defaultSettingsMap.[systemType]
+    static member DefaultAcousticSettingsFor systemType = SettingsDetails.defaultSettingsMap.[systemType]
 
     member s.Validate () =
         let pingsPerFrame = pingModeConfigurations.[s.PingMode].PingsPerFrame

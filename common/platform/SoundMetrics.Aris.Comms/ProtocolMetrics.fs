@@ -14,7 +14,7 @@ type ProtocolMetrics =
       TotalPacketsAccepted:   uint64
       UnparsablePackets:      uint64 }
 
-module private ProtocolMetricsImpl =
+module private ProtocolMetricsDetails =
     let empty = 
         { UniqueFrameIndexCount  = 0UL
           ProcessedFrameCount    = 0UL
@@ -27,7 +27,7 @@ module private ProtocolMetricsImpl =
           UnparsablePackets      = 0UL }
 
 type ProtocolMetrics with
-    static member Empty = ProtocolMetricsImpl.empty
+    static member Empty = ProtocolMetricsDetails.empty
     static member (+) (a, b) =
         { UniqueFrameIndexCount   = a.UniqueFrameIndexCount   + b.UniqueFrameIndexCount
           ProcessedFrameCount     = a.ProcessedFrameCount     + b.ProcessedFrameCount

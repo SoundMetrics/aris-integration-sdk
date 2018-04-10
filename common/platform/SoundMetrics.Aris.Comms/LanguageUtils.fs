@@ -61,11 +61,11 @@ module Dispose =
             for d in disposables do
                 if d <> null then d.Dispose()
 
-    module private DisposeImpl =
+    module private DisposeDetails =
         let emptyFirst = fun () -> ()
 
     /// Disposes the disposables indicated.
-    let these isDisposed disposables = theseWith isDisposed disposables DisposeImpl.emptyFirst
+    let these isDisposed disposables = theseWith isDisposed disposables DisposeDetails.emptyFirst
 
     /// Wraps disposables for clean up.
     type private AnonymousDisposable (cleanUp: unit -> unit, disposables: IDisposable list) =

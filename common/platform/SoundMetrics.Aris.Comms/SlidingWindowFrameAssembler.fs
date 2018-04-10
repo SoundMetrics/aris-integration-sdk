@@ -96,8 +96,7 @@ module private SlidingWindowFrameAssemblerLogging =
 type internal SendAck = FrameIndex -> uint32 -> unit
 type internal FrameFinishedHandler = FrameAccumulator -> unit
 
-[<AutoOpen>]
-module private SlidingWindowFrameAssemblerImpl =
+module private SlidingWindowFrameAssemblerDetails =
 
     type WorkUnit =
     | Packet of data : byte array * timestamp : DateTimeOffset
@@ -190,7 +189,7 @@ module private SlidingWindowFrameAssemblerImpl =
             // Ack will go out asking for the first part of the frame to be resent.
             logMissedPacket !currentFrameIndex incomingFrameIndex 0u incomingDataOffset
 
-
+open SlidingWindowFrameAssemblerDetails
 
 /// Assembles packets into frames. See FrameStreamListener for policy regarding
 /// packet retries and dropping partial frames.

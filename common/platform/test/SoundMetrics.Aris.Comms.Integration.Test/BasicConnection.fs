@@ -47,7 +47,7 @@ let testBasicConnection (inputs : TestInputs) =
                     frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
                 frameCount <- frameCount + 1
 
-                if frame.Header.ReorderedSamples <> 0u then
+                if frame.Header.ReorderedSamples = 0u then
                     errorCount <- errorCount + 1u
                     Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
 

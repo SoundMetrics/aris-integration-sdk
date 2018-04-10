@@ -44,7 +44,7 @@ module Beacons =
 
     type BeaconExpirationPolicy = RemoveExpiredBeacons | KeepExpiredBeacons
 
-    module private BeaconsImpl =
+    module private BeaconsDetails =
 
         // Generalized listener for UDP beacons.
         type BeaconListener<'B>(beaconPort, mapfn : Udp.UdpReceived -> 'B option) =
@@ -173,7 +173,7 @@ module Beacons =
             new BeaconListener<'B>(beaconPort, toBeacon)
 
 
-    open BeaconsImpl
+    open BeaconsDetails
 
 
     /// Maintains an observable collection of beacons.
@@ -192,7 +192,7 @@ module Beacons =
         let timer = Observable.Interval(timerPeriod)
 
         let updateBeaconTable =
-            BeaconsImpl.updateBeaconTableEntries
+            BeaconsDetails.updateBeaconTableEntries
                             support expirationPeriod beaconCollection
                             beaconTable expirationPolicy
             
