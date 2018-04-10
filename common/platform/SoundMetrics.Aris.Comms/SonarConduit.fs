@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open Serilog
 open System
 open System.Net
 open System.Reactive.Linq
@@ -76,7 +77,6 @@ module SonarConduitHelpers =
 
 
 module private SonarConduitDetails =
-    open Serilog
     open System.Diagnostics
     open System.Net.NetworkInformation
 
@@ -366,7 +366,9 @@ type SonarConduit private (initialAcousticSettings: AcousticSettings,
 
         member s.OnInitializeConnection frameSinkAddress =
             Trace.TraceInformation("SonarConduit[{0}]: initializing connection", targetSonar)
-            queueCmd (makeTimeCmd DateTime.Now) |> ignore
+            let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
+            Log.Information("Setting sonar clock to {dateTime}", setTimeCmd.DateTime.DateTime)
+            queueCmd setTimeCmd |> ignore
             let sink = frameStreamListener.SetSinkAddress frameSinkAddress
             queueCmd (makeFramestreamReceiverCmd sink) |> ignore
 

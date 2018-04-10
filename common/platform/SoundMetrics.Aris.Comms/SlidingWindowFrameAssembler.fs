@@ -11,6 +11,13 @@ open System.Threading.Tasks.Dataflow
 [<AutoOpen>]
 module private SlidingWindowFrameAssemblerLogging =
 
+    let logVerboseFrameAssembly =
+#if LOG_VERBOSE_FRAME_ASSEMBLY
+        true
+#else
+        false
+#endif
+
     let logSkippedFrame (currentFrame : FrameIndex) (incomingFrame : FrameIndex) (incomingDataOffset : uint32)
                         (gap : uint64) (cause : string) =
         Log.Information("Skipped frame currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
@@ -18,55 +25,68 @@ module private SlidingWindowFrameAssemblerLogging =
             currentFrame, incomingFrame, incomingDataOffset, gap, cause)
 
     let logDuplicatePacket (lastFinishedFrame : FrameIndex) (incomingFrame : FrameIndex) (incomingDataOffset : uint32) =
-        Log.Verbose("Duplicate packet lastFinishedFrame={LastFinishedFrame}; incomingFrame={IncomingFrame}; incomingDataOffset={IncomingDataOffset}",
-            lastFinishedFrame, incomingFrame, incomingDataOffset)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Duplicate packet lastFinishedFrame={LastFinishedFrame}; incomingFrame={IncomingFrame}; incomingDataOffset={IncomingDataOffset}",
+                lastFinishedFrame, incomingFrame, incomingDataOffset)
 
     let logMissedPacket (currentFrame : FrameIndex) (incomingFrame : FrameIndex) (expectedOffset : uint32) (incomingOffset : uint32) =
-        Log.Verbose("Missed packet currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
-            + "expectedOffset={ExpectedOffset}; incomingOffset={IncomingOffset}",
-            currentFrame, incomingFrame, expectedOffset, incomingOffset)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Missed packet currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
+                + "expectedOffset={ExpectedOffset}; incomingOffset={IncomingOffset}",
+                currentFrame, incomingFrame, expectedOffset, incomingOffset)
 
     let logFinishedFrame (currentFrame : FrameIndex) (isComplete : bool) =
-        Log.Verbose("Finished frame currentFrame={CurrentFrame}; isComplete={IsComplete}",
-            currentFrame, isComplete)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Finished frame currentFrame={CurrentFrame}; isComplete={IsComplete}",
+                currentFrame, isComplete)
 
     let logAcceptedPacket (currentFrame : FrameIndex) (incomingOffset : uint32) =
-        Log.Verbose("Accepted packet currentFrame={CurrentFrame}; incomingOffset={IncomingOffset}",
-            currentFrame, incomingOffset)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Accepted packet currentFrame={CurrentFrame}; incomingOffset={IncomingOffset}",
+                currentFrame, incomingOffset)
 
     let logResetFrameIndexes (lastFinishedFrame : FrameIndex) =
         Log.Information("Reset last finished frame index to {LastFinishedFrame}", lastFinishedFrame)
 
     let logReceivedWorkUnit (workUnitType : string) =
-        Log.Verbose("Received work unit; type={WorkUnitType}", workUnitType)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Received work unit; type={WorkUnitType}", workUnitType)
 
     let logReceivingPacket (byteCount : int) =
-        Log.Verbose("Receiving packet of {ByteCount} bytes", byteCount)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Receiving packet of {ByteCount} bytes", byteCount)
 
     let logCouldNotParseOrProcessFramePart (msg : string) stackTrace =
         Log.Warning("Couldn't parse or process FramePart: {Message}; {stackTrace}", msg, stackTrace)
 
     let logIncomingFrameIndexAdvanced (currentFI : FrameIndex) (incomingFI : FrameIndex) =
-        Log.Verbose("Incoming frame index advanced from {CurrentFI} to {IncomingFI}",
-            currentFI, incomingFI)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Incoming frame index advanced from {CurrentFI} to {IncomingFI}",
+                currentFI, incomingFI)
 
     let logFirstKnownFrame (fi : FrameIndex) =
-        Log.Verbose("First known frame; fi={FrameIndex}", fi)
+        if logVerboseFrameAssembly then
+            Log.Verbose("First known frame; fi={FrameIndex}", fi)
 
     let logSenderMovedOnToNextFrame (fi : FrameIndex) =
-        Log.Verbose("Sender moved on to next frame; fi= {FrameIndex}", fi)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Sender moved on to next frame; fi= {FrameIndex}", fi)
 
     let logResetCurrentFrameIndexTo (fi : FrameIndex) =
-        Log.Verbose("Reset current frame index; fi={FrameIndex}", fi)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Reset current frame index; fi={FrameIndex}", fi)
 
     let logReceivedPacketFromPreviousFrame (fi : FrameIndex) =
-        Log.Verbose("Received packet from previous frame; fi={FrameIndex}", fi)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Received packet from previous frame; fi={FrameIndex}", fi)
 
     let logSendingFramePartAck (fi : FrameIndex) (offset : uint32) =
-        Log.Verbose("Sending frame part ack; fi={FrameIndex}; offset={Offset}", fi, offset)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Sending frame part ack; fi={FrameIndex}; offset={Offset}", fi, offset)
 
     let logFrameComplete (fi : FrameIndex) (offset : uint32) =
-        Log.Verbose("Frame complete; fi={FrameIndex}; offset={Offset}", fi, offset)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Frame complete; fi={FrameIndex}; offset={Offset}", fi, offset)
 
 (*
     The sliding window frame assembler implements a simple sliding window method for use

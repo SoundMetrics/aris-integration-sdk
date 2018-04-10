@@ -3,6 +3,8 @@ SETLOCAL
 SET DEST=.\generated
 IF NOT EXIST %DEST% MKDIR %DEST%
 
+DEL/Q %DEST%\*.*
+
 ECHO Generating protobuf output...
 
 SET PROTOC=..\packages\Google.Protobuf.Tools.3.5.1\tools\windows_x86\protoc.exe

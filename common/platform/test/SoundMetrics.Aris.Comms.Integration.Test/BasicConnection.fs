@@ -34,18 +34,34 @@ let testBasicConnection (inputs : TestInputs) =
 
         use readySignal = new ManualResetEvent(false)
 
+        let mutable frameCount = 0
+        let framesExpected = 5
+        let endTime = DateTime.Now.Add(TimeSpan.FromSeconds(5.0))
+        let mutable errorCount = 0u
+
         Log.Information("Waiting on a frame...")
         use frames = conduit.Frames.Subscribe(fun processedFrame ->
-            readySignal.Set() |> ignore
             match processedFrame.work with
             | Frame (frame, _histogram, _isRecording) ->
                 Log.Information("Received frame {fi} from SN {sn}",
                     frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
+                frameCount <- frameCount + 1
+
+                if frame.Header.ReorderedSamples <> 0u then
+                    errorCount <- errorCount + 1u
+                    Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
+
+                //if frameCount = framesExpected then
+                if DateTime.Now > endTime then
+                    readySignal.Set() |> ignore
             | _ -> ()
         )
 
         if readySignal.WaitOne(TimeSpan.FromSeconds(15.0)) then
-            Ok ()
+            if errorCount = 0u then
+                Ok ()
+            else
+                Error (sprintf "%u errors occured." errorCount)
         else
             Error "Timed out waiting for a frame"
     | None -> Error (sprintf "Timed out waiting to find ARIS %d" sn)

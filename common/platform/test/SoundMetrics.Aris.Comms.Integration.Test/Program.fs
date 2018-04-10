@@ -10,10 +10,6 @@ open System.Reflection
 [<Literal>]
 let LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
 
-let applyAction (args : ParseResults<ProgramArgs>) =
-
-    ()
-
 [<EntryPoint>]
 let main argv =
 

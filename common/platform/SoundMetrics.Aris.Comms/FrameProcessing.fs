@@ -176,13 +176,8 @@ module internal FrameProcessing =
 
     let reorderData (fb : FrameBuffer) =
         let sw = Stopwatch.StartNew()
-        let beamsPerPing = int (fb.BeamCount / fb.PingsPerFrame)
-        let channelReverseMultipledMap = buildChannelReverseMultiples beamsPerPing (int fb.PingsPerFrame)
-
-        let sampleStride = fb.BeamCount
-        let bytesReadPerPing = sampleStride / fb.PingsPerFrame
-
         let histogram = Histogram.Create ()
+
         let reorderedSampleData =
             let reorder = reorderSampleBuffer fb histogram
             fb.SampleData |> NativeBuffer.transform reorder

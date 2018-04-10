@@ -2,9 +2,30 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open Serilog
+open System
+open System.Net
+
 module ArisCommands =
-    open System
-    open System.Net
+
+    /// Sets the sonar clock to the local time of the value passed in.
+    let makeSetDatetimeCmd (dateTimeOffset: DateTimeOffset) =
+        let localTime = dateTimeOffset.ToLocalTime()
+        let dateTimeString =
+            localTime.ToString("yyyy'-'MMM'-'dd HH':'mm':'ss",
+                               System.Globalization.CultureInfo.InvariantCulture)
+        Aris.Command(
+            Type = Aris.Command.Types.CommandType.SetDatetime,
+            DateTime =
+                Aris.Command.Types.SetDateTime(
+                DateTime = dateTimeString
+            )
+        )
+
+    /// Sets the sonar clock to the current local time.
+    let makeSetDatetimeCmdAuto () =
+        let now = DateTimeOffset.Now
+        makeSetDatetimeCmd (now.ToLocalTime())
 
     let makeFramestreamReceiverCmd (ep : IPEndPoint) =
         Aris.Command(

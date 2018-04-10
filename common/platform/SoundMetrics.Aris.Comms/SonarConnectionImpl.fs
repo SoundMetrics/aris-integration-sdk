@@ -91,32 +91,24 @@ module internal SonarConnectionDetails =
 
     open Google.Protobuf
 
-    let getCommandLengthPrefix (length : int) =
+    let getCommandLengthPrefix (cmd: Aris.Command) =
+        let length : Int32 = cmd.CalculateSize()
         let msgLengthNetworkOrder = IPAddress.HostToNetworkOrder length
         BitConverter.GetBytes msgLengthNetworkOrder
 
-    let sendCmd (socket: TcpClient) (cmd: Aris.Command) =
+    let sendCmd (socket: TcpClient) (cmd : Aris.Command) =
         // Let's not assume we're the only writer to the socket.
         // Put the prefix in the same buffer as the message.
-        let prefix = getCommandLengthPrefix (cmd.CalculateSize())
+        let prefix = getCommandLengthPrefix cmd
 
         use memstream = new System.IO.MemoryStream()
         memstream.Write(prefix, 0, prefix.Length)
-        use cos = new CodedOutputStream(memstream, leaveOpen = true)
-        cmd.WriteTo(cos)
-        cos.Flush()
+        cmd.WriteTo(memstream)
+        memstream.Flush()
 
-        memstream.Position <- 0L
-        socket.Client.Send(memstream.ToArray())
-
-    let makeTimeCmd (dateTime: DateTime) =
-        Aris.Command(
-            Type = Aris.Command.Types.CommandType.SetDatetime,
-            DateTime = Aris.Command.Types.SetDateTime(
-                DateTime = dateTime.ToLocalTime().ToString("yyyy'-'MMM'-'dd HH':'mm':'ss",
-                                    System.Globalization.CultureInfo.InvariantCulture)
-            )
-        )
+        let msg = memstream.ToArray()
+        Serilog.Log.Information("Sending command {cmdType} of {length} bytes", cmd.Type, msg.Length - prefix.Length)
+        socket.Client.Send(msg)
 
     let buildCommandSocket (ipAddress: IPAddress) (connectionTimeout: TimeSpan) =
         if connectionTimeout < TimeSpan.FromSeconds(2.0) then
