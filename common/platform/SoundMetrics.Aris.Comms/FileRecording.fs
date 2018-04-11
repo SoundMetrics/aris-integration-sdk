@@ -5,6 +5,7 @@ namespace SoundMetrics.Aris.Comms
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open System
+open System.Diagnostics
 open System.IO
 open System.Runtime.InteropServices
 
@@ -24,8 +25,9 @@ module internal RecordingLog =
 
     let logStoppedAllRecordings () = Log.Information("Stopped all recording")
 
-    let logTimeToProcess (workType : string) (milliseconds : int64) =
-        Log.Verbose("Time to {workType}: {milliseconds} ms", workType, milliseconds)
+    let logTimeToProcess (workType : string) (stopwatch : Stopwatch) =
+        let duration = PerformanceTiming.formatTiming stopwatch
+        Log.Verbose("Time to {workType}: {duration}", workType, duration)
 
     let logRecordingError (msg : string) (path : string) =
         Log.Warning("Recording error {msg} on \"{path}\"", msg, path)

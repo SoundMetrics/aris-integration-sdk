@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.NativeInterop
+open PerformanceTiming
 open SoundMetrics.Aris.Config
 open SoundMetrics.NativeMemory
 open System
@@ -62,8 +63,9 @@ with
 module internal FrameProcessing =
     open Serilog
 
-    let private logTimeToProcessFrame (milliseconds : int64) =
-        Log.Verbose("Time to process frame: {milliseconds} ms", milliseconds)
+    let private logTimeToProcessFrame (stopwatch : Stopwatch) =
+        let duration = PerformanceTiming.formatTiming stopwatch
+        Log.Verbose("Time to process frame: {duration}", duration)
 
     type FrameBuffer = {
         FrameIndex: FrameIndex
@@ -175,17 +177,17 @@ module internal FrameProcessing =
         disposeHistoUpdater ()
 
     let reorderData (fb : FrameBuffer) =
-        let sw = Stopwatch.StartNew()
-        let histogram = Histogram.Create ()
+        let struct (result, sw) = timeThis (fun () ->
+            let histogram = Histogram.Create ()
 
-        let reorderedSampleData =
-            let reorder = reorderSampleBuffer fb histogram
-            fb.SampleData |> NativeBuffer.transform reorder
+            let reorderedSampleData =
+                let reorder = reorderSampleBuffer fb histogram
+                fb.SampleData |> NativeBuffer.transform reorder
+            reorderedSampleData, histogram
+        )
 
-        sw.Stop()
-        Log.Verbose("F# reordering {ticks} ticks", sw.ElapsedTicks)
-
-        reorderedSampleData, histogram
+        Log.Verbose("F# reordering {duration}", PerformanceTiming.formatTiming sw)
+        result
 
     let generateHistogram (fb : FrameBuffer) =
         let histogram = Histogram.Create ()
@@ -221,38 +223,39 @@ module internal FrameProcessing =
                         (state: ProcessPipelineState ref)
                         (work: WorkUnit) =
 
-        let sw = Stopwatch.StartNew()
-        let output = match work.work with
-                        | IncomingFrame frame ->
-                            let fb = FrameBuffer.FromFrame frame
-                            let reorder = (frame.Header.ReorderedSamples = 0u)
-                            let sampleData, histogram = processFrameBuffer reorder fb
-                            let newF =
-                                if reorder then
-                                    let mutable hdr = frame.Header
-                                    hdr.ReorderedSamples <- 1u
-                                    { Header = hdr; SampleData = sampleData }
-                                else
-                                    frame
+        let struct (output, sw) = timeThis (fun () ->
+            match work.work with
+            | IncomingFrame frame ->
+                let fb = FrameBuffer.FromFrame frame
+                let reorder = (frame.Header.ReorderedSamples = 0u)
+                let sampleData, histogram = processFrameBuffer reorder fb
+                let newF =
+                    if reorder then
+                        let mutable hdr = frame.Header
+                        hdr.ReorderedSamples <- 1u
+                        { Header = hdr; SampleData = sampleData }
+                    else
+                        frame
 
-                            let usingOriginalSampleData = Object.ReferenceEquals(frame.SampleData, sampleData)
-                            if not usingOriginalSampleData then
-                                frame.SampleData.Dispose()
+                let usingOriginalSampleData = Object.ReferenceEquals(frame.SampleData, sampleData)
+                if not usingOriginalSampleData then
+                    frame.SampleData.Dispose()
 
-                            ProcessedFrame.Frame work newF histogram (!state).isRecording
+                ProcessedFrame.Frame work newF histogram (!state).isRecording
 
-                        | WorkType.Command cmd ->
-                            state := {
-                                isRecording = match cmd with
-                                              | StartRecording _ -> true
-                                              | StopRecording _ -> false
-                                              | StopStartRecording _ -> true
-                            }
+            | WorkType.Command cmd ->
+                state := {
+                    isRecording = match cmd with
+                                    | StartRecording _ -> true
+                                    | StopRecording _ -> false
+                                    | StopStartRecording _ -> true
+                }
 
-                            ProcessedFrame.Command work cmd
+                ProcessedFrame.Command work cmd
 
-                        | WorkType.Quit -> ProcessedFrame.Quit work
+            | WorkType.Quit -> ProcessedFrame.Quit work
+        )
 
-        logTimeToProcessFrame sw.ElapsedMilliseconds
+        logTimeToProcessFrame sw
         earlyFrameSpur.OnNext (output)
         output

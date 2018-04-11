@@ -5,10 +5,16 @@ open ProgramArgs
 open Serilog
 open Serilog.Core
 open Serilog.Events
+open System.Diagnostics
 open System.Reflection
 
 [<Literal>]
 let LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+
+let logStopwatchResolution () =
+    let state = if Stopwatch.IsHighResolution then "is" else "is not"
+    Log.Information("Stopwatch {state} using a high-resolution timer; frequency={frequency}; period={period:F6} \u00B5s",
+        state, Stopwatch.Frequency, 1000000.0 / float Stopwatch.Frequency)
 
 [<EntryPoint>]
 let main argv =
@@ -41,6 +47,7 @@ let main argv =
 
     Log.Information("Starting {programName}", programName)
     Log.Information("Logging level is {loggingLevel}", loggingLevel)
+    logStopwatchResolution()
 
     let mutable actionState = ProgramActions.Skipped
     for action in ProgramActions.allActions do

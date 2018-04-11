@@ -43,7 +43,7 @@ let testBasicConnection (inputs : TestInputs) =
         use frames = conduit.Frames.Subscribe(fun processedFrame ->
             match processedFrame.work with
             | Frame (frame, _histogram, _isRecording) ->
-                Log.Information("Received frame {fi} from SN {sn}",
+                Log.Verbose("Received frame {fi} from SN {sn}",
                     frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
                 frameCount <- frameCount + 1
 

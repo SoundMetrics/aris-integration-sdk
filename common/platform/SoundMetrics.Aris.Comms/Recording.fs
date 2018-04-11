@@ -34,6 +34,7 @@ module internal Recording =
         }
 
     module private RecordingImpl =
+        open SoundMetrics.Aris.Comms.PerformanceTiming
 
         let noRecordingFailure = { FailedPath = None }
 
@@ -167,7 +168,7 @@ module internal Recording =
                 startRecordRequest := Some req
                 sprintf "queued recording request: '%s'" req.Description
 
-            let action =
+            let struct (action, sw) = timeThis (fun () ->
                 match workUnit.work with
                 | Frame (frame, _histogram, _isRecording) ->
                     // Check whether the frame size has changed; if so, stop and restart current recordings.
@@ -294,8 +295,9 @@ module internal Recording =
                 | Quit ->
                     reqInfos := stopAll !reqInfos
                     "quit"
+            )
 
-            logTimeToProcess action sw.ElapsedMilliseconds
+            logTimeToProcess action sw
 
 
     let recordFrame mapFrameIndex recordingState input = RecordingImpl.processInput mapFrameIndex recordingState input
