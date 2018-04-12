@@ -338,13 +338,13 @@ type SonarConduit private (conduitOptions : ConduitOptions,
                              (fun beacon -> beacon.SrcIpAddr = ipAddress),
                              frameStreamReliabilityPolicy)
 
-    /// Internal IP version for testing.
-    internal new(conduitOptions, initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
+    /// Internal SN version for testing.
+    internal new(conduitOptions, initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) = 
             new SonarConduit(conduitOptions,
                              initialAcousticSettings,
                              availableSonars,
-                             ipAddress.ToString(),
-                             (fun beacon -> beacon.SrcIpAddr = ipAddress),
+                             sn.ToString(),
+                             (fun beacon -> beacon.SerialNumber = sn),
                              frameStreamReliabilityPolicy)
 
     interface IDisposable with

@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj" />
+    <ProjectReference Include="..\..\SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj" />
   </ItemGroup>
 
 </Project>
