@@ -202,12 +202,11 @@ type RequestedSettings =
     | SettingsDeclined of string
 
 
-type SonarConduit private (conduitOptions : ConduitOptions,
-                           initialAcousticSettings: AcousticSettings,
-                           available: AvailableSonars,
-                           targetSonar: string,
-                           matchBeacon: SonarBeacon -> bool,
-                           frameStreamReliabilityPolicy: FrameStreamReliabilityPolicy) as self =
+type SonarConduit private (initialAcousticSettings : AcousticSettings,
+                           available : AvailableSonars,
+                           targetSonar : string,
+                           matchBeacon : SonarBeacon -> bool,
+                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy) as self =
 
     let disposed = ref false
     let mutable serialNumber: SerialNumber option = None
@@ -226,7 +225,6 @@ type SonarConduit private (conduitOptions : ConduitOptions,
     let lastRequestedAcoustingSettings = ref AcousticSettingsConstants.invalidAcousticSettingsVersioned
     let requestedAcousticSettingsResult = ref Uninitialized
     let currentAcousticSettings = ref AcousticSettingsConstants.invalidAcousticSettingsVersioned
-    //let attemptedAcousticSettingsSubject = new Subject<AcousticSettingsApplied>()
     let cookieTracker = SettingsHelpers.AcousticSettingsCookieTracker()
     let acousticSettingsRequestGuard = Object()
     let instantaneousFrameRate: float option ref = ref None
@@ -237,7 +235,6 @@ type SonarConduit private (conduitOptions : ConduitOptions,
     // Processing graph
     let pGraph, pGraphLeaves, pGraphDisposables =
         GraphBuilder.buildSimpleRecordingGraph frameStreamListener.Frames
-                                               conduitOptions
                                                earlyFrameSubject
                                                frameIndexMapper.ReportFrameMapping
 
@@ -322,8 +319,7 @@ type SonarConduit private (conduitOptions : ConduitOptions,
 
     /// Find the sonar by its serial number.
     new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) =
-            new SonarConduit({ AlternateReordering = None },
-                             initialAcousticSettings,
+            new SonarConduit(initialAcousticSettings,
                              availableSonars,
                              sn.ToString(),
                              (fun beacon -> beacon.SerialNumber = sn),
@@ -331,20 +327,10 @@ type SonarConduit private (conduitOptions : ConduitOptions,
 
     /// Find the sonar by its IP address
     new(initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
-            new SonarConduit({ AlternateReordering = None },
-                             initialAcousticSettings,
+            new SonarConduit(initialAcousticSettings,
                              availableSonars,
                              ipAddress.ToString(),
                              (fun beacon -> beacon.SrcIpAddr = ipAddress),
-                             frameStreamReliabilityPolicy)
-
-    /// Internal SN version for testing.
-    internal new(conduitOptions, initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) = 
-            new SonarConduit(conduitOptions,
-                             initialAcousticSettings,
-                             availableSonars,
-                             sn.ToString(),
-                             (fun beacon -> beacon.SerialNumber = sn),
                              frameStreamReliabilityPolicy)
 
     interface IDisposable with

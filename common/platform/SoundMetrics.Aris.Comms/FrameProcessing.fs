@@ -182,34 +182,29 @@ module internal FrameProcessing =
         finally
             disposeHistoUpdater()
 
-    let reorderData conduitOptions (fb : FrameBuffer) =
+    let reorderData (fb : FrameBuffer) =
 
         let struct ((result, method), sw) = timeThis (fun () ->
             let histogram = Histogram.Create ()
-            let reorderFn, reorderDesc =
-                match conduitOptions.AlternateReordering with
-                | None -> TransformFunction(reorderSampleBuffer histogram), "F# reordering"
-                | Some (txf, description) -> txf, description
 
             let reorderedSampleData =
+                let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
                 NativeBuffer.transform
-                    reorderFn
+                    reorder
                     fb.PingMode
                     fb.PingsPerFrame
                     fb.BeamCount
                     fb.SampleCount
                     fb.SampleData
-            (reorderedSampleData, histogram), reorderDesc
+            (reorderedSampleData, histogram), "ReorderCS"
         )
 
         Log.Verbose("{method} {duration}", method, PerformanceTiming.formatTiming sw)
         result
 
-    //let reorderDataNotInlineForTest fb _histogram = reorderData fb
-
-    let inline processFrameBuffer reorderSamples conduitOptions fb =
+    let inline processFrameBuffer reorderSamples fb =
         if reorderSamples then
-            reorderData conduitOptions fb
+            reorderData fb
         else
             fb.SampleData, (generateHistogram fb)
 
@@ -219,8 +214,7 @@ module internal FrameProcessing =
     with
         static member Create () = { IsRecording = false }
 
-    let processPipeline (conduitOptions : ConduitOptions)
-                        (earlyFrameSpur: ISubject<ProcessedFrame>)
+    let processPipeline (earlyFrameSpur: ISubject<ProcessedFrame>)
                         (state: ProcessPipelineState ref)
                         (work: WorkUnit) =
 
@@ -229,7 +223,7 @@ module internal FrameProcessing =
             | IncomingFrame frame ->
                 let fb = FrameBuffer.FromFrame frame
                 let reorderSamples = (frame.Header.ReorderedSamples = 0u)
-                let sampleData, histogram = processFrameBuffer reorderSamples conduitOptions fb
+                let sampleData, histogram = processFrameBuffer reorderSamples fb
                 let newF =
                     if reorderSamples then
                         let mutable hdr = frame.Header

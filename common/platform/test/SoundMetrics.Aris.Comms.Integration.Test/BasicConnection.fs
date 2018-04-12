@@ -30,13 +30,7 @@ let testBasicConnection (inputs : TestInputs) =
                         sn, beacon.SoftwareVersion, beacon.SrcIpAddr)
 
         let initialSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
-        let conduitOptions =
-            let reordering =
-                (SoundMetrics.NativeMemory.TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame),
-                 "ReorderCS")
-            { AlternateReordering = Some reordering }
-
-        use conduit = new SonarConduit(conduitOptions, initialSettings, sn, availability,
+        use conduit = new SonarConduit(initialSettings, sn, availability,
                                        FrameStreamReliabilityPolicy.DropPartialFrames)
 
         use readySignal = new ManualResetEvent(false)

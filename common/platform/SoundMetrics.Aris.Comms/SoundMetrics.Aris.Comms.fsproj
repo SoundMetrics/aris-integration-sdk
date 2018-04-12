@@ -49,7 +49,6 @@
     <Compile Include="SonarConnectionDetails.fs" />
     <Compile Include="ProcessingCommands.fs" />
     <Compile Include="Histogram.fs" />
-    <Compile Include="ConduitOptions.fs" />
     <Compile Include="FrameProcessing.fs" />
     <Compile Include="FileRecording.fs" />
     <Compile Include="Recording.fs" />
@@ -74,6 +73,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
+    <ProjectReference Include="..\SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj" />
     <ProjectReference Include="..\SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj" />
   </ItemGroup>
 
