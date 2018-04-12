@@ -14,15 +14,15 @@ module PerformanceTiming =
     let private stopwatchToMicroseconds (stopwatch : Stopwatch) : float<Us> =
         float stopwatch.ElapsedTicks * stopwatchPeriod
 
-    let private stopwatchToMilliseconds(stopwatch : Stopwatch) : float<ms> =
-        1.0<ms> * float stopwatch.ElapsedMilliseconds
+    let private stopwatchToMilliseconds(stopwatch : Stopwatch) : int64<ms> =
+        1L<ms> * stopwatch.ElapsedMilliseconds
 
     let formatTiming (stopwatch : Stopwatch) =
         let elapsed = stopwatch.Elapsed
         if elapsed >= TimeSpan.FromSeconds(1.0) then
             elapsed.ToString()
         elif elapsed >= TimeSpan.FromSeconds(0.010) then
-            sprintf "%.3f ms" (stopwatchToMilliseconds stopwatch)
+            sprintf "%d ms" (stopwatchToMilliseconds stopwatch)
         else
             sprintf "%.3f \u00B5s" (stopwatchToMicroseconds stopwatch)
 

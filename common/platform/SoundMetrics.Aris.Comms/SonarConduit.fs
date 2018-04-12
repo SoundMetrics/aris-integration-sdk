@@ -202,7 +202,8 @@ type RequestedSettings =
     | SettingsDeclined of string
 
 
-type SonarConduit private (initialAcousticSettings: AcousticSettings,
+type SonarConduit private (conduitOptions : ConduitOptions,
+                           initialAcousticSettings: AcousticSettings,
                            available: AvailableSonars,
                            targetSonar: string,
                            matchBeacon: SonarBeacon -> bool,
@@ -236,6 +237,7 @@ type SonarConduit private (initialAcousticSettings: AcousticSettings,
     // Processing graph
     let pGraph, pGraphLeaves, pGraphDisposables =
         GraphBuilder.buildSimpleRecordingGraph frameStreamListener.Frames
+                                               conduitOptions
                                                earlyFrameSubject
                                                frameIndexMapper.ReportFrameMapping
 
@@ -320,7 +322,8 @@ type SonarConduit private (initialAcousticSettings: AcousticSettings,
 
     /// Find the sonar by its serial number.
     new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) =
-            new SonarConduit(initialAcousticSettings,
+            new SonarConduit({ AlternateReordering = None },
+                             initialAcousticSettings,
                              availableSonars,
                              sn.ToString(),
                              (fun beacon -> beacon.SerialNumber = sn),
@@ -328,7 +331,17 @@ type SonarConduit private (initialAcousticSettings: AcousticSettings,
 
     /// Find the sonar by its IP address
     new(initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
-            new SonarConduit(initialAcousticSettings,
+            new SonarConduit({ AlternateReordering = None },
+                             initialAcousticSettings,
+                             availableSonars,
+                             ipAddress.ToString(),
+                             (fun beacon -> beacon.SrcIpAddr = ipAddress),
+                             frameStreamReliabilityPolicy)
+
+    /// Internal IP version for testing.
+    internal new(conduitOptions, initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
+            new SonarConduit(conduitOptions,
+                             initialAcousticSettings,
                              availableSonars,
                              ipAddress.ToString(),
                              (fun beacon -> beacon.SrcIpAddr = ipAddress),

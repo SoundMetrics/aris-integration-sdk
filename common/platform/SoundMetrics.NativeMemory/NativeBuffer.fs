@@ -104,6 +104,10 @@ module private NativeBufferDetails =
         arr
 
 
+type TransformFunction =
+    // PrimitivePingMode * PingsPerFrame * BeamCount * SamplesPerBeam * nativeint * nativeint
+    delegate of (uint32 * uint32 * uint32 * uint32 * nativeint * nativeint) -> unit
+
 open NativeBufferDetails
 
 /// Immutable buffer, backed by native memory in order to avoid the LOH.
@@ -136,11 +140,15 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 
     member __.Length = buffer.Length
 
-    member __.Transform(f : (nativeptr<byte> * nativeptr<byte>) -> unit) : NativeBuffer =
+    member __.Transform(txf : TransformFunction,
+                        pingMode : uint32,
+                        pingsPerFrame : uint32,
+                        beamCount : uint32,
+                        samplesPerBeam : uint32) : NativeBuffer =
 
         let destination = NativeBufferHandle.Create buffer.Length
         let source = buffer
-        f(NativePtr.ofNativeInt<byte> source.IntPtr, NativePtr.ofNativeInt<byte> destination.IntPtr)
+        txf.Invoke(pingMode, pingsPerFrame, beamCount, samplesPerBeam, source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
     member __.Read(f : nativeptr<byte> -> unit) : unit = f(buffer.NativePtr)
@@ -162,9 +170,13 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 module NativeBuffer = 
 
     /// Transforms into a new copy; assumes the output is the same size as the source.
-    let transform (f : nativeptr<byte> * nativeptr<byte> -> unit)
+    let transform txf
+                  pingMode
+                  pingsPerFrame
+                  beamCount
+                  samplesPerBeam
                   (source : NativeBuffer)
                   : NativeBuffer =
-        source.Transform(f)
+        source.Transform(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
 
     let iter (f : nativeptr<byte> -> unit) (source : NativeBuffer) : unit = source.Read(f)

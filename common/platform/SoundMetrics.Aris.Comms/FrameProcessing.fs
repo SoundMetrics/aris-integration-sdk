@@ -28,22 +28,6 @@ with
     static member Command cmd = { work = Command cmd; enqueueTime = Stopwatch.StartNew () }
     static member Quit = { work = WorkType.Quit; enqueueTime = Stopwatch.StartNew () }
 
-type Histogram = { values: int[] }
-with
-    static member Create () = { values = Array.zeroCreate<int> 256 }
-
-    /// Crass attempt to do something faster than using managed arrays (much).
-    member internal s.CreateUpdater () =
-        let h = Runtime.InteropServices.GCHandle.Alloc(s.values, Runtime.InteropServices.GCHandleType.Pinned)
-        let dispose = fun () -> h.Free()
-        let addr = h.AddrOfPinnedObject()
-        let basePtr = NativePtr.ofNativeInt<int> addr
-        let incr = fun value ->
-                    let p = NativePtr.add basePtr value
-                    let current = NativePtr.read p
-                    NativePtr.write p (current + 1)
-        incr, dispose
-
 type ProcessedFrameType =
     | Frame of frame: Frame * histogram: Histogram * isRecording: bool
     | Command of ProcessingCommand
@@ -69,6 +53,7 @@ module internal FrameProcessing =
 
     type FrameBuffer = {
         FrameIndex: FrameIndex
+        PingMode : uint32
         BeamCount : uint32
         SampleCount: uint32
         PingsPerFrame: uint32
@@ -79,6 +64,7 @@ module internal FrameProcessing =
             let cfg = SonarConfig.getPingModeConfig (PingMode.From (uint32 f.Header.PingMode))
             {
                 FrameIndex = int f.Header.FrameIndex
+                PingMode = f.Header.PingMode
                 BeamCount  = cfg.ChannelCount
                 SampleCount = f.Header.SamplesPerBeam
                 PingsPerFrame = cfg.PingsPerFrame
@@ -101,24 +87,28 @@ module internal FrameProcessing =
             f n
             n <- n + skip
 
-    let inline reorderSampleBuffer (fb : FrameBuffer)
-                                   (histogram : Histogram)
-                                   (source : nativeptr<byte>, destination : nativeptr<byte>) =
+    let inline reorderSampleBuffer (histogram : Histogram)
+                                   (primitivePingMode : uint32,
+                                    pingsPerFrame : uint32,
+                                    beamCount : uint32,
+                                    samplesPerBeam : uint32,
+                                    src : nativeint,
+                                    dest : nativeint) =
 
-        let outbuf = destination
-        let inputW = NativePtr.ofNativeInt<uint32> (NativePtr.toNativeInt source)
+        let outbuf = NativePtr.ofNativeInt<byte> dest
+        let inputW = NativePtr.ofNativeInt<uint32> src
 
-        let beamsPerPing = int (fb.BeamCount / fb.PingsPerFrame)
-        let channelReverseMultipledMap = buildChannelReverseMultiples beamsPerPing (int fb.PingsPerFrame)
+        let beamsPerPing = beamCount / pingsPerFrame
+        let channelReverseMultipledMap = buildChannelReverseMultiples (int beamsPerPing) (int pingsPerFrame)
 
-        let sampleStride = fb.BeamCount
-        let bytesReadPerPing = sampleStride / fb.PingsPerFrame
+        let sampleStride = beamCount
+        let bytesReadPerPing = sampleStride / pingsPerFrame
 
         let updateHisto, disposeHistoUpdater = histogram.CreateUpdater ()
 
         let sizeofUint = 4u
         let dwordsToReadPerPing = bytesReadPerPing / sizeofUint
-        let totalDwordsPerPing = (fb.BeamCount * fb.SampleCount / fb.PingsPerFrame) / sizeofUint
+        let totalDwordsPerPing = (beamCount * samplesPerBeam / pingsPerFrame) / sizeofUint
         assert(totalDwordsPerPing = (totalDwordsPerPing / dwordsToReadPerPing) * dwordsToReadPerPing)
         let bytesWritten = ref 0u // ref cell because of lambda expression used with forSkip can't capture mutables
         let inputOffset = ref 0u // outside the loops for perfiness
@@ -126,17 +116,17 @@ module internal FrameProcessing =
         // Note that "for i = x to y do" does not allow for an unsigned range
 
         let mutable idxDwordPing0 = 0u
-        for idxSample = 0 to int fb.SampleCount - 1 do
+        for idxSample = 0 to int samplesPerBeam - 1 do
             let mutable idxLocalSample = idxDwordPing0
-            for idxPing = 0 to int fb.PingsPerFrame - 1 do
+            for idxPing = 0 to int pingsPerFrame - 1 do
                 //for idxDword in idxLocalSample .. 4 .. idxLocalSample + dwordsToReadPerPing - 1 do // slow due to enumerator used
                 forSkip idxLocalSample 4u (idxLocalSample + dwordsToReadPerPing - 1u) (fun idxDword ->
-                    let composed = idxSample * int fb.BeamCount + idxPing
+                    let composed = idxSample * int beamCount + idxPing
 
                     assert((dwordsToReadPerPing / 4u) * 4u = dwordsToReadPerPing)
                     inputOffset := 0u // ref cell because of lambda expression used with forSkip can't capture mutables
                     //for channel in 0 .. 4 .. beamsPerPing - 1 do // slow due to enumerator used
-                    forSkip 0 4 (beamsPerPing - 1) (fun channel ->
+                    forSkip 0 4 (int beamsPerPing - 1) (fun channel ->
                         //let p = NativePtr.add inputW (int (idxDword + !inputOffset)) // inputW[idxDword + inputOffset]
                         //let values1 = NativePtr.read<uint32> p
                         let values1 = NativePtr.get inputW (int (idxDword + !inputOffset))
@@ -172,22 +162,9 @@ module internal FrameProcessing =
                 idxLocalSample <- idxLocalSample + totalDwordsPerPing
                 (* end: for idxDword in idxLocalSample .. 4 .. idxLocalSample + dwordsToReadPerPing - 1 do *)
             idxDwordPing0 <- idxDwordPing0 + dwordsToReadPerPing
-            (* end: for idxPing in 0 .. fb.pingsPerFrame - 1 do *)
+            (* end: for idxPing in 0 .. pingsPerFrame - 1 do *)
 
         disposeHistoUpdater ()
-
-    let reorderData (fb : FrameBuffer) =
-        let struct (result, sw) = timeThis (fun () ->
-            let histogram = Histogram.Create ()
-
-            let reorderedSampleData =
-                let reorder = reorderSampleBuffer fb histogram
-                fb.SampleData |> NativeBuffer.transform reorder
-            reorderedSampleData, histogram
-        )
-
-        Log.Verbose("F# reordering {duration}", PerformanceTiming.formatTiming sw)
-        result
 
     let generateHistogram (fb : FrameBuffer) =
         let histogram = Histogram.Create ()
@@ -205,21 +182,45 @@ module internal FrameProcessing =
         finally
             disposeHistoUpdater()
 
-    let reorderDataNotInlineForTest fb histogram = reorderData fb
+    let reorderData conduitOptions (fb : FrameBuffer) =
 
-    let inline processFrameBuffer reorder fb =
-        if reorder then
-            reorderData fb
+        let struct ((result, method), sw) = timeThis (fun () ->
+            let histogram = Histogram.Create ()
+            let reorderFn, reorderDesc =
+                match conduitOptions.AlternateReordering with
+                | None -> TransformFunction(reorderSampleBuffer histogram), "F# reordering"
+                | Some (txf, description) -> txf, description
+
+            let reorderedSampleData =
+                NativeBuffer.transform
+                    reorderFn
+                    fb.PingMode
+                    fb.PingsPerFrame
+                    fb.BeamCount
+                    fb.SampleCount
+                    fb.SampleData
+            (reorderedSampleData, histogram), reorderDesc
+        )
+
+        Log.Verbose("{method} {duration}", method, PerformanceTiming.formatTiming sw)
+        result
+
+    //let reorderDataNotInlineForTest fb _histogram = reorderData fb
+
+    let inline processFrameBuffer reorderSamples conduitOptions fb =
+        if reorderSamples then
+            reorderData conduitOptions fb
         else
             fb.SampleData, (generateHistogram fb)
 
     type ProcessPipelineState = {
-        isRecording: bool
+        IsRecording: bool
     }
     with
-        static member Create () = { isRecording = false }
+        static member Create () = { IsRecording = false }
 
-    let processPipeline (earlyFrameSpur: ISubject<ProcessedFrame>)
+    let processPipeline (conduitOptions : ConduitOptions)
+                        (earlyFrameSpur: ISubject<ProcessedFrame>)
                         (state: ProcessPipelineState ref)
                         (work: WorkUnit) =
 
@@ -227,10 +228,10 @@ module internal FrameProcessing =
             match work.work with
             | IncomingFrame frame ->
                 let fb = FrameBuffer.FromFrame frame
-                let reorder = (frame.Header.ReorderedSamples = 0u)
-                let sampleData, histogram = processFrameBuffer reorder fb
+                let reorderSamples = (frame.Header.ReorderedSamples = 0u)
+                let sampleData, histogram = processFrameBuffer reorderSamples conduitOptions fb
                 let newF =
-                    if reorder then
+                    if reorderSamples then
                         let mutable hdr = frame.Header
                         hdr.ReorderedSamples <- 1u
                         { Header = hdr; SampleData = sampleData }
@@ -241,11 +242,11 @@ module internal FrameProcessing =
                 if not usingOriginalSampleData then
                     frame.SampleData.Dispose()
 
-                ProcessedFrame.Frame work newF histogram (!state).isRecording
+                ProcessedFrame.Frame work newF histogram (!state).IsRecording
 
             | WorkType.Command cmd ->
                 state := {
-                    isRecording = match cmd with
+                    IsRecording = match cmd with
                                     | StartRecording _ -> true
                                     | StopRecording _ -> false
                                     | StopStartRecording _ -> true
