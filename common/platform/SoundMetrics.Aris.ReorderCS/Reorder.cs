@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+
+using System;
 
 namespace SoundMetrics.Aris.ReorderCS
 {
@@ -30,10 +32,6 @@ namespace SoundMetrics.Aris.ReorderCS
             if (outputBuffer == null)
                 throw new ArgumentNullException(nameof(outputBuffer));
 
-            //const uint32_t samplesPerBeam = header.SamplesPerBeam;
-            //const uint32_t pingMode = header.PingMode;
-            //const uint32_t pingsPerFrame = PingModeToPingsPerFrame(pingMode);
-            //const uint32_t numBeams = PingModeToNumBeams(pingMode);
             const int beamsPerPing = 16;
 
             int[] chRvMap = { 10, 2, 14, 6, 8, 0, 12, 4, 11, 3, 15, 7, 9, 1, 13, 5 };

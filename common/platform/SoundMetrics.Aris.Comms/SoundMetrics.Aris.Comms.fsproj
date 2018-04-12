@@ -48,7 +48,6 @@
     <Compile Include="ArisCommands.fs" />
     <Compile Include="SonarConnectionDetails.fs" />
     <Compile Include="ProcessingCommands.fs" />
-    <Compile Include="Histogram.fs" />
     <Compile Include="FrameProcessing.fs" />
     <Compile Include="FileRecording.fs" />
     <Compile Include="Recording.fs" />

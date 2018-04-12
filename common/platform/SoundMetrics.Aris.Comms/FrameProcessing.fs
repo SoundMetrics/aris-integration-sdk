@@ -5,6 +5,7 @@ namespace SoundMetrics.Aris.Comms
 open Microsoft.FSharp.NativeInterop
 open PerformanceTiming
 open SoundMetrics.Aris.Config
+open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.NativeMemory
 open System
 open System.Diagnostics
@@ -29,7 +30,7 @@ with
     static member Quit = { work = WorkType.Quit; enqueueTime = Stopwatch.StartNew () }
 
 type ProcessedFrameType =
-    | Frame of frame: Frame * histogram: Histogram * isRecording: bool
+    | Frame of frame: Frame * histogram: FrameHistogram * isRecording: bool
     | Command of ProcessingCommand
     | Quit
 
@@ -87,106 +88,9 @@ module internal FrameProcessing =
             f n
             n <- n + skip
 
-    let inline reorderSampleBuffer (histogram : Histogram)
-                                   (primitivePingMode : uint32,
-                                    pingsPerFrame : uint32,
-                                    beamCount : uint32,
-                                    samplesPerBeam : uint32,
-                                    src : nativeint,
-                                    dest : nativeint) =
-
-        let outbuf = NativePtr.ofNativeInt<byte> dest
-        let inputW = NativePtr.ofNativeInt<uint32> src
-
-        let beamsPerPing = beamCount / pingsPerFrame
-        let channelReverseMultipledMap = buildChannelReverseMultiples (int beamsPerPing) (int pingsPerFrame)
-
-        let sampleStride = beamCount
-        let bytesReadPerPing = sampleStride / pingsPerFrame
-
-        let updateHisto, disposeHistoUpdater = histogram.CreateUpdater ()
-
-        let sizeofUint = 4u
-        let dwordsToReadPerPing = bytesReadPerPing / sizeofUint
-        let totalDwordsPerPing = (beamCount * samplesPerBeam / pingsPerFrame) / sizeofUint
-        assert(totalDwordsPerPing = (totalDwordsPerPing / dwordsToReadPerPing) * dwordsToReadPerPing)
-        let bytesWritten = ref 0u // ref cell because of lambda expression used with forSkip can't capture mutables
-        let inputOffset = ref 0u // outside the loops for perfiness
-
-        // Note that "for i = x to y do" does not allow for an unsigned range
-
-        let mutable idxDwordPing0 = 0u
-        for idxSample = 0 to int samplesPerBeam - 1 do
-            let mutable idxLocalSample = idxDwordPing0
-            for idxPing = 0 to int pingsPerFrame - 1 do
-                //for idxDword in idxLocalSample .. 4 .. idxLocalSample + dwordsToReadPerPing - 1 do // slow due to enumerator used
-                forSkip idxLocalSample 4u (idxLocalSample + dwordsToReadPerPing - 1u) (fun idxDword ->
-                    let composed = idxSample * int beamCount + idxPing
-
-                    assert((dwordsToReadPerPing / 4u) * 4u = dwordsToReadPerPing)
-                    inputOffset := 0u // ref cell because of lambda expression used with forSkip can't capture mutables
-                    //for channel in 0 .. 4 .. beamsPerPing - 1 do // slow due to enumerator used
-                    forSkip 0 4 (int beamsPerPing - 1) (fun channel ->
-                        //let p = NativePtr.add inputW (int (idxDword + !inputOffset)) // inputW[idxDword + inputOffset]
-                        //let values1 = NativePtr.read<uint32> p
-                        let values1 = NativePtr.get inputW (int (idxDword + !inputOffset))
-
-                        let outIndex1 = channelReverseMultipledMap.[channel] + composed
-                        let outIndex2 = channelReverseMultipledMap.[channel+1] + composed
-                        let outIndex3 = channelReverseMultipledMap.[channel+2] + composed
-                        let outIndex4 = channelReverseMultipledMap.[channel+3] + composed
-
-                        let byte1 = byte (values1 &&& uint32 0xFF)
-                        let byte2 = byte ((values1 >>> 8) &&& uint32 0xFF)
-                        let byte3 = byte ((values1 >>> 16) &&& uint32 0xFF)
-                        let byte4 = byte ((values1 >>> 24) &&& uint32 0xFF)
-                        NativePtr.write<byte> (NativePtr.add outbuf outIndex1) byte1
-                        NativePtr.write<byte> (NativePtr.add outbuf outIndex2) byte2
-                        NativePtr.write<byte> (NativePtr.add outbuf outIndex3) byte3
-                        NativePtr.write<byte> (NativePtr.add outbuf outIndex4) byte4
-
-//                        histogram.Increment (int byte1)
-//                        histogram.Increment (int byte2)
-//                        histogram.Increment (int byte3)
-//                        histogram.Increment (int byte4)
-                        updateHisto (int byte1)
-                        updateHisto (int byte2)
-                        updateHisto (int byte3)
-                        updateHisto (int byte4)
-
-                        bytesWritten := !bytesWritten + 4u
-                        inputOffset := !inputOffset + 1u
-                        )
-                    )
-
-                idxLocalSample <- idxLocalSample + totalDwordsPerPing
-                (* end: for idxDword in idxLocalSample .. 4 .. idxLocalSample + dwordsToReadPerPing - 1 do *)
-            idxDwordPing0 <- idxDwordPing0 + dwordsToReadPerPing
-            (* end: for idxPing in 0 .. pingsPerFrame - 1 do *)
-
-        disposeHistoUpdater ()
-
-    let generateHistogram (fb : FrameBuffer) =
-        let histogram = Histogram.Create ()
-        let updateHisto, disposeHistoUpdater = histogram.CreateUpdater ()
-
-        let buildHistogram (source : nativeptr<byte>) =
-            let bytes = source
-            for offset = 0 to int fb.SampleData.Length - 1 do
-                let sample = NativePtr.get bytes offset
-                updateHisto (int sample)
-
-        try
-            fb.SampleData |> NativeBuffer.iter buildHistogram
-            histogram
-        finally
-            disposeHistoUpdater()
-
     let reorderData (fb : FrameBuffer) =
 
-        let struct ((result, method), sw) = timeThis (fun () ->
-            let histogram = Histogram.Create ()
-
+        let struct ((reordered, method), sw) = timeThis (fun () ->
             let reorderedSampleData =
                 let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
                 NativeBuffer.transform
@@ -196,17 +100,36 @@ module internal FrameProcessing =
                     fb.BeamCount
                     fb.SampleCount
                     fb.SampleData
-            (reorderedSampleData, histogram), "ReorderCS"
+
+            reorderedSampleData, "ReorderCS"
         )
 
-        Log.Verbose("{method} {duration}", method, PerformanceTiming.formatTiming sw)
-        result
+        Log.Verbose("Reorder with {method} {duration}", method, PerformanceTiming.formatTiming sw)
+        reordered
+
+    let generateHistogram (fb : FrameBuffer) =
+
+        let struct (histogram, sw) = timeThis (fun () ->
+            
+            let buildHistogram size (source : nativeptr<byte>) =
+                FrameHistogram.Generate(source, size)
+            
+            let size = fb.BeamCount * fb.SampleCount
+            fb.SampleData |> NativeBuffer.iter (buildHistogram size)
+        )
+
+        Log.Verbose("generateHistogram {duration}", PerformanceTiming.formatTiming sw)
+        histogram
 
     let inline processFrameBuffer reorderSamples fb =
-        if reorderSamples then
-            reorderData fb
-        else
-            fb.SampleData, (generateHistogram fb)
+        let reorderedSamples =
+            if reorderSamples then
+                reorderData fb
+            else
+                fb.SampleData
+
+        let histogram = generateHistogram fb
+        (reorderedSamples, histogram)
 
     type ProcessPipelineState = {
         IsRecording: bool

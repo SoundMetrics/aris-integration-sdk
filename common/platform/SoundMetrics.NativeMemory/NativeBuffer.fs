@@ -151,7 +151,7 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
         txf.Invoke(pingMode, pingsPerFrame, beamCount, samplesPerBeam, source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
-    member __.Read(f : nativeptr<byte> -> unit) : unit = f(buffer.NativePtr)
+    member __.Read<'Result>(f : nativeptr<byte> -> 'Result) : 'Result = f(buffer.NativePtr)
 
     member __.ToArray() = bufferToByteArray buffer
 
@@ -179,4 +179,5 @@ module NativeBuffer =
                   : NativeBuffer =
         source.Transform(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
 
-    let iter (f : nativeptr<byte> -> unit) (source : NativeBuffer) : unit = source.Read(f)
+    let iter<'Result> (f : nativeptr<byte> -> 'Result) (source : NativeBuffer) : 'Result =
+            source.Read(f)
