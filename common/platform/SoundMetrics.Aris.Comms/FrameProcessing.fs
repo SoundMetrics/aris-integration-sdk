@@ -48,10 +48,6 @@ with
 module internal FrameProcessing =
     open Serilog
 
-    let private logTimeToProcessFrame (stopwatch : Stopwatch) =
-        let duration = PerformanceTiming.formatTiming stopwatch
-        Log.Verbose("Time to process frame: {duration}", duration)
-
     type FrameBuffer = {
         FrameIndex: FrameIndex
         PingMode : uint32
@@ -90,7 +86,7 @@ module internal FrameProcessing =
 
     let reorderData (fb : FrameBuffer) =
 
-        let struct ((reordered, method), sw) = timeThis (fun () ->
+        let struct (struct (reordered, method), sw) = timeThis (fun _sw ->
             let reorderedSampleData =
                 let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
                 NativeBuffer.transform
@@ -101,7 +97,7 @@ module internal FrameProcessing =
                     fb.SampleCount
                     fb.SampleData
 
-            reorderedSampleData, "ReorderCS"
+            struct (reorderedSampleData, "ReorderCS")
         )
 
         Log.Verbose("Reorder with {method} {duration}", method, PerformanceTiming.formatTiming sw)
@@ -109,7 +105,7 @@ module internal FrameProcessing =
 
     let generateHistogram (fb : FrameBuffer) =
 
-        let struct (histogram, sw) = timeThis (fun () ->
+        let struct (histogram, sw) = timeThis (fun _sw ->
             
             let buildHistogram size (source : nativeptr<byte>) =
                 FrameHistogram.Generate(source, size)
@@ -122,14 +118,19 @@ module internal FrameProcessing =
         histogram
 
     let inline processFrameBuffer reorderSamples fb =
-        let reorderedSamples =
-            if reorderSamples then
-                reorderData fb
-            else
-                fb.SampleData
+        let struct (result, sw) = timeThis (fun _sw ->
+            let reorderedSamples =
+                if reorderSamples then
+                    reorderData fb
+                else
+                    fb.SampleData
 
-        let histogram = generateHistogram fb
-        (reorderedSamples, histogram)
+            let histogram = generateHistogram fb
+            struct (reorderedSamples, histogram)
+        )
+
+        Log.Verbose("processFrameBuffer {duration}", PerformanceTiming.formatTiming sw)
+        result
 
     type ProcessPipelineState = {
         IsRecording: bool
@@ -141,12 +142,13 @@ module internal FrameProcessing =
                         (state: ProcessPipelineState ref)
                         (work: WorkUnit) =
 
-        let struct (output, sw) = timeThis (fun () ->
+        let struct (output, sw) = timeThis (fun sw ->
             match work.work with
             | IncomingFrame frame ->
                 let fb = FrameBuffer.FromFrame frame
                 let reorderSamples = (frame.Header.ReorderedSamples = 0u)
-                let sampleData, histogram = processFrameBuffer reorderSamples fb
+
+                let struct (sampleData, histogram) = processFrameBuffer reorderSamples fb
                 let newF =
                     if reorderSamples then
                         let mutable hdr = frame.Header
@@ -174,6 +176,7 @@ module internal FrameProcessing =
             | WorkType.Quit -> ProcessedFrame.Quit work
         )
 
-        logTimeToProcessFrame sw
         earlyFrameSpur.OnNext (output)
+
+        Log.Verbose("processPipeline {duration}", PerformanceTiming.formatTiming sw)
         output

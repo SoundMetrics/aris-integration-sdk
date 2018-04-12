@@ -7,6 +7,7 @@ open Serilog.Core
 open Serilog.Events
 open System.Diagnostics
 open System.Reflection
+open System
 
 [<Literal>]
 let LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
@@ -18,6 +19,8 @@ let logStopwatchResolution () =
 
 [<EntryPoint>]
 let main argv =
+
+    Console.Title <- Assembly.GetEntryAssembly().GetName().Name
 
     let programName = Assembly.GetEntryAssembly().Location |> System.IO.Path.GetFileName
 

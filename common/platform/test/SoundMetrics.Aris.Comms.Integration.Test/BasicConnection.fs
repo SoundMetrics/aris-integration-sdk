@@ -1,5 +1,6 @@
 ﻿module BasicConnection
 
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Comms
 open System
@@ -22,22 +23,25 @@ let testBasicConnection (inputs : TestInputs) =
                 Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
                 None // callbacks
 
-    let timeoutPeriod = TimeSpan.FromSeconds(5.0)
+    let timeoutPeriod = TimeSpan.FromSeconds(180.0)
 
     match FindSonar.findAris availability timeoutPeriod sn with
     | Some beacon ->
         Log.Information("ARIS {sn}, software version {softwareVersion}, found at {targetIpAddr}",
                         sn, beacon.SoftwareVersion, beacon.SrcIpAddr)
 
-        let initialSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
+        let initialSettings =
+            let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
+            { defaultSettings with FrameRate = 15.0f</s> }
+
         use conduit = new SonarConduit(initialSettings, sn, availability,
                                        FrameStreamReliabilityPolicy.DropPartialFrames)
 
         use readySignal = new ManualResetEvent(false)
 
         let mutable frameCount = 0
-        let framesExpected = 5
-        let endTime = DateTime.Now.Add(TimeSpan.FromSeconds(5.0))
+        //let framesExpected = 5
+        let endTime = DateTime.Now.Add(timeoutPeriod)
         let mutable errorCount = 0u
 
         Log.Information("Waiting on a frame...")
@@ -58,7 +62,7 @@ let testBasicConnection (inputs : TestInputs) =
             | _ -> ()
         )
 
-        if readySignal.WaitOne(TimeSpan.FromSeconds(15.0)) then
+        if readySignal.WaitOne(timeoutPeriod) then
             if errorCount = 0u then
                 Ok ()
             else

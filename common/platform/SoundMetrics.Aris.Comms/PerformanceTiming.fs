@@ -28,9 +28,9 @@ module PerformanceTiming =
 
     type TimedFunction<'Result> = delegate of unit -> 'Result
 
-    let timeThis<'Result> (timedFunction : unit -> 'Result) : struct ('Result * Stopwatch) =
+    let timeThis<'Result> (timedFunction : Stopwatch -> 'Result) : struct ('Result * Stopwatch) =
 
         let sw = Stopwatch.StartNew()
-        let result = timedFunction()
+        let result = timedFunction sw
         sw.Stop()
         struct (result, sw)

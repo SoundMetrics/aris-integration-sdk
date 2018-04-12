@@ -168,7 +168,7 @@ module internal Recording =
                 startRecordRequest := Some req
                 sprintf "queued recording request: '%s'" req.Description
 
-            let struct (action, sw) = timeThis (fun () ->
+            let struct (action, sw) = timeThis (fun _sw ->
                 match workUnit.work with
                 | Frame (frame, _histogram, _isRecording) ->
                     // Check whether the frame size has changed; if so, stop and restart current recordings.
