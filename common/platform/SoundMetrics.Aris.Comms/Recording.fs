@@ -155,20 +155,19 @@ module internal Recording =
 
 
         // Side effects on recordingState.reqInfos
-        let processInput recordFrameIndexOffset recordingState workUnit =
+        let processInput (perfSink : ConduitPerfSink) recordFrameIndexOffset recordingState workUnit =
 
-            let sw = Stopwatch.StartNew()
-            let reqInfos = recordingState.ReqInfos
-            let startRecordRequest = recordingState.QueuedStartRecordRequest
-            let frameSize = recordingState.FrameSize
+            let struct (_result, sw) = timeThis (fun _sw ->
+                let reqInfos = recordingState.ReqInfos
+                let startRecordRequest = recordingState.QueuedStartRecordRequest
+                let frameSize = recordingState.FrameSize
 
-            // We wait until the next frame to actually start a recording so we can
-            // pass beam/sample count to the client for naming.
-            let queueRecordingRequest req =
-                startRecordRequest := Some req
-                sprintf "queued recording request: '%s'" req.Description
+                // We wait until the next frame to actually start a recording so we can
+                // pass beam/sample count to the client for naming.
+                let queueRecordingRequest req =
+                    startRecordRequest := Some req
+                    sprintf "queued recording request: '%s'" req.Description
 
-            let struct (action, sw) = timeThis (fun _sw ->
                 match workUnit.work with
                 | Frame (frame, _histogram, _isRecording) ->
                     // Check whether the frame size has changed; if so, stop and restart current recordings.
@@ -220,8 +219,8 @@ module internal Recording =
 
                     // Process the frame with some number of retries for write failures.
                     let rec attemptFrameAndUpdateReqs (reqsTodo : ReqInProgress list)
-                                                      frame
-                                                      recordFrameIndexOffset
+                                                        frame
+                                                        recordFrameIndexOffset
                             : ReqInProgress list * ReqInProgress list =
 
                         if reqsTodo.IsEmpty then
@@ -244,9 +243,9 @@ module internal Recording =
                                             let ri = fst rip
                                             let req = ri.Request
                                             match req.BuildRecordingPath DateTime.Now
-                                                                         frame.BeamCount
-                                                                         frame.Header.SamplesPerBeam
-                                                                         { FailedPath = Some ri.RecordingPath } with
+                                                                            frame.BeamCount
+                                                                            frame.Header.SamplesPerBeam
+                                                                            { FailedPath = Some ri.RecordingPath } with
                                             | Choice1Of2 newPath ->
                                                 let recFail = { FailedPath = Some lastBadPath }
                                                 match startRecording req frame.BeamCount frame.Header.SamplesPerBeam recFail with
@@ -297,7 +296,9 @@ module internal Recording =
                     "quit"
             )
 
-            logTimeToProcess action sw
+            perfSink.FrameRecorded sw
 
 
-    let recordFrame mapFrameIndex recordingState input = RecordingImpl.processInput mapFrameIndex recordingState input
+    let recordFrame perfSink mapFrameIndex recordingState input =
+
+        RecordingImpl.processInput perfSink mapFrameIndex recordingState input

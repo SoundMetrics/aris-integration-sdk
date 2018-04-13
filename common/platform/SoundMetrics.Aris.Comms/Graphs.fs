@@ -43,9 +43,9 @@ module internal GraphBuilder =
         let makeState () = ref (FrameProcessing.ProcessPipelineState.Create ())
         (bindTransformWithState makeState (FrameProcessing.processPipeline perfSink earlyFrameSpur)) rhNode
 
-    let makeRecorder recordedFrameIndexSpur rhNode =
+    let makeRecorder perfSink recordedFrameIndexSpur rhNode =
         let makeState () = Recording.RecordingState.Create ()
-        (bindActionWithState makeState (Recording.recordFrame recordedFrameIndexSpur)) rhNode
+        (bindActionWithState makeState (Recording.recordFrame perfSink recordedFrameIndexSpur)) rhNode
 
     let quit () =
         // 'Complete' this node when the Quit message comes through.
@@ -70,7 +70,7 @@ module internal GraphBuilder =
             bindFrameSource frameSource
             << makeBuffer
             << makeProcessorPipeline perfSink earlyFrameSpur
-            << makeRecorder recordedFrameIndexSpur
+            << makeRecorder perfSink recordedFrameIndexSpur
             << quit
         ctor ()
 

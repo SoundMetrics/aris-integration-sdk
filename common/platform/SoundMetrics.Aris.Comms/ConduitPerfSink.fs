@@ -9,6 +9,7 @@ type ConduitPerfSink () =
 
     abstract FrameProcessed : Stopwatch -> unit
     abstract FrameReordered : Stopwatch -> unit
+    abstract FrameRecorded :  Stopwatch -> unit
 
     static member public NoOp = NoOpConduitPerfSink() :> ConduitPerfSink
 
@@ -17,6 +18,7 @@ and internal NoOpConduitPerfSink () =
 
     override __.FrameProcessed (sw : Stopwatch) = ()
     override __.FrameReordered (sw : Stopwatch) = ()
+    override __.FrameRecorded  (sw : Stopwatch) = ()
 
 module PerfSink =
 
@@ -75,11 +77,14 @@ type internal SampledConduitPerfSink (size : int, ?skip : int) =
     let skip' = defaultArg skip 0
     let frameProcessed = SampleInfo(size, skip')
     let frameReordered = SampleInfo(size, skip')
+    let frameRecorded =  SampleInfo(size, skip')
 
     override s.FrameProcessed (sw : Stopwatch) = frameProcessed.AddSample sw.ElapsedTicks
     override s.FrameReordered (sw : Stopwatch) = frameReordered.AddSample sw.ElapsedTicks
+    override s.FrameRecorded  (sw : Stopwatch) = frameRecorded.AddSample  sw.ElapsedTicks
 
     member __.IsFull = frameProcessed.IsFull
     member __.SamplesCollected = frameProcessed.SampleCount
     member __.FrameProcessedReport = frameProcessed.Report
     member __.FrameReorderedReport = frameReordered.Report
+    member __.FrameRecordedReport  = frameRecorded.Report

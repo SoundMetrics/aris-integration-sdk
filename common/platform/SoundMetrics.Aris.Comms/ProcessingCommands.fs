@@ -39,7 +39,7 @@ type RecordingRequest = {
     JobDisplayTime: DateTime option
 }
 with
-    static member Create description getRecordingPath onTermination =
+    static member Create(description, getRecordingPath, onTermination) =
         { Id = Guid.NewGuid()
           Description = description
           GetRecordingPath = getRecordingPath

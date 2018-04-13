@@ -1,4 +1,4 @@
-﻿module FrameProcessingStats
+﻿module RecordingStats
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
@@ -7,7 +7,7 @@ open System
 open System.Threading
 open TestInputs
 
-let frameProcessingStats (inputs : TestInputs) =
+let recordingStats (inputs : TestInputs) =
 
     let sn = match inputs.SerialNumber with
              | Some sn -> sn
@@ -46,6 +46,24 @@ let frameProcessingStats (inputs : TestInputs) =
         let mutable frameCount = 0
         let mutable errorCount = 0u
 
+        let recordingFile =
+            let path = IO.Path.GetTempFileName()
+            IO.File.Delete(path)
+            path
+
+        let recordingRequest =
+            let getPath _ _ = true, recordingFile
+            let onTermination (notification : RecordingTerminatedNotification) =
+                Log.Error("Recording was terminated: {reason}", notification.Reason)
+            RecordingRequest.Create("RecordingStats",
+                                    RecordingPathFactory(getPath),
+                                    RecordingTerminationHandler(onTermination))
+
+        if conduit.StartRecording(recordingRequest) then
+            Log.Information("Recording to {recordingFile}", recordingFile)
+        else
+            Log.Error("Could not start a recording.")
+
         Log.Information("Waiting on a frame...")
         use frames = conduit.Frames.Subscribe(fun processedFrame ->
             match processedFrame.work with
@@ -66,6 +84,7 @@ let frameProcessingStats (inputs : TestInputs) =
         )
 
         readySignal.WaitOne(-1) |> ignore
+        conduit.StopRecording(recordingRequest) |> ignore
         if errorCount = 0u then
             Log.Information("States follow; durations in \u00B5s unless otherwise indicated")
             Log.Information("FrameProcessedReport={FrameProcessedReport}",

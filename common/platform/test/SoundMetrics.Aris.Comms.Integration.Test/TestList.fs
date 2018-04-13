@@ -16,6 +16,7 @@ module private TestListDetails =
         [|
             <@ BasicConnection.testBasicConnection @>
             <@ FrameProcessingStats.frameProcessingStats @>
+            <@ RecordingStats.recordingStats @>
         |]
 
     let getTestName testEntry =
