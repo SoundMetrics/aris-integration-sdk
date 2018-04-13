@@ -20,9 +20,10 @@ module private SlidingWindowFrameAssemblerLogging =
 
     let logSkippedFrame (currentFrame : FrameIndex) (incomingFrame : FrameIndex) (incomingDataOffset : uint32)
                         (gap : uint64) (cause : string) =
-        Log.Information("Skipped frame currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
-            + "incomingDataOffset={IncomingDataOffset}; gap={Gap}; cause={Cause}",
-            currentFrame, incomingFrame, incomingDataOffset, gap, cause)
+        if logVerboseFrameAssembly then
+            Log.Verbose("Skipped frame currentFrame={CurrentFrame}; incomingFrame={IncomingFrame}; "
+                + "incomingDataOffset={IncomingDataOffset}; gap={Gap}; cause={Cause}",
+                currentFrame, incomingFrame, incomingDataOffset, gap, cause)
 
     let logDuplicatePacket (lastFinishedFrame : FrameIndex) (incomingFrame : FrameIndex) (incomingDataOffset : uint32) =
         if logVerboseFrameAssembly then

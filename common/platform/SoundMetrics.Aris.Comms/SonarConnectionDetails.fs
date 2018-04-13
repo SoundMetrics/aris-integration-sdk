@@ -107,7 +107,9 @@ module internal SonarConnectionDetails =
         memstream.Flush()
 
         let msg = memstream.ToArray()
-        Serilog.Log.Information("Sending command {cmdType} of {length} bytes", cmd.Type, msg.Length - prefix.Length)
+        if cmd.Type <> Aris.Command.Types.CommandType.Ping then
+            Serilog.Log.Information("Sending command {cmdType} of {length} bytes", cmd.Type, msg.Length - prefix.Length)
+
         socket.Client.Send(msg)
 
     let buildCommandSocket (ipAddress: IPAddress) (connectionTimeout: TimeSpan) =

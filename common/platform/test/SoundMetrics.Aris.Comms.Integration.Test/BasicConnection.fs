@@ -23,7 +23,7 @@ let testBasicConnection (inputs : TestInputs) =
                 Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
                 None // callbacks
 
-    let timeoutPeriod = TimeSpan.FromSeconds(180.0)
+    let timeoutPeriod = TimeSpan.FromSeconds(10.0)
 
     match FindSonar.findAris availability timeoutPeriod sn with
     | Some beacon ->
@@ -34,8 +34,10 @@ let testBasicConnection (inputs : TestInputs) =
             let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
             { defaultSettings with FrameRate = 15.0f</s> }
 
+        let performanceReportSink = SamplePerformanceReportSink(1000, 10)
         use conduit = new SonarConduit(initialSettings, sn, availability,
-                                       FrameStreamReliabilityPolicy.DropPartialFrames)
+                                       FrameStreamReliabilityPolicy.DropPartialFrames,
+                                       performanceReportSink)
 
         use readySignal = new ManualResetEvent(false)
 
@@ -62,11 +64,12 @@ let testBasicConnection (inputs : TestInputs) =
             | _ -> ()
         )
 
-        if readySignal.WaitOne(timeoutPeriod) then
-            if errorCount = 0u then
-                Ok ()
-            else
-                Error (sprintf "%u errors occured." errorCount)
+        readySignal.WaitOne(timeoutPeriod) |> ignore
+        if errorCount = 0u then
+            Log.Information("FrameProcessedReport={FrameProcessedReport}",
+                            sprintf "%A" performanceReportSink.FrameProcessedReport)
+            Ok ()
         else
-            Error "Timed out waiting for a frame"
+            Error (sprintf "%u errors occured." errorCount)
+
     | None -> Error (sprintf "Timed out waiting to find ARIS %d" sn)

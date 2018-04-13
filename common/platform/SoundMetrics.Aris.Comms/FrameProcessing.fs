@@ -2,7 +2,6 @@
 
 namespace SoundMetrics.Aris.Comms
 
-open Microsoft.FSharp.NativeInterop
 open PerformanceTiming
 open SoundMetrics.Aris.Config
 open SoundMetrics.Aris.ReorderCS
@@ -46,7 +45,6 @@ with
     static member Quit (workUnit: WorkUnit) = { work = ProcessedFrameType.Quit; enqueueTime = workUnit.enqueueTime }
 
 module internal FrameProcessing =
-    open Serilog
 
     type FrameBuffer = {
         FrameIndex: FrameIndex
@@ -100,7 +98,6 @@ module internal FrameProcessing =
             struct (reorderedSampleData, "ReorderCS")
         )
 
-        Log.Verbose("Reorder with {method} {duration}", method, PerformanceTiming.formatTiming sw)
         reordered
 
     let generateHistogram (fb : FrameBuffer) =
@@ -114,7 +111,6 @@ module internal FrameProcessing =
             fb.SampleData |> NativeBuffer.iter (buildHistogram size)
         )
 
-        Log.Verbose("generateHistogram {duration}", PerformanceTiming.formatTiming sw)
         histogram
 
     let inline processFrameBuffer reorderSamples fb =
@@ -129,7 +125,6 @@ module internal FrameProcessing =
             struct (reorderedSamples, histogram)
         )
 
-        Log.Verbose("processFrameBuffer {duration}", PerformanceTiming.formatTiming sw)
         result
 
     type ProcessPipelineState = {
@@ -138,9 +133,10 @@ module internal FrameProcessing =
     with
         static member Create () = { IsRecording = false }
 
-    let processPipeline (earlyFrameSpur: ISubject<ProcessedFrame>)
-                        (state: ProcessPipelineState ref)
-                        (work: WorkUnit) =
+    let processPipeline (performanceReportSink : ConduitPerformanceReportSink)
+                        (earlyFrameSpur : ISubject<ProcessedFrame>)
+                        (state : ProcessPipelineState ref)
+                        (work : WorkUnit) =
 
         let struct (output, sw) = timeThis (fun sw ->
             match work.work with
@@ -178,5 +174,5 @@ module internal FrameProcessing =
 
         earlyFrameSpur.OnNext (output)
 
-        Log.Verbose("processPipeline {duration}", PerformanceTiming.formatTiming sw)
+        performanceReportSink.FrameProcessed sw
         output
