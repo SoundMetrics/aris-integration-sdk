@@ -27,7 +27,7 @@
     <Compile Include="UnitOfMeasure.fs" />
     <Compile Include="TypeAliases.fs" />
     <Compile Include="PerformanceTiming.fs" />
-    <Compile Include="PerformanceReportSink.fs" />
+    <Compile Include="ConduitPerfSink.fs" />
     <Compile Include="NetworkSupport.fs" />
     <Compile Include="UdpListener.fs" />
     <Compile Include="Beacons.fs" />
