@@ -39,9 +39,9 @@ module internal GraphBuilder =
 
     let makeBuffer rhNode = (bindBuffer ()) rhNode
 
-    let makeProcessorPipeline performanceReportSink earlyFrameSpur rhNode =
+    let makeProcessorPipeline perfSink earlyFrameSpur rhNode =
         let makeState () = ref (FrameProcessing.ProcessPipelineState.Create ())
-        (bindTransformWithState makeState (FrameProcessing.processPipeline performanceReportSink earlyFrameSpur)) rhNode
+        (bindTransformWithState makeState (FrameProcessing.processPipeline perfSink earlyFrameSpur)) rhNode
 
     let makeRecorder recordedFrameIndexSpur rhNode =
         let makeState () = Recording.RecordingState.Create ()
@@ -65,11 +65,11 @@ module internal GraphBuilder =
 //-----------------------------------------------------------------------------
 
     /// Builds a simple recording pipeline.
-    let buildSimpleRecordingGraph performanceReportSink frameSource earlyFrameSpur recordedFrameIndexSpur =
+    let buildSimpleRecordingGraph perfSink frameSource earlyFrameSpur recordedFrameIndexSpur =
         let ctor =
             bindFrameSource frameSource
             << makeBuffer
-            << makeProcessorPipeline performanceReportSink earlyFrameSpur
+            << makeProcessorPipeline perfSink earlyFrameSpur
             << makeRecorder recordedFrameIndexSpur
             << quit
         ctor ()

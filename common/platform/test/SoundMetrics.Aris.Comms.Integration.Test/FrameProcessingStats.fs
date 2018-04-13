@@ -1,4 +1,4 @@
-﻿module BasicConnection
+﻿module FrameProcessingStats
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
@@ -7,7 +7,7 @@ open System
 open System.Threading
 open TestInputs
 
-let testBasicConnection (inputs : TestInputs) =
+let frameProcessingStats (inputs : TestInputs) =
 
     let sn = match inputs.SerialNumber with
              | Some sn -> sn
@@ -34,7 +34,9 @@ let testBasicConnection (inputs : TestInputs) =
             let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
             { defaultSettings with FrameRate = 15.0f</s> }
 
-        let perfSink = SampledConduitPerfSink(1000, 10)
+        let skipFrames = 10
+        let sampleCountWanted = 500
+        let perfSink = SampledConduitPerfSink(sampleCountWanted, skipFrames)
         use conduit = new SonarConduit(initialSettings, sn, availability,
                                        FrameStreamReliabilityPolicy.DropPartialFrames,
                                        perfSink)
@@ -42,7 +44,6 @@ let testBasicConnection (inputs : TestInputs) =
         use readySignal = new ManualResetEvent(false)
 
         let mutable frameCount = 0
-        let framesExpected = 5
         let mutable errorCount = 0u
 
         Log.Information("Waiting on a frame...")
@@ -57,16 +58,20 @@ let testBasicConnection (inputs : TestInputs) =
                     errorCount <- errorCount + 1u
                     Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
 
-                if frameCount >= framesExpected then
-                    Log.Information("Observed {frameCount} frames, exiting.", frameCount)
+                if perfSink.IsFull then
+                    Log.Information("Exiting, {frameCount} frames collected",
+                                    perfSink.SamplesCollected)
                     readySignal.Set() |> ignore
             | _ -> ()
         )
 
-        readySignal.WaitOne(timeoutPeriod) |> ignore
+        readySignal.WaitOne(-1) |> ignore
         if errorCount = 0u then
+            Log.Information("States follow; durations in \u00B5s")
             Log.Information("FrameProcessedReport={FrameProcessedReport}",
                             sprintf "%A" perfSink.FrameProcessedReport)
+            Log.Information("FrameReorderedReport={FrameReorderedReport}",
+                            sprintf "%A" perfSink.FrameReorderedReport)
             Ok ()
         else
             Error (sprintf "%u errors occured." errorCount)

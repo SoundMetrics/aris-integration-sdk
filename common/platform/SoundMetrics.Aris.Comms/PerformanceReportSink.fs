@@ -5,18 +5,20 @@ namespace SoundMetrics.Aris.Comms
 open System.Diagnostics
 
 [<AbstractClass>]
-type ConduitPerformanceReportSink () =
+type ConduitPerfSink () =
 
     abstract FrameProcessed : Stopwatch -> unit
+    abstract FrameReordered : Stopwatch -> unit
 
-    static member public NoOp = NoOpConduitPerformanceReportSink() :> ConduitPerformanceReportSink
+    static member public NoOp = NoOpConduitPerfSink() :> ConduitPerfSink
 
-and internal NoOpConduitPerformanceReportSink () =
-    inherit ConduitPerformanceReportSink()
+and internal NoOpConduitPerfSink () =
+    inherit ConduitPerfSink()
 
     override __.FrameProcessed (sw : Stopwatch) = ()
+    override __.FrameReordered (sw : Stopwatch) = ()
 
-module PerformanceReportSink =
+module PerfSink =
 
     [<Struct>]
     type DataPoint = {
@@ -33,20 +35,20 @@ module PerformanceReportSink =
         val mutable SkipCount : int
         val mutable SampleCount : int
         val Samples : int64 array
-        val Length : int
+        val Capacity : int
 
-        new (size : int, ?skip : int) =
+        new (capacity : int, ?skip : int) =
             {
                 SkipCount = defaultArg skip 0
                 SampleCount = 0
-                Samples = Array.zeroCreate<int64> size
-                Length = size
+                Samples = Array.zeroCreate<int64> capacity
+                Capacity = capacity
             }
 
         member i.AddSample sample =
             if i.SkipCount > 0 then
                 i.SkipCount <- i.SkipCount - 1
-            elif i.SampleCount < i.Length then
+            elif i.SampleCount < i.Capacity then
                 i.Samples.[i.SampleCount] <- sample
                 i.SampleCount <- i.SampleCount + 1
 
@@ -63,13 +65,21 @@ module PerformanceReportSink =
 
                 { SampleCount = samples; MeanDuration = average; MedianDuration = median }
 
-open PerformanceReportSink
+        member i.IsFull = (i.SampleCount = i.Capacity)
 
-type internal SamplePerformanceReportSink (size : int, ?skip : int) =
-    inherit ConduitPerformanceReportSink()
+open PerfSink
 
-    let frameProcessed = SampleInfo(size, defaultArg skip 0)
+type internal SampledConduitPerfSink (size : int, ?skip : int) =
+    inherit ConduitPerfSink()
+
+    let skip' = defaultArg skip 0
+    let frameProcessed = SampleInfo(size, skip')
+    let frameReordered = SampleInfo(size, skip')
 
     override s.FrameProcessed (sw : Stopwatch) = frameProcessed.AddSample sw.ElapsedTicks
+    override s.FrameReordered (sw : Stopwatch) = frameReordered.AddSample sw.ElapsedTicks
 
+    member __.IsFull = frameProcessed.IsFull
+    member __.SamplesCollected = frameProcessed.SampleCount
     member __.FrameProcessedReport = frameProcessed.Report
+    member __.FrameReorderedReport = frameReordered.Report

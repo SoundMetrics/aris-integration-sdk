@@ -9,6 +9,7 @@
     <None Include="README.md" />
     <Compile Include="TestInputs.fs" />
     <Compile Include="BasicConnection.fs" />
+    <Compile Include="FrameProcessingStats.fs" />
     <Compile Include="TestList.fs" />
     <Compile Include="ProgramArgs.fs" />
     <Compile Include="ProgramActions.fs" />

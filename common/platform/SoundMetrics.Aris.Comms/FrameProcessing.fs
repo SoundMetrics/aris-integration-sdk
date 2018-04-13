@@ -82,7 +82,7 @@ module internal FrameProcessing =
             f n
             n <- n + skip
 
-    let reorderData (fb : FrameBuffer) =
+    let reorderData (perfSink : ConduitPerfSink) (fb : FrameBuffer) =
 
         let struct (struct (reordered, method), sw) = timeThis (fun _sw ->
             let reorderedSampleData =
@@ -98,6 +98,7 @@ module internal FrameProcessing =
             struct (reorderedSampleData, "ReorderCS")
         )
 
+        perfSink.FrameReordered sw
         reordered
 
     let generateHistogram (fb : FrameBuffer) =
@@ -113,11 +114,11 @@ module internal FrameProcessing =
 
         histogram
 
-    let inline processFrameBuffer reorderSamples fb =
+    let inline processFrameBuffer perfSink reorderSamples fb =
         let struct (result, sw) = timeThis (fun _sw ->
             let reorderedSamples =
                 if reorderSamples then
-                    reorderData fb
+                    reorderData perfSink fb
                 else
                     fb.SampleData
 
@@ -133,7 +134,7 @@ module internal FrameProcessing =
     with
         static member Create () = { IsRecording = false }
 
-    let processPipeline (performanceReportSink : ConduitPerformanceReportSink)
+    let processPipeline (perfSink : ConduitPerfSink)
                         (earlyFrameSpur : ISubject<ProcessedFrame>)
                         (state : ProcessPipelineState ref)
                         (work : WorkUnit) =
@@ -144,7 +145,7 @@ module internal FrameProcessing =
                 let fb = FrameBuffer.FromFrame frame
                 let reorderSamples = (frame.Header.ReorderedSamples = 0u)
 
-                let struct (sampleData, histogram) = processFrameBuffer reorderSamples fb
+                let struct (sampleData, histogram) = processFrameBuffer perfSink reorderSamples fb
                 let newF =
                     if reorderSamples then
                         let mutable hdr = frame.Header
@@ -174,5 +175,5 @@ module internal FrameProcessing =
 
         earlyFrameSpur.OnNext (output)
 
-        performanceReportSink.FrameProcessed sw
+        perfSink.FrameProcessed sw
         output

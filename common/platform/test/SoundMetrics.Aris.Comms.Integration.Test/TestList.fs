@@ -15,6 +15,7 @@ module private TestListDetails =
     let tests : TestEntry array =
         [|
             <@ BasicConnection.testBasicConnection @>
+            <@ FrameProcessingStats.frameProcessingStats @>
         |]
 
     let getTestName testEntry =
