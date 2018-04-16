@@ -100,7 +100,12 @@ type FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabilityPolicy:
                         // Not using ReceiveAsync here definitely helps performance.
                         let udpReceiveResult = udpClient.Receive(remoteEndPoint)
                         let timestamp = DateTimeOffset.Now
-                        frameAssembler.ProcessPacket (udpReceiveResult, timestamp) |> ignore
+
+                        // On Linux/raspi we sometimes receive spurious empty packets on
+                        // 0.0.0.0:0, which is the default value before the sonar's IP address
+                        // is known. Ignore these.
+                        if udpReceiveResult.Length > 0 then
+                            frameAssembler.ProcessPacket (udpReceiveResult, timestamp) |> ignore
                 with
                     _ -> () // Try again.
         finally
