@@ -4,10 +4,7 @@ namespace SoundMetrics.Aris.Comms
 
 module FindSonar =
 
-    open SoundMetrics.Aris.Config
     open System
-    open System.Net
-    open System.Reactive
     open System.Reactive.Linq
     open System.Runtime.InteropServices
     open System.Threading
@@ -18,6 +15,8 @@ module FindSonar =
     let private timeout<'T> (timespan : TimeSpan) (obs : IObservable<'T>) =
         Observable.Timeout(obs, timespan)
 
+    /// This is the F#-friendly version of FindAris. If you're using C#, use
+    /// the Pascal-cased FindAris.
     let findAris (availability : SonarBeaconListener) timeoutPeriod sn  =
 
         let mutable beaconFound = None

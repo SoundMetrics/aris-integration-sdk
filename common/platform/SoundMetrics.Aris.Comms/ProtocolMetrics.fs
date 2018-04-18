@@ -2,17 +2,18 @@
 
 namespace SoundMetrics.Aris.Comms
 
-type ProtocolMetrics =
-    { UniqueFrameIndexCount:  uint64
-      ProcessedFrameCount:    uint64
-      /// Fully complete frames processed.
-      CompleteFrameCount:     uint64
-      SkippedFrameCount:      uint64
-      TotalExpectedFrameSize: uint64
-      TotalReceivedFrameSize: uint64
-      TotalPacketsReceived:   uint64
-      TotalPacketsAccepted:   uint64
-      UnparsablePackets:      uint64 }
+type ProtocolMetrics = {
+    UniqueFrameIndexCount:  uint64
+    ProcessedFrameCount:    uint64
+    /// Fully complete frames processed.
+    CompleteFrameCount:     uint64
+    SkippedFrameCount:      uint64
+    TotalExpectedFrameSize: uint64
+    TotalReceivedFrameSize: uint64
+    TotalPacketsReceived:   uint64
+    TotalPacketsAccepted:   uint64
+    UnparsablePackets:      uint64
+}
 
 module private ProtocolMetricsDetails =
     let empty = 

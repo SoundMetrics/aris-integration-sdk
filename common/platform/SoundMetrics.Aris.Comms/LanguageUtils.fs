@@ -4,7 +4,7 @@ namespace SoundMetrics.Aris.Comms
 
 open System
 
-module Log =
+module internal Log =
     open System.Diagnostics
 
     /// Use to log the first loading of an assembly. Useful when managed code is
@@ -15,7 +15,7 @@ module Log =
         Trace.TraceInformation(sprintf "Loading %s - %A - %s" name DateTime.Now assyName)
 
 [<AutoOpen>]
-module ExceptionHelpers =
+module internal ExceptionHelpers =
 
 
     [<Literal>]
@@ -51,7 +51,7 @@ module ExceptionHelpers =
 
 /// Functions to facilitate the disposal of disposable resources.
 [<RequireQualifiedAccess>]
-module Dispose =
+module internal Dispose =
 
     /// Disposes the disposables indicated after first calling the function 'cleanUp'.
     let theseWith (isDisposed: bool ref) (disposables: IDisposable seq) (cleanUp: unit -> unit) =

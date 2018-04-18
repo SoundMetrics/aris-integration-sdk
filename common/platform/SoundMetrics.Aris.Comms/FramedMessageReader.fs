@@ -38,7 +38,7 @@ open FramedMessageReaderDetails
 
 /// Reads framed messages from a TCP stream. The message is prefixed
 /// by a 4-byte length
-type FramedMessageReader(tcp : TcpClient, maxBufSize, instanceDescription) =
+type internal FramedMessageReader(tcp : TcpClient, maxBufSize, instanceDescription) =
 
     let disposed = ref false
     let prefix = Array.zeroCreate<byte> 4

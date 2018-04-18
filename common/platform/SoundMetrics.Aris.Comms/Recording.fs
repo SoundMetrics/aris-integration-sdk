@@ -2,9 +2,9 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open FrameProcessing
 open RecordingLog
 open System
-open System.Diagnostics
 
 module internal Recording =
 
@@ -168,8 +168,9 @@ module internal Recording =
                     startRecordRequest := Some req
                     sprintf "queued recording request: '%s'" req.Description
 
-                match workUnit.work with
-                | Frame (frame, _histogram, _isRecording) ->
+                match workUnit.Work with
+                | Frame readyFrame ->
+                    let frame = readyFrame.Frame
                     // Check whether the frame size has changed; if so, stop and restart current recordings.
                     let beamCount = frame.BeamCount
                     let sampleCount = frame.Header.SamplesPerBeam

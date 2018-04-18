@@ -1,8 +1,9 @@
 ﻿module BasicConnection
 
+open SoundMetrics.Aris.Comms
+open SoundMetrics.Aris.Comms.FrameProcessing
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
-open SoundMetrics.Aris.Comms
 open System
 open System.Threading
 open TestInputs
@@ -46,21 +47,19 @@ let testBasicConnection (inputs : TestInputs) =
         let mutable errorCount = 0u
 
         Log.Information("Waiting on a frame...")
-        use frames = conduit.Frames.Subscribe(fun processedFrame ->
-            match processedFrame.work with
-            | Frame (frame, _histogram, _isRecording) ->
-                Log.Verbose("Received frame {fi} from SN {sn}",
-                    frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
-                frameCount <- frameCount + 1
+        use frames = conduit.Frames.Subscribe(fun readyFrame ->
+            let frame = readyFrame.Frame
+            Log.Verbose("Received frame {fi} from SN {sn}",
+                frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
+            frameCount <- frameCount + 1
 
-                if frame.Header.ReorderedSamples = 0u then
-                    errorCount <- errorCount + 1u
-                    Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
+            if frame.Header.ReorderedSamples = 0u then
+                errorCount <- errorCount + 1u
+                Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
 
-                if frameCount >= framesExpected then
-                    Log.Information("Observed {frameCount} frames, exiting.", frameCount)
-                    readySignal.Set() |> ignore
-            | _ -> ()
+            if frameCount >= framesExpected then
+                Log.Information("Observed {frameCount} frames, exiting.", frameCount)
+                readySignal.Set() |> ignore
         )
 
         readySignal.WaitOne(timeoutPeriod) |> ignore

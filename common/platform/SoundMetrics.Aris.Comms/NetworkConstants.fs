@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
-module NetworkConstants =
+module internal NetworkConstants =
 
     let SonarAvailabilityListenerPortV1 = 56123 // DEFAULT_ARIS_TS_DISCOVERY_LISTEN_PORT  = 56123,
     let SonarAvailabilityListenerPortV2 = 56124 // version 2 software

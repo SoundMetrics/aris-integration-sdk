@@ -34,9 +34,9 @@ module private FrameIndexMapperImpl =
         else
             None
 
-type ReportFrameMappingFunction = RecordingRequest -> Offset -> unit
+type internal ReportFrameMappingFunction = RecordingRequest -> Offset -> unit
 
-type FrameIndexMapper () =
+type internal FrameIndexMapper () =
 
     let state = ref Map.empty<Key, Offset>
     let guard = obj()

@@ -52,11 +52,11 @@ module SonarConduitHelpers =
 
 
     [<CompiledName("TargetIdFromStringAsync")>]
-    let targetIdFromStringAsync s: Task<ParsedTargetId> =
+    let internal targetIdFromStringAsync s: Task<ParsedTargetId> =
         try
-            let parsed, sn = Int32.TryParse(s)
+            let parsed, sn = UInt32.TryParse(s)
             if parsed then
-                Task.FromResult (SN sn)
+                Task.FromResult (SN (int sn))
             else
                 let parsed, ip = IPAddress.TryParse(s)
                 if parsed then
@@ -146,14 +146,9 @@ module private SonarConduitDetails =
     | Range of float<m>
     | FocusEnvironment of SonarConduitHelpers.FocusContext
 
-    type FocusRequested = {
-        Mapped : FocusMap.MappedFocusUnits
-        FocusEnvironment : SonarConduitHelpers.FocusContext
-    }
-
     // Focus requests require the environmental inputs needed to calculate sound speed in water as well as system type and
     // whether using a telephoto lens. We don't have these until we've received a frame from the sonar.
-    let mkFocusQueue (frames: ISubject<ProcessedFrame>)
+    let mkFocusQueue (frames: ISubject<ReadyFrame>)
                      (send: float<m> -> FU -> unit) =
 
         let focusRequestSink = new Subject<float<m>>()
@@ -161,11 +156,7 @@ module private SonarConduitDetails =
         let environment: SonarConduitHelpers.FocusContext option ref = ref None
         let focusInputSubscription =
             Observable.Merge<FocusInput>([ focusRequestSink.Select(fun range -> Range range)
-                                           frames.Where(fun pf -> match pf.work with | Frame (_frame, _histo, _isRecording) -> true | _ -> false)
-                                                 .Select(fun f -> match f.work with
-                                                                  | Frame (fr, _histo, _isRecording) ->
-                                                                        FocusEnvironment (SonarConduitHelpers.FocusContext.FromFrame fr)
-                                                                  | _ -> failwith "logic error: should receive only frames") ])
+                                           frames.Select(fun rf -> FocusEnvironment (SonarConduitHelpers.FocusContext.FromFrame rf.Frame)) ])
                       .Subscribe(fun input ->
 
                             let sendIfContextDiffers range (env: SonarConduitHelpers.FocusContext) =
@@ -194,8 +185,10 @@ module private SonarConduitDetails =
         focusRequestSink, focusInputSubscription
 
 open ArisCommands
+open FrameProcessing
 open SonarConduitDetails
 open System.Diagnostics
+
 
 type RequestedSettings =
     | SettingsApplied of versioned : AcousticSettingsVersioned * constrained : bool
@@ -210,26 +203,25 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
                            perfSink : ConduitPerfSink) as self =
 
     let disposed = ref false
-    let mutable serialNumber: SerialNumber option = None
+    let mutable serialNumber: Nullable<SerialNumber> = Nullable<SerialNumber>()
     let mutable snListener: IDisposable = null
     let mutable setSalinity: (Frame -> unit) = fun _ -> ()
     let systemType: SystemType option ref = ref None
     let cts = new CancellationTokenSource()
     let cxnMgrDone = new ManualResetEventSlim()
-    let earlyFrameSubject = new Subject<ProcessedFrame>() // Spur from early in the graph
+    let earlyFrameSubject = new Subject<ReadyFrame>() // Spur from early in the graph
     let frameIndexMapper = new FrameIndexMapper()
 
-    // Lie about the frame sink IP address until we get a connection
     let frameStreamListener =
         new FrameStreamListener(IPAddress.Any, frameStreamReliabilityPolicy)
 
-    let lastRequestedAcoustingSettings = ref AcousticSettingsConstants.invalidAcousticSettingsVersioned
+    let lastRequestedAcoustingSettings = ref AcousticSettingsVersioned.Invalid
     let requestedAcousticSettingsResult = ref Uninitialized
-    let currentAcousticSettings = ref AcousticSettingsConstants.invalidAcousticSettingsVersioned
+    let currentAcousticSettings = ref AcousticSettingsVersioned.Invalid
     let cookieTracker = SettingsHelpers.AcousticSettingsCookieTracker()
     let acousticSettingsRequestGuard = Object()
     let instantaneousFrameRate: float option ref = ref None
-    let cxnStateSubject = new Subject<CxnState>()
+    let cxnStateSubject = new Subject<ConnectionState>()
 
     let keepAliveTimer = Observable.Interval(SonarConnectionDetails.keepAlivePingInterval)
 
@@ -271,17 +263,17 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
                            cxnMgrDone
     let inputGraphLinks = wireUpInputEvents cxnEvQueue keepAliveTimer available matchBeacon
 
-    let quitCxnMgr () = cxnEvQueue.Post(mkEventNoCallback Quit) |> ignore
+    let quitCxnMgr () = cxnEvQueue.Post(mkEventNoCallback CxnEventType.Quit) |> ignore
     let queueCmd (cmd : Aris.Command) =
         if Serilog.Log.IsEnabled(Serilog.Events.LogEventLevel.Verbose) then
             let commandType = cmd.Type.ToString()
             Serilog.Log.Verbose("Queuing command type {commandType}", commandType)
 
-        cxnEvQueue.Post(mkEventNoCallback (Command cmd)) |> ignore
+        cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
         // TODO mkEventNoCallback determine if we really want callbacks; how to implement in API
 
     let focusRequestSink, focusInputSubscription =
-        mkFocusQueue (earlyFrameSubject :> ISubject<ProcessedFrame>)
+        mkFocusQueue (earlyFrameSubject :> ISubject<ReadyFrame>)
                      (fun (range: float<m>) requestedFocus ->
                         Trace.TraceInformation("SonarConduit: Queuing focus request command for range {0}; focus units={1}",
                                                range, requestedFocus)
@@ -316,24 +308,37 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
 
     do
         // Start the listener only after fully initialized--because it modifies this instance.
-        snListener <- listenForBeacon available matchBeacon targetSonar (fun beacon -> self.SerialNumber <- Some beacon.SerialNumber)
+        snListener <- listenForBeacon available
+                                      matchBeacon
+                                      targetSonar
+                                      (fun beacon ->
+                                        self.SerialNumber <- Nullable<SerialNumber>(beacon.SerialNumber))
+
         logNewSonarConduit targetSonar initialAcousticSettings
 
     /// Find the sonar by its serial number.
-    new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy, perfSink) =
+    new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) =
             new SonarConduit(initialAcousticSettings,
                              availableSonars,
                              sn.ToString(),
                              (fun beacon -> beacon.SerialNumber = sn),
                              frameStreamReliabilityPolicy,
-                             perfSink)
+                             ConduitPerfSink.None)
 
     /// Find the sonar by its IP address
-    new(initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy, perfSink) = 
+    new(initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
             new SonarConduit(initialAcousticSettings,
                              availableSonars,
                              ipAddress.ToString(),
                              (fun beacon -> beacon.SrcIpAddr = ipAddress),
+                             frameStreamReliabilityPolicy,
+                             ConduitPerfSink.None)
+
+    internal new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy, perfSink) =
+            new SonarConduit(initialAcousticSettings,
+                             availableSonars,
+                             sn.ToString(),
+                             (fun beacon -> beacon.SerialNumber = sn),
                              frameStreamReliabilityPolicy,
                              perfSink)
 
@@ -362,7 +367,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
         member __.OnCxnStateChanged cxnState =
             Trace.TraceInformation("SonarConduit({0}): connection state changed to {1}", targetSonar, cxnState)
             match cxnState with
-            | CxnState.Connected _ -> ()
+            | ConnectionState.Connected _ -> ()
             | _ -> frameStreamListener.Flush() // Resets frame index tracker
             
             cxnStateSubject.OnNext(cxnState)
@@ -377,7 +382,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
 
             let settings =
                 let requested = s.RequestedAcousticSettings
-                let hasExistingSettings = not (requested.Cookie = AcousticSettingsConstants.invalidAcousticSettingsCookie)
+                let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings
                     then System.Diagnostics.Trace.TraceInformation ("sending existing settings" + requested.Settings.ToString())
                          requested.Settings
@@ -392,9 +397,9 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
 
     member __.SerialNumber
         with get () = serialNumber
-        and private set sn = serialNumber <- sn
+        and private set (sn : Nullable<SerialNumber>) = serialNumber <- sn
 
-    member __.ConnectionState with get () = cxnStateSubject :> ISubject<CxnState>
+    member __.ConnectionState with get () = cxnStateSubject :> ISubject<ConnectionState>
 
     member __.Metrics = makeMetrics instantaneousFrameRate.Value frameStreamListener.Metrics
 
@@ -427,7 +432,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
     // Frames
 
     /// Stream of frames from the sonar.
-    member __.Frames = earlyFrameSubject :> IObservable<ProcessedFrame>
+    member __.Frames = earlyFrameSubject :> IObservable<ReadyFrame>
 
     // Recording
 
@@ -439,7 +444,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
     /// Facilitates mapping the display frame index to the recorded frame index.
     /// Returns None if the mapping cannot be done. Mapping can be done only during
     /// recording.
-    member __.FrameIndexMapper = frameIndexMapper
+    member internal __.FrameIndexMapper = frameIndexMapper
 
     // Rotator
 

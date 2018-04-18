@@ -2,6 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open FrameProcessing
 open System
 open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
@@ -51,7 +52,7 @@ module internal GraphBuilder =
         // 'Complete' this node when the Quit message comes through.
         let refAction: ActionBlock<ProcessedFrame> option ref = ref None
         let action = ActionBlock<ProcessedFrame>(fun pf -> 
-            match pf.work with 
+            match pf.Work with 
             | Quit ->
                 match !refAction with
                 | Some action -> action.Complete ()

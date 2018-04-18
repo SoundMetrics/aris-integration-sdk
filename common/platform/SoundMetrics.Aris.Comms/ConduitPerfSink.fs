@@ -5,13 +5,13 @@ namespace SoundMetrics.Aris.Comms
 open System.Diagnostics
 
 [<AbstractClass>]
-type ConduitPerfSink () =
+type internal ConduitPerfSink () =
 
     abstract FrameProcessed : Stopwatch -> unit
     abstract FrameReordered : Stopwatch -> unit
     abstract FrameRecorded :  Stopwatch -> unit
 
-    static member public NoOp = NoOpConduitPerfSink() :> ConduitPerfSink
+    static member public None = NoOpConduitPerfSink() :> ConduitPerfSink
 
 and internal NoOpConduitPerfSink () =
     inherit ConduitPerfSink()
@@ -20,7 +20,7 @@ and internal NoOpConduitPerfSink () =
     override __.FrameReordered (sw : Stopwatch) = ()
     override __.FrameRecorded  (sw : Stopwatch) = ()
 
-module PerfSink =
+module internal PerfSink =
 
     [<Struct>]
     type DataPoint = {

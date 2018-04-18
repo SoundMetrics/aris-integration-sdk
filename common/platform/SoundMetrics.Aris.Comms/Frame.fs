@@ -49,7 +49,7 @@ type Frame = {
 with
     member f.BeamCount = uint32 f.SampleData.Length / f.Header.SamplesPerBeam // only available by calculating it
 
-    static member HeaderFrom(buf, (timestamp: DateTimeOffset), frameIndex) =
+    static member internal HeaderFrom(buf, (timestamp: DateTimeOffset), frameIndex) =
         let h = GCHandle.Alloc(buf, GCHandleType.Pinned)
         try
             let mutable hdr =
@@ -75,7 +75,7 @@ with
 exception IndeterminateSettingsException
 
 [<Struct>]
-type AcousticSettingsFromFrame = {
+type internal AcousticSettingsFromFrame = {
     CurrentSettings : AcousticSettingsVersioned
     AppliedSettings : AcousticSettingsApplied
 }
@@ -84,7 +84,7 @@ type AcousticSettingsFromFrame = {
 type ArisFrameExtensions =
 
     [<Extension>]
-    static member GetAcousticSettings (f : Frame) =
+    static member internal GetAcousticSettings (f : Frame) =
 
         let currentSettings = { FrameRate =         f.Header.FrameRate * 1.0f</s>
                                 SampleCount =       f.Header.SamplesPerBeam

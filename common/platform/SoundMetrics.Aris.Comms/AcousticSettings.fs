@@ -5,7 +5,6 @@ namespace SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Config
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
-open System.Text
 
 type Salinity =
     | Fresh = 0
@@ -25,13 +24,8 @@ type AcousticSettings = {
     Enable150Volts: bool
     ReceiverGain: float32 }
 with
-    override s.ToString () =
-        // Using String.Format in order to avoid the pain at the intersection of sprintf and unit of measure (F# 3.1.2).
-        System.String.Format(
-            "frameRate={0}; sampleCount={1}; sampleStartDelay={2}; cyclePeriod={3}; samplePeriod={4}; pulseWidth={5};"
-                + "pingMode={6}; enableTransmit={7}; frequency={8}; enable150Volts={9}; receiverGain={10}",
-            s.FrameRate, s.SampleCount, s.SampleStartDelay, s.CyclePeriod, s.SamplePeriod,
-            s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
+    override s.ToString () = sprintf "%A" s
+
     member s.ToShortString () =
         // Using String.Format in order to avoid the pain at the intersection of sprintf and unit of measure (F# 3.1.2).
         System.String.Format(
@@ -39,8 +33,22 @@ with
             s.FrameRate, s.SampleCount, s.SampleStartDelay, s.CyclePeriod, s.SamplePeriod,
             s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
 
+    static member Invalid = {
+        FrameRate = 1.0f</s>
+        SampleCount = 0u
+        SampleStartDelay = 0<Us>
+        CyclePeriod = 0<Us>
+        SamplePeriod = 0<Us>
+        PulseWidth = 0<Us>
+        PingMode = SoundMetrics.Aris.Config.InvalidPingMode 0u
+        EnableTransmit = false
+        Frequency = Frequency.Low
+        Enable150Volts = false
+        ReceiverGain = 0.0f
+    }
+
     static member diff left right =
-        let buf = StringBuilder()
+        let buf = System.Text.StringBuilder()
         let count = ref 0
         let addDiff (name: string) l r =
             if l <> r then
@@ -67,30 +75,12 @@ type AcousticSettingsVersioned = {
     Cookie : AcousticSettingsCookie
     Settings: AcousticSettings
 }
+with
+    static member InvalidAcousticSettingsCookie = 0u
 
-/// Constants for initializing values.
-module AcousticSettingsConstants =
-    [<CompiledName("InvalidAcousticSettings")>]
-    let invalidAcousticSettings = {
-        FrameRate = 1.0f</s>
-        SampleCount = 0u
-        SampleStartDelay = 0<Us>
-        CyclePeriod = 0<Us>
-        SamplePeriod = 0<Us>
-        PulseWidth = 0<Us>
-        PingMode = SoundMetrics.Aris.Config.InvalidPingMode 0u
-        EnableTransmit = false
-        Frequency = Frequency.Low
-        Enable150Volts = false
-        ReceiverGain = 0.0f }
-
-    [<CompiledName("InvalidAcousticSettingsCookie")>]
-    let invalidAcousticSettingsCookie = 0u
-
-    [<CompiledName("InvalidAcousticSettingsVersioned")>]
-    let invalidAcousticSettingsVersioned = {
-        Cookie = invalidAcousticSettingsCookie
-        Settings = invalidAcousticSettings
+    static member Invalid = {
+        Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie
+        Settings = AcousticSettings.Invalid
     }
 
 /// Used to track the latest acoustic settings applied.
@@ -104,45 +94,47 @@ open SonarConfig
 
 module internal SettingsDetails =
     let defaultSettingsMap =
-        [ SystemType.Aris1200, { FrameRate = 1.0f</s>
-                                 SampleCount = 1000u
+        [ SystemType.Aris1200, { FrameRate =        1.0f</s>
+                                 SampleCount =      1000u
                                  SampleStartDelay = 4000<Us>
-                                 CyclePeriod = 32400<Us>
-                                 SamplePeriod = 28<Us>
-                                 PulseWidth = 24<Us>
+                                 CyclePeriod =      32400<Us>
+                                 SamplePeriod =     28<Us>
+                                 PulseWidth =       24<Us>
                                  PingMode = getDefaultPingModeForSystemType SystemType.Aris1200
-                                 EnableTransmit = true
-                                 Frequency = Frequency.High
-                                 Enable150Volts = true
-                                 ReceiverGain = 20.0f }
-          SystemType.Aris1800, { FrameRate = 1.0f</s>
-                                 SampleCount = 1000u
+                                 EnableTransmit =   true
+                                 Frequency =        Frequency.High
+                                 Enable150Volts =   true
+                                 ReceiverGain =     20.0f }
+
+          SystemType.Aris1800, { FrameRate =        1.0f</s>
+                                 SampleCount =      1000u
                                  SampleStartDelay = 2000<Us>
-                                 CyclePeriod = 19400<Us>
-                                 SamplePeriod = 17<Us>
-                                 PulseWidth = 14<Us>
+                                 CyclePeriod =      19400<Us>
+                                 SamplePeriod =     17<Us>
+                                 PulseWidth =       14<Us>
                                  PingMode = getDefaultPingModeForSystemType SystemType.Aris1800
-                                 EnableTransmit = true
-                                 Frequency = Frequency.High
-                                 Enable150Volts = true
-                                 ReceiverGain = 18.0f }
-          SystemType.Aris3000, { FrameRate = 1.0f</s>
-                                 SampleCount = 1000u
+                                 EnableTransmit =   true
+                                 Frequency =        Frequency.High
+                                 Enable150Volts =   true
+                                 ReceiverGain =     18.0f }
+
+          SystemType.Aris3000, { FrameRate =        1.0f</s>
+                                 SampleCount =      1000u
                                  SampleStartDelay = 1300<Us>
-                                 CyclePeriod = 6700<Us>
-                                 SamplePeriod = 5<Us>
-                                 PulseWidth = 5<Us>
+                                 CyclePeriod =      6700<Us>
+                                 SamplePeriod =     5<Us>
+                                 PulseWidth =       5<Us>
                                  PingMode = getDefaultPingModeForSystemType SystemType.Aris3000
-                                 EnableTransmit = true
-                                 Frequency = Frequency.High
-                                 Enable150Volts = true
-                                 ReceiverGain = 12.0f } ]
+                                 EnableTransmit =   true
+                                 Frequency =        Frequency.High
+                                 Enable150Volts =   true
+                                 ReceiverGain =     12.0f } ]
         |> Map.ofList
  
 type AcousticSettings with
     static member DefaultAcousticSettingsFor systemType = SettingsDetails.defaultSettingsMap.[systemType]
 
-    member s.Validate () =
+    member internal s.Validate () =
         let pingsPerFrame = pingModeConfigurations.[s.PingMode].PingsPerFrame
         let framePeriod = int (ceil (1000000.0f / float32 s.FrameRate)) * 1<Us>
         let adjustedCyclePeriod = s.SampleStartDelay + (s.SamplePeriod * int s.SampleCount) + 360<Us>

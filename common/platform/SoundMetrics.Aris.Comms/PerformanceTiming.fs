@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
-module PerformanceTiming =
+module internal PerformanceTiming =
     open System
     open System.Diagnostics
 

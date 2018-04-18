@@ -7,7 +7,7 @@ namespace SoundMetrics.Aris.Comms
 open System.Net
 open System.Net.Sockets
 
-type DeviceCxnState =
+type internal DeviceCxnState =
     | Start
     | Connected of ep: IPEndPoint // ep for ToString on dead state (cmdLink.Client=null)
     | NotConnected

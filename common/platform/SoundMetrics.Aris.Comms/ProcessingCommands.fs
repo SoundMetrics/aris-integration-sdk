@@ -20,7 +20,10 @@ with
     static member None = { FailedPath = None }
 
 type RecordingPath = string
-type RecordingPathFactory = System.Func<RecordingNamingPolicyInput, RecordingFailure, bool * RecordingPath>
+
+// C#-friendly
+type RecordingPathFactory = System.Func<RecordingNamingPolicyInput, RecordingFailure, struct (bool * RecordingPath)>
+
 type RecordingId = Guid
 
 type RecordingTerminationReason =
@@ -51,7 +54,7 @@ with
         // Protect ourselves across this call to application level code--don't let any exceptions
         // leak through, turn it into a Choice.
         try
-            let success, path =
+            let struct (success, path) =
                 r.GetRecordingPath.Invoke ({ RecordingTime = now; BeamCount = beamCount; SampleCount = sampleCount },
                                            recordingFailure)
             if success then
@@ -77,7 +80,7 @@ and RecordingTerminationHandler = System.Action<RecordingTerminatedNotification>
 //-----------------------------------------------------------------------------
 // General Processing Commands
 
-type ProcessingCommand =
+type internal ProcessingCommand =
     | StartRecording of RecordingRequest
     | StopRecording of RecordingRequest
     | StopStartRecording of stop: RecordingRequest * start: RecordingRequest

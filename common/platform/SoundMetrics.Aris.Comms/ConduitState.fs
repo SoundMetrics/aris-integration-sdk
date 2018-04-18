@@ -12,13 +12,13 @@ namespace SoundMetrics.Aris.Comms
 /// for consumption by users. Note that the conduit state
 /// never goes to "closed," there would be no more conduit
 /// in this case.
-type ConduitState =
+type internal ConduitState =
     | TryingToConnect   = 0
     | Connected         = 1
     | TryingToReconnect = 2
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module ConduitState =
+module internal ConduitState =
 
     let getNextDefenderConduitState currentState input : ConduitState =
 

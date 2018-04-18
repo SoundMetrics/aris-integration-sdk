@@ -11,11 +11,13 @@ open System.Reactive.Linq
 open System.Threading
 open System.Threading.Tasks.Dataflow
 
-type CxnState = | SonarNotFound
-                | Connected of ip: IPAddress * cmdLink: TcpClient // ip for ToString on dead state (cmdLink.Client=null)
-                | NotConnected of IPAddress
-                | ConnectionRefused of IPAddress
-                | Closed
+type ConnectionState =
+    // Be thoughtful about this, we're exposing the state machine state
+    | SonarNotFound
+    | Connected of ip: IPAddress * cmdLink: TcpClient // ip for ToString on dead state (cmdLink.Client=null)
+    | NotConnected of IPAddress
+    | ConnectionRefused of IPAddress
+    | Closed
 with
     override s.ToString() =
         match s with
@@ -61,7 +63,7 @@ module internal SonarConnectionMachineState =
     /// Callbacks used to indicate state changes and allow initialization
     /// on the sonar connection.
     type ISonarConnectionCallbacks =
-        abstract member OnCxnStateChanged: CxnState -> unit
+        abstract member OnCxnStateChanged: ConnectionState -> unit
         abstract member OnInitializeConnection: frameSinkAddress : IPAddress -> bool
 
     let closeCmdLink (cmdLink: TcpClient) = cmdLink.Close()
@@ -112,7 +114,7 @@ module internal SonarConnectionMachineState =
 
     /// State maintained across calls to handleEvent.
     type EventHandlerState = {
-        mutable machineState: CxnState
+        mutable machineState: ConnectionState
         mutable sonarIP: IPAddress
         targetSonar: string
         callbacks: ISonarConnectionCallbacks
@@ -124,7 +126,7 @@ module internal SonarConnectionMachineState =
               targetSonar = targetSonar
               callbacks = callbacks
               doneSignal = doneSignal }
-        member s.ChangeState (newState: CxnState) =
+        member s.ChangeState (newState: ConnectionState) =
             s.machineState <- newState
             let stateString = newState.ToString()
             logConnectionStateChange s.targetSonar stateString

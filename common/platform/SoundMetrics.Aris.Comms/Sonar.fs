@@ -55,7 +55,7 @@ type SoftwareVersion = { major: int; minor: int; buildNumber: int }
 with
     override x.ToString() = sprintf "%d.%d.%d" x.major x.minor x.buildNumber
 
-module SystemVariant =
+module internal SystemVariant =
 
     [<Literal>]
     let Voyager = "VG"
@@ -91,7 +91,7 @@ type OnBoardBatteryState =
     | Missing = 3
     | OnTetherPower = 4
 
-type DefenderBeacon = {
+type internal DefenderBeacon = {
     Timestamp: DateTime
     SrcIpAddr: IPAddress
     SerialNumber: SerialNumber
@@ -107,7 +107,7 @@ type DefenderBeacon = {
 
 // Command Module Beacon
 
-type CommandModuleBeacon = {
+type internal CommandModuleBeacon = {
     SrcIpAddr : IPAddress
 
     // sonar_serial_number[] is not currently supported
@@ -248,7 +248,7 @@ module BeaconListeners =
                     observationContext, beaconExpirationPolicy)
 
     /// Listens for and reports ARIS Defender beacons on the network.
-    let mkDefenderBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
+    let internal mkDefenderBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
                                  callbacks =
 
         let toSoftwareVersion (ver: DefenderAvailability.Types.SoftwareVersion) =
@@ -306,7 +306,7 @@ module BeaconListeners =
                     observationContext, beaconExpirationPolicy)
 
     /// Listens for and reports ARIS Defender beacons on the network.
-    let mkCommandModuleBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
+    let internal mkCommandModuleBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
                                       callbacks =
 
         let toBeacon (pkt : Udp.UdpReceived) =
@@ -359,5 +359,5 @@ module BeaconListeners =
                     observationContext, beaconExpirationPolicy)
 
 type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
-type AvailableDefenders = Beacons.BeaconSource<DefenderBeacon, SerialNumber>
-type AvailableCommandModules = Beacons.BeaconSource<CommandModuleBeacon, int64>
+type internal AvailableDefenders = Beacons.BeaconSource<DefenderBeacon, SerialNumber>
+type internal AvailableCommandModules = Beacons.BeaconSource<CommandModuleBeacon, int64>

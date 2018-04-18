@@ -1,8 +1,9 @@
 ﻿module FrameProcessingStats
 
+open SoundMetrics.Aris.Comms
+open SoundMetrics.Aris.Comms.FrameProcessing
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
-open SoundMetrics.Aris.Comms
 open System
 open System.Threading
 open TestInputs
@@ -47,22 +48,20 @@ let frameProcessingStats (inputs : TestInputs) =
         let mutable errorCount = 0u
 
         Log.Information("Waiting on a frame...")
-        use frames = conduit.Frames.Subscribe(fun processedFrame ->
-            match processedFrame.work with
-            | Frame (frame, _histogram, _isRecording) ->
-                Log.Verbose("Received frame {fi} from SN {sn}",
-                    frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
-                frameCount <- frameCount + 1
+        use frames = conduit.Frames.Subscribe(fun readyFrame ->
+            let frame = readyFrame.Frame
+            Log.Verbose("Received frame {fi} from SN {sn}",
+                frame.Header.FrameIndex, frame.Header.SonarSerialNumber)
+            frameCount <- frameCount + 1
 
-                if frame.Header.ReorderedSamples = 0u then
-                    errorCount <- errorCount + 1u
-                    Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
+            if frame.Header.ReorderedSamples = 0u then
+                errorCount <- errorCount + 1u
+                Log.Error("Frame {fi} is not reordered.", frame.Header.FrameIndex)
 
-                if perfSink.IsFull then
-                    Log.Information("Exiting, {frameCount} frames collected",
-                                    perfSink.SamplesCollected)
-                    readySignal.Set() |> ignore
-            | _ -> ()
+            if perfSink.IsFull then
+                Log.Information("Exiting, {frameCount} frames collected",
+                                perfSink.SamplesCollected)
+                readySignal.Set() |> ignore
         )
 
         readySignal.WaitOne(-1) |> ignore

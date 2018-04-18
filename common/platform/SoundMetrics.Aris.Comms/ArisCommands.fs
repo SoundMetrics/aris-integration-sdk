@@ -9,6 +9,7 @@ open System.Net
 module ArisCommands =
 
     /// Sets the sonar clock to the local time of the value passed in.
+    [<CompiledName("MakeSetDatetimeCmd")>]
     let makeSetDatetimeCmd (dateTimeOffset: DateTimeOffset) =
         let localTime = dateTimeOffset.ToLocalTime()
         let dateTimeString =
@@ -23,10 +24,12 @@ module ArisCommands =
         )
 
     /// Sets the sonar clock to the current local time.
+    [<CompiledName("MakeSetDatetimeCmdAuto")>]
     let makeSetDatetimeCmdAuto () =
         let now = DateTimeOffset.Now
         makeSetDatetimeCmd (now.ToLocalTime())
 
+    [<CompiledName("MakeFramestreamReceiverCmd")>]
     let makeFramestreamReceiverCmd (ep : IPEndPoint) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetFramestreamReceiver,
@@ -36,6 +39,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MapFocusRange")>]
     let mapFocusRange systemType range degreesC salinity telephoto =
 
         if Double.IsNaN(float range) || Double.IsInfinity(float range) then
@@ -43,6 +47,7 @@ module ArisCommands =
 
         FocusMap.mapRangeToFocusUnits systemType range degreesC salinity telephoto
 
+    [<CompiledName("MakeFocusCmd")>]
     let makeFocusCmd (requestedFocus: FU) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetFocus,
@@ -51,6 +56,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MakeSetRotatorMountCmd")>]
     let makeSetRotatorMountCmd (mountType: RotatorMount) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetRotatorMount,
@@ -59,6 +65,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MakeSetRotatorVelocityCmd")>]
     let makeSetRotatorVelocityCmd (axis: RotatorAxis) velocity =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetRotatorVelocity,
@@ -68,6 +75,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MakeSetRotatorAccelerationCmd")>]
     let makeSetRotatorAccelerationCmd (axis: RotatorAxis) acceleration =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetRotatorAcceleration,
@@ -77,6 +85,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MakeSetRotatorPositionCmd")>]
     let makeSetRotatorPositionCmd (axis: RotatorAxis) position =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetRotatorPosition,
@@ -86,6 +95,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MakeStopRotatorCmd")>]
     let makeStopRotatorCmd (axis: RotatorAxis) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.StopRotator,
@@ -94,6 +104,7 @@ module ArisCommands =
             )
         )
 
+    [<CompiledName("MakeSalinityCmd")>]
     let makeSalinityCmd (salinity : Salinity) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetSalinity,
@@ -102,13 +113,14 @@ module ArisCommands =
             )
         )
 
-    let pingCommandSingleton =
+    let internal pingCommandSingleton =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.Ping,
             Ping = Aris.Command.Types.Ping()
         )
 
 
+    [<CompiledName("MakeAcousticSettingsCmd")>]
     let makeAcousticSettingsCmd (v: AcousticSettingsVersioned) =
 
         Aris.Command(

@@ -195,8 +195,8 @@ open SlidingWindowFrameAssemblerDetails
 /// Assembles packets into frames. See FrameStreamListener for policy regarding
 /// packet retries and dropping partial frames.
 [<Sealed(true)>]
-type SlidingWindowFrameAssembler (sendAck: SendAck,
-                                  onFrameFinished: FrameFinishedHandler) =
+type internal SlidingWindowFrameAssembler (sendAck: SendAck,
+                                           onFrameFinished: FrameFinishedHandler) =
     let disposed = ref false
     let currentFrameIndex = ref -1
     let lastFinishedFrameIndex = ref -1

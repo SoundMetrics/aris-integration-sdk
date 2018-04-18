@@ -27,7 +27,7 @@ type FrameStreamReliabilityPolicy =
 
 /// Listens for frames. If the FrameStreamReliabilityPolicy calls for dropping partial frames that
 /// dropping is done by this type.
-type FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabilityPolicy: FrameStreamReliabilityPolicy) =
+type internal FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabilityPolicy: FrameStreamReliabilityPolicy) =
 
     let remoteEndPoint = ref (IPEndPoint(0L, 0))
     let disposed = ref false

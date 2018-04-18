@@ -217,11 +217,6 @@ module Beacons =
         member __.BeaconCollection = beaconCollection
         member __.Beacons = beaconSubject :> IObservable<'B>
 
-        member __.RemoveBeacon beacon =
-            let expiration = DateTimeOffset.UtcNow - expirationPeriod
-            removeExpiredBeacons support expiration beaconCollection
-                (fun b -> b = beacon) beaconTable
-
         /// Blocking wait for the beacon you're interested in.
         member s.WaitForBeacon (predicate : 'B -> bool) (timeout : TimeSpan) : 'B option =
             let beacon : 'B option ref = ref None
