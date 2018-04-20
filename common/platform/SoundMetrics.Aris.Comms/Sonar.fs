@@ -143,7 +143,7 @@ type IBeaconSourceCallbacks<'B> =
 // Sonar
 //
 
-type Sonar = { serialNumber: SerialNumber; systemType: SystemType }
+type Sonar = { SerialNumber: SerialNumber; SystemType: SystemType }
 
 //
 // Available sonar status
