@@ -20,11 +20,11 @@ namespace SoundMetrics.Aris.ReorderCS
         /// <param name="samples">Samples to be read.</param>
         /// <param name="sampleCount">Number of samples to be read.</param>
         /// <returns></returns>
-        public static unsafe FrameHistogram Generate(byte* samples, uint sampleCount)
+        public static unsafe FrameHistogram Generate(byte* samples, int sampleCount)
         {
             var counts = new int[256];
             byte* p = samples;
-            for (uint i = 0; i < sampleCount; ++i, ++p)
+            for (int i = 0; i < sampleCount; ++i, ++p)
             {
                 counts[*p] += 1;
             }

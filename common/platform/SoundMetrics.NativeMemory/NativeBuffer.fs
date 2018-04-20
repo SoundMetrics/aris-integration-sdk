@@ -140,18 +140,18 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 
     member __.Length = buffer.Length
 
-    member __.Transform(txf : TransformFunction,
-                        pingMode : uint32,
-                        pingsPerFrame : uint32,
-                        beamCount : uint32,
-                        samplesPerBeam : uint32) : NativeBuffer =
+    member __.TransformFrame(txf : TransformFunction,
+                             pingMode : uint32,
+                             pingsPerFrame : uint32,
+                             beamCount : uint32,
+                             samplesPerBeam : uint32) : NativeBuffer =
 
         let destination = NativeBufferHandle.Create buffer.Length
         let source = buffer
         txf.Invoke(pingMode, pingsPerFrame, beamCount, samplesPerBeam, source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
-    member __.Read<'Result>(f : nativeptr<byte> -> 'Result) : 'Result = f(buffer.NativePtr)
+    member __.Map<'Result>(f : (nativeptr<byte> * int) -> 'Result) : 'Result = f(buffer.NativePtr, buffer.Length)
 
     member __.ToArray() = bufferToByteArray buffer
 
@@ -170,14 +170,14 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 module NativeBuffer = 
 
     /// Transforms into a new copy; assumes the output is the same size as the source.
-    let transform txf
-                  pingMode
-                  pingsPerFrame
-                  beamCount
-                  samplesPerBeam
-                  (source : NativeBuffer)
-                  : NativeBuffer =
-        source.Transform(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
+    let transformFrame txf
+                       pingMode
+                       pingsPerFrame
+                       beamCount
+                       samplesPerBeam
+                       (source : NativeBuffer)
+                       : NativeBuffer =
+        source.TransformFrame(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
 
-    let iter<'Result> (f : nativeptr<byte> -> 'Result) (source : NativeBuffer) : 'Result =
-            source.Read(f)
+    let map<'Result> (f : (nativeptr<byte> * int) -> 'Result) (source : NativeBuffer) : 'Result =
+            source.Map(f)
