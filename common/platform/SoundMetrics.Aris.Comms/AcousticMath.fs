@@ -4,7 +4,42 @@ namespace SoundMetrics.Aris.Comms
 
 open SoundMetrics.Aris.Config
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open System
 open System.Diagnostics
+
+module private AcousticMathDetails =
+
+        // Calculate the speed of sound based on temperature, depth and salinity, per
+        // the associated documents.
+        //
+        // We're calculating to the first-order depth correction, nothing beyond that.
+        //
+        // C = 1402.5 + (5 * T) - (5.44e-2 * T*T) + (2.1e-4 * T*T*T) + 1.33*S -(1.23e-2 * S * T) + (8.7e-5 * S * T*T)	// first order for small depths
+        // 
+        // + (1.56e-2 * Z) + (2.55e-7 * Z*Z) -(7.3e-12 * Z*Z*Z)     // first order depth correction, max +4.70 m/s @ 300 m
+        // + (1.2e-6 * Z * (Theta - 45))  -(9.5e-13 * T * Z*Z*Z)    // second order latitude/temperature/depth, max +/- .004 m/s @ 300m over latitude 0 to 90 degrees 
+        // + (3e-7 * T*T * Z) + (1.43e-5 * S * Z)                   // third order temperature/salinity/depth, max + .29 m/s @ 40°C, 35ppt, 300m 
+
+        let calculateSpeedOfSound(temperatureC : Double, depthM : Double, salinityPPT : Double) : Double =
+
+            let T = temperatureC;
+            let Z = depthM;
+            let S = salinityPPT;
+
+            1402.5 + (5.0 * T) - (5.44e-2 * T*T) + (2.1e-4 * T*T*T) + 1.33*S - (1.23e-2 * S * T) + (8.7e-5 * S * T*T) // first order for small depths
+                + (1.56e-2 * Z) + (2.55e-7 * Z*Z) - (7.3e-12 * Z*Z*Z) // first order depth correction, max +4.70 m/s @ 300 m
+
+        let validateDouble f name =
+
+            if System.Double.IsNaN(f) then
+                invalidArg name "is NaN"
+            if System.Double.IsInfinity(f) then
+                let flavor = if System.Double.IsPositiveInfinity(f) then
+                                "+Infinity"
+                             else
+                                "-Infinity"
+                invalidArg name ("is " + flavor)
+
 
 module AcousticMath =
 
@@ -31,14 +66,6 @@ module AcousticMath =
                                     + SonarConfig.CyclePeriodMargin
         min maxAllowedCyclePeriod unboundedCyclePeriod
 
-    module private Native =
-        open System.Runtime.InteropServices
-
-        // NOTE: We'll need to start preloading the appropriate flavor of target
-        // DLL if we begin to support x64.
-        [<DllImport(@"Aris.Model.Native.dll", CallingConvention = CallingConvention.StdCall)>]
-        extern double CalculateSpeedOfSound(double _temperatureC, double _depthM, double _salinityPPT);
-
 
     [<CompiledName("CalculateSpeedOfSound")>]
     let calculateSpeedOfSound (temperature: float<degC>) (depth: float<m>) (salinity: float) : float<m/s> =
@@ -47,22 +74,11 @@ module AcousticMath =
         let Z = depth / 1.0<m>
         let S = salinity
 
-        // If you passed in NaN (etc.), you have failed me.
-        let checkInput f name =
-            if System.Double.IsNaN(f) then
-                invalidArg name "is NaN"
-            if System.Double.IsInfinity(f) then
-                let flavor = if System.Double.IsPositiveInfinity(f) then
-                                "+Infinity"
-                             else
-                                "-Infinity"
-                invalidArg name ("is " + flavor)
+        AcousticMathDetails.validateDouble T "temperature"
+        AcousticMathDetails.validateDouble Z "depth"
+        AcousticMathDetails.validateDouble S "salinity"
 
-        checkInput T "temperature"
-        checkInput Z "depth"
-        checkInput S "salinity"
-
-        1.0<m/s> * Native.CalculateSpeedOfSound(T, Z, S)
+        1.0<m/s> * AcousticMathDetails.calculateSpeedOfSound(T, Z, S)
 
 
     type WindowSize = {
