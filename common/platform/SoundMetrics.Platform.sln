@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.DataVisualizat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTestBench", "WPF\WpfTestBench\WpfTestBench.csproj", "{3F22DCB6-D360-43E2-8380-4968C896B13C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.PaletteShader", "SoundMetrics.Aris.PaletteShader\SoundMetrics.Aris.PaletteShader.csproj", "{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{3F22DCB6-D360-43E2-8380-4968C896B13C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F22DCB6-D360-43E2-8380-4968C896B13C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F22DCB6-D360-43E2-8380-4968C896B13C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +100,7 @@ Global
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{BE7E1388-706E-44D7-96F6-D5CEBF2317F6} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
 		{3F22DCB6-D360-43E2-8380-4968C896B13C} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
+		{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}
