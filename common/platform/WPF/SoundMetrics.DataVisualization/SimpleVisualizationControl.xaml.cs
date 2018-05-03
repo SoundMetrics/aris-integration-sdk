@@ -1,28 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+
+using SoundMetrics.Aris.PaletteShader;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using FrameSource = System.IObservable<SoundMetrics.Aris.Comms.Frame>;
 
 namespace SoundMetrics.DataVisualization
 {
-    /// <summary>
-    /// Interaction logic for SimpleVisualizationControl.xaml
-    /// </summary>
-    public partial class SimpleVisualizationControl : UserControl
+    /// <summary>Simple visualization control for ARIS.</summary>
+    public sealed partial class SimpleVisualizationControl : UserControl
     {
         public SimpleVisualizationControl()
         {
             InitializeComponent();
         }
+
+        private void OnFrameSourceChanged(FrameSource newValue)
+        {
+            // TODO
+        }
+
+        private void OnIsReversedChanged(bool oldValue, bool newValue)
+        {
+            // TODO
+        }
+
+        private void OnRangeLabelModeChanged(RangeLabelMode oldValue, RangeLabelMode newValue)
+        {
+            // TODO
+        }
+
+        private void OnPaletteTemplateChanged(Brush newValue)
+        {
+            // TODO
+        }
+
+        private void OnPaletteIndexChanged(int oldValue, int newValue)
+        {
+            shader.PalletteIndex = GetPaletteIndexFromInteger(newValue);
+        }
+
+        private static float GetPaletteIndexFromInteger(int value) => (value / 16f) + (1f / 32f);
+
+        private readonly ArisPaletteShader shader = new ArisPaletteShader();
     }
 }

@@ -10,6 +10,7 @@ namespace SoundMetrics.Aris.PaletteShader
     /// <summary>
     /// Applies a specified palette as available in ARIScope and other places.
     /// </summary>
+    /// <remarks>Ancient code.</remarks>
     public class ArisPaletteShader : ShaderEffect
     {
         /// <summary>
