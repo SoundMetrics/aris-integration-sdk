@@ -22,7 +22,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include=".\generated\*.cs" />
+    <Compile Include=".\generated\Availability.cs" />
+    <Compile Include=".\generated\CommandModuleBeacon.cs" />
+    <Compile Include=".\generated\Commands.cs" />
+    <Compile Include=".\generated\DefenderAvailability.cs" />
+    <Compile Include=".\generated\DefenderSettings.cs" />
+    <Compile Include=".\generated\FrameStream.cs" />
     <None Include="..\..\protobuf\availability.proto" Link="availability.proto" />
     <None Include="..\..\protobuf\commands.proto" Link="commands.proto" />
     <None Include="..\..\protobuf\command_module_beacon.proto" Link="command_module_beacon.proto" />
