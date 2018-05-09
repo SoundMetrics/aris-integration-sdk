@@ -17,7 +17,12 @@
     <FileVersion>1.0.3.0</FileVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
   <ItemGroup>
+    <Compile Include=".\generated\*.cs" />
     <None Include="..\..\protobuf\availability.proto" Link="availability.proto" />
     <None Include="..\..\protobuf\commands.proto" Link="commands.proto" />
     <None Include="..\..\protobuf\command_module_beacon.proto" Link="command_module_beacon.proto" />
