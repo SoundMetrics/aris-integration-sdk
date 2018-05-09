@@ -40,7 +40,7 @@
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="REM Assumes building on Windows.&#xD;&#xA;&#xD;&#xA;SETLOCAL&#xD;&#xA;&#xD;&#xA;SET SIGN_SCRIPT=$(ProjectDir)..\..\..\submodules\build-tools\SignBinary.cmd&#xD;&#xA;call &quot;%SIGN_SCRIPT%&quot; &quot;&quot; $(Configuration) $(TargetPath)&#xD;&#xA;&#xD;&#xA;ENDLOCAL&#xD;&#xA;" />
+    <Exec Command="REM Assumes building on Windows.&#xD;&#xA;&#xD;&#xA;SETLOCAL&#xD;&#xA;&#xD;&#xA;dir $(TargetPath)&#xD;&#xA;&#xD;&#xA;SET SIGN_SCRIPT=$(ProjectDir)..\..\..\submodules\build-tools\SignBinary.cmd&#xD;&#xA;call &quot;%SIGN_SCRIPT%&quot; &quot;&quot; $(Configuration) $(TargetPath)&#xD;&#xA;&#xD;&#xA;dir $(TargetPath)&#xD;&#xA;&#xD;&#xA;ENDLOCAL&#xD;&#xA;" />
   </Target>
 
 </Project>
