@@ -13,6 +13,7 @@ message DefenderSet {
   Units units = 4;
   uint32 antialiasing = 5;
   FrameStreamReceiver receiver = 6;
+  FieldUpdate fieldsUsed = 7;
 }
 
 message DefenderReport {
@@ -41,3 +42,18 @@ message FrameStreamReceiver {
   uint32 port = 2;
 }
 
+// An effort to deal with the ambiguity of protobuf v3 and its tendency to elide
+// fields that have a value of zero. The original DefenderSet message was not meant
+// to send multiple fields at once, but losing the ability to call .has_xxx has been
+// problematic.
+//
+// Usage: bitwise-or the field specs that are passed in DefenderSet and set fieldsUsed.
+enum FieldUpdate {
+  NONE          = 0x00;
+  DATETIME      = 0x01;
+  FREQUENCY     = 0x02;
+  RANGE         = 0x04;
+  UNITS         = 0x08;
+  ANTIALIASING  = 0x10; // Not currently implemented.
+  RECEIVER      = 0x20;
+}
