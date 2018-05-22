@@ -3,7 +3,7 @@
 using System;
 using System.Windows;
 using System.Windows.Media;
-using FrameSource = System.IObservable<SoundMetrics.Aris.Comms.Frame>;
+using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.Frame>;
 
 namespace SoundMetrics.DataVisualization
 {
@@ -14,17 +14,17 @@ namespace SoundMetrics.DataVisualization
         //-------------------------------------------------------------------------------
 
         public static readonly DependencyProperty FrameSourceProperty =
-            DependencyProperty.Register("FrameSource", typeof(FrameSource), typeof(SimpleVisualizationControl),
+            DependencyProperty.Register("FrameSource", typeof(ArisFrameSource), typeof(SimpleVisualizationControl),
                                         new PropertyMetadata(OnFrameSourceChanged));
 
-        public FrameSource FrameSource
+        public ArisFrameSource FrameSource
         {
-            get => (FrameSource)GetValue(FrameSourceProperty);
+            get => (ArisFrameSource)GetValue(FrameSourceProperty);
             set => SetValue(FrameSourceProperty, value);
         }
 
         private static void OnFrameSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((SimpleVisualizationControl)d).OnFrameSourceChanged((FrameSource)e.NewValue);
+            => ((SimpleVisualizationControl)d).OnFrameSourceChanged((ArisFrameSource)e.NewValue);
 
         //-------------------------------------------------------------------------------
 

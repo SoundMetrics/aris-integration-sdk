@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=4.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FSharp.Core.4.3.4\lib\net45\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Serilog.2.6.0\lib\net46\Serilog.dll</HintPath>
     </Reference>
@@ -104,6 +108,10 @@
     <ProjectReference Include="..\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj">
       <Project>{be7e1388-706e-44d7-96f6-d5cebf2317f6}</Project>
       <Name>SoundMetrics.DataVisualization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WpfTestBench.ViewModel\WpfTestBench.ViewModel.fsproj">
+      <Project>{09c94e33-e5a7-4993-a19c-971e016cd50c}</Project>
+      <Name>WpfTestBench.ViewModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

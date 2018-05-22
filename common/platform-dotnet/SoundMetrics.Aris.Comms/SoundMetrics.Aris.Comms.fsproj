@@ -58,7 +58,7 @@
     <Compile Include="FramedMessageReader.fs" />
     <Compile Include="DeviceConnection.fs" />
     <Compile Include="ConduitState.fs" />
-    <Compile Include="SonarConduit.fs" />
+    <Compile Include="ArisConduit.fs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -28,4 +28,8 @@
     <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.3.4" />
+  </ItemGroup>
+
 </Project>

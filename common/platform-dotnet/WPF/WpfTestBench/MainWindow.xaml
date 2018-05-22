@@ -8,7 +8,12 @@
         mc:Ignorable="d"
         Title="WPF Test Bench" Height="450" Width="800">
     <Grid>
-        <dv:SimpleVisualizationControl Background="BlanchedAlmond"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel MinHeight="16"/>
+        <dv:SimpleVisualizationControl Grid.Row="1" Background="BlanchedAlmond"/>
 
     </Grid>
 </Window>
