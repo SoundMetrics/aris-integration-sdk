@@ -37,8 +37,8 @@
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Serilog.2.6.0\lib\net46\Serilog.dll</HintPath>
     </Reference>
-    <Reference Include="SoundMetrics.Aris.Headers, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SoundMetrics.Aris.Headers.1.0.0-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
+    <Reference Include="SoundMetrics.Aris.Headers, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SoundMetrics.Aris.Headers.1.0.1-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
