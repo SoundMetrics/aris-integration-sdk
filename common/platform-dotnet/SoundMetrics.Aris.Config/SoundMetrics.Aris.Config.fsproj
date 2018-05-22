@@ -11,6 +11,7 @@
     <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Sound Metrics Corporation</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
