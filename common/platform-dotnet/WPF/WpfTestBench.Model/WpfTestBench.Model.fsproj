@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.3.4" />
   </ItemGroup>
 

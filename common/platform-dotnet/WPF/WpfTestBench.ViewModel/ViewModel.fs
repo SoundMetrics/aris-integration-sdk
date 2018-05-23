@@ -1,5 +1,5 @@
 namespace WpfTestBench
 
-type ViewModel() =
+type ViewModel (model : Model) =
 
     do ()

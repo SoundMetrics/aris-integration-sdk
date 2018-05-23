@@ -15,7 +15,7 @@ open SonarConnectionDetails
 open SonarConnectionMachineState
 open SoundMetrics.Aris.Config
 
-module SonarConduitHelpers =
+module ArisConduitHelpers =
 
     type ParsedTargetId =
     | SN of sn: SerialNumber
@@ -144,7 +144,7 @@ module private SonarConduitDetails =
 
     type FocusInput =
     | Range of float<m>
-    | FocusEnvironment of SonarConduitHelpers.FocusContext
+    | FocusEnvironment of ArisConduitHelpers.FocusContext
 
     // Focus requests require the environmental inputs needed to calculate sound speed in water as well as system type and
     // whether using a telephoto lens. We don't have these until we've received a frame from the sonar.
@@ -153,13 +153,13 @@ module private SonarConduitDetails =
 
         let focusRequestSink = new Subject<float<m>>()
         let pendingFocusRequest: float<m> option ref = ref None
-        let environment: SonarConduitHelpers.FocusContext option ref = ref None
+        let environment: ArisConduitHelpers.FocusContext option ref = ref None
         let focusInputSubscription =
             Observable.Merge<FocusInput>([ focusRequestSink.Select(fun range -> Range range)
-                                           frames.Select(fun rf -> FocusEnvironment (SonarConduitHelpers.FocusContext.FromFrame rf.Frame)) ])
+                                           frames.Select(fun rf -> FocusEnvironment (ArisConduitHelpers.FocusContext.FromFrame rf.Frame)) ])
                       .Subscribe(fun input ->
 
-                            let sendIfContextDiffers range (env: SonarConduitHelpers.FocusContext) =
+                            let sendIfContextDiffers range (env: ArisConduitHelpers.FocusContext) =
                                 let requestedFocus =
                                     (FocusMap.mapRangeToFocusUnits env.SystemType range env.Temperature env.Salinity env.Telephoto).FocusUnits
 
