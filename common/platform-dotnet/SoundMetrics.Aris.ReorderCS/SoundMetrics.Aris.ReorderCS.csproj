@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1-alpha</Version>
+    <Authors>Sound Metrics Corporation</Authors>
+    <Company>Sound Metrics Corporation</Company>
+    <Description>ARIS 2 reorder code</Description>
+    <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
+    <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
