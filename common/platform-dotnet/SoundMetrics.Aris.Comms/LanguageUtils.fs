@@ -51,7 +51,7 @@ module internal ExceptionHelpers =
 
 /// Functions to facilitate the disposal of disposable resources.
 [<RequireQualifiedAccess>]
-module internal Dispose =
+module Dispose =
 
     /// Disposes the disposables indicated after first calling the function 'cleanUp'.
     let theseWith (isDisposed: bool ref) (disposables: IDisposable seq) (cleanUp: unit -> unit) =
@@ -76,10 +76,3 @@ module internal Dispose =
     /// Wraps disposables for clean up.
     let makeDisposable (cleanUp: unit -> unit) (disposables: IDisposable list) =
         new AnonymousDisposable(cleanUp, disposables) :> IDisposable
-
-    /// Unpacks an option<IDisposable> into a list of zero or one disposables.
-    let unpack (r: IDisposable option) =
-
-        match r with
-        | Some d -> [ d ]
-        | None ->   []
