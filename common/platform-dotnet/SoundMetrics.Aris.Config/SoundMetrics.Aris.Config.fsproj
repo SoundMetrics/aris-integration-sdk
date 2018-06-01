@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.1-alpha</Version>
+    <Version>1.0.5-alpha</Version>
     <Company>Sound Metrics Corporation</Company>
     <Product>ARIS 2 Configuration</Product>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
@@ -12,6 +12,8 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Sound Metrics Corporation</Authors>
+    <AssemblyVersion>1.0.5.0</AssemblyVersion>
+    <FileVersion>1.0.5.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
