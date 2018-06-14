@@ -191,8 +191,9 @@ module BeaconListeners =
 
 
     /// Listens for and reports ARIS beacons on the network.
-    let mkSonarBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
-                              callbacks =
+    [<CompiledName("CreateSonarBeaconListener")>]
+    let createSonarBeaconListener expirationPeriod observationContext beaconExpirationPolicy
+                                  callbacks =
 
         let toSoftwareVersion (ver: SonarAvailability.Types.SoftwareVersion) =
             { major = int ver.Major; minor = int ver.Minor; buildNumber = int ver.Buildnumber }
@@ -244,11 +245,18 @@ module BeaconListeners =
                                     | None -> support
 
         new BeaconSource<SonarBeacon, SerialNumber>(
-                    beaconPort, expirationPeriod, toBeacon, combinedNotifications,
+                    NetworkConstants.SonarAvailabilityListenerPortV2, expirationPeriod, toBeacon, combinedNotifications,
                     observationContext, beaconExpirationPolicy)
 
+    /// Listens for and reports ARIS beacons on the network, using reasonable default settings.
+    [<CompiledName("CreateDefaultSonarBeaconListener")>]
+    let createDefaultSonarBeaconListener observationContext =
+        createSonarBeaconListener (TimeSpan.FromSeconds(10.0)) observationContext
+            BeaconExpirationPolicy.RemoveExpiredBeacons None
+
     /// Listens for and reports ARIS Defender beacons on the network.
-    let internal mkDefenderBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
+    [<CompiledName("CreateDefenderBeaconListener")>]
+    let internal createDefenderBeaconListener expirationPeriod observationContext beaconExpirationPolicy
                                  callbacks =
 
         let toSoftwareVersion (ver: DefenderAvailability.Types.SoftwareVersion) =
@@ -302,8 +310,15 @@ module BeaconListeners =
                                     | None -> support
 
         new BeaconSource<DefenderBeacon, SerialNumber>(
-                    beaconPort, expirationPeriod, toBeacon, combinedNotifications,
+                    NetworkConstants.DefenderBeaconPort, expirationPeriod, toBeacon, combinedNotifications,
                     observationContext, beaconExpirationPolicy)
+
+
+    /// Listens for and reports ARIS Defender beacons on the network, using reasonable default settings.
+    [<CompiledName("CreateDefaultDefenderBeaconListener")>]
+    let internal createDefaultDefenderBeaconListener observationContext =
+        createDefenderBeaconListener (TimeSpan.FromSeconds(10.0)) observationContext
+            BeaconExpirationPolicy.RemoveExpiredBeacons None
 
     /// Listens for and reports ARIS Defender beacons on the network.
     let internal mkCommandModuleBeaconListener beaconPort expirationPeriod observationContext beaconExpirationPolicy
