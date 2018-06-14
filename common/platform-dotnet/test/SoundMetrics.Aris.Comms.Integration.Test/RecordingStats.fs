@@ -18,8 +18,7 @@ let recordingStats (inputs : TestInputs) =
     // Console doesn't have a sync context by default, we need one for the beacon listener.
     let syncContext = Threading.SynchronizationContext()
     use availability =
-            BeaconListeners.mkSonarBeaconListener
-                NetworkConstants.SonarAvailabilityListenerPortV2
+            BeaconListeners.createSonarBeaconListener
                 (TimeSpan.FromSeconds(30.0))
                 syncContext
                 Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
