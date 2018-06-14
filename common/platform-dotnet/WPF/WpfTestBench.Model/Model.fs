@@ -10,8 +10,7 @@ type Model (syncContext : SynchronizationContext) =
     let mutable disposed = false
 
     let beaconListener =
-            BeaconListeners.mkSonarBeaconListener
-                NetworkConstants.SonarAvailabilityListenerPortV2
+            BeaconListeners.createSonarBeaconListener
                 (TimeSpan.FromSeconds(30.0))
                 syncContext
                 Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
