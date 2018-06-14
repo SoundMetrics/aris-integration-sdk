@@ -8,12 +8,12 @@ open System.Net.Sockets
 open System.Reactive.Subjects
 open System.Threading
 
-module internal Udp =
+module Udp =
 
     type UdpReceived = { udpResult: UdpReceiveResult; timestamp: DateTime }
 
     /// Returns the tuple (ISubject<UdpReceived>, IDisposable).
-    let makeUdpListener (addr : IPAddress) port (reuseAddr: bool) =
+    let internal makeUdpListener (addr : IPAddress) port (reuseAddr: bool) =
         // Shutdown
         let cts = new CancellationTokenSource ()
         let doneSignal = new ManualResetEventSlim ()

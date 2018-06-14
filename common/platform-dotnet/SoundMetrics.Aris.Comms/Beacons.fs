@@ -32,7 +32,7 @@ module Beacons =
 
 
     /// Log changes in beacon status.
-    type internal IBeaconSupport<'B, 'K> =
+    type IBeaconSupport<'B, 'K> =
         // Beacon management
         abstract GetKey :    'B -> 'K
         abstract IsChanged : old : 'B -> newer : 'B -> bool
@@ -178,8 +178,8 @@ module Beacons =
 
     /// Maintains an observable collection of beacons.
     type BeaconSource<'B, 'K when 'B : equality and 'K : comparison>
-             internal (beaconPort, expirationPeriod, toBeacon, support,
-                       observationContext : SynchronizationContext, expirationPolicy) =
+             (beaconPort, expirationPeriod, toBeacon, support,
+              observationContext : SynchronizationContext, expirationPolicy) =
 
         let disposed = ref false
         let beaconSource = mkBeaconListener beaconPort toBeacon
