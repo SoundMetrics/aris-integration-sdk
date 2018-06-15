@@ -174,6 +174,7 @@ module Beacons =
 
 
     open BeaconsDetails
+    open System.Threading.Tasks
 
 
     /// Maintains an observable collection of beacons.
@@ -217,17 +218,28 @@ module Beacons =
         member __.BeaconCollection = beaconCollection
         member __.Beacons = beaconSubject :> IObservable<'B>
 
-        /// Blocking wait for the beacon you're interested in.
-        member s.WaitForBeacon (predicate : 'B -> bool) (timeout : TimeSpan) : 'B option =
-            let beacon : 'B option ref = ref None
+        /// Blocking wait for the beacon you're interested in, for F# folk.
+        member s.WaitForBeacon (predicate : 'B -> bool, ct : CancellationToken) : 'B option =
+            if ct = CancellationToken.None then
+                invalidArg "ct" "Must pass a valid cancellation token"
+
+            let mutable beacon = None
             use ev = new ManualResetEventSlim(false)
-            use _sub = s.Beacons.Where(predicate)
-                                .Subscribe(fun b -> if (!beacon).IsNone then
-                                                        beacon := (Some b)
-                                                    ev.Set () |> ignore)
-            if ev.Wait timeout then
-                assert (!beacon).IsSome
-                assert (predicate (!beacon).Value)
-                !beacon
-            else
-                None // avoid a race condition w/the subscribed func; don't use !beacon
+
+            let updateAction =
+                Action<'B>(fun b -> if beacon.IsNone then
+                                        beacon <- Some b
+                                    ev.Set () |> ignore)
+
+            s.Beacons.Where(predicate)
+                     .Subscribe(updateAction, ct)
+            ev.Wait(-1, ct) |> ignore
+            beacon
+
+        /// Blocking wait for the beacon you're interested in, for C# folk.
+        member s.WaitForBeacon (predicate : Func<'B, bool>, ct : CancellationToken, b : 'B byref) : bool =
+            let predicate' = fun b -> predicate.Invoke(b)
+            match s.WaitForBeacon (predicate', ct) with
+            | Some beacon ->    b <- beacon
+                                true
+            | None -> false
