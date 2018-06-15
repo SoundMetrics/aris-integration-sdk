@@ -233,8 +233,11 @@ module Beacons =
 
             s.Beacons.Where(predicate)
                      .Subscribe(updateAction, ct)
-            ev.Wait(-1, ct) |> ignore
-            beacon
+            try
+                ev.Wait(-1, ct) |> ignore
+                beacon
+            with
+                :? OperationCanceledException -> None
 
         /// Blocking wait for the beacon you're interested in, for C# folk.
         member s.WaitForBeacon (predicate : Func<'B, bool>, ct : CancellationToken, b : 'B byref) : bool =
