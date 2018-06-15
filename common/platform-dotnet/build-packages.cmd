@@ -16,6 +16,14 @@ ECHO Making packages for %VERSION%.%BUILD_NUMBER%
 SET PACKCMD=dotnet pack -c Release /p:Version=%VERSION%
 ECHO PACKCMD=%PACKCMD%
 
-%PACKCMD% .\SoundMetrics.Aris.Messages\
+SET PROJECTS=SoundMetrics.Aris.Comms SoundMetrics.Aris.Config SoundMetrics.Aris.FrameHeaderInjection
+SET PROJECTS=%PROJECTS% SoundMetrics.Aris.Messages SoundMetrics.Aris.ReorderCS SoundMetrics.NativeMemory
+
+FOR %%p in (%PROJECTS%) do (
+    ECHO ---------------------------------------------------------------------
+    ECHO %%p
+    ECHO ---------------------------------------------------------------------
+    %PACKCMD% %%p
+)
 
 ENDLOCAL

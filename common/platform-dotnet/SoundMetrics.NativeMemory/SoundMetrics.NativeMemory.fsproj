@@ -6,7 +6,7 @@
     <Company>Sound Metrics Corporation</Company>
     <Product>Native Buffer</Product>
     <Description>Native buffer for use with managed code. The buffer is allocated on the native heap rather than managed memory, as our buffers would be put in LOH if they were managed.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
     <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
