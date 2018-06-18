@@ -8,6 +8,7 @@ open System
 open System.Net
 open System.Runtime.CompilerServices
 open System.Threading
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module private SonarLogging =
@@ -386,66 +387,41 @@ module private BeaconExtensions =
 [<Extension>]
 type BeaconExtensions =
 
+    /// Extension method to fetch an option's value.
+    [<Extension>]
+    static member ToValue<'T>(option : Option<'T>, value : 'T byref) : bool =
+        match option with
+        | Some t -> value <- t
+                    true
+        | None -> false
+
     /// Extension method to wait on an Explorer beacon by serial number.
     [<Extension>]
-    static member WaitForExplorerBySerialNumber (availables : AvailableSonars,
-                                                 sn : SerialNumber,
-                                                 ct : CancellationToken,
-                                                 b : SonarBeacon byref) : bool =
-        availables.WaitForBeacon(Func<_,_>(BeaconExtensions.matchExplorerBeacon sn), ct, &b)
+    static member WaitForExplorerBySerialNumberAsync (availables : AvailableSonars,
+                                                      sn : SerialNumber,
+                                                      ct : CancellationToken) : Task<SonarBeacon option> =
+        availables.WaitForBeaconAsync(BeaconExtensions.matchExplorerBeacon sn, ct)
 
     /// Extension method to wait on an Explorer beacon by serial number, with timeout.
     [<Extension>]
     static member WaitForExplorerBySerialNumber (availables : AvailableSonars,
                                                  sn : SerialNumber,
                                                  timeout : TimeSpan,
-                                                 b : SonarBeacon byref) : bool =
+                                                 b : SonarBeacon byref) : Task<SonarBeacon option> =
         use cts = new CancellationTokenSource(timeout)
-        availables.WaitForExplorerBySerialNumber(sn, cts.Token, &b)
-
-    /// Extension method to wait on an Explorer beacon by serial number.
-    [<Extension>]
-    static member WaitForExplorerBySerialNumber (availables : AvailableSonars,
-                                                 sn : SerialNumber,
-                                                 ct : CancellationToken) : SonarBeacon option =
-        availables.WaitForBeacon(BeaconExtensions.matchExplorerBeacon sn, ct)
-
-    /// Extension method to wait on an Explorer beacon by serial number, with timeout.
-    [<Extension>]
-    static member WaitForExplorerBySerialNumber (availables : AvailableSonars,
-                                                 sn : SerialNumber,
-                                                 timeout : TimeSpan) : SonarBeacon option =
-        use cts = new CancellationTokenSource(timeout)
-        availables.WaitForExplorerBySerialNumber(sn, cts.Token)
+        availables.WaitForExplorerBySerialNumberAsync(sn, cts.Token)
 
     /// Extension method to wait on a Defender beacon by serial number.
     [<Extension>]
-    static member WaitForDefenderBySerialNumber (availables : AvailableDefenders,
-                                                 sn : SerialNumber,
-                                                 ct : CancellationToken,
-                                                 b : DefenderBeacon byref) : bool =
-        availables.WaitForBeacon(Func<_,_>(BeaconExtensions.matchDefenderBeacon sn), ct, &b)
+    static member WaitForDefenderBySerialNumberAsync (availables : AvailableDefenders,
+                                                      sn : SerialNumber,
+                                                      ct : CancellationToken) : Task<DefenderBeacon option> =
+        availables.WaitForBeaconAsync(BeaconExtensions.matchDefenderBeacon sn, ct)
 
     /// Extension method to wait on a Defender beacon by serial number, with timeout.
     [<Extension>]
-    static member WaitForDefenderBySerialNumber (availables : AvailableDefenders,
-                                                 sn : SerialNumber,
-                                                 timeout : TimeSpan,
-                                                 b : DefenderBeacon byref) : bool =
+    static member WaitForDefenderBySerialNumberAsync (availables : AvailableDefenders,
+                                                      sn : SerialNumber,
+                                                      timeout : TimeSpan) : Task<DefenderBeacon option> =
         use cts = new CancellationTokenSource(timeout)
-        availables.WaitForDefenderBySerialNumber(sn, cts.Token, &b)
-
-    /// Extension method to wait on an Defender beacon by serial number.
-    [<Extension>]
-    static member WaitForDefenderBySerialNumber (availables : AvailableDefenders,
-                                                 sn : SerialNumber,
-                                                 ct : CancellationToken) : DefenderBeacon option =
-        availables.WaitForBeacon(BeaconExtensions.matchDefenderBeacon sn, ct)
-
-    /// Extension method to wait on an Defender beacon by serial number, with timeout.
-    [<Extension>]
-    static member WaitForDefenderBySerialNumber (availables : AvailableDefenders,
-                                                 sn : SerialNumber,
-                                                 timeout : TimeSpan) : DefenderBeacon option =
-        use cts = new CancellationTokenSource(timeout)
-        availables.WaitForDefenderBySerialNumber(sn, cts.Token)
+        availables.WaitForDefenderBySerialNumberAsync(sn, cts.Token)
