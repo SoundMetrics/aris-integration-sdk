@@ -404,10 +404,9 @@ type BeaconExtensions =
 
     /// Extension method to wait on an Explorer beacon by serial number, with timeout.
     [<Extension>]
-    static member WaitForExplorerBySerialNumber (availables : AvailableSonars,
-                                                 sn : SerialNumber,
-                                                 timeout : TimeSpan,
-                                                 b : SonarBeacon byref) : Task<SonarBeacon option> =
+    static member WaitForExplorerBySerialNumberAsync (availables : AvailableSonars,
+                                                      sn : SerialNumber,
+                                                      timeout : TimeSpan) : Task<SonarBeacon option> =
         use cts = new CancellationTokenSource(timeout)
         availables.WaitForExplorerBySerialNumberAsync(sn, cts.Token)
 
