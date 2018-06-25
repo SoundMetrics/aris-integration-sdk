@@ -220,34 +220,21 @@ module Beacons =
 
         /// Blocking wait for the beacon you're interested in, for F# folk.
         /// Cancellation does not throw. Returns Task<> to ensure equal behavior with C#.
-        member s.WaitForBeaconAsync (predicate : 'B -> bool, ct : CancellationToken) : Task<'B option> =
-            if ct = CancellationToken.None then
-                invalidArg "ct" "Must pass a valid cancellation token"
+        member s.WaitForBeaconAsync (predicate : 'B -> bool) : Async<'B option> = async {
+            let mutable beacon = None
+            use ev = new ManualResetEventSlim(false)
 
-            Task.Run(fun () ->
-                let mutable beacon = None
-                use ev = new ManualResetEventSlim(false)
+            let updateAction =
+                Action<'B>(fun b -> if beacon.IsNone then
+                                        beacon <- Some b
+                                    ev.Set () |> ignore)
+            let! ct = Async.CancellationToken
 
-                let updateAction =
-                    Action<'B>(fun b -> if beacon.IsNone then
-                                            beacon <- Some b
-                                        ev.Set () |> ignore)
-
-                s.Beacons.Where(predicate)
-                         .Subscribe(updateAction, ct)
-                try
-                    ev.Wait(-1, ct) |> ignore
-                    beacon
-                with
-                    :? OperationCanceledException -> None
-            )
-
-
-        ///// Blocking wait for the beacon you're interested in, for C# folk.
-        ///// Cancellation does not throw.
-        //member s.WaitForBeacon (predicate : Func<'B, bool>, ct : CancellationToken, b : 'B byref) : bool =
-        //    let predicate' = fun b -> predicate.Invoke(b)
-        //    match s.WaitForBeacon (predicate', ct) with
-        //    | Some beacon ->    b <- beacon
-        //                        true
-        //    | None -> false
+            s.Beacons.Where(predicate)
+                     .Subscribe(updateAction, ct)
+            try
+                ev.Wait(-1, ct) |> ignore
+                return beacon
+            with
+                :? OperationCanceledException -> return None
+        }
