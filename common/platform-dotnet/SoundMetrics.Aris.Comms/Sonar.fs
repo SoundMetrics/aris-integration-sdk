@@ -381,7 +381,7 @@ type internal AvailableDefenders = Beacons.BeaconSource<DefenderBeacon, SerialNu
 type internal AvailableCommandModules = Beacons.BeaconSource<CommandModuleBeacon, int64>
 
 [<AutoOpen>]
-module BeaconExtensions =
+module BeaconFunctions =
     let matchExplorerBeacon sn = fun (b : SonarBeacon) -> b.SerialNumber = sn
     let matchDefenderBeacon sn = fun (b : DefenderBeacon) -> b.SerialNumber = sn
 
@@ -394,34 +394,34 @@ module BeaconExtensions =
             Unchecked.defaultof<'T>
 
     /// Waits on an Explorer beacon by serial number.
-    let waitForExplorerBySerialNumberAsync (availables : AvailableSonars,
-                                            sn : SerialNumber) : Async<SonarBeacon option> =
+    let waitForExplorerBySerialNumberAsync (availables : AvailableSonars)
+                                           (sn : SerialNumber) : Async<SonarBeacon option> =
         availables.WaitForBeaconAsync(matchExplorerBeacon sn)
 
     /// Waits on an Explorer beacon by serial number, with timeout.
-    let waitForExplorerBySerialNumberTimedAsync (availables : AvailableSonars,
-                                                 sn : SerialNumber,
-                                                 timeout : TimeSpan) : Async<SonarBeacon option> =
+    let waitForExplorerBySerialNumberTimedAsync (availables : AvailableSonars)
+                                                (timeout : TimeSpan)
+                                                (sn : SerialNumber) : Async<SonarBeacon option> =
         async {
             use cts = new CancellationTokenSource(timeout) // Synchronous call below, so 'use'.
             // Using RunSynchronously to inject the cancellation token.
-            return Async.RunSynchronously(waitForExplorerBySerialNumberAsync(availables, sn),
+            return Async.RunSynchronously(waitForExplorerBySerialNumberAsync availables sn,
                                           cancellationToken = cts.Token)
         }
 
     /// Extension method to wait on a Defender beacon by serial number.
-    let waitForDefenderBySerialNumberAsync (availables : AvailableDefenders,
-                                            sn : SerialNumber) : Async<DefenderBeacon option> =
+    let waitForDefenderBySerialNumberAsync (availables : AvailableDefenders)
+                                           (sn : SerialNumber) : Async<DefenderBeacon option> =
         availables.WaitForBeaconAsync(matchDefenderBeacon sn)
 
     /// Extension method to wait on a Defender beacon by serial number, with timeout.
-    let waitForDefenderBySerialNumberTimedAsync (availables : AvailableDefenders,
-                                                 sn : SerialNumber,
-                                                 timeout : TimeSpan) : Async<DefenderBeacon option> =
+    let waitForDefenderBySerialNumberTimedAsync (availables : AvailableDefenders)
+                                                (timeout : TimeSpan)
+                                                (sn : SerialNumber) : Async<DefenderBeacon option> =
         async {
             use cts = new CancellationTokenSource(timeout) // Synchronous call below, so 'use'.
             // Using RunSynchronously to inject the cancellation token.
-            return Async.RunSynchronously(waitForDefenderBySerialNumberAsync(availables, sn),
+            return Async.RunSynchronously(waitForDefenderBySerialNumberAsync availables sn,
                                           cancellationToken = cts.Token)
         }
 
@@ -433,7 +433,7 @@ type BeaconExtensionsCSharp =
     static member WaitForExplorerBySerialNumberAsync (availables : AvailableSonars,
                                                       sn : SerialNumber,
                                                       ct : CancellationToken) : Task<SonarBeacon> =
-        Async.StartAsTask(availables.WaitForBeaconAsync(BeaconExtensions.matchExplorerBeacon sn),
+        Async.StartAsTask(availables.WaitForBeaconAsync(BeaconFunctions.matchExplorerBeacon sn),
                           cancellationToken = ct)
              .ContinueWith(optionToNullReturn)
 
@@ -451,7 +451,7 @@ type BeaconExtensionsCSharp =
     static member WaitForDefenderBySerialNumberAsync (availables : AvailableDefenders,
                                                       sn : SerialNumber,
                                                       ct : CancellationToken) : Task<DefenderBeacon> =
-        Async.StartAsTask(availables.WaitForBeaconAsync(BeaconExtensions.matchDefenderBeacon sn),
+        Async.StartAsTask(availables.WaitForBeaconAsync(BeaconFunctions.matchDefenderBeacon sn),
                           cancellationToken = ct)
              .ContinueWith(optionToNullReturn)
 
