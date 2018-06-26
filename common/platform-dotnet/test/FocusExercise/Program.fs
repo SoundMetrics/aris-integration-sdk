@@ -1,6 +1,7 @@
 ﻿module Main
 
 open Serilog
+open SyslogReceiver
 open System
 open System.Reactive.Linq
 open System.Threading
@@ -14,7 +15,7 @@ let LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Mes
 let main argv =
 
     Log.Logger <- (new LoggerConfiguration())
-                    .MinimumLevel.Debug()
+                    //.MinimumLevel.Debug()
                     .WriteTo.Console(outputTemplate = LoggingTemplate)
                     .CreateLogger()
 
@@ -28,7 +29,16 @@ let main argv =
     use _cleanUpSub =
         syslogSubject.ObserveOn(SynchronizationContext.Current)
                      .Subscribe(
-                        Action<_>(printfn "*** got one: %A")
+                        Action<_>(
+                            fun msg ->
+                                match msg with
+                                | ReceivedFocusCommand (targetPosFU, targetPosMC) ->
+                                    printfn "*** targetPosFU=%d; targetPosMC=%d" targetPosFU targetPosMC
+                                | UpdatedFocusState (state, currentPosition) ->
+                                    printfn "*** state=%d; currentPosition=%d" state currentPosition
+                                | Other _ -> ()
+                                | None -> ()
+                        )
                      )
 
     printfn "Waiting..."
@@ -37,7 +47,5 @@ let main argv =
     ThreadPool.QueueUserWorkItem(fun _ ->   Test.testRawFocusUnits syslogSubject
                                             frame.Continue <- false) |> ignore
     Dispatcher.PushFrame(frame)
-
-    //waitWithLiveDispatcher (Task.Delay(1000))
 
     0

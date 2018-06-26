@@ -80,8 +80,6 @@ let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>
                         availables,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 
-        let syslogSub = messageSource.Subscribe(fun ev -> printfn "ev=%A" ev)
-
         let frame = DispatcherFrame()
         Async.Start(async {
             do! Async.Sleep(1000)
@@ -94,7 +92,6 @@ let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>
             frame.Continue <- false
         })
         Dispatcher.PushFrame(frame)
-        syslogSub.Dispose()
 
     match beacon with
     | Some b -> Log.Information("Found SN {targetSN}", targetSN)
