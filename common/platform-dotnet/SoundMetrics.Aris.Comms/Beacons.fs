@@ -4,12 +4,15 @@ namespace SoundMetrics.Aris.Comms
 
 /// Abstractions about listening for beacons.
 module Beacons =
+    open Serilog
     open System
     open System.Collections.Generic
     open System.Collections.ObjectModel
     open System.Reactive.Linq
+    open System.Reactive.Concurrency
     open System.Reactive.Subjects
     open System.Threading
+    open System.Threading.Tasks
 
 
     /// Mutable wrapper that allows us to update the status without causing notification
@@ -174,8 +177,8 @@ module Beacons =
 
 
     open BeaconsDetails
-    open System.Threading.Tasks
-
+    open System.Reactive
+    open System.Reactive.Linq
 
     /// Maintains an observable collection of beacons.
     type BeaconSource<'B, 'K when 'B : equality and 'K : comparison>
@@ -220,21 +223,35 @@ module Beacons =
 
         /// Blocking wait for the beacon you're interested in, for F# folk.
         /// Cancellation does not throw. Returns Task<> to ensure equal behavior with C#.
-        member s.WaitForBeaconAsync (predicate : 'B -> bool) : Async<'B option> = async {
-            let mutable beacon = None
-            use ev = new ManualResetEventSlim(false)
-
-            let updateAction =
-                Action<'B>(fun b -> if beacon.IsNone then
-                                        beacon <- Some b
-                                    ev.Set () |> ignore)
-            let! ct = Async.CancellationToken
-
-            s.Beacons.Where(predicate)
-                     .Subscribe(updateAction, ct)
+        member s.WaitForBeaconAsync (predicate : 'B -> bool) (timeout : TimeSpan) : Async<'B option> = async {
+            Log.Debug("BeaconSource.WaitForBeaconAsync: entering...")
             try
-                ev.Wait(-1, ct) |> ignore
-                return beacon
-            with
-                :? OperationCanceledException -> return None
+                let mutable beacon = None
+                use ev = new ManualResetEventSlim(false)
+
+                use observer = new AnonymousObserver<'B>(
+                                    onNext = (fun b ->
+                                                Log.Debug("BeaconSource.WaitForBeaconAsync: Received a beacon")
+                                                if beacon.IsNone then
+                                                    beacon <- Some b
+                                                ev.Set () |> ignore),
+                                    onError = fun _ -> ev.Set() |> ignore)
+                let! ct = Async.CancellationToken
+
+                Log.Debug("BeaconSource.WaitForBeaconAsync: Set up subscription")
+                use _sub =
+                    s.Beacons.Where(predicate)
+                             .Timeout(timeout)
+                             .SubscribeOn(observationContext)
+                             .SubscribeSafe(observer)
+
+                try
+                    Log.Debug("BeaconSource.WaitForBeaconAsync: waiting...")
+                    ev.Wait(-1, ct) |> ignore
+                    Log.Debug("BeaconSource.WaitForBeaconAsync: wait complete.")
+                    return beacon
+                with
+                    :? OperationCanceledException -> return None
+            finally
+                Log.Debug("BeaconSource.WaitForBeaconAsync: leaving.")
         }

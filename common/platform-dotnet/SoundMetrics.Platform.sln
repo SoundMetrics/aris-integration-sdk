@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetProtobufTools", "GetProt
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D2654555-979F-4020-A426-0A6293D75B17}"
 	ProjectSection(SolutionItems) = preProject
-		build-packages.cmd = build-packages.cmd
+		build-packages.ps1 = build-packages.ps1
 		ver.platform.txt = ver.platform.txt
 	EndProjectSection
 EndProject
@@ -37,9 +37,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTestBench", "WPF\WpfTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.PaletteShader", "SoundMetrics.Aris.PaletteShader\SoundMetrics.Aris.PaletteShader.csproj", "{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WpfTestBench.Model", "WPF\WpfTestBench.Model\WpfTestBench.Model.fsproj", "{D831C646-E00A-4361-974C-D1A5CE15B660}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "WpfTestBench.Model", "WPF\WpfTestBench.Model\WpfTestBench.Model.fsproj", "{D831C646-E00A-4361-974C-D1A5CE15B660}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WpfTestBench.ViewModel", "WPF\WpfTestBench.ViewModel\WpfTestBench.ViewModel.fsproj", "{09C94E33-E5A7-4993-A19C-971E016CD50C}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "WpfTestBench.ViewModel", "WPF\WpfTestBench.ViewModel\WpfTestBench.ViewModel.fsproj", "{09C94E33-E5A7-4993-A19C-971E016CD50C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FocusExercise", "test\FocusExercise\FocusExercise.fsproj", "{5E40044D-64A5-4F99-AF88-11190E38D469}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +105,10 @@ Global
 		{09C94E33-E5A7-4993-A19C-971E016CD50C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09C94E33-E5A7-4993-A19C-971E016CD50C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09C94E33-E5A7-4993-A19C-971E016CD50C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E40044D-64A5-4F99-AF88-11190E38D469}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E40044D-64A5-4F99-AF88-11190E38D469}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E40044D-64A5-4F99-AF88-11190E38D469}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E40044D-64A5-4F99-AF88-11190E38D469}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,6 +121,7 @@ Global
 		{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
 		{D831C646-E00A-4361-974C-D1A5CE15B660} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
 		{09C94E33-E5A7-4993-A19C-971E016CD50C} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
+		{5E40044D-64A5-4F99-AF88-11190E38D469} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}

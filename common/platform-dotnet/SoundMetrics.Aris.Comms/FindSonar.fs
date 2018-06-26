@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
-module FindSonar =
+module internal FindSonar =
 
     open System
     open System.Reactive.Linq
