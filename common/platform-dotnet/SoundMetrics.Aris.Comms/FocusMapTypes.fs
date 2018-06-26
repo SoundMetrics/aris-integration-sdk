@@ -39,12 +39,7 @@ namespace SoundMetrics.Aris.Comms
 
 module internal FocusMapTypes =
 
-    open System.Diagnostics
-
-    [<Sealed>]
-    type Log =
-        [<Conditional("LOGVERBOSE")>]
-        static member Verbose msg = printfn "%s" msg
+    open Serilog
 
     module NumericHelpers =
 

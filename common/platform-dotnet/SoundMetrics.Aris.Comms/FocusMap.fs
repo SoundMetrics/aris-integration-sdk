@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open Serilog
 open SoundMetrics.Aris.Config
 
 module FocusUnits =
