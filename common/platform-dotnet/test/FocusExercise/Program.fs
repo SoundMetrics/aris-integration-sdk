@@ -33,11 +33,11 @@ let main argv =
                             fun msg ->
                                 match msg with
                                 | ReceivedFocusCommand (targetPosFU, targetPosMC) ->
-                                    printfn "*** targetPosFU=%d; targetPosMC=%d" targetPosFU targetPosMC
+                                    Log.Information(sprintf "*** targetPosFU=%d; targetPosMC=%d" targetPosFU targetPosMC)
                                 | UpdatedFocusState (state, currentPosition) ->
-                                    printfn "*** state=%d; currentPosition=%d" state currentPosition
+                                    Log.Information(sprintf "*** state=%d; currentPosition=%d" state currentPosition)
                                 | Other _ -> ()
-                                | None -> ()
+                                | NoMessage -> ()
                         )
                      )
 

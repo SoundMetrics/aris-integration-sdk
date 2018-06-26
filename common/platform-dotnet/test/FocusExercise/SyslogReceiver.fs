@@ -49,7 +49,7 @@ type SyslogMessage =
     | ReceivedFocusCommand of targetPosFU : int * targetPosMC : int
     | UpdatedFocusState of state : int * currentPosition : int
     | Other of string
-    | None
+    | NoMessage
 
 module private Details =
     type MessageConverter = Match -> SyslogMessage
@@ -72,7 +72,7 @@ module private Details =
 
         let s = Encoding.UTF8.GetString(buffer)
         let mutable isDone = false
-        let mutable syslogMessage  = SyslogMessage.None
+        let mutable syslogMessage  = SyslogMessage.NoMessage
 
         for regex, cvt in messageTypes |> Seq.takeWhile (fun _ -> not isDone) do
             if regex.IsMatch(s) then
@@ -83,7 +83,7 @@ module private Details =
 
     let printMessage = function
         | Other _ -> ()
-        | None -> ()
+        | NoMessage -> ()
         | ReceivedFocusCommand (targetPosFU, targetPosMC) -> printfn "ReceivedFocusCommand: targetPosFU=%d; targetPosMC=%d" targetPosFU targetPosMC
         | UpdatedFocusState (state, currentPosition) -> printfn "UpdatedFocusState: state=%d; currentPosition=%d" state currentPosition
 

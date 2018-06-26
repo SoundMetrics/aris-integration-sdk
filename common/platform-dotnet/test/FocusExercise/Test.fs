@@ -5,9 +5,12 @@ open Serilog
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Config
 open System
+open System.Reactive.Linq
 open System.Threading
 open System.Windows.Threading
 open System.Threading.Tasks
+open SyslogReceiver
+open System.Reactive
 
 type FU = int
 type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
@@ -21,7 +24,7 @@ type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
 // Framework (Desktop).
 //-----------------------------------------------------------------------------
 
-let getExplorerBeacon (availables : AvailableSonars) targetSN =
+let getExplorerBeacon (availables : AvailableSonars) targetSN : SonarBeacon option =
 
     let timeout = TimeSpan.FromSeconds(4.0)
 
@@ -60,6 +63,55 @@ let getExplorerBeacon (availables : AvailableSonars) targetSN =
     beacon
 #endif
 
+type StepPredicate = SyslogMessage -> bool
+type Timeout = int
+type SequenceStep = StepPredicate
+
+let waitForSequence (messageSource : IObservable<SyslogReceiver.SyslogMessage>)
+                    (steps : SequenceStep array)
+                    (timeout : TimeSpan) =
+
+    let mutable result = 0
+    let mutable index = 0
+    let frame = DispatcherFrame()
+
+    use observer =
+        new AnonymousObserver<_>(
+            onNext = (fun msg ->
+                        let test = steps.[index]
+                        if test msg then
+                            result <- result + 1
+                            index <- index + 1
+                            if result = steps.Length then
+                                Log.Information("waitForSequence: Sequence succeeded")
+                                frame.Continue <- false
+                        ),
+            onError = (fun _ ->
+                        Log.Error("waitForSequence: Sequence timed out")
+                        frame.Continue <- false)
+    )
+        //match msg with
+        //| ReceivedFocusCommand (targetPosFU, targetPosMC) ->
+        //    printfn "*** targetPosFU=%d; targetPosMC=%d" targetPosFU targetPosMC
+        //| UpdatedFocusState (state, currentPosition) ->
+        //    printfn "*** state=%d; currentPosition=%d" state currentPosition
+        //| Other _ -> ()
+        //| None -> ()
+
+    use _sub = messageSource .Timeout(timeout).Subscribe(observer)
+    Dispatcher.PushFrame(frame)
+
+let isFocusRequest = function | ReceivedFocusCommand _ -> true | _ -> false
+let isFocusState = function | UpdatedFocusState _ -> true | _ -> false
+
+let runATest (messageSource : IObservable<SyslogReceiver.SyslogMessage>)
+             conduit
+             setup
+             steps
+             timeout =
+    setup conduit
+    waitForSequence messageSource steps timeout
+
 
 let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>) =
 
@@ -80,18 +132,27 @@ let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>
                         availables,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 
-        let frame = DispatcherFrame()
-        Async.Start(async {
-            do! Async.Sleep(1000)
-            for i = 1 to 2 do
-                conduit.RequestFocusDistance(1.0<m>)
-                do! Async.Sleep(5000)
+        let runMyTest = runATest messageSource conduit
 
-                conduit.RequestFocusDistance(double i * 1.0<m>)
-                do! Async.Sleep(5000)
-            frame.Continue <- false
-        })
-        Dispatcher.PushFrame(frame)
+        runMyTest (fun conduit -> conduit.RequestFocusDistance(1.0<m>))
+                  [| isFocusRequest; isFocusState |]
+                  (TimeSpan.FromSeconds(5.0))
+        runMyTest (fun conduit -> conduit.RequestFocusDistance(3.0<m>))
+                  [| isFocusRequest; isFocusState |]
+                  (TimeSpan.FromSeconds(5.0))
+
+        //let frame = DispatcherFrame()
+        //Async.Start(async {
+        //    do! Async.Sleep(1000)
+        //    for i = 1 to 2 do
+        //        conduit.RequestFocusDistance(1.0<m>)
+        //        do! Async.Sleep(5000)
+
+        //        conduit.RequestFocusDistance(double i * 1.0<m>)
+        //        do! Async.Sleep(5000)
+        //    frame.Continue <- false
+        //})
+        //Dispatcher.PushFrame(frame)
 
     match beacon with
     | Some b -> Log.Information("Found SN {targetSN}", targetSN)
