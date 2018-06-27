@@ -26,23 +26,6 @@ let main argv =
     let syslogSubject, subjectDisposable = SyslogReceiver.mkSyslogSubject ()
     use _cleanUpSubject = subjectDisposable
 
-    use _cleanUpSub =
-        syslogSubject.ObserveOn(SynchronizationContext.Current)
-                     .Subscribe(
-                        Action<_>(
-                            fun msg ->
-                                match msg with
-                                | ReceivedFocusCommand (targetPosFU, targetPosMC) ->
-                                    Log.Information(sprintf "*** targetPosFU=%d; targetPosMC=%d" targetPosFU targetPosMC)
-                                | UpdatedFocusState (state, currentPosition) ->
-                                    Log.Information(sprintf "*** state=%d; currentPosition=%d" state currentPosition)
-                                | Other _ -> ()
-                                | NoMessage -> ()
-                        )
-                     )
-
-    printfn "Waiting..."
-
     let frame = DispatcherFrame()
     ThreadPool.QueueUserWorkItem(fun _ ->   Test.testRawFocusUnits syslogSubject
                                             frame.Continue <- false) |> ignore
