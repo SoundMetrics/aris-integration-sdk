@@ -63,48 +63,48 @@ let getExplorerBeacon (availables : AvailableSonars) targetSN : SonarBeacon opti
     beacon
 #endif
 
-type StepPredicate = SyslogMessage -> bool
-type Timeout = int
-type SequenceStep = StepPredicate
+//-----------------------------------------------------------------------------
 
-let waitForSequence (messageSource : IObservable<SyslogReceiver.SyslogMessage>)
-                    (steps : SequenceStep array)
-                    (timeout : TimeSpan) =
+module EventMatcher =
 
-    let mutable result = 0
-    let mutable index = 0
-    let frame = DispatcherFrame()
+    // Watches an event stream for a known sequence of events to occur. These sequence
+    // is validated by an array of predicates, one per step.
+    let waitForSequence<'T> (eventSource : IObservable<'T>)
+                            (steps : ('T -> bool) array)
+                            (timeout : TimeSpan)
+                            : bool =
 
-    use observer =
-        new AnonymousObserver<_>(
-            onNext = (fun msg ->
-                        let test = steps.[index]
-                        if test msg then
-                            result <- result + 1
-                            index <- index + 1
-                            if result = steps.Length then
-                                Log.Information("waitForSequence: Sequence succeeded")
-                                frame.Continue <- false
-                        ),
-            onError = (fun _ ->
-                        Log.Error("waitForSequence: Sequence timed out")
-                        frame.Continue <- false)
-    )
+        let mutable index = 0
+        let mutable matchedSteps = 0
+        let mutable quitting = false
+        let frame = DispatcherFrame() // for keeping the dispatcher running
 
-    use _sub = messageSource .Timeout(timeout).Subscribe(observer)
-    Dispatcher.PushFrame(frame)
+        use observer =
+            new AnonymousObserver<_>(
+                onNext = (fun msg ->
+                            let isMatch = steps.[index]
+                            if isMatch msg then
+                                matchedSteps <- matchedSteps + 1
+                                index <- index + 1
+                                if matchedSteps = steps.Length then
+                                    Log.Information("waitForSequence: Sequence succeeded")
+                                    quitting <- true
+                                    frame.Continue <- false),
+                onError = (fun _ -> Log.Error("waitForSequence: Sequence timed out")
+                                    frame.Continue <- false)
+            )
+
+        use _subscription = eventSource.Timeout(timeout).Subscribe(observer)
+        Dispatcher.PushFrame(frame)
+        let success = matchedSteps = steps.Length
+        success
+
+//-----------------------------------------------------------------------------
 
 let isFocusRequest = function | ReceivedFocusCommand _ -> true | _ -> false
 let isFocusState = function | UpdatedFocusState _ -> true | _ -> false
 
-let runATest (messageSource : IObservable<SyslogReceiver.SyslogMessage>)
-             conduit
-             setup
-             steps
-             timeout =
-    setup conduit
-    waitForSequence messageSource steps timeout
-
+open EventMatcher
 
 let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>) =
 
@@ -125,14 +125,18 @@ let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>
                         availables,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 
-        let run = runATest messageSource conduit
+        let runTest setup sequence timeout =
+            setup conduit
+            waitForSequence messageSource sequence timeout
 
-        run (fun conduit -> conduit.RequestFocusDistance(1.0<m>))
+        runTest (fun conduit -> conduit.RequestFocusDistance(1.0<m>))
                 [| isFocusRequest; isFocusState |]
                 (TimeSpan.FromSeconds(10.0))
-        run (fun conduit -> conduit.RequestFocusDistance(3.0<m>))
+            |> ignore
+        runTest (fun conduit -> conduit.RequestFocusDistance(3.0<m>))
                 [| isFocusRequest; isFocusState |]
                 (TimeSpan.FromSeconds(10.0))
+            |> ignore
 
     match beacon with
     | Some b -> Log.Information("Found SN {targetSN}", targetSN)
