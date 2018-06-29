@@ -5,15 +5,15 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>5e40044d-64a5-4f99-af88-11190e38d469</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>FocusExercise</RootNamespace>
-    <AssemblyName>FocusExercise</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <ProjectGuid>17f62268-0d61-414e-8fa3-44c29cdc9a2a</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>SoundMetrics.Scripting.Desktop</RootNamespace>
+    <AssemblyName>SoundMetrics.Scripting.Desktop</AssemblyName>
     <UseStandardResourceNames>true</UseStandardResourceNames>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.4.3.0</TargetFSharpCoreVersion>
-    <Name>FocusExercise</Name>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Name>SoundMetrics.Scripting.Desktop</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,11 +21,9 @@
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\$(Configuration)\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
     <OtherFlags>--warnon:1182</OtherFlags>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
@@ -37,9 +35,7 @@
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
     <OtherFlags>--warnon:1182</OtherFlags>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
@@ -62,43 +58,23 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Test.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="EventMatcher.Desktop.fs" />
+    <None Include="Script.fsx" />
     <Content Include="packages.config" />
+    <None Include="SoundMetrics.Scripting.Desktop.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="fracas.standard">
-      <HintPath>..\..\packages\fracas.1.0.0-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
-    </Reference>
-    <Reference Include="FSharp.Core">
-      <HintPath>..\..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Protobuf">
-      <HintPath>..\..\packages\Google.Protobuf.3.6.0\lib\net45\Google.Protobuf.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
-    <Reference Include="Serilog">
-      <HintPath>..\..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Sinks.Console">
-      <HintPath>..\..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Aris.Headers">
-      <HintPath>..\..\packages\SoundMetrics.Aris.Headers.1.0.1-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
+    <Reference Include="FSharp.Core">
+      <Name>FSharp.Core</Name>
+      <AssemblyName>FSharp.Core.dll</AssemblyName>
+      <HintPath>$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\FSharp\.NETFramework\v4.0\$(TargetFSharpCoreVersion)\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Reactive">
-      <HintPath>..\..\packages\System.Reactive.4.0.0\lib\net46\System.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Linq">
-      <HintPath>..\..\packages\System.Reactive.Linq.4.0.0\lib\net46\System.Reactive.Linq.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow">
-      <HintPath>..\..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <HintPath>..\packages\System.Reactive.4.0.0\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.ValueTuple">
       <Private>True</Private>
@@ -108,22 +84,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj">
-      <Name>SoundMetrics.Aris.Comms</Name>
-      <Project>{74b8eb49-4248-43cb-9d69-af71b4d68e66}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj">
-      <Name>SoundMetrics.Aris.Config</Name>
-      <Project>{7274df9e-ec20-4be8-a24f-16bbc8e164d0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj">
-      <Name>SoundMetrics.Scripting.Desktop</Name>
-      <Project>{17f62268-0d61-414e-8fa3-44c29cdc9a2a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj">
+    <ProjectReference Include="..\SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj">
       <Name>SoundMetrics.Scripting</Name>
       <Project>{8e219fb0-dbf5-4bd7-89d8-32b579f3dda2}</Project>
       <Private>True</Private>

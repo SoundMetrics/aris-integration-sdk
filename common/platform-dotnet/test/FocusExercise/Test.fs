@@ -4,16 +4,18 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Config
+open SoundMetrics.Scripting
 open System
 open System.Reactive.Linq
 open System.Threading
 open System.Windows.Threading
 open System.Threading.Tasks
-open SyslogReceiver
 open System.Reactive
+open System.Runtime.CompilerServices
 
 type FU = int
 type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
+
 
 //-----------------------------------------------------------------------------
 // Synchronization Context
@@ -28,26 +30,6 @@ let getExplorerBeacon (availables : AvailableSonars) targetSN : SonarBeacon opti
 
     let timeout = TimeSpan.FromSeconds(4.0)
 
-#if USE_THE_TASK_BASED_FUNCTIONS
-    let beacon =
-        let beaconTask =
-            availables.WaitForExplorerBySerialNumberAsync(timeout, targetSN)
-
-        let frame = DispatcherFrame()
-        ThreadPool.QueueUserWorkItem(fun _ ->   try
-                                                    beaconTask.Wait()
-                                                with
-                                                    :? TaskCanceledException -> ()
-                                                frame.Continue <- false)
-            |> ignore
-        Dispatcher.PushFrame(frame)
-        beaconTask.Result
-
-    if Object.ReferenceEquals(beacon, null) then
-        None
-    else
-        Some beacon
-#else
     let beacon =
         let mutable someBeacon = None
         let frame = DispatcherFrame()
@@ -61,52 +43,16 @@ let getExplorerBeacon (availables : AvailableSonars) targetSN : SonarBeacon opti
         Dispatcher.PushFrame(frame)
         someBeacon
     beacon
-#endif
+
 
 //-----------------------------------------------------------------------------
 
-module EventMatcher =
-
-    // Watches an event stream for a known sequence of events to occur. These sequence
-    // is validated by an array of predicates, one per step.
-    let waitForSequence<'T> (eventSource : IObservable<'T>)
-                            (steps : ('T -> bool) array)
-                            (timeout : TimeSpan)
-                            : bool =
-
-        let mutable index = 0
-        let mutable matchedSteps = 0
-        let mutable quitting = false
-        let frame = DispatcherFrame() // for keeping the dispatcher running
-
-        use observer =
-            new AnonymousObserver<_>(
-                onNext = (fun msg ->
-                            let isMatch = steps.[index]
-                            if isMatch msg then
-                                matchedSteps <- matchedSteps + 1
-                                index <- index + 1
-                                if matchedSteps = steps.Length then
-                                    Log.Information("waitForSequence: Sequence succeeded")
-                                    quitting <- true
-                                    frame.Continue <- false),
-                onError = (fun _ -> Log.Error("waitForSequence: Sequence timed out")
-                                    frame.Continue <- false)
-            )
-
-        use _subscription = eventSource.Timeout(timeout).Subscribe(observer)
-        Dispatcher.PushFrame(frame)
-        let success = matchedSteps = steps.Length
-        success
-
-//-----------------------------------------------------------------------------
+open SoundMetrics.Scripting.Desktop.EventMatcher
 
 let isFocusRequest = function | ReceivedFocusCommand _ -> true | _ -> false
 let isFocusState = function | UpdatedFocusState _ -> true | _ -> false
 
-open EventMatcher
-
-let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>) =
+let testRawFocusUnits (messageSource : IObservable<SyslogMessage>) =
 
     Log.Debug("testRawFocusUnits")
 
@@ -127,7 +73,7 @@ let testRawFocusUnits (messageSource : IObservable<SyslogReceiver.SyslogMessage>
 
         let runTest setup sequence timeout =
             setup conduit
-            waitForSequence messageSource sequence timeout
+            waitForSequenceWithDispatch messageSource sequence timeout
 
         runTest (fun conduit -> conduit.RequestFocusDistance(1.0<m>))
                 [| isFocusRequest; isFocusState |]

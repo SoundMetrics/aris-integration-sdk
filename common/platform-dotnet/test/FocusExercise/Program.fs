@@ -1,7 +1,7 @@
 ﻿module Main
 
 open Serilog
-open SyslogReceiver
+open SoundMetrics.Scripting
 open System
 open System.Reactive.Linq
 open System.Threading
@@ -12,7 +12,7 @@ open System.Windows.Threading
 let LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
 
 [<EntryPoint>]
-let main argv =
+let main _argv =
 
     Log.Logger <- (new LoggerConfiguration())
                     //.MinimumLevel.Debug()
@@ -23,11 +23,10 @@ let main argv =
 
     SynchronizationContext.SetSynchronizationContext(DispatcherSynchronizationContext())
 
-    let syslogSubject, subjectDisposable = SyslogReceiver.mkSyslogSubject ()
-    use _cleanUpSubject = subjectDisposable
+    use syslogListener = new SyslogListener()
 
     let frame = DispatcherFrame()
-    ThreadPool.QueueUserWorkItem(fun _ ->   Test.testRawFocusUnits syslogSubject
+    ThreadPool.QueueUserWorkItem(fun _ ->   Test.testRawFocusUnits syslogListener.Messages
                                             frame.Continue <- false) |> ignore
     Dispatcher.PushFrame(frame)
 

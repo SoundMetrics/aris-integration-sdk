@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SoundMetrics.Scripting.Desktop</id>
+    <version>0.0.0.0</version><!-- specify version at the command line script -->
+    <title>SoundMetrics.Scripting.Desktop</title>
+    <authors>Sound Metrics Corporation</authors>
+    <owners>Sound Metrics Corporation</owners>
+    <licenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/SoundMetrics/aris-integration-sdk</projectUrl>
+    <!--<iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Sound Metrics scripting tools</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</copyright>
+
+    <dependencies/>
+  </metadata>
+
+  <files>
+    <file src="bin\Release\SoundMetrics.Scripting.Desktop.dll" target="lib\net47"/>
+  </files>
+</package>

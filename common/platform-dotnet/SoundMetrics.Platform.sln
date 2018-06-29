@@ -43,6 +43,10 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "WpfTestBench.ViewModel", "W
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FocusExercise", "test\FocusExercise\FocusExercise.fsproj", "{5E40044D-64A5-4F99-AF88-11190E38D469}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting", "SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj", "{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting.Desktop", "SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj", "{17F62268-0D61-414E-8FA3-44C29CDC9A2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,6 +113,14 @@ Global
 		{5E40044D-64A5-4F99-AF88-11190E38D469}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E40044D-64A5-4F99-AF88-11190E38D469}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E40044D-64A5-4F99-AF88-11190E38D469}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

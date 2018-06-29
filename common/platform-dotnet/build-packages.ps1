@@ -16,21 +16,30 @@ $split_version = $package_version.Split("-")[0]
 $version_with_build_number = $split_version + "." + $build_number
 '$version_with_build_number=' + $version_with_build_number
 
-$assemblies = @(
+$dotnetStandardAssemblies = @(
     "SoundMetrics.Aris.Comms"
     "SoundMetrics.Aris.Config"
     "SoundMetrics.Aris.FrameHeaderInjection"
     "SoundMetrics.Aris.Messages"
     "SoundMetrics.Aris.ReorderCS"
     "SoundMetrics.NativeMemory"
+    "SoundMetrics.Scripting"
 )
 
 '$assemblies: ' + $assemblies
 
-Foreach ($el in $assemblies) {
+Foreach ($el in $dotnetStandardAssemblies) {
     ''
     '---------------------------------------------------------------------'
     "Packing $el"
     '---------------------------------------------------------------------'
     dotnet pack -c Release /p:Version=$split_version /p:PackageVersion=$package_version $el
 }
+
+$desktopAssemblies = @(
+    "SoundMetrics.Scripting.Desktop"
+)
+
+'$desktopAssemblies: ' + $desktopAssemblies
+
+.\.nuget\nuget.exe pack -IncludeReferencedProjects -Version $package_version -OutputDirectory .\SoundMetrics.Scripting.Desktop\bin\Release\ .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.nuspec

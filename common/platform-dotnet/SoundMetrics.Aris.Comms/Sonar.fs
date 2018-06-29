@@ -411,7 +411,7 @@ module BeaconFunctions =
         availables.WaitForBeaconAsync (matchDefenderBeacon sn) timeout
 
 [<Extension>]
-type BeaconExtensionsCSharp =
+type BeaconExtensions =
 
     /// Extension method to wait on an Explorer beacon by serial number, with timeout.
     [<Extension>]
