@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetProtobufTools", "GetProt
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D2654555-979F-4020-A426-0A6293D75B17}"
 	ProjectSection(SolutionItems) = preProject
+		add-local-packages.ps1 = add-local-packages.ps1
 		build-packages.ps1 = build-packages.ps1
 		ver.platform.txt = ver.platform.txt
 	EndProjectSection
@@ -43,7 +44,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "WpfTestBench.ViewModel", "W
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FocusExercise", "test\FocusExercise\FocusExercise.fsproj", "{5E40044D-64A5-4F99-AF88-11190E38D469}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting", "SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj", "{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Scripting", "SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj", "{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting.Desktop", "SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj", "{17F62268-0D61-414E-8FA3-44C29CDC9A2A}"
 EndProject

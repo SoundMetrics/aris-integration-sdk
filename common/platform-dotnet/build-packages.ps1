@@ -42,4 +42,4 @@ $desktopAssemblies = @(
 
 '$desktopAssemblies: ' + $desktopAssemblies
 
-.\.nuget\nuget.exe pack -IncludeReferencedProjects -Version $package_version -OutputDirectory .\SoundMetrics.Scripting.Desktop\bin\Release\ .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.nuspec
+.\.nuget\nuget.exe pack -Version $package_version -Properties Configuration=Release -OutputDirectory .\SoundMetrics.Scripting.Desktop\bin\Release\ .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
