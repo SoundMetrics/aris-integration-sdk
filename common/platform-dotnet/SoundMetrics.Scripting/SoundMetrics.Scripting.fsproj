@@ -24,11 +24,8 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.7.1" />
+    <PackageReference Include="SoundMetrics.Aris.Comms" Version="1.0.17-alpha" />
     <PackageReference Include="System.Reactive" Version="4.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

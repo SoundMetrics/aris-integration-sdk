@@ -64,11 +64,40 @@
     <None Include="SoundMetrics.Scripting.Desktop.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="mscorlib" />
+    <Reference Include="fracas.standard">
+      <HintPath>..\packages\fracas.1.0.0-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.Core">
-      <Name>FSharp.Core</Name>
-      <AssemblyName>FSharp.Core.dll</AssemblyName>
-      <HintPath>$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\FSharp\.NETFramework\v4.0\$(TargetFSharpCoreVersion)\FSharp.Core.dll</HintPath>
+      <HintPath>..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>..\packages\Google.Protobuf.3.5.1\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="mscorlib" />
+    <Reference Include="Serilog">
+      <HintPath>..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.Comms">
+      <HintPath>..\packages\SoundMetrics.Aris.Comms.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Comms.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.Config">
+      <HintPath>..\packages\SoundMetrics.Aris.Config.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Config.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.Headers">
+      <HintPath>..\packages\SoundMetrics.Aris.Headers.1.0.1-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.Messages">
+      <HintPath>..\packages\SoundMetrics.Aris.Messages.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Messages.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.ReorderCS">
+      <HintPath>..\packages\SoundMetrics.Aris.ReorderCS.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.ReorderCS.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.NativeMemory">
+      <HintPath>..\packages\SoundMetrics.NativeMemory.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.NativeMemory.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Scripting">
+      <HintPath>..\packages\SoundMetrics.Scripting.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Scripting.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,19 +105,15 @@
     <Reference Include="System.Reactive">
       <HintPath>..\packages\System.Reactive.4.0.0\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow">
+      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
     <Reference Include="System.ValueTuple">
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj">
-      <Name>SoundMetrics.Scripting</Name>
-      <Project>{8e219fb0-dbf5-4bd7-89d8-32b579f3dda2}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -71,16 +71,13 @@
   <ItemGroup>
     <PackageReference Include="fracas" Version="1.0.0-beta" />
     <PackageReference Include="Serilog" Version="2.7.1" />
+    <PackageReference Include="SoundMetrics.Aris.Config" Version="1.0.17-alpha" />
     <PackageReference Include="SoundMetrics.Aris.Headers" Version="1.0.1-beta" />
+    <PackageReference Include="SoundMetrics.Aris.Messages" Version="1.0.17-alpha" />
+    <PackageReference Include="SoundMetrics.Aris.ReorderCS" Version="1.0.17-alpha" />
+    <PackageReference Include="SoundMetrics.NativeMemory" Version="1.0.17-alpha" />
     <PackageReference Include="System.Reactive" Version="4.0.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
-    <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
-    <ProjectReference Include="..\SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj" />
-    <ProjectReference Include="..\SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

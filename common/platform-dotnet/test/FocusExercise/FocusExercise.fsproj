@@ -85,8 +85,29 @@
     <Reference Include="Serilog.Sinks.Console">
       <HintPath>..\..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
     </Reference>
+    <Reference Include="SoundMetrics.Aris.Comms">
+      <HintPath>..\..\packages\SoundMetrics.Aris.Comms.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Comms.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.Config">
+      <HintPath>..\..\packages\SoundMetrics.Aris.Config.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Config.dll</HintPath>
+    </Reference>
     <Reference Include="SoundMetrics.Aris.Headers">
       <HintPath>..\..\packages\SoundMetrics.Aris.Headers.1.0.1-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.Messages">
+      <HintPath>..\..\packages\SoundMetrics.Aris.Messages.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Messages.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Aris.ReorderCS">
+      <HintPath>..\..\packages\SoundMetrics.Aris.ReorderCS.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.ReorderCS.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.NativeMemory">
+      <HintPath>..\..\packages\SoundMetrics.NativeMemory.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.NativeMemory.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Scripting">
+      <HintPath>..\..\packages\SoundMetrics.Scripting.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="SoundMetrics.Scripting.Desktop">
+      <HintPath>..\..\packages\SoundMetrics.Scripting.Desktop.1.0.17-alpha\lib\net472\SoundMetrics.Scripting.Desktop.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -106,28 +127,6 @@
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj">
-      <Name>SoundMetrics.Aris.Comms</Name>
-      <Project>{74b8eb49-4248-43cb-9d69-af71b4d68e66}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj">
-      <Name>SoundMetrics.Aris.Config</Name>
-      <Project>{7274df9e-ec20-4be8-a24f-16bbc8e164d0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj">
-      <Name>SoundMetrics.Scripting.Desktop</Name>
-      <Project>{17f62268-0d61-414e-8fa3-44c29cdc9a2a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj">
-      <Name>SoundMetrics.Scripting</Name>
-      <Project>{8e219fb0-dbf5-4bd7-89d8-32b579f3dda2}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
