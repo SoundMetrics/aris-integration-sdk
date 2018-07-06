@@ -91,7 +91,7 @@ type FocusMapTest () =
         let salinities = [| Salinity.Fresh; Salinity.Brackish; Salinity.Seawater |];
         let temperatures = [| 0.0; 2.5; 5.0; 10.0; 15.0; 20.0; 25.0; 30.0; 35.0 |]
 
-        let getSlopeDirection (a : float<m>) (b : float<m>) =
+        let getSlopeDirection (a : float<m>, b : float<m>) =
             match a, b with
             | a, b when a < b -> -1
             | a, b when a > b -> +1
@@ -101,25 +101,36 @@ type FocusMapTest () =
 
         for systemType, isTelephoto in systemTests do
             for salinity in salinities do
-                for temp in temperatures do
 
-                    // Convert focus units to range
-                    let ranges =
-                        let temp' = 1.0<degC> * temp
-                        allFocusUnits
-                            |> Seq.map (fun fu ->
-                                mapFocusUnitsToRange systemType fu temp' salinity isTelephoto)
+                let results =
+                    temperatures
+                        |> Seq.map (fun temp -> async {
+                            // Convert focus units to range
+                            let ranges =
+                                let temp' = 1.0<degC> * temp
+                                allFocusUnits
+                                    |> Seq.map (fun fu ->
+                                        mapFocusUnitsToRange systemType fu temp' salinity isTelephoto)
 
-                    let slopeDirections =
-                        ranges
-                        |> Seq.pairwise
-                        |> Seq.map (fun (a, b) -> getSlopeDirection a b)
-                        |> Seq.cache
-                    //printfn "Slope directions:"
-                    //slopeDirections |> Seq.iter (printf "%d ")
-                    //printfn ""
+                            let slopeDirections =
+                                ranges
+                                |> Seq.pairwise
+                                |> Seq.map getSlopeDirection
+                                |> Seq.cache
 
-                    let expectedSlope = slopeDirections |> Seq.filter (fun s -> s <> 0) |> Seq.head
-                    let allSameSlope = slopeDirections |> Seq.forall (fun s -> s = 0 || s = expectedSlope)
+                            let expectedSlope = slopeDirections |> Seq.filter (fun s -> s <> 0) |> Seq.head
+                            let allSameSlope = slopeDirections |> Seq.forall (fun s -> s = 0 || s = expectedSlope)
 
-                    Assert.IsTrue(allSameSlope)
+                            return allSameSlope
+                                    })
+                        |> Async.Parallel
+                        |> Async.RunSynchronously
+
+                // Validate
+                results |> Seq.mapi (fun idx result -> struct (idx, result))
+                        |> Seq.filter (fun struct (_idx, result) -> not result)
+                        |> Seq.iter (fun struct (idx, _result) ->
+                                Assert.Fail(
+                                    sprintf "Failed at temp=%f; systemType=%A; isTelephoto=%A; salinity=%A"
+                                        temperatures.[idx] systemType isTelephoto salinity)
+                        )
