@@ -1,7 +1,8 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
+open SoundMetrics.Aris.Comms
 open System.Diagnostics
 
 [<AbstractClass>]
@@ -29,11 +30,11 @@ module internal PerfSink =
         MedianDuration :    float<Us>
     }
 
-    let internal ticksToMicroseconds (ticks : int64) =
+    let ticksToMicroseconds (ticks : int64) =
 
         PerformanceTiming.stopwatchPeriod * float ticks
 
-    type internal SampleInfo =
+    type SampleInfo =
         val mutable SkipCount : int
         val mutable SampleCount : int
         val Samples : int64 array

@@ -3,11 +3,11 @@
 namespace SoundMetrics.Aris.Comms
 
 open Serilog
+open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Aris.Config
 open System
 open System.Net
 open System.Runtime.CompilerServices
-open System.Threading
 open System.Threading.Tasks
 
 [<AutoOpen>]
@@ -58,7 +58,7 @@ type SoftwareVersion = { major: int; minor: int; buildNumber: int }
 with
     override x.ToString() = sprintf "%d.%d.%d" x.major x.minor x.buildNumber
 
-module internal SystemVariant =
+module private SystemVariant =
 
     [<Literal>]
     let Voyager = "VG"
@@ -107,34 +107,6 @@ type DefenderBeacon = {
     BatteryState : OnBoardBatteryState
     BatteryLevel : float32
 }
-
-// Command Module Beacon
-
-type internal CommandModuleBeacon = {
-    SrcIpAddr : IPAddress
-
-    // sonar_serial_number[] is not currently supported
-    ArisCurrent : float32 option
-    ArisPower : float32 option
-    ArisVoltage : float32 option
-    CpuTemp : float32 option
-    Revision : uint32 option
-}
-with
-    static member inline ValueOrNone<'T when 'T : equality> (v : 'T)
-        = if (v = Unchecked.defaultof<'T>) then None else Some v
-
-    static member internal From(pkt : Udp.UdpReceived) =
-
-        let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(pkt.udpResult.Buffer)
-        {
-            SrcIpAddr = pkt.udpResult.RemoteEndPoint.Address
-            ArisCurrent =   CommandModuleBeacon.ValueOrNone cms.ArisCurrent
-            ArisPower =     CommandModuleBeacon.ValueOrNone cms.ArisPower
-            ArisVoltage =   CommandModuleBeacon.ValueOrNone cms.ArisVoltage
-            CpuTemp =       CommandModuleBeacon.ValueOrNone cms.CpuTemp
-            Revision =      CommandModuleBeacon.ValueOrNone cms.Revision
-        }
 
 
 type IBeaconSourceCallbacks<'B> =

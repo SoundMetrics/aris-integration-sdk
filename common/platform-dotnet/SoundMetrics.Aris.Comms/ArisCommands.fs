@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
-open Serilog
+open SoundMetrics.Aris.Comms.Internal
 open System
 open System.Net
 
@@ -40,6 +40,7 @@ module ArisCommands =
         )
 
     [<CompiledName("MapFocusRange")>]
+    [<Obsolete>]
     let internal mapFocusRange systemType range degreesC salinity telephoto =
 
         if Double.IsNaN(float range) || Double.IsInfinity(float range) then

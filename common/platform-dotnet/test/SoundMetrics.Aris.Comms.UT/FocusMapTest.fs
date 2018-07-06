@@ -3,7 +3,7 @@
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open SoundMetrics.Aris.Comms
-open SoundMetrics.Aris.Comms.FocusMapDetails
+open SoundMetrics.Aris.Comms.Internal.FocusMapDetails
 open SoundMetrics.Aris.Config
 open System
 
@@ -97,7 +97,7 @@ type FocusMapTest () =
             | a, b when a > b -> +1
             | _ -> 0 // IsNaN(b - a) winds up here
 
-        let allFocusUnits = [| 0us .. 1000us |]
+        let allFocusUnits = seq { 0us .. 1000us } |> Seq.cache
 
         for systemType, isTelephoto in systemTests do
             for salinity in salinities do
@@ -109,16 +109,15 @@ type FocusMapTest () =
                         allFocusUnits
                             |> Seq.map (fun fu ->
                                 mapFocusUnitsToRange systemType fu temp' salinity isTelephoto)
-                            |> Seq.toArray
 
                     let slopeDirections =
                         ranges
                         |> Seq.pairwise
                         |> Seq.map (fun (a, b) -> getSlopeDirection a b)
-                        |> Seq.toArray
-                    printfn "Slope directions:"
-                    slopeDirections |> Seq.iter (printf "%d ")
-                    printfn ""
+                        |> Seq.cache
+                    //printfn "Slope directions:"
+                    //slopeDirections |> Seq.iter (printf "%d ")
+                    //printfn ""
 
                     let expectedSlope = slopeDirections |> Seq.filter (fun s -> s <> 0) |> Seq.head
                     let allSameSlope = slopeDirections |> Seq.forall (fun s -> s = 0 || s = expectedSlope)

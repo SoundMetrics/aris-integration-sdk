@@ -1,6 +1,6 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
 // Support for binding functions to the scaffolding used to create the
 // dataflow graph.

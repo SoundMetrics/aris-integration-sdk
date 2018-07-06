@@ -1,14 +1,10 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open SoundMetrics.Aris.Comms
 open System
-
-type SonarConnectionMetrics = {
-    InstantaneousFrameRate: float option
-    ProtocolMetrics: ProtocolMetrics
-}
 
 module internal SonarConnectionDetails =
 

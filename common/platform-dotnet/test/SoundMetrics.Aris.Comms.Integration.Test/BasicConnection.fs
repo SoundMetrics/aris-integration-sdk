@@ -1,7 +1,7 @@
 ﻿module BasicConnection
 
 open SoundMetrics.Aris.Comms
-open SoundMetrics.Aris.Comms.FrameProcessing
+open SoundMetrics.Aris.Comms.Internal
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open System

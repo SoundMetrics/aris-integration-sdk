@@ -1,9 +1,10 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
 open FrameStream
 open Google.Protobuf
+open SoundMetrics.Aris.Comms
 open System
 open System.Diagnostics
 open System.Net
@@ -13,6 +14,7 @@ open System.Threading
 
 [<AutoOpen>]
 module private FrameStreamListenerImpl =
+
     let makeUdpClient (sinkAddress : IPAddress) =
         let udpClient = new UdpClient(IPEndPoint(sinkAddress, 0)) // any arbitrary port
         assert udpClient.Client.IsBound
@@ -22,8 +24,6 @@ module private FrameStreamListenerImpl =
         Debug.WriteLine(sprintf "FrameStreamListener: local listen port is %d" localEndPointPort)
         udpClient
 
-type FrameStreamReliabilityPolicy =
-| DropPartialFrames
 
 /// Listens for frames. If the FrameStreamReliabilityPolicy calls for dropping partial frames that
 /// dropping is done by this type.

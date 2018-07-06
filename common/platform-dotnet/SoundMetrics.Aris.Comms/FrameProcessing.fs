@@ -1,11 +1,12 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
-open PerformanceTiming
+open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Config
 open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.NativeMemory
+open PerformanceTiming
 open System
 open System.Diagnostics
 open System.Reactive.Subjects
@@ -13,15 +14,6 @@ open System.Reactive.Subjects
 // For native pointers:
 // warning FS0009: Uses of this construct may result in the generation of unverifiable .NET IL code. This warning can be disabled using '--nowarn:9' or '#nowarn "9"'.
 #nowarn "9"
-
-type RecordingState = NotRecording = 0 | Recording = 1
-
-type ReadyFrame = {
-    Frame :             Frame
-    Histogram :         FrameHistogram
-    RecordingState :    RecordingState
-}
-
 
 module internal FrameProcessing =
 

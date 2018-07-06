@@ -6,7 +6,9 @@
     DeviceConnection.
 *)
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
+
+open SoundMetrics.Aris.Comms
 
 /// High-level representation of the conduit state suitable
 /// for consumption by users. Note that the conduit state

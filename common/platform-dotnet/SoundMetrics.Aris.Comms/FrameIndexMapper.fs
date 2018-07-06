@@ -1,9 +1,11 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
+
+open SoundMetrics.Aris.Comms
 
 [<AutoOpen>]
-module private FrameIndexMapperImpl =
+module internal FrameIndexMapperImpl =
 
     type Key = RecordingId
     type Offset = int

@@ -1,7 +1,8 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
+open SoundMetrics.Aris.Comms
 open FrameProcessing
 open RecordingLog
 open System
@@ -34,7 +35,7 @@ module internal Recording =
         }
 
     module private RecordingImpl =
-        open SoundMetrics.Aris.Comms.PerformanceTiming
+        open PerformanceTiming
 
         let noRecordingFailure = { FailedPath = None }
 

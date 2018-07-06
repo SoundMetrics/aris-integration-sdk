@@ -2,6 +2,7 @@
 
 open SoundMetrics.Aris.Comms
 
+open SoundMetrics.Aris.Comms.Internal
 open FrameProcessing
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog

@@ -1,10 +1,10 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
 open Serilog
+open SoundMetrics.Aris.Comms
 open System
-open System.Diagnostics
 open System.Net.Sockets
 open System.Reactive.Subjects
 

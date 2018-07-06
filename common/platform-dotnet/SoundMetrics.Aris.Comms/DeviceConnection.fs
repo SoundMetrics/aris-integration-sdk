@@ -1,9 +1,10 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
 // Generic device connection management
 
+open SoundMetrics.Aris.Comms
 open System.Net
 open System.Net.Sockets
 
@@ -24,6 +25,7 @@ with
 
 
 module internal DeviceConnectionDetails =
+    open SoundMetrics.Aris.Comms.Internal
     open System
     open System.Diagnostics
     open System.Threading
