@@ -47,7 +47,8 @@ let getExplorerBeacon (availables : AvailableSonars) targetSN : SonarBeacon opti
 
 //-----------------------------------------------------------------------------
 
-open SoundMetrics.Scripting.Desktop.EventMatcher
+open SoundMetrics.Scripting
+open SoundMetrics.Scripting.EventMatcher
 
 let isFocusRequest = function | ReceivedFocusCommand _ -> true | _ -> false
 let isFocusState = function | UpdatedFocusState _ -> true | _ -> false
@@ -73,7 +74,8 @@ let testRawFocusUnits (messageSource : IObservable<SyslogMessage>) =
 
         let runTest setup sequence timeout =
             setup conduit
-            waitForSequenceWithDispatch messageSource sequence timeout
+            DispatcherHelper.waitForAsyncWithDispatch
+                (detectSequenceAsync messageSource sequence timeout)
 
         runTest (fun conduit -> conduit.RequestFocusDistance(1.0<m>))
                 [| isFocusRequest; isFocusState |]

@@ -2,6 +2,7 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
@@ -58,56 +59,19 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="EventMatcher.Desktop.fs" />
+    <Compile Include="DispatcherHelper.fs" />
     <None Include="Script.fsx" />
     <Content Include="packages.config" />
-    <None Include="SoundMetrics.Scripting.Desktop.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="fracas.standard">
-      <HintPath>..\packages\fracas.1.0.0-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
-    </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.5.0\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Protobuf">
-      <HintPath>..\packages\Google.Protobuf.3.5.1\lib\net45\Google.Protobuf.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
-    <Reference Include="Serilog">
-      <HintPath>..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Aris.Comms">
-      <HintPath>..\packages\SoundMetrics.Aris.Comms.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Comms.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Aris.Config">
-      <HintPath>..\packages\SoundMetrics.Aris.Config.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Config.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Aris.Headers">
-      <HintPath>..\packages\SoundMetrics.Aris.Headers.1.0.1-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Aris.Messages">
-      <HintPath>..\packages\SoundMetrics.Aris.Messages.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.Messages.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Aris.ReorderCS">
-      <HintPath>..\packages\SoundMetrics.Aris.ReorderCS.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Aris.ReorderCS.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.NativeMemory">
-      <HintPath>..\packages\SoundMetrics.NativeMemory.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.NativeMemory.dll</HintPath>
-    </Reference>
-    <Reference Include="SoundMetrics.Scripting">
-      <HintPath>..\packages\SoundMetrics.Scripting.1.0.17-alpha\lib\netstandard2.0\SoundMetrics.Scripting.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Reactive">
-      <HintPath>..\packages\System.Reactive.4.0.0\lib\net46\System.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow">
-      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
-    </Reference>
     <Reference Include="System.ValueTuple">
       <Private>True</Private>
     </Reference>

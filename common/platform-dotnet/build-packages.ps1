@@ -2,8 +2,7 @@ Param(
     [string]$build_number = "55555"
 )
 
-# Print the script name
-"Script: $MyInvocation.MyCommand.Name"
+'Building packages...'
 
 $package_version = Get-Content "ver.platform.txt"
 '$package_version=' + $package_version
@@ -36,10 +35,6 @@ Foreach ($el in $dotnetStandardAssemblies) {
     dotnet pack -c Release /p:Version=$split_version /p:PackageVersion=$package_version $el
 }
 
-$desktopAssemblies = @(
-    "SoundMetrics.Scripting.Desktop"
-)
+# .NET Desktop assemblies
 
-'$desktopAssemblies: ' + $desktopAssemblies
-
-.\.nuget\nuget.exe pack -Version $package_version -Properties Configuration=Release -OutputDirectory .\SoundMetrics.Scripting.Desktop\bin\Release\ .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
+.\.nuget\nuget.exe pack -Verbosity detailed -Version $package_version -Properties Configuration=Release -OutputDirectory .\SoundMetrics.Scripting.Desktop\bin\Release\ .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
