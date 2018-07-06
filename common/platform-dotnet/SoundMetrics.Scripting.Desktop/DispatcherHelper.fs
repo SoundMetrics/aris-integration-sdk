@@ -3,7 +3,7 @@
 open System
 
 [<AutoOpen>]
-module DispatcherHelper =
+module DispatcherHelperFSharp =
     open System.Runtime.CompilerServices
     open System.Windows.Threading
 
@@ -25,6 +25,8 @@ module DispatcherHelper =
 
         waitForFuncWithDispatch (fun () -> Async.RunSynchronously work)
 
+module DispatcherHelper =
+    open System.Runtime.CompilerServices
     /// Pushes a dispatcher frame and waits for the function to run on an asynchronous context.
     [<CompiledName("WaitForFuncWithDispatch")>]
     let waitForFuncWithDispatchCSharp (workerFunction : Func<bool>) : bool =
