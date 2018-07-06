@@ -5,6 +5,7 @@ namespace SoundMetrics.Aris.Comms
 open System
 
 module internal Log =
+    open Serilog
     open System.Diagnostics
 
     /// Use to log the first loading of an assembly. Useful when managed code is
@@ -12,7 +13,7 @@ module internal Log =
     let logLoad name =
         let callerStackFrame = StackFrame(1)
         let assyName = callerStackFrame.GetMethod().DeclaringType.Assembly.FullName
-        Trace.TraceInformation(sprintf "Loading %s - %A - %s" name DateTime.Now assyName)
+        Log.Information("Loading {name} - {timestamp} - {assyName}", name, DateTime.Now, assyName)
 
 [<AutoOpen>]
 module internal ExceptionHelpers =
