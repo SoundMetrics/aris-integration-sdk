@@ -3,7 +3,6 @@
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open SoundMetrics.Aris.Comms
-open SoundMetrics.Aris.Comms.FocusMap
 open SoundMetrics.Aris.Comms.FocusMapDetails
 open SoundMetrics.Aris.Config
 open System

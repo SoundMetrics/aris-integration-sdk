@@ -6,7 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Config
 
-module FocusUnits =
+module internal FocusUnits =
     open FocusMapTypes
 
     let Minimum : FU = 0us
@@ -26,7 +26,6 @@ module internal FocusMapDetails =
             | false, _ -> focusMap12001800
 
         Log.Verbose (sprintf "Selected focus map for %A/telephoto=%A" systemType telephotoLens)
-        //Log.Verbose (sprintf "map: %A" focusMap)
 
         focusMap
 
@@ -183,11 +182,6 @@ module internal FocusMapDetails =
 
         float (interpolate inputs.Temperature c1 c2) * 1.0<m>
 
-open FocusMapDetails
-
-module FocusMap =
-    open FocusMapTypes
-
     type MappedFocusUnits = {
         RequestedFocusRange: float<m>
         TemperatureC: float<degC>
@@ -231,13 +225,16 @@ module FocusMap =
         }
 
 
+module FocusRange =
+    open FocusMapDetails
+
     type AvailableFocusRange = {
         Min: float<m>
         Max: float<m>
     }
 
     [<CompiledName("CalculateAvailableFocusRange")>]
-    let calculateAvailableFocusRange systemType temperatureC salinity telephoto =
+    let calculateAvailableFocusRange systemType temperatureC salinity telephoto : AvailableFocusRange =
         let min = mapFocusUnitsToRange systemType FocusUnits.Minimum temperatureC salinity telephoto
         let max = mapFocusUnitsToRange systemType FocusUnits.Maximum temperatureC salinity telephoto
 

@@ -161,7 +161,7 @@ module private SonarConduitDetails =
 
                             let sendIfContextDiffers range (env: ArisConduitHelpers.FocusContext) =
                                 let requestedFocus =
-                                    (FocusMap.mapRangeToFocusUnits env.SystemType range env.Temperature env.Salinity env.Telephoto).FocusUnits
+                                    (FocusMapDetails.mapRangeToFocusUnits env.SystemType range env.Temperature env.Salinity env.Telephoto).FocusUnits
 
                                 let minFocusDeltaAllowedToSend = 4
                                 let diff = abs ((int env.ObservedFocus) - (int requestedFocus))
