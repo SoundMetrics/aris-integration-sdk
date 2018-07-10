@@ -1,67 +1,86 @@
-// Copyright 2015-2017 Sound Metrics corporation
+// Copyright 2015-2018 Sound Metrics corporation
 
 #include "Depth.h"
-#include <map>
+#include <array>
 #include <cmath>
 
 namespace Aris {
   namespace AcousticMath {
 
-    // 3 sets of conversion factors for 3 different salinities: fresh, brackish and sea water
-    // key is water temperature in Celsius
-    // value is water density
-    static const std::map<double, double> tempToFreshDepthCFs = {
-      { 0.0, 1.0 }, { 5.0, 1.0 }, { 10.0, 1.0 }, { 15.0, 0.999 }, { 20.0, 0.998 }, { 25.0, 0.997 }, { 30.0, 0.996 } };
+    namespace {
+      // 3 sets of conversion factors for 3 different salinities: fresh, brackish and sea water
+      // The implied key is water temperature in Celsius.
+      // The value is water density.
 
-    static const std::map<double, double> tempToBrackishDepthCFs = {
-      { 0.0, 1.012 }, { 5.0, 1.012 }, { 10.0, 1.011 }, { 15.0, 1.011 }, { 20.0, 1.010 }, { 25.0, 1.008 }, { 30.0, 1.007 } };
-
-    static const std::map<double, double> tempToSeaDepthCFs = {
-      { 0, 1.028 }, { 5, 1.028 }, { 10, 1.027 }, { 15, 1.026 }, { 20, 1.025 }, { 25, 1.023 }, { 30, 1.022 } };
-
-    static double GetConversionFactor(uint32_t salinityPPT, double temperatureC)
-    {
-      // Find depth conversion factor for water temperature in map
-      auto findCF = [](const std::map<double, double> & tempToDepthCFs, double temperatureC)
-      {
-        auto current = tempToDepthCFs.begin();
-        auto previous = tempToDepthCFs.end();
-
-        while (current != tempToDepthCFs.end()) {
-          if ((int32_t)std::floor(current->first) > (int32_t)std::floor(temperatureC)) {
-            if (current == tempToDepthCFs.begin()) {
-              // water temperature below 0 celsius
-              return current->second;
-            }
-            else {
-              return previous->second;
-            }
-          }
-          previous = current;
-          ++current;
-        }
-
-        // water temperature above 30 celsius
-        return previous->second;
+      constexpr std::array<float, 7> tempToFreshDepthCFs = {
+        1.000f, // 0C
+        1.000f, // 5C
+        1.000f, // 10C
+        0.999f, // 15C
+        0.998f, // 20C
+        0.997f, // 25C
+        0.996f, // 30C
       };
 
-      double cf;
+      constexpr std::array<float, 7> tempToBrackishDepthCFs = {
+        1.012f, // 0C
+        1.012f, // 5C
+        1.011f, // 10C
+        1.011f, // 15C
+        1.010f, // 20C
+        1.008f, // 25C
+        1.007f, // 30C
+      };
 
-      if (salinityPPT >= 35) {
-        cf = findCF(tempToSeaDepthCFs, temperatureC);
-      }
-      else if (salinityPPT >= 15) {
-        cf = findCF(tempToBrackishDepthCFs, temperatureC);
-      }
-      else /* salinityPPT >= 0 */ {
-        cf = findCF(tempToFreshDepthCFs, temperatureC);
+      constexpr std::array<float, 7> tempToSeaDepthCFs = {
+        1.028f, // 0C
+        1.028f, // 5C
+        1.027f, // 10C
+        1.026f, // 15C
+        1.025f, // 20C
+        1.023f, // 25C
+        1.022f, // 30C
+      };
+
+      inline int temperatureToIndex(const std::array<float, 7> & cfs, double temp) {
+
+        const int maxIdx = cfs.size() - 1;
+
+        // The temperature is the index into cfs. There are 5-degree ranges for each, so
+        // idx = lround(temp / 5).
+
+        temp = std::max(0.0, temp); // Bottom of the scale is zero.
+
+        const int idx = lround(temp / 5); // wraps to really big index on negative
+        return std::min(maxIdx, idx);
       }
 
-      return cf;
+      inline const std::array<float, 7> & selectCFRange(uint32_t salinityPPT) {
+
+        if (salinityPPT >= 35) {
+          return tempToSeaDepthCFs;
+        }
+        else if (salinityPPT >= 15) {
+          return tempToBrackishDepthCFs;
+        }
+        else /* salinityPPT >= 0 */ {
+          return tempToFreshDepthCFs;
+        }
+      }
+
+      inline float selectCF(const std::array<float, 7> & cfs, double temp) {
+
+        const auto idx = temperatureToIndex(cfs, temp);
+        return cfs[idx];
+      }
+
+      inline double GetConversionFactor(uint32_t salinityPPT, double temperatureC) {
+        return selectCF(selectCFRange(salinityPPT), temperatureC);
+      }
     }
 
-    double CalculateDepthM(double pressurePSI, uint32_t salinityPPT, double temperatureC)
-    {
+    double CalculateDepthM(double pressurePSI, uint32_t salinityPPT, double temperatureC) {
+
       const auto cf = GetConversionFactor(salinityPPT, temperatureC);
 
       return (pressurePSI - 14.6959) * 0.702398 / cf;
@@ -69,4 +88,3 @@ namespace Aris {
 
   }
 }
-
