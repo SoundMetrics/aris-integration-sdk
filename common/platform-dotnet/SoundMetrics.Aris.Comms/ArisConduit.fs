@@ -11,6 +11,7 @@ open System.Net
 open System.Reactive.Linq
 open System.Reactive.Subjects
 open System.Threading
+open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
 open SonarConnectionDetails
 open SonarConnectionMachineState
@@ -231,6 +232,25 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
         and private set (sn : Nullable<SerialNumber>) = serialNumber <- sn
 
     member __.ConnectionState with get () = cxnStateSubject :> ISubject<ConnectionState>
+
+    member ac.WaitForConnectionAsync (timeout : TimeSpan) : Task<bool> =
+        
+        let doneSignal = new ManualResetEventSlim(false)
+        let reachedState = ref false
+
+        // TODO race conditions on destruction
+        let sub = ac.ConnectionState.Subscribe(fun state ->
+                        match state with
+                        | ConnectionState.Connected (_ip, _cmdLink) ->
+                            reachedState := true
+                            doneSignal.Set() |> ignore
+                        | _ -> ())
+
+        Async.StartAsTask(async {
+            doneSignal.Wait(timeout) |> ignore
+            sub.Dispose()
+            return !reachedState
+        })
 
     member __.Metrics = makeMetrics instantaneousFrameRate.Value frameStreamListener.Metrics
 

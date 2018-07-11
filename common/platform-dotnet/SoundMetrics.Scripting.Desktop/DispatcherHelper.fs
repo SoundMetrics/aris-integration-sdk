@@ -4,7 +4,7 @@ open System
 
 [<AutoOpen>]
 module DispatcherHelperFSharp =
-    open System.Runtime.CompilerServices
+    open System.Threading.Tasks
     open System.Windows.Threading
 
     /// Pushes a dispatcher frame and waits for the function to run on an asynchronous context.
@@ -25,10 +25,25 @@ module DispatcherHelperFSharp =
 
         waitForFuncWithDispatch (fun () -> Async.RunSynchronously work)
 
-module DispatcherHelper =
+    let waitForTaskWithDispatch (task : Task<'T>) : 'T =
+
+        let frame = DispatcherFrame()
+        task.ContinueWith(Action<Task>(fun _ -> frame.Continue <- false)) |> ignore
+
+        Dispatcher.PushFrame(frame)
+        task.Result
+
+
+module DispatcherHelpers =
     open System.Runtime.CompilerServices
+    open System.Threading.Tasks
+
     /// Pushes a dispatcher frame and waits for the function to run on an asynchronous context.
     [<CompiledName("WaitForFuncWithDispatch")>]
     let waitForFuncWithDispatchCSharp (workerFunction : Func<bool>) : bool =
 
         waitForFuncWithDispatch (fun () -> workerFunction.Invoke())
+
+    /// Pushes a dispatcher frame and waits for the task to run on an asynchronous context.
+    [<CompiledName("WaitForTaskWithDispatch")>]
+    let waitForTaskWithDispatchCSharp (task : Task<'T>) : 'T = waitForTaskWithDispatch task

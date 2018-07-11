@@ -75,8 +75,13 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 
         // wait for connection
-        waitForAsyncWithDispatch (async { do! Async.Sleep(1000)
-                                          return true }) |> ignore
+        let connected =
+            waitForTaskWithDispatch (conduit.WaitForConnectionAsync(TimeSpan.FromSeconds(5.0)))
+        if connected then
+            Log.Information("Sonar connected")
+        else
+            Log.Error("Timed out waiting for sonar connection")
+            exit 2
 
         let series = [|
             {
