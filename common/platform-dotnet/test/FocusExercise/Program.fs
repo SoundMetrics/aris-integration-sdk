@@ -14,6 +14,8 @@ let LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Mes
 [<EntryPoint>]
 let main _argv =
 
+    Thread.CurrentThread.Name <- "Main thread"
+
     Log.Logger <- (new LoggerConfiguration())
                     //.MinimumLevel.Debug()
                     .WriteTo.Console(outputTemplate = LoggingTemplate)
@@ -26,7 +28,8 @@ let main _argv =
     use syslogListener = new SyslogListener()
 
     let frame = DispatcherFrame()
-    ThreadPool.QueueUserWorkItem(fun _ ->   Test.testRawFocusUnits syslogListener.Messages
+    ThreadPool.QueueUserWorkItem(fun _ ->   Thread.CurrentThread.Name <- "Test.testRawFocusUnits"
+                                            Test.testRawFocusUnits syslogListener.Messages
                                             frame.Continue <- false) |> ignore
     Dispatcher.PushFrame(frame)
 

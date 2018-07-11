@@ -9,12 +9,17 @@ module EventMatcher =
     open System.Reactive.Linq
     open System.Threading
 
+    type ExpectedEvent<'Ev> = {
+        Description     : string
+        Match           : Func<'Ev, bool> // Func<,> for interop
+    }
+
     // Watches an event stream for a known sequence of events to occur. These sequence
     // is validated by an array of predicates, one per step.
-    let detectSequenceAsync<'T> (eventSource : IObservable<'T>)
-                                 (sequence : ('T -> bool) array)
-                                 (timeout : TimeSpan)
-                                 : Async<bool> =
+    let detectSequenceAsync (eventSource : IObservable<'Ev>)
+                            (series : ExpectedEvent<'Ev> array)
+                            (timeout : TimeSpan)
+                            : Async<bool> =
         async {
             let mutable index = 0
             let mutable quitting = false
@@ -24,20 +29,20 @@ module EventMatcher =
                 quitting <- true
                 doneSignal.Set()
 
-            let checkMsg msg =
+            let checkEvent ev =
                 if quitting then
-                    false // avoid a race condition that handles too many messages
+                    false // avoid the race condition that handles extra events
                 else
-                    let isMatch = sequence.[index]
-                    isMatch msg
+                    let isMatch = series.[index].Match
+                    isMatch.Invoke(ev)
 
             let advanceStep () = index <- index + 1
-            let isDone () = index = sequence.Length
+            let isDone () = index = series.Length
 
             use observer =
                 new AnonymousObserver<_>(
-                    onNext = (fun msg ->
-                                if checkMsg msg then
+                    onNext = (fun ev ->
+                                if checkEvent ev then
                                     advanceStep()
                                     if isDone() then
                                         Log.Information("waitForSequence: Sequence succeeded")
@@ -51,22 +56,61 @@ module EventMatcher =
             let! _ = Async.AwaitWaitHandle(doneSignal.WaitHandle)
 
             let matchedSteps = index
-            let success = matchedSteps = sequence.Length
+            let success = matchedSteps = series.Length
             return success
         }
 
     // Watches an event stream for a known sequence of events to occur. These sequence
     // is validated by an array of predicates, one per step.
-    let waitForSequence<'T> (eventSource : IObservable<'T>)
-                            (steps : ('T -> bool) array)
-                            (timeout : TimeSpan)
-                            : bool =
+    let waitForSequence (eventSource : IObservable<'Ev>)
+                        (series : ExpectedEvent<'Ev> array)
+                        (timeout : TimeSpan)
+                        : bool =
 
-        Async.RunSynchronously(detectSequenceAsync eventSource steps timeout)
+        Async.RunSynchronously(detectSequenceAsync eventSource series timeout)
 
-    let funcsToFuncs<'T> (fs : Func<'T, bool> array) : ('T -> bool) array =
-        fs |> Array.map (fun f ->
-                            fun (t : 'T) -> f.Invoke(t))
+    type SetupAndMatch<'Ev, 'St> = {
+        Description     : string
+        SetUp           : 'St -> bool
+        Expecteds       : ExpectedEvent<'Ev> array
+    }
+
+    let runSetupMatchValidateAsync (eventSource : IObservable<'Ev>)
+                                   (state : 'St)
+                                   (series : SetupAndMatch<'Ev, 'St> array)
+                                   (timeout : TimeSpan)
+                                   : Async<bool> =
+
+        Log.Information("runSetupMatchValidateAsync: checking input")
+
+        if series.Length = 0 then
+            invalidArg "series" "An empty series is not allowed"
+
+        if series |> Seq.map (fun step -> step.Expecteds)
+                  |> Seq.exists (fun expecteds -> expecteds.Length = 0) then
+            invalidArg "series.Expecteds" "Empty expecteds are not allowed"
+
+        async {
+            Log.Information("in runSetupMatchValidateAsync")
+
+            let mutable success = true
+            let mutable stepNum = 1
+
+            for step in series do
+                if success then
+                    Log.Information("Starting step {stepNum}: {stepDescription}", stepNum, step.Description)
+                    success <- step.SetUp state
+                    if success then
+                        let! result =  detectSequenceAsync eventSource step.Expecteds timeout
+                        success <- result
+                else
+                    Log.Warning("Skipping step {stepNum}: {stepDescription}", stepNum, step.Description)
+
+                stepNum <- stepNum + 1
+
+            return success
+        }
+
 
 [<Extension>]
 module EventMatcherExtensions =
@@ -75,17 +119,23 @@ module EventMatcherExtensions =
     open System.Threading.Tasks
 
     [<Extension>]
-    type IObserver<'T> with
-        /// Extension for C# users.
-        member __.DetectSequenceAsync (eventSource : IObservable<'T>,
-                                       steps : Func<'T, bool> array,
-                                       timeout : TimeSpan): Task<bool> =
-            Async.StartAsTask(detectSequenceAsync eventSource (steps |> funcsToFuncs) timeout)
+    type IObserver<'Ev> with
 
         /// Extension for C# users.
-        member __.DetectSequenceAsync (eventSource : IObservable<'T>,
-                                       steps : Func<'T, bool> array,
+        member __.DetectSequenceAsync (eventSource : IObservable<'Ev>,
+                                       series : ExpectedEvent<'Ev> array,
                                        timeout : TimeSpan,
                                        cancellationToken : CancellationToken): Task<bool> =
-            Async.StartAsTask(detectSequenceAsync eventSource (steps |> funcsToFuncs) timeout,
-                                cancellationToken = cancellationToken)
+
+            if isNull eventSource then invalidArg "eventSource" "Cannot be null"
+            if isNull series then invalidArg "steps" "Cannot be null"
+
+            Async.StartAsTask(detectSequenceAsync eventSource series timeout,
+                              cancellationToken = cancellationToken)
+
+        /// Extension for C# users.
+        member ob.DetectSequenceAsync (eventSource : IObservable<'Ev>,
+                                       series : ExpectedEvent<'Ev> array,
+                                       timeout : TimeSpan): Task<bool> =
+
+            ob.DetectSequenceAsync(eventSource, series, timeout, CancellationToken.None)

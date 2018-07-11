@@ -18,7 +18,6 @@ open SonarConnectionMachineState
 open ArisCommands
 open FrameProcessing
 open SonarConduitDetails
-open System.Diagnostics
 
 
 type RequestedSettings =
@@ -104,19 +103,20 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
         // TODO mkEventNoCallback determine if we really want callbacks; how to implement in API
 
     let focusRequestSink, focusInputSubscription =
-        mkFocusQueue (earlyFrameSubject :> ISubject<ReadyFrame>)
-                     (fun (range: float<m>) requestedFocus ->
-                        Trace.TraceInformation("SonarConduit: Queuing focus request command for range {0}; focus units={1}",
-                                               range, requestedFocus)
-                        let cmd = makeFocusCmd requestedFocus
+        mkFocusQueue (fun (range: float<m>) ->
+                        Log.Information(
+                            "SonarConduit: Queuing focus request command for range {range}", range)
+                        let cmd = makeFocusCmd range
                         queueCmd cmd)
 
     let requestAcousticSettings (settings: AcousticSettings): RequestedSettings =
 
-        Trace.TraceInformation("SonarConduit({0}): requesting acoustic settings {1}", targetSonar, settings.ToShortString())
+        Log.Information(
+            "SonarConduit({target}): requesting acoustic settings {settings}",
+            targetSonar, settings.ToShortString())
 
         match SettingsHelpers.validateSettings settings with
-        | ValidationError msg -> Trace.TraceError("SonarConduit({0}): invalid settings: {1}", targetSonar, msg)
+        | ValidationError msg -> Log.Error("SonarConduit({target}): invalid settings: {msg}", targetSonar, msg)
                                  SettingsDeclined ("Validation error: " + msg)
         | Valid settings ->
             lock acousticSettingsRequestGuard (fun () ->
@@ -196,7 +196,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
 
     interface ISonarConnectionCallbacks with
         member __.OnCxnStateChanged cxnState =
-            Trace.TraceInformation("SonarConduit({0}): connection state changed to {1}", targetSonar, cxnState)
+            Log.Information("SonarConduit({target}): connection state changed to {state}", targetSonar, cxnState)
             match cxnState with
             | ConnectionState.Connected _ -> ()
             | _ -> frameStreamListener.Flush() // Resets frame index tracker
@@ -204,7 +204,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
             cxnStateSubject.OnNext(cxnState)
 
         member s.OnInitializeConnection frameSinkAddress =
-            Trace.TraceInformation("SonarConduit[{0}]: initializing connection", targetSonar)
+            Log.Information("SonarConduit[{target}]: initializing connection", targetSonar)
             let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
             Log.Information("Setting sonar clock to {dateTime}", setTimeCmd.DateTime.DateTime)
             queueCmd setTimeCmd |> ignore
@@ -215,9 +215,9 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
                 let requested = s.RequestedAcousticSettings
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings
-                    then System.Diagnostics.Trace.TraceInformation ("sending existing settings" + requested.Settings.ToString())
+                    then Log.Information("sending existing settings: {setings}", requested.Settings.ToString())
                          requested.Settings
-                    else System.Diagnostics.Trace.TraceInformation ("sending intiial settings" + initialAcousticSettings.ToString())
+                    else Log.Information("sending initial settings: {settings}", initialAcousticSettings.ToString())
                          initialAcousticSettings
             let requestResult = requestAcousticSettings settings
             match requestResult with
@@ -258,7 +258,11 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
     /// Requests the supplied settings; returns a copy with the cookie attached to the request.
     member __.RequestAcousticSettings settings : RequestedSettings = requestAcousticSettings settings
 
-    member __.RequestFocusDistance (range: float<m>) = focusRequestSink.OnNext(range)
+    member __.RequestFocusDistance (range: float<m>) =
+
+        if range < 0.0<m> then
+            invalidArg "range" "Range must be greater than zero"
+        queueCmd (makeFocusCmd range)
 
     // Frames
 

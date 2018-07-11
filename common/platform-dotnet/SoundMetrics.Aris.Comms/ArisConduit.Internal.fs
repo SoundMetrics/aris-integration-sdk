@@ -139,44 +139,14 @@ module internal SonarConduitDetails =
         { new IDisposable with
             member __.Dispose() = cleanUp() }
 
-    type FocusInput =
-    | Range of float<m>
-    | FocusEnvironment of ArisConduitHelpers.FocusContext
-
     // Focus requests require the environmental inputs needed to calculate sound speed in water as well as system type and
     // whether using a telephoto lens. We don't have these until we've received a frame from the sonar.
-    let mkFocusQueue (frames: ISubject<ReadyFrame>)
-                     (send: float<m> -> FU -> unit) =
+    let mkFocusQueue (send: float<m> -> unit) =
 
         let focusRequestSink = new Subject<float<m>>()
-        let pendingFocusRequest: float<m> option ref = ref None
-        let environment: ArisConduitHelpers.FocusContext option ref = ref None
         let focusInputSubscription =
-            Observable.Merge<FocusInput>([ focusRequestSink.Select(fun range -> Range range)
-                                           frames.Select(fun rf -> FocusEnvironment (ArisConduitHelpers.FocusContext.FromFrame rf.Frame)) ])
-                      .Subscribe(fun input ->
-
-                            let sendIfContextDiffers range (env: ArisConduitHelpers.FocusContext) =
-                                let requestedFocus =
-                                    (FocusMapDetails.mapRangeToFocusUnits env.SystemType range env.Temperature env.Salinity env.Telephoto).FocusUnits
-
-                                let minFocusDeltaAllowedToSend = 4
-                                let diff = abs ((int env.ObservedFocus) - (int requestedFocus))
-                                if diff >= minFocusDeltaAllowedToSend then
-                                    send range (uint32 requestedFocus)
-
-                            // Handle both Range and FocusEnvironment inputs.
-                            match input, !environment, !pendingFocusRequest with
-                            | Range r, Some env, _ ->   sendIfContextDiffers r env
-                                                        pendingFocusRequest := None
-
-                            | Range r, None,     _ ->   pendingFocusRequest := Some r
-
-                            | FocusEnvironment fe, _, Some r -> sendIfContextDiffers r fe
-                                                                pendingFocusRequest := None
-                                                                environment := Some fe
-
-                            | FocusEnvironment fe, _, None ->   environment := Some fe
-                         )
+            focusRequestSink.Subscribe(fun range ->
+                Log.Information("Sending focus range request for {range}", range)
+                send range)
 
         focusRequestSink, focusInputSubscription

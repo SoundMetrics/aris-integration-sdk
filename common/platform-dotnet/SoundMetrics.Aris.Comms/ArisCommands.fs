@@ -2,6 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.Aris.Comms.Internal
 open System
 open System.Net
@@ -49,11 +50,11 @@ module ArisCommands =
         FocusMapDetails.mapRangeToFocusUnits systemType range degreesC salinity telephoto
 
     [<CompiledName("MakeFocusCmd")>]
-    let makeFocusCmd (requestedFocus: FU) =
+    let makeFocusCmd (requestedFocus: float<m>) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetFocus,
             FocusPosition = Aris.Command.Types.SetFocusPosition(
-                Position = uint32 requestedFocus
+                FocusRange = float32 (requestedFocus / 1.0<m>)
             )
         )
 
