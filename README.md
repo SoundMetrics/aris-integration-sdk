@@ -16,7 +16,7 @@ An Excel spreadsheet that provides rudimentary support in choosing valid acousti
 **[aris-integration-sdk/documents/how-to-set-the-ARIS-IP-address.pdf](documents/how-to-set-the-ARIS-IP-address.pdf)**:
 Describes how to configure an ARIS to use a static IP address. (*Not recommended.*)
 
-Documentation of file formats and frame headers can be found in our repo `aris-file-sdk`.
+Documentation of file formats and frame headers can be found in our repo [aris-file-sdk](https://github.com/SoundMetrics/aris-file-sdk).
 
 ### Common Code
 
