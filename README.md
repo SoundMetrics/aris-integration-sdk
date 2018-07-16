@@ -1,5 +1,5 @@
 # ARIS Integration SDK 2.1
-This SDK supports connecting to and commanding an ARIS sonar.
+This SDK supports connecting to and commanding ARIS Explorer and ARIS Voyager sonars. (Connecting to an ARIS Defender is not supported).
 For information on ARIS frame formats, see [ARIS File SDK](https://github.com/SoundMetrics/aris-file-sdk).
 
 ## Contents
@@ -13,7 +13,10 @@ Describes the mechanisms necessary to build an application to control an ARIS.
 **[aris-integration-sdk/documents/Integration-SDK-suggested-settings.xlsx](documents/Integration-SDK-suggested-settings.xlsx)**:
 An Excel spreadsheet that provides rudimentary support in choosing valid acoustic settings.
 
-Documentation of file formats and frame headers can be found in our repo `aris-file-sdk`.
+**[aris-integration-sdk/documents/how-to-set-the-ARIS-IP-address.pdf](documents/how-to-set-the-ARIS-IP-address.pdf)**:
+Describes how to configure an ARIS to use a static IP address. (*Not recommended.*)
+
+Documentation of file formats and frame headers can be found in our repo [aris-file-sdk](https://github.com/SoundMetrics/aris-file-sdk).
 
 ### Common Code
 
