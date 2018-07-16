@@ -45,10 +45,10 @@ module EventMatcher =
                                 if checkEvent ev then
                                     advanceStep()
                                     if isDone() then
-                                        Log.Information("waitForSequence: Sequence succeeded")
+                                        Log.Information("detectSequenceAsync: Sequence succeeded")
                                         quit() ),
                     onError = (fun _ ->
-                                Log.Error("waitForSequence: Sequence timed out")
+                                Log.Error("detectSequenceAsync: Sequence timed out")
                                 quit() )
                 )
 
