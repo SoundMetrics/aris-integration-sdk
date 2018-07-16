@@ -91,8 +91,6 @@ module EventMatcher =
             invalidArg "series.Expecteds" "Empty expecteds are not allowed"
 
         async {
-            Log.Information("in runSetupMatchValidateAsync")
-
             let mutable success = true
             let mutable stepNum = 1
 
