@@ -1,5 +1,5 @@
 # ARIS Integration SDK 2.1
-This SDK supports connecting to and commanding an ARIS sonar.
+This SDK supports connecting to and commanding ARIS Explorer and ARIS Voyager sonars. (Connecting to an ARIS Defender is not supported).
 For information on ARIS frame formats, see [ARIS File SDK](https://github.com/SoundMetrics/aris-file-sdk).
 
 ## Contents
