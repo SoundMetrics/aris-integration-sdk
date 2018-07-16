@@ -50,6 +50,7 @@ message Availability {
   
   message SystemVariants {
     // DF : Defender
+    // VG : Voyager
     repeated string enabled = 1;
   }
 
