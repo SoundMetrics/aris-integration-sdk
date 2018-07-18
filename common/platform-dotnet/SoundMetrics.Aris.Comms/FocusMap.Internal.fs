@@ -192,7 +192,7 @@ module internal FocusMapDetails =
         ActualFocusDistance: float<m>
     }
 
-
+    // Internal only!
     let mapFocusUnitsToRange (systemType : SystemType)
                              (focusUnits : FU)
                              (temperatureC : float<degC>)
@@ -206,6 +206,7 @@ module internal FocusMapDetails =
 
         range
 
+    // Internal only!
     let mapRangeToFocusUnits (systemType: SystemType)
                              (range : float<m>)
                              (temperatureC : float<degC>)

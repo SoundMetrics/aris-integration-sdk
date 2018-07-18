@@ -40,15 +40,6 @@ module ArisCommands =
             )
         )
 
-    [<CompiledName("MapFocusRange")>]
-    [<Obsolete>]
-    let internal mapFocusRange systemType range degreesC salinity telephoto =
-
-        if Double.IsNaN(float range) || Double.IsInfinity(float range) then
-            invalidArg "range" (sprintf "Value '%f' is invalid" (float range))
-
-        FocusMapDetails.mapRangeToFocusUnits systemType range degreesC salinity telephoto
-
     [<CompiledName("MakeFocusCmd")>]
     let makeFocusCmd (requestedFocus: float<m>) =
         Aris.Command(
