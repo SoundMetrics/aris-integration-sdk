@@ -4,12 +4,12 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open SoundMetrics.Aris.Comms
 
-module internal FindSonar =
+module FindSonar =
 
     open System
     open System.Reactive.Linq
-    open System.Runtime.InteropServices
     open System.Threading
+    open System.Threading.Tasks
 
     type SonarBeaconListener = Beacons.BeaconSource<SonarBeacon, SerialNumber>
 
@@ -17,33 +17,37 @@ module internal FindSonar =
     let private timeout<'T> (timespan : TimeSpan) (obs : IObservable<'T>) =
         Observable.Timeout(obs, timespan)
 
-    /// This is the F#-friendly version of FindAris. If you're using C#, use
-    /// the Pascal-cased FindAris.
-    let findAris (availability : SonarBeaconListener) timeoutPeriod sn  =
+    /// This is the asynchronous, F#-friendly version of FindArisAsync. If you're using C#, use
+    /// the Pascal-cased FindArisAsync.
+    /// See BeaconListeners.CreateDefaultSonarBeaconListener.
+    [<CompiledName("FindArisAsyncFSharp")>]
+    let findArisAsync (availability : SonarBeaconListener) findTimeout sn  = async {
 
-        let mutable beaconFound = None
-        use readySignal = new ManualResetEvent(false)
+            let mutable beaconFound = None
+            use readySignal = new ManualResetEvent(false)
 
-        use sub = availability.Beacons
-                  |> Observable.filter (fun beacon -> beacon.SerialNumber = sn)
-                  |> timeout timeoutPeriod
-                  |> Observable.subscribe (fun beacon ->
-                        beaconFound <- Some beacon
-                        readySignal.Set() |> ignore
-                     )
-        if readySignal.WaitOne(timeoutPeriod : TimeSpan) then
-            beaconFound
-        else
-            None
+            use _sub = availability.Beacons
+                      |> Observable.filter (fun beacon -> beacon.SerialNumber = sn)
+                      |> timeout findTimeout
+                      |> Observable.subscribe (fun beacon ->
+                            beaconFound <- Some beacon
+                            readySignal.Set() |> ignore
+                         )
 
-    [<CompiledName("FindAris")>]
-    let findArisFiendly(availability : SonarBeaconListener,
-                        timeoutPeriod : TimeSpan,
-                        sn : SerialNumber,
-                        [<Out>] beaconFound : SonarBeacon byref) : bool =
+            return
+                if readySignal.WaitOne(findTimeout : TimeSpan) then
+                    beaconFound
+                else
+                    None
+    }
 
-        match findAris availability timeoutPeriod sn with
-        | Some beacon ->    beaconFound <- beacon
-                            true
-        | None ->           beaconFound <- Unchecked.defaultof<_> // null for interop
-                            false
+    [<CompiledName("FindArisAsync")>]
+    let findArisCSharpAsync (availability : SonarBeaconListener) findTimeout sn : Task<SonarBeacon> =
+
+        Async.StartAsTask(async {
+            let! beacon = findArisAsync availability findTimeout sn
+            return
+                match beacon with
+                | Some beacon -> beacon
+                | None -> Unchecked.defaultof<SonarBeacon>
+        })

@@ -25,7 +25,7 @@ let frameProcessingStats (inputs : TestInputs) =
 
     let timeoutPeriod = TimeSpan.FromSeconds(10.0)
 
-    match FindSonar.findAris availability timeoutPeriod sn with
+    match Async.RunSynchronously(FindSonar.findArisAsync availability timeoutPeriod sn) with
     | Some beacon ->
         Log.Information("ARIS {sn}, software version {softwareVersion}, found at {targetIpAddr}",
                         sn, beacon.SoftwareVersion, beacon.SrcIpAddr)

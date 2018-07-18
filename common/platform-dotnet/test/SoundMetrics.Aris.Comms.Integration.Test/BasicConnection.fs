@@ -23,9 +23,9 @@ let testBasicConnection (inputs : TestInputs) =
                 Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
                 None // callbacks
 
-    let timeoutPeriod = TimeSpan.FromSeconds(10.0)
+    let findTimeout = TimeSpan.FromSeconds(10.0)
 
-    match FindSonar.findAris availability timeoutPeriod sn with
+    match Async.RunSynchronously(FindSonar.findArisAsync availability findTimeout sn) with
     | Some beacon ->
         Log.Information("ARIS {sn}, software version {softwareVersion}, found at {targetIpAddr}",
                         sn, beacon.SoftwareVersion, beacon.SrcIpAddr)
@@ -61,7 +61,7 @@ let testBasicConnection (inputs : TestInputs) =
                 readySignal.Set() |> ignore
         )
 
-        readySignal.WaitOne(timeoutPeriod) |> ignore
+        readySignal.WaitOne(findTimeout) |> ignore
         if errorCount = 0u then
             Log.Information("FrameProcessedReport={FrameProcessedReport}",
                             sprintf "%A" perfSink.FrameProcessedReport)

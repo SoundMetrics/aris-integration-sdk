@@ -3,6 +3,7 @@
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Comms
+open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Scripting
 open System
 open System.Threading
@@ -21,7 +22,7 @@ type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
 // Framework (Desktop).
 //-----------------------------------------------------------------------------
 
-let getExplorerBeacon (availables : AvailableSonars) targetSN : SonarBeacon option =
+let getArisBeacon (availables : AvailableSonars) targetSN : SonarBeacon option =
 
     let timeout = TimeSpan.FromSeconds(4.0)
 
@@ -80,7 +81,7 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
     use availables = BeaconListeners.createDefaultSonarBeaconListener SynchronizationContext.Current
 
     let targetSN = 24
-    let beacon = getExplorerBeacon availables targetSN
+    let beacon = getArisBeacon availables targetSN
 
     let runTest (beacon : SonarBeacon) =
         Log.Information("Running test...")
