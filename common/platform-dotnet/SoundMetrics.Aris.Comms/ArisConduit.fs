@@ -84,9 +84,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             setSalinity frame
 
         let onError (ex: Exception) = printfn "SonarConnection frame error: %s" ex.Message
-        let onCompleted () = () // TODO?
-
-        frameStreamListener.Frames.Subscribe (trackFrameInfo, onError, onCompleted)
+        frameStreamListener.Frames.Subscribe (trackFrameInfo, onError)
 
     let frameStreamSubscription = buildFrameStreamSubscription()
 
@@ -102,7 +100,6 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             Serilog.Log.Verbose("Queuing command type {commandType}", commandType)
 
         cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
-        // TODO mkEventNoCallback determine if we really want callbacks; how to implement in API
 
     let requestAcousticSettings (settings: AcousticSettings): RequestedSettings =
 

@@ -220,16 +220,16 @@ module internal Recording =
                         | None -> ""
 
                     // Process the frame with some number of retries for write failures.
-                    let rec attemptFrameAndUpdateReqs (reqsTodo : ReqInProgress list)
+                    let rec attemptFrameAndUpdateReqs (reqsInProgress : ReqInProgress list)
                                                         frame
                                                         recordFrameIndexOffset
                             : ReqInProgress list * ReqInProgress list =
 
-                        if reqsTodo.IsEmpty then
+                        if reqsInProgress.IsEmpty then
                             [], []
                         else
                             // Failed here refers to recording requests that have not written successfully.
-                            let complete, failed = processFrameOverRequests reqsTodo frame recordFrameIndexOffset
+                            let complete, failed = processFrameOverRequests reqsInProgress frame recordFrameIndexOffset
 
                             let rec restartFailedReqs retryReqs recoveredReqs gaveUpReqs =
 

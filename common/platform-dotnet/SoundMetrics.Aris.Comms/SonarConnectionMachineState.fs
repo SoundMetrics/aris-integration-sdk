@@ -127,7 +127,7 @@ module internal SonarConnectionMachineState =
 
     /// Handles every type of input event given to the sonar.
     let handleEvent (state: EventHandlerState) (event: CxnEvent) =
-        let mutable success = false // TODO initialize everywhere
+        let mutable success = false
         let machineStateBegin = state.machineState
         let ev, callback = event
 
@@ -150,7 +150,7 @@ module internal SonarConnectionMachineState =
                         if state.callbacks.OnInitializeConnection frameSinkAddr then
                             state.ChangeState (connected (targetAddr, cmdLink) state.machineState)
                         else
-                            state.ChangeState (NotConnected targetAddr) // TODO logging, at least
+                            state.ChangeState (NotConnected targetAddr)
                     with
                     | :? System.Net.Sockets.SocketException as ex ->
                         logSocketException ex.Message
