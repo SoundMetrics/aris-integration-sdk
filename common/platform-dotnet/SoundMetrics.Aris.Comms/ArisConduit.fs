@@ -83,7 +83,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
 
             setSalinity frame
 
-        let onError (ex: Exception) = printfn "SonarConnection frame error: %s" ex.Message
+        let onError (ex: Exception) = Log.Error("SonarConnection frame error: {exMsg}", ex.Message)
         frameStreamListener.Frames.Subscribe (trackFrameInfo, onError)
 
     let frameStreamSubscription = buildFrameStreamSubscription()
