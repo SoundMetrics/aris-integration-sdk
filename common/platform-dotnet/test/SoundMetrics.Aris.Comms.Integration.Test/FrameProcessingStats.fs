@@ -37,9 +37,9 @@ let frameProcessingStats (inputs : TestInputs) =
         let skipFrames = 10
         let sampleCountWanted = 500
         let perfSink = SampledConduitPerfSink(sampleCountWanted, skipFrames)
-        use conduit = new SonarConduit(initialSettings, sn, availability,
-                                       FrameStreamReliabilityPolicy.DropPartialFrames,
-                                       perfSink)
+        use conduit = new ArisConduit(initialSettings, sn, availability,
+                                      FrameStreamReliabilityPolicy.DropPartialFrames,
+                                      perfSink)
 
         use readySignal = new ManualResetEvent(false)
 

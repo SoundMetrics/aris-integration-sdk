@@ -51,7 +51,7 @@ let runTest eventSource (series : SetupAndMatch<SyslogMessage, unit> array) time
     waitForAsyncWithDispatch
         (runSetupMatchValidateAsync eventSource () series timeout)
 
-let getAFrame (conduit : SonarConduit) (timeout : TimeSpan) =
+let getAFrame (conduit : ArisConduit) (timeout : TimeSpan) =
 
     let mutable frame = None
     waitForAsyncWithDispatch (async {
@@ -86,7 +86,7 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
     let runTest (beacon : SonarBeacon) =
         Log.Information("Running test...")
         Log.Information("Traget sonar beacon={beacon}", beacon)
-        use conduit = new SonarConduit(
+        use conduit = new ArisConduit(
                         AcousticSettings.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
                         availables,

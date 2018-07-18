@@ -35,9 +35,9 @@ let testBasicConnection (inputs : TestInputs) =
             { defaultSettings with FrameRate = 15.0f</s> }
 
         let perfSink = SampledConduitPerfSink(1000, 10)
-        use conduit = new SonarConduit(initialSettings, sn, availability,
-                                       FrameStreamReliabilityPolicy.DropPartialFrames,
-                                       perfSink)
+        use conduit = new ArisConduit(initialSettings, sn, availability,
+                                      FrameStreamReliabilityPolicy.DropPartialFrames,
+                                      perfSink)
 
         use readySignal = new ManualResetEvent(false)
 

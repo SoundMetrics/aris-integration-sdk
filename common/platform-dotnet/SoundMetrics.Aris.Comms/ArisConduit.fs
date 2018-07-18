@@ -26,12 +26,12 @@ type RequestedSettings =
     | SettingsDeclined of string
 
 
-type SonarConduit private (initialAcousticSettings : AcousticSettings,
-                           available : AvailableSonars,
-                           targetSonar : string,
-                           matchBeacon : SonarBeacon -> bool,
-                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
-                           perfSink : ConduitPerfSink) as self =
+type ArisConduit private (initialAcousticSettings : AcousticSettings,
+                          available : AvailableSonars,
+                          targetSonar : string,
+                          matchBeacon : SonarBeacon -> bool,
+                          frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
+                          perfSink : ConduitPerfSink) as self =
 
     let disposed = ref false
     let disposingSignal = new ManualResetEventSlim()
@@ -144,29 +144,29 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
 
     /// Find the sonar by its serial number.
     new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) =
-            new SonarConduit(initialAcousticSettings,
-                             availableSonars,
-                             sn.ToString(),
-                             (fun beacon -> beacon.SerialNumber = sn),
-                             frameStreamReliabilityPolicy,
-                             ConduitPerfSink.None)
+            new ArisConduit(initialAcousticSettings,
+                            availableSonars,
+                            sn.ToString(),
+                            (fun beacon -> beacon.SerialNumber = sn),
+                            frameStreamReliabilityPolicy,
+                            ConduitPerfSink.None)
 
     /// Find the sonar by its IP address
     new(initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
-            new SonarConduit(initialAcousticSettings,
-                             availableSonars,
-                             ipAddress.ToString(),
-                             (fun beacon -> beacon.SrcIpAddr = ipAddress),
-                             frameStreamReliabilityPolicy,
-                             ConduitPerfSink.None)
+            new ArisConduit(initialAcousticSettings,
+                            availableSonars,
+                            ipAddress.ToString(),
+                            (fun beacon -> beacon.SrcIpAddr = ipAddress),
+                            frameStreamReliabilityPolicy,
+                            ConduitPerfSink.None)
 
     internal new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy, perfSink) =
-            new SonarConduit(initialAcousticSettings,
-                             availableSonars,
-                             sn.ToString(),
-                             (fun beacon -> beacon.SerialNumber = sn),
-                             frameStreamReliabilityPolicy,
-                             perfSink)
+            new ArisConduit(initialAcousticSettings,
+                            availableSonars,
+                            sn.ToString(),
+                            (fun beacon -> beacon.SerialNumber = sn),
+                            frameStreamReliabilityPolicy,
+                            perfSink)
 
     interface IDisposable with
         member __.Dispose() =
