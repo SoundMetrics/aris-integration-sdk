@@ -34,6 +34,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
                            perfSink : ConduitPerfSink) as self =
 
     let disposed = ref false
+    let disposingSignal = new ManualResetEventSlim()
     let mutable serialNumber: Nullable<SerialNumber> = Nullable<SerialNumber>()
     let mutable snListener: IDisposable = null
     let mutable setSalinity: (Frame -> unit) = fun _ -> ()
@@ -176,6 +177,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
 
     interface IDisposable with
         member __.Dispose() =
+            disposingSignal.Set()
             let disposables = List.concat [ queueLinks; inputGraphLinks; pGraphDisposables
                                             [ focusInputSubscription; earlyFrameSubject; frameStreamSubscription
                                               frameStreamListener; snListener; cxnStateSubject; cts; cxnMgrDone ] ]
@@ -236,20 +238,29 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
     member ac.WaitForConnectionAsync (timeout : TimeSpan) : Task<bool> =
         
         let doneSignal = new ManualResetEventSlim(false)
-        let reachedState = ref false
+        let mutable reachedState = false
 
-        // TODO race conditions on destruction
         let sub = ac.ConnectionState.Subscribe(fun state ->
                         match state with
                         | ConnectionState.Connected (_ip, _cmdLink) ->
-                            reachedState := true
+                            reachedState <- true
                             doneSignal.Set() |> ignore
                         | _ -> ())
 
         Async.StartAsTask(async {
-            doneSignal.Wait(timeout) |> ignore
-            sub.Dispose()
-            return !reachedState
+            try
+                let disposingHandle = disposingSignal.WaitHandle // Keep a copy in case of dispose race condition
+                let waitHandles = [| doneSignal.WaitHandle; disposingHandle |]
+
+                match WaitHandle.WaitAny(waitHandles, timeout) with
+                | WaitHandle.WaitTimeout -> ()
+                | idx when waitHandles.[idx] = disposingHandle ->
+                    raise (ObjectDisposedException "SonarConduit was disposed while waiting for a state change")
+                | _ -> ()
+            finally
+                sub.Dispose()
+
+            return reachedState
         })
 
     member __.Metrics = makeMetrics instantaneousFrameRate.Value frameStreamListener.Metrics
