@@ -138,15 +138,3 @@ module internal SonarConduitDetails =
                             cleanUp()))
         { new IDisposable with
             member __.Dispose() = cleanUp() }
-
-    // Focus requests require the environmental inputs needed to calculate sound speed in water as well as system type and
-    // whether using a telephoto lens. We don't have these until we've received a frame from the sonar.
-    let mkFocusQueue (send: float<m> -> unit) =
-
-        let focusRequestSink = new Subject<float<m>>()
-        let focusInputSubscription =
-            focusRequestSink.Subscribe(fun range ->
-                Log.Information("Sending focus range request for {range}", range)
-                send range)
-
-        focusRequestSink, focusInputSubscription

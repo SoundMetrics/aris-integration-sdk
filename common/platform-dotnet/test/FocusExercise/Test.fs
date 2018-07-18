@@ -83,7 +83,8 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
     let beacon = getExplorerBeacon availables targetSN
 
     let runTest (beacon : SonarBeacon) =
-        Log.Information("Running test against sonar {sn}; system type={systemType}", targetSN, beacon.SystemType)
+        Log.Information("Running test...")
+        Log.Information("Traget sonar beacon={beacon}", beacon)
         use conduit = new SonarConduit(
                         AcousticSettings.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
@@ -114,7 +115,8 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
         let series = [|
             {
                 SetupAndMatch.Description = "My first step"
-                SetUp = fun _ ->    conduit.RequestFocusDistance(range1 + 1.0<m>)
+                SetUp = fun _ ->    conduit.SetSalinity(Salinity.Brackish)
+                                    conduit.RequestFocusDistance(range1 + 1.0<m>)
                                     conduit.RequestFocusDistance(range1)
                                     true
                 Expecteds =
@@ -126,7 +128,8 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
             }
             {
                 SetupAndMatch.Description = "My second step"
-                SetUp = fun _ ->    conduit.RequestFocusDistance(range2)
+                SetUp = fun _ ->    conduit.SetSalinity(Salinity.Brackish)
+                                    conduit.RequestFocusDistance(range2)
                                     true
                 Expecteds =
                     [|

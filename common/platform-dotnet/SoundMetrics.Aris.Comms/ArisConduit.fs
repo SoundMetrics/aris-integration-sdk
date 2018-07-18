@@ -104,13 +104,6 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
         cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
         // TODO mkEventNoCallback determine if we really want callbacks; how to implement in API
 
-    let focusRequestSink, focusInputSubscription =
-        mkFocusQueue (fun (range: float<m>) ->
-                        Log.Information(
-                            "SonarConduit: Queuing focus request command for range {range}", range)
-                        let cmd = makeFocusCmd range
-                        queueCmd cmd)
-
     let requestAcousticSettings (settings: AcousticSettings): RequestedSettings =
 
         Log.Information(
@@ -179,7 +172,7 @@ type SonarConduit private (initialAcousticSettings : AcousticSettings,
         member __.Dispose() =
             disposingSignal.Set()
             let disposables = List.concat [ queueLinks; inputGraphLinks; pGraphDisposables
-                                            [ focusInputSubscription; earlyFrameSubject; frameStreamSubscription
+                                            [ earlyFrameSubject; frameStreamSubscription
                                               frameStreamListener; snListener; cxnStateSubject; cts; cxnMgrDone ] ]
             Dispose.theseWith disposed
                 disposables
