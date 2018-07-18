@@ -73,6 +73,7 @@ module EventMatcher =
         Description     : string
         SetUp           : 'St -> bool
         Expecteds       : ExpectedEvent<'Ev> array
+        OnSuccess       : unit -> unit
     }
 
     let runSetupMatchValidateAsync (eventSource : IObservable<'Ev>)
@@ -101,6 +102,9 @@ module EventMatcher =
                     if success then
                         let! result =  detectSequenceAsync eventSource step.Expecteds timeout
                         success <- result
+                        match result, step.OnSuccess with
+                        | true, fn -> fn()
+                        | _ -> ()
                 else
                     Log.Warning("Skipping step {stepNum}: {stepDescription}", stepNum, step.Description)
 

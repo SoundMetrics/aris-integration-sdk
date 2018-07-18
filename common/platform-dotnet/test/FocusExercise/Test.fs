@@ -50,6 +50,21 @@ let runTest eventSource (series : SetupAndMatch<SyslogMessage, unit> array) time
     waitForAsyncWithDispatch
         (runSetupMatchValidateAsync eventSource () series timeout)
 
+let getAFrame (conduit : SonarConduit) (timeout : TimeSpan) =
+
+    let mutable frame = None
+    waitForAsyncWithDispatch (async {
+        use doneSignal = new ManualResetEventSlim()
+        use _sub = conduit.Frames.Subscribe(fun f ->
+                        frame <- Some f
+                        doneSignal.Set())
+        doneSignal.Wait(timeout) |> ignore
+        return true
+    }) |> ignore
+
+    frame
+
+
 let exit code = Environment.Exit(code)
 
 let isFocusRequest = Func<SyslogMessage,bool>(function | ReceivedFocusCommand _ -> true | _ -> false)
@@ -67,9 +82,10 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
     let targetSN = 24
     let beacon = getExplorerBeacon availables targetSN
 
-    let runTest systemType =
+    let runTest (beacon : SonarBeacon) =
+        Log.Information("Running test against sonar {sn}; system type={systemType}", targetSN, beacon.SystemType)
         use conduit = new SonarConduit(
-                        AcousticSettings.DefaultAcousticSettingsFor(systemType),
+                        AcousticSettings.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
                         availables,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
@@ -83,27 +99,41 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
             Log.Error("Timed out waiting for sonar connection")
             exit 2
 
+        let showUnits range () = // add unit for use as partial application below
+            match getAFrame conduit (TimeSpan.FromSeconds(2.0)) with
+            | Some readyFrame ->
+                let frame = readyFrame.Frame
+                Log.Information("Frame info: fu={fu}; focus range={focusRange}",
+                                            frame.Header.Focus,
+                                            range)
+            | None -> Log.Error("Attempt to get a frame failed")
+
+        let range1 = 1.0<m>
+        let range2 = 3.0<m>
+
         let series = [|
             {
                 SetupAndMatch.Description = "My first step"
-                SetUp = fun _ ->    conduit.RequestFocusDistance(2.0<m>)
-                                    conduit.RequestFocusDistance(1.0<m>)
+                SetUp = fun _ ->    conduit.RequestFocusDistance(range1 + 1.0<m>)
+                                    conduit.RequestFocusDistance(range1)
                                     true
                 Expecteds =
-                [|
-                    { Description = "Found focus request"; Match = isFocusRequest }
-                    { Description = "Observed focus state"; Match = isFocusState }
-                |]
+                    [|
+                        { Description = "Found focus request"; Match = isFocusRequest }
+                        { Description = "Observed focus state"; Match = isFocusState }
+                    |]
+                OnSuccess = showUnits range1
             }
             {
                 SetupAndMatch.Description = "My second step"
-                SetUp = fun _ ->    conduit.RequestFocusDistance(3.0<m>)
+                SetUp = fun _ ->    conduit.RequestFocusDistance(range2)
                                     true
                 Expecteds =
-                [|
-                    { Description = "Found focus request"; Match = isFocusRequest }
-                    { Description = "Observed focus state"; Match = isFocusState }
-                |]
+                    [|
+                        { Description = "Found focus request"; Match = isFocusRequest }
+                        { Description = "Observed focus state"; Match = isFocusState }
+                    |]
+                OnSuccess = showUnits range2
             }
         |]
 
@@ -114,8 +144,8 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
             Log.Information("Test succeeded")
 
     match beacon with
-    | Some b -> Log.Information("Found SN {targetSN}", targetSN)
-                runTest b.SystemType
+    | Some bcn -> Log.Information("Found SN {targetSN}", targetSN)
+                  runTest bcn
     | None -> Log.Error("Couldn't find a beacon for SN {targetSN}", targetSN)
 
     Log.Information("testRawFocusUnits completed.")
