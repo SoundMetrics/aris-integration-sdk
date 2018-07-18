@@ -49,7 +49,7 @@ module internal ArisConduitHelpers =
 
 
     [<CompiledName("TargetIdFromStringAsync")>]
-    let targetIdFromStringAsync s: Task<ParsedTargetId> =
+    let targetIdFromStringAsync (s : string) : Task<ParsedTargetId> =
         try
             let parsed, sn = UInt32.TryParse(s)
             if parsed then
@@ -64,9 +64,7 @@ module internal ArisConduitHelpers =
                             let hostEntry = Dns.GetHostEntry(s)
                             IP hostEntry.AddressList.[0]
                         with
-                        | ex -> let msg = sprintf "Exception: couldn't resolve '%s' %s %s" s ex.Message ex.StackTrace
-                                System.Diagnostics.Trace.TraceError(msg)
-                                System.Diagnostics.Debug.WriteLine(msg)
+                        | ex -> Log.Error("Exception: couldn't resolve '{target}' {exMsg} {stackTrace}", s, ex.Message, ex.StackTrace)
                                 Unknown (sprintf "Error: couldn't resolve '%s' %s" s ex.Message)
                         )
         with

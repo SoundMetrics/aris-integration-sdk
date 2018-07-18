@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open FrameStream
 open Google.Protobuf
+open Serilog
 open SoundMetrics.Aris.Comms
 open System
 open System.Diagnostics
@@ -21,7 +22,7 @@ module private FrameStreamListenerImpl =
         udpClient.Client.ReceiveBufferSize <- 2 * 1024 * 1024
         udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
         let localEndPointPort = (udpClient.Client.LocalEndPoint :?> IPEndPoint).Port
-        Debug.WriteLine(sprintf "FrameStreamListener: local listen port is %d" localEndPointPort)
+        Log.Verbose("FrameStreamListener: local listen port is {port}", localEndPointPort)
         udpClient
 
 
