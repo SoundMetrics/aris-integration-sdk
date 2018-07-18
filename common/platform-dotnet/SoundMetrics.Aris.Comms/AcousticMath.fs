@@ -2,10 +2,10 @@
 
 namespace SoundMetrics.Aris.Comms
 
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open Serilog
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Aris.Config
-open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open System.Diagnostics
 
 module AcousticMath =
 
@@ -144,6 +144,6 @@ module AcousticMath =
 
         let isConstrained = s.FrameRate <> adjustedFrameRate
         let constrainedSettings = { s with FrameRate = adjustedFrameRate }
-        if isConstrained then Trace.TraceInformation("constrainAcousticSettings: constrained; " + (AcousticSettings.diff s constrainedSettings))
+        if isConstrained then Log.Information("constrainAcousticSettings: constrained; {settings}", (AcousticSettings.diff s constrainedSettings))
         constrainedSettings, isConstrained
 

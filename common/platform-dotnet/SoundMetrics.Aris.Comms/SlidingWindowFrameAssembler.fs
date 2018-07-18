@@ -131,7 +131,7 @@ module private SlidingWindowFrameAssemblerDetails =
                             "sender moved on to the next frame"
             flush false
 
-        System.Diagnostics.Trace.TraceInformation(sprintf "Reset currentFrameIndex to %d" !currentFrameIndex)
+        Log.Information("Reset currentFrameIndex to {index}", !currentFrameIndex)
         logResetCurrentFrameIndexTo incomingFrameIndex
         currentFrameIndex := incomingFrameIndex
         expectedDataOffset := 0u

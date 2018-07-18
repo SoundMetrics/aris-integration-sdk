@@ -90,31 +90,31 @@ module internal SonarConduitDetails =
 
                             let bits32 = "32-bit"
                             let bits64 = "64-bit"
-                            let processIntSize = if Environment.Is64BitProcess         then bits64 else bits32
+                            let processIntSize = if Environment.Is64BitProcess    then bits64 else bits32
                             let osIntsize = if Environment.Is64BitOperatingSystem then bits64 else bits32
-                            Trace.TraceInformation(sprintf "%s process; %s OS; %d processors"
-                                                           processIntSize osIntsize Environment.ProcessorCount)
+
+                            Log.Information("{processIntSize} process; {osIntSize} OS; {processorCount} processors",
+                                            processIntSize, osIntsize, Environment.ProcessorCount)
 
                             try
                                 let ifcs = NetworkInterface.GetAllNetworkInterfaces()
-                                Trace.TraceInformation("Network interfaces:")
+                                Log.Information("Network interfaces:")
                                 let ethernets =
                                     ifcs |> Seq.filter(fun ifc ->
                                                         ifc.NetworkInterfaceType = NetworkInterfaceType.Ethernet)
 
                                 let separator = "--------------------------------------------------"
                                 for ifc in ethernets do
-                                    Trace.TraceInformation(separator)
-                                    Trace.TraceInformation(sprintf "%s %s" ifc.Id ifc.Name)
-                                    Trace.TraceInformation(sprintf "    %s" ifc.Description)
-                                    Trace.TraceInformation(
-                                        sprintf "    status=%A; speed=%d bits/s" ifc.OperationalStatus ifc.Speed)
+                                    Log.Information(separator)
+                                    Log.Information("{ifcId} {ifcName}", ifc.Id, ifc.Name)
+                                    Log.Information("    {ifcDesc}", ifc.Description)
+                                    Log.Information("    status={status}; speed={speed} bits/s", ifc.OperationalStatus, ifc.Speed)
 
-                                Trace.TraceInformation(separator)
+                                Log.Information(separator)
                             with
-                                | ex -> Trace.TraceWarning("Could not enumerate network interfaces: " + ex.Message)
+                                | ex -> Log.Warning("Could not enumerate network interfaces: {exMsg}", ex.Message)
 
-    let listenForBeacon (available: AvailableSonars) matchBeacon beaconTarget onFound =
+    let listenForBeacon (available: AvailableSonars) matchBeacon (beaconTarget : string) onFound =
 
         let disposed = ref false
         let guardObject = Object()
@@ -127,11 +127,11 @@ module internal SonarConduitDetails =
                                                             ref.Dispose()
                                         | None -> ())
 
-        Trace.TraceInformation(sprintf "listenForBeacon: watching for beacon for '%s'" beaconTarget)
+        Log.Information("listenForBeacon: watching for beacon for '{target}'", beaconTarget)
         listener :=
             Some (available.Beacons.Subscribe(fun beacon ->
                         if matchBeacon beacon then
-                            Trace.TraceInformation("listenForBeacon: matched beacon for sonar {0} at {1}", beacon.SerialNumber, beacon.SrcIpAddr)
+                            Log.Information("listenForBeacon: matched beacon for sonar {sn} at {ipAddr}", beacon.SerialNumber, beacon.SrcIpAddr)
                             onFound beacon
                             cleanUp()))
         { new IDisposable with

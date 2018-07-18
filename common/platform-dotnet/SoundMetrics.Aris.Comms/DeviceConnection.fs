@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 // Generic device connection management
 
+open Serilog
 open SoundMetrics.Aris.Comms
 open System.Net
 open System.Net.Sockets
@@ -61,7 +62,7 @@ module internal DeviceConnectionDetails =
 
         let onError (exn : Exception) =
         
-            Trace.TraceWarning(sprintf "Device connection error: %s" exn.Message)
+            Log.Warning("Device connection error: {exMsg}", exn.Message)
             errorSignal.Set() |> ignore
 
         let mkConnection (ep : IPEndPoint) =
@@ -103,7 +104,7 @@ module internal DeviceConnectionDetails =
 
                         Some { tcp = tcp; reader = reader; subscription = subscription }, Connected ep
                     with
-                        ex -> Trace.TraceInformation(sprintf "mkConnection failed : %s" ex.Message)
+                        ex -> Log.Warning("mkConnection failed : {exMsg}", ex.Message)
                               tcp.Close()
                               None, NotConnected
                 else
@@ -111,7 +112,7 @@ module internal DeviceConnectionDetails =
                     None, NotConnected
             with
             | :? SocketException as ex ->
-                Trace.TraceInformation(sprintf "mkConnection socket exception: %s" ex.Message)
+                Log.Information("mkConnection socket exception: {exMsg}", ex.Message)
                 None, (ConnectionRefused ep)
             | _ -> None, NotConnected
 
@@ -257,8 +258,7 @@ type internal DeviceConnection() =
         let callbacks = {
             new ICxnCallbacks with
                 member __.OnStateChange newState =
-                    System.Diagnostics.Trace.TraceInformation(
-                        sprintf "DeviceConnection changed state to %A" newState)
+                    Log.Information("DeviceConnection changed state to {newState}", newState)
                     stateSubject.OnNext(newState)
                 member __.OnMsgReceived msg = msgSubject.OnNext(msg)
         }

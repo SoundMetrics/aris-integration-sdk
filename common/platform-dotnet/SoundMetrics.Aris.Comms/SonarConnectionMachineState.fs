@@ -114,8 +114,8 @@ module internal SonarConnectionMachineState =
             s.machineState <- newState
             let stateString = newState.ToString()
             logConnectionStateChange s.targetSonar stateString
-            Trace.TraceInformation(sprintf "EventHandlerState[%s]: state changed to [%s]" 
-                                    s.targetSonar stateString)
+            Log.Information("EventHandlerState[{target}]: state changed to [{state}]" ,
+                                    s.targetSonar, stateString)
 
     /// Builds the TCP command link with appropriate settings.
     let buildCmdLink (ip: IPAddress) =
@@ -154,7 +154,6 @@ module internal SonarConnectionMachineState =
                     with
                     | :? System.Net.Sockets.SocketException as ex ->
                         logSocketException ex.Message
-                        Trace.TraceWarning(sprintf "Couldn't connect to %A: %s" targetAddr ex.Message)
                         state.ChangeState (refused targetAddr state.machineState)
                     
                 match state.machineState with
@@ -193,9 +192,7 @@ module internal SonarConnectionMachineState =
             try
                 state.callbacks.OnCxnStateChanged(state.machineState) |> ignore
             with
-            | ex ->
-                Trace.TraceError ("OnCxnStateChanged: an exception occurred: {0}", ex.Message)
-                Trace.TraceError (ex.StackTrace)
+            | ex -> Log.Error("OnCxnStateChanged: an exception occurred: {exMsg}", ex.Message)
 
         callback, success
 

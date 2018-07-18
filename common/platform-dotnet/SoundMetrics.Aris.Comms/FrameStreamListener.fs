@@ -61,8 +61,8 @@ type internal FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabili
                 match frameStreamReliabilityPolicy with
                 | FrameStreamReliabilityPolicy.DropPartialFrames ->
                     let frameIsComplete = accum.IsComplete
-                    if not frameIsComplete then /// REVIEW compile list of modules that should use event sources instead of Trace
-                        Trace.TraceInformation("FrameStreamListener: dropping partial frame")
+                    if not frameIsComplete then
+                        Log.Verbose("FrameStreamListener: dropping partial frame")
                     frameIsComplete
 
             if keepFrame then
