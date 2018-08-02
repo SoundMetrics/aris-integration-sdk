@@ -12,5 +12,6 @@ set FSHARP_PATH=%ProgramFiles(x86)%\Microsoft SDKs\F#\10.1\Framework\v4.0
 set PATH=%FSHARP_PATH%;%PATH%
 
 fsi %*
+exit /b %ERRORLEVEL%
 
 ENDLOCAL
