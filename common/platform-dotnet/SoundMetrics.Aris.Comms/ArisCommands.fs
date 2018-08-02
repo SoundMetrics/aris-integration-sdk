@@ -1,13 +1,13 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms
+namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open SoundMetrics.Aris.Comms.Internal
+open SoundMetrics.Aris.Comms
 open System
 open System.Net
 
-module ArisCommands =
+module internal ArisCommands =
 
     /// Sets the sonar clock to the local time of the value passed in.
     [<CompiledName("MakeSetDatetimeCmd")>]
