@@ -20,6 +20,34 @@ module Seq =
         ts' |> Seq.iter (fun t -> printfn "  %s: %A" name t)
         ts'
 
+module Exclusions =
+
+    type private ClassExclusion = DebugTypeProxy | FullName of string
+
+    let private classExclusions = [
+        DebugTypeProxy
+        FullName "<>c"
+    ]
+
+    let excludeClass (ti : TypeInfo) =
+        let name = ti.Name
+
+        classExclusions |>
+        Seq.exists (fun ex ->   match ex with
+                                | DebugTypeProxy -> name.EndsWith("@DebugTypeProxy")
+                                | FullName n -> name = n)
+
+    let private membersToIgnore =
+        [
+            "ToString"
+            "Equals"
+            "GetHashCode"
+            "GetType"
+            "Invoke"
+        ] |> List.toSeq |> Set
+
+    let exludeMember (m : MemberInfo) = membersToIgnore |> Set.contains m.Name
+
 module Details =
     open System.Text.RegularExpressions
 
@@ -170,8 +198,7 @@ let assembliesOfInterest = [
 
 let getPublicTypes assemblyPath =
 
-    let isPublicType (typeInfo : TypeInfo) =
-        typeInfo.IsPublic // TODO public enclosing type?
+    let isPublicType (typeInfo : TypeInfo) = typeInfo.IsPublic
 
     let publicTypes =
         try
@@ -184,7 +211,7 @@ let getPublicTypes assemblyPath =
             | :? FileLoadException as ex ->
                 eprintfn "Couldn't load file '%s'" ex.FileName
                 reraise()
-        |> Seq.filter (fun ti -> ti.Name <> "<>c")
+        |> Seq.filter (fun ti -> not (Exclusions.excludeClass ti))
         |> Seq.cache
 
     //printfn "Public types for %s" (Path.GetFileName(assemblyPath))
@@ -209,19 +236,10 @@ let findAssemblyPath assemblyName : string option =
 
     checkForFile startFolder
 
-let membersToIgnore =
-    [
-        "ToString"
-        "Equals"
-        "GetHashCode"
-        "GetType"
-        "Invoke"
-    ] |> List.toSeq |> Set
-
 let findProhibitedTypes (prohibitedTypes : TypeInfo seq) (subjectType : TypeInfo) 
         : (TypeInfo * MemberInfo * Type seq) seq =
 
-    let filterMembers (m : MemberInfo) = not (membersToIgnore |> Set.contains m.Name)
+    let filterMember (m : MemberInfo) = not (Exclusions.exludeMember m)
 
     let prohibitedTypes' = prohibitedTypes |> Seq.map (fun ti -> ti.AsType()) |> Seq.cache
     let check = Details.Check(prohibitedTypes')
@@ -230,28 +248,28 @@ let findProhibitedTypes (prohibitedTypes : TypeInfo seq) (subjectType : TypeInfo
 
     seq {
         yield! subjectType.GetConstructors() |> Seq.filter Details.Public.Test
-                                             |> Seq.filter filterMembers
+                                             |> Seq.filter filterMember
                                              |> Seq.collect check.BadActors
                                              |> Seq.map addSubjectType
         yield! subjectType.GetEvents() |> Seq.filter Details.Public.Test
-                                       |> Seq.filter filterMembers
+                                       |> Seq.filter filterMember
                                        |> Seq.collect check.BadActors
                                        |> Seq.map addSubjectType
         yield! subjectType.GetFields() |> Seq.filter Details.Public.Test
-                                       |> Seq.filter filterMembers
+                                       |> Seq.filter filterMember
                                        |> Seq.collect check.BadActors
                                        |> Seq.map addSubjectType
         yield! subjectType.GetMethods() |> Seq.filter Details.Public.Test
-                                        |> Seq.filter filterMembers
+                                        |> Seq.filter filterMember
                                         |> Seq.collect check.BadActors
                                         |> Seq.map addSubjectType
         yield! subjectType.GetProperties() |> Seq.filter Details.Public.Test
-                                           |> Seq.filter filterMembers
+                                           |> Seq.filter filterMember
                                            |> Seq.collect check.BadActors
                                            |> Seq.map addSubjectType
     }
 
-// TODO also check inherited types & interfaces
+// Possibly TODO: also check inherited types & interfaces & collection types
 
 let performTest () =
 
@@ -280,12 +298,13 @@ let performTest () =
         |> Seq.toList
 
     printfn "%s" (String('-', 80))
-    printfn "%d errors found" results.Length
 
     if results.Length > 0 then
         for (containingTypeInfo, mi, badTypes) in results do
             for bt in badTypes do
                 printfn "%s %s uses %s" containingTypeInfo.Name mi.Name bt.Name
+
+    printfn "%d errors found" results.Length
 
     results.Length
 
