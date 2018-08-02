@@ -279,6 +279,7 @@ let performTest () =
         }
         |> Seq.toList
 
+    printfn "%s" (String('-', 80))
     printfn "%d errors found" results.Length
 
     if results.Length > 0 then
@@ -290,9 +291,7 @@ let performTest () =
 
 
 let run () =
-#if INTERACTIVE
     System.Environment.CurrentDirectory <- @"S:\git\aris-integration-sdk\common\platform-dotnet\"
-#endif
 
     printfn "cwd: %s" (Environment.CurrentDirectory)
 
@@ -305,11 +304,8 @@ let run () =
 
     if errorCount <> 0 then
         let exitCode = 1
-        printfn "*** FAILED: returning %d ***" exitCode
-#if INTERACTIVE
-        ()
-#else
+        printfn "*** FAILED ***"
         Environment.Exit(exitCode)
-#endif
+        //Environment.ExitCode <- exitCode
 
 run()
