@@ -355,6 +355,5 @@ let run () =
         let exitCode = 1
         printfn "*** FAILED ***"
         Environment.Exit(exitCode)
-        //Environment.ExitCode <- exitCode
 
 run()
