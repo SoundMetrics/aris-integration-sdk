@@ -289,9 +289,39 @@ let performTest () =
 
     results.Length
 
+// Get only the args after the first "--"
+let getProgramArgs args =
+
+    let rec findDelim argList =
+        match argList with
+        | "--" :: rem ->    rem |> List.toArray
+        | _ :: rem ->       findDelim rem
+        | [] ->             Array.empty
+
+    findDelim (args |> Array.toList)
+
+// Get the root folder and output file from arguments.
+let parseArgs () =
+    // Get only the args that apply to the program.
+    let args = getProgramArgs fsi.CommandLineArgs
+
+    match args with
+    | [| folder |] -> Ok folder
+    | [||] ->         Ok ""
+    | _ ->            Error "Too many arguments"
 
 let run () =
-    System.Environment.CurrentDirectory <- @"S:\git\aris-integration-sdk\common\platform-dotnet\"
+
+    match parseArgs() with
+    | Ok "" ->
+        let defaultFolder = @"S:\git\aris-integration-sdk\common\platform-dotnet\"
+        printfn "Using default folder: %s" defaultFolder
+        Environment.CurrentDirectory <- defaultFolder
+
+    | Ok folder ->
+        printfn "Using provided folder: %s" folder
+        Environment.CurrentDirectory <- folder
+    | Error msg ->  eprintfn "ERROR: %s" msg
 
     printfn "cwd: %s" (Environment.CurrentDirectory)
 
