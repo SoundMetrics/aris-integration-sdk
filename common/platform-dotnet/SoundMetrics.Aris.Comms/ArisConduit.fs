@@ -22,7 +22,7 @@ open ArisConduitDetails
 
 
 type RequestedSettings =
-    | SettingsApplied of versioned : AcousticSettingsVersioned * constrained : bool
+    | SettingsApplied of versioned : AcousticSettings * constrained : bool
     | SettingsDeclined of string
 
 
@@ -127,7 +127,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                 lastRequestedAcoustingSettings := versionedSettings
                 queueCmd (makeAcousticSettingsCmd versionedSettings)
                 logSentAcousticSettings versionedSettings
-                SettingsApplied (versionedSettings, constrained))
+                SettingsApplied (versionedSettings.Settings, constrained))
 
     do
         // Start the listener only after fully initialized--because it modifies this instance.

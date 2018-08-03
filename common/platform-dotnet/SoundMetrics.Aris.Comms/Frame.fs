@@ -81,7 +81,7 @@ type internal AcousticSettingsFromFrame = {
 }
 
 [<Extension>]
-type ArisFrameExtensions =
+type internal ArisFrameExtensions =
 
     [<Extension>]
     static member internal GetAcousticSettings (f : Frame) =

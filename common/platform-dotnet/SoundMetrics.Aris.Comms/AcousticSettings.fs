@@ -71,7 +71,7 @@ with
 
 /// Represents a versioned AcoustincSettings; a cookie is used to uniquely identify
 /// a specific AcousticSettings so the protocols can refer to settings commands.
-type AcousticSettingsVersioned = {
+type internal AcousticSettingsVersioned = {
     Cookie : AcousticSettingsCookie
     Settings: AcousticSettings
 }
@@ -84,7 +84,7 @@ with
     }
 
 /// Used to track the latest acoustic settings applied.
-type AcousticSettingsApplied =
+type internal AcousticSettingsApplied =
     | Uninitialized
     | Applied of AcousticSettingsVersioned
     | Constrained of AcousticSettingsVersioned
