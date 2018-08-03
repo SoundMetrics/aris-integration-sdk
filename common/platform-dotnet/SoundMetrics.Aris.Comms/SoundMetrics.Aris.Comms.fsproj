@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <Compile Include="AssemblyAttributes.fs" />
+    <Compile Include="AsyncTaskTracker.fs" />
     <Compile Include="LanguageUtils.Internal.fs" />
     <Compile Include="LanguageUtils.fs" />
     <Compile Include="UnitOfMeasure.fs" />
