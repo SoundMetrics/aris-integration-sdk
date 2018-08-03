@@ -196,7 +196,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             
             cxnStateSubject.OnNext(cxnState)
 
-        member s.OnInitializeConnection frameSinkAddress =
+        member __.OnInitializeConnection frameSinkAddress =
             Log.Information("ArisConduit[{target}]: initializing connection", targetSonar)
             let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
             Log.Information("Setting sonar clock to {dateTime}", setTimeCmd.DateTime.DateTime)
@@ -205,7 +205,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             queueCmd (makeFramestreamReceiverCmd sink) |> ignore
 
             let settings =
-                let requested = s.RequestedAcousticSettings
+                let requested = !lastRequestedAcoustingSettings
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings
                     then Log.Information("sending existing settings: {setings}", requested.Settings.ToString())
@@ -253,14 +253,9 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             return reachedState
         })
 
-    member __.Metrics = makeMetrics instantaneousFrameRate.Value frameStreamListener.Metrics
+    member __.GetMetrics () = makeMetrics instantaneousFrameRate.Value frameStreamListener.Metrics
 
     // Settings
-
-    /// The most-recently requested settings; may not match currently applied settings.
-    member __.RequestedAcousticSettings = lastRequestedAcoustingSettings.Value
-
-    member __.RequestedAcousticSettingsResult = requestedAcousticSettingsResult.Value
 
     /// Send salinity to the sonar; it may take a moment to appear in the frame header.
     member __.SetSalinity (salinity : Salinity) =
@@ -269,12 +264,6 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                                         queueCmd (makeSalinityCmd salinity) |> ignore
                                     else
                                         setSalinity <- fun _ -> ()
-
-    /// The current acoustic settings as applied by the sonar.
-    member __.CurrentAcousticSettings = currentAcousticSettings.Value
-
-    /// Stream of attempted acoustic settings returned from the sonar, applied, constrained, or invalid.
-    //member s.AttemptedAcousticSettings = attemptedAcousticSettingsSubject :> ISubject<AcousticSettingsApplied>
 
     /// Requests the supplied settings; returns a copy with the cookie attached to the request.
     member __.RequestAcousticSettings settings : RequestedSettings = requestAcousticSettings settings
@@ -287,7 +276,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
 
     // Frames
 
-    /// Stream of frames from the sonar.
+    /// Observerable stream of frames from the ARIS.
     member __.Frames = earlyFrameSubject :> IObservable<ReadyFrame>
 
     // Recording
