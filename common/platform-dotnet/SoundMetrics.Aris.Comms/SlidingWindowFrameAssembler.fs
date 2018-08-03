@@ -334,7 +334,7 @@ type internal SlidingWindowFrameAssembler (sendAck: SendAck,
 
     /// Flushes the current frame and resets to expect any frame index next.
     member __.Flush () = flush true
-    member __.Metrics = !metrics
+    member __.Metrics = lock metricsGuard (fun () -> !metrics)
     member __.ProcessPacket packetData = workQueue.Post(Packet packetData)
     member __.DrainAsync () =
         let tcs = TaskCompletionSource<unit>()
