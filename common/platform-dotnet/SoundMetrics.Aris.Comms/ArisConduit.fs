@@ -18,7 +18,7 @@ open SonarConnectionMachineState
 
 open ArisCommands
 open FrameProcessing
-open SonarConduitDetails
+open ArisConduitDetails
 
 
 type RequestedSettings =
@@ -104,18 +104,18 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
     let requestAcousticSettings (settings: AcousticSettings): RequestedSettings =
 
         Log.Information(
-            "SonarConduit({target}): requesting acoustic settings {settings}",
+            "ArisConduit({target}): requesting acoustic settings {settings}",
             targetSonar, settings.ToShortString())
 
         match SettingsHelpers.validateSettings settings with
-        | ValidationError msg -> Log.Error("SonarConduit({target}): invalid settings: {msg}", targetSonar, msg)
+        | ValidationError msg -> Log.Error("ArisConduit({target}): invalid settings: {msg}", targetSonar, msg)
                                  SettingsDeclined ("Validation error: " + msg)
         | Valid settings ->
             lock acousticSettingsRequestGuard (fun () ->
                 let antiAliasing = 0<Us> // REVIEW
 
                 // We need to know the system type in order to constrain settings, so until then we
-                // don't constrain. System type is gleaned in SonarConduit.buildFrameStreamSubscription.
+                // don't constrain. System type is gleaned in ArisConduit.buildFrameStreamSubscription.
                 let constrainedSettings, constrained =
                     match !systemType with
                     | Some systemType -> AcousticMath.constrainAcousticSettings systemType settings antiAliasing
@@ -137,7 +137,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                                       (fun beacon ->
                                         self.SerialNumber <- Nullable<SerialNumber>(beacon.SerialNumber))
 
-        logNewSonarConduit targetSonar initialAcousticSettings
+        logNewArisConduit targetSonar initialAcousticSettings
 
     /// Find the sonar by its serial number.
     new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) =
@@ -183,13 +183,13 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                         cxnEvQueue.Complete()
                         cxnEvQueue.Completion.Wait()
                         cxnMgrDone.Wait())
-            logCloseSonarConduit(targetSonar)
+            logCloseArisConduit(targetSonar)
 
     member s.Dispose() = (s :> IDisposable).Dispose()
 
     interface ISonarConnectionCallbacks with
         member __.OnCxnStateChanged cxnState =
-            Log.Information("SonarConduit({target}): connection state changed to {state}", targetSonar, cxnState)
+            Log.Information("ArisConduit({target}): connection state changed to {state}", targetSonar, cxnState)
             match cxnState with
             | ConnectionState.Connected _ -> ()
             | _ -> frameStreamListener.Flush() // Resets frame index tracker
@@ -197,7 +197,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             cxnStateSubject.OnNext(cxnState)
 
         member s.OnInitializeConnection frameSinkAddress =
-            Log.Information("SonarConduit[{target}]: initializing connection", targetSonar)
+            Log.Information("ArisConduit[{target}]: initializing connection", targetSonar)
             let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
             Log.Information("Setting sonar clock to {dateTime}", setTimeCmd.DateTime.DateTime)
             queueCmd setTimeCmd |> ignore
@@ -245,7 +245,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                 match WaitHandle.WaitAny(waitHandles, timeout) with
                 | WaitHandle.WaitTimeout -> ()
                 | idx when waitHandles.[idx] = disposingHandle ->
-                    raise (ObjectDisposedException "SonarConduit was disposed while waiting for a state change")
+                    raise (ObjectDisposedException "ArisConduit was disposed while waiting for a state change")
                 | _ -> ()
             finally
                 sub.Dispose()

@@ -71,22 +71,22 @@ module internal ArisConduitHelpers =
             | ex -> Task.FromResult (Unknown (sprintf "Error: %s" ex.Message))
 
 
-module internal SonarConduitDetails =
+module internal ArisConduitDetails =
     open System.Diagnostics
     open System.Net.NetworkInformation
 
-    let logNewSonarConduit (targetSonar : string) (initialAcousticSettings : AcousticSettings) =
-        Log.Information("New sonar conduit {targetSonar}; initial={initialAcousticSettings}",
+    let logNewArisConduit (targetSonar : string) (initialAcousticSettings : AcousticSettings) =
+        Log.Information("New ARIS conduit {targetSonar}; initial={initialAcousticSettings}",
             targetSonar, initialAcousticSettings)
 
-    let logCloseSonarConduit (targetSonar : string) =
-        Log.Information("Close sonar conduit {targetSonar}", targetSonar)
+    let logCloseArisConduit (targetSonar : string) =
+        Log.Information("Close ARIS conduit {targetSonar}", targetSonar)
 
     
     let logSentAcousticSettings (settings : AcousticSettingsVersioned) =
         Log.Information("Sent acoustic settings: {settings}", settings)
 
-    let private _loaded =   Log.logLoad "SonarConduit"
+    let private _loaded =   Log.logLoad "ArisConduit"
 
                             let bits32 = "32-bit"
                             let bits64 = "64-bit"
