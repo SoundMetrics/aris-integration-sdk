@@ -1,3 +1,4 @@
+@ECHO OFF
 REM build-vc-programs.cmd
 
 REM This script does the following:

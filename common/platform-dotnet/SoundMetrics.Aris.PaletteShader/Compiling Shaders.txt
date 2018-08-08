@@ -1,0 +1,20 @@
+﻿How to Compile the Shader
+=========================
+
+The shader file RenderShader.ps is produced by the HLSL compiler. This file need to
+be regenerated every time the shader code in RenderShader.fx is modified.
+
+To do so, perform the following steps:
+
+1) Verify that you have the latest DirectX SDK installed. It can be installed from
+   http://msdn.microsoft.com/directx
+   
+2) Add the DirectX bin directory to the PATH. Usually this path is the following:
+   "C:\Program Files\Microsoft DirectX SDK (August 2009)\Utilities\bin\x86"
+   
+3) Go to the directory where RenderShader.fx is located.
+
+4) Run the shader compiler with the following command line:
+   "fxc /T ps_2_0 /E main /FoRenderShader.ps RenderShader.fx"
+
+5) Verify that the compiler didn't output any errors.

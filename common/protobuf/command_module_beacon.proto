@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package aris;
+
+// This is the beacon emitted by Command Modules.
+// Note that parts of the beacon may be defined but not implemented.
+
+message CommandModuleBeacon {
+  repeated uint32 sonar_serial_number = 1;
+  string max_cur = 2;
+  string max_volt = 3;
+  string max_power = 4;
+  string breaker_flt = 5;
+  string over_temp = 6;
+  string low_volt = 7;
+  string min_cur = 8;
+  string no_aris = 9;
+  string aris_boot = 10;
+  string connect_pc = 11;
+  string connect_aris = 12;
+  string powerdown_temp = 13;
+  float cpu_temp = 14;
+  float aris_voltage = 15;
+  float aris_current = 16;
+  float aris_power = 17;
+  uint32 revision = 18;
+}

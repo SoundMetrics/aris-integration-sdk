@@ -7,3 +7,6 @@
 [submodule "submodules/vcpkg"]
 	path = submodules/vcpkg
 	url = https://github.com/Microsoft/vcpkg
+[submodule "submodules/build-tools"]
+	path = submodules/build-tools
+	url = https://github.com/SoundMetrics/build-tools.git

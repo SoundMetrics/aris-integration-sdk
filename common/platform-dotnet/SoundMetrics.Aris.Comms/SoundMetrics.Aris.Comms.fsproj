@@ -1,0 +1,104 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.0.9-alpha</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Company>Sound Metrics Corporation</Company>
+    <Authors>Sound Metrics Corporation</Authors>
+    <Product>ARIS 2 Communications (managed)</Product>
+    <Description>Provides a high-level communications implementation for ARIS 2.</Description>
+    <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
+    <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <FileVersion>1.0.9.0</FileVersion>
+    <AssemblyVersion>1.0.9.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AssemblyAttributes.fs" />
+    <Compile Include="AsyncTaskTracker.fs" />
+    <Compile Include="LanguageUtils.Internal.fs" />
+    <Compile Include="LanguageUtils.fs" />
+    <Compile Include="UnitOfMeasure.fs" />
+    <Compile Include="TypeAliases.fs" />
+    <Compile Include="PerformanceTiming.fs" />
+    <Compile Include="ConduitPerfSink.fs" />
+    <Compile Include="NetworkSupport.fs" />
+    <Compile Include="UdpListener.fs" />
+    <Compile Include="Beacons.fs" />
+    <Compile Include="AcousticSettings.fs" />
+    <Compile Include="AcousticMath.Internal.fs" />
+    <Compile Include="AcousticMath.fs" />
+    <Compile Include="Rotator.fs" />
+    <Compile Include="FrameAccumulator.fs" />
+    <Compile Include="Frame.fs" />
+    <Compile Include="ProtocolMetrics.fs" />
+    <Compile Include="NetworkConstants.fs" />
+    <Compile Include="SlidingWindowFrameAssembler.fs" />
+    <Compile Include="FrameStreamReliabilityPolicy.fs" />
+    <Compile Include="FrameStreamListener.fs" />
+    <Compile Include="CommandModuleBeacon.fs" />
+    <Compile Include="Sonar.fs" />
+    <Compile Include="FindSonar.fs" />
+    <Compile Include="FocusMapTypes.fs" />
+    <Compile Include="FocusMapData.fs" />
+    <Compile Include="FocusMap.Internal.fs" />
+    <Compile Include="FocusMap.fs" />
+    <Compile Include="ArisCommands.fs" />
+    <Compile Include="SonarConnectionMetrics.fs" />
+    <Compile Include="SonarConnectionDetails.fs" />
+    <Compile Include="RecordingRequest.fs" />
+    <Compile Include="ProcessingCommands.fs" />
+    <Compile Include="ReadyFrame.fs" />
+    <Compile Include="FrameProcessing.fs" />
+    <Compile Include="FileRecording.fs" />
+    <Compile Include="Recording.fs" />
+    <Compile Include="GraphBinding.fs" />
+    <Compile Include="Graphs.fs" />
+    <Compile Include="FrameIndexMapper.fs" />
+    <Compile Include="ConnectionState.fs" />
+    <Compile Include="SonarConnectionMachineState.fs" />
+    <Compile Include="FramedMessageReader.fs" />
+    <Compile Include="DeviceConnection.fs" />
+    <Compile Include="ConduitState.fs" />
+    <Compile Include="ArisConduit.Internal.fs" />
+    <Compile Include="ArisConduit.fs" />
+  </ItemGroup>
+
+  <ItemGroup />
+
+  <ItemGroup>
+    <PackageReference Include="fracas" Version="1.0.0-beta" />
+    <PackageReference Include="Serilog" Version="2.7.1" />
+    <PackageReference Include="SoundMetrics.Aris.Headers" Version="1.0.1-beta" />
+    <PackageReference Include="System.Reactive" Version="4.0.0" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
+    <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
+    <ProjectReference Include="..\SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj" />
+    <ProjectReference Include="..\SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+</Project>

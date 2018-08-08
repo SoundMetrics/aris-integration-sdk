@@ -1,6 +1,7 @@
 #include "Connection.h"
 #include "AcousticSettings.h"
 #include "CommandBuilder.h"
+#include <iostream>
 
 using CommandBuilder = Aris::Network::CommandBuilder;
 

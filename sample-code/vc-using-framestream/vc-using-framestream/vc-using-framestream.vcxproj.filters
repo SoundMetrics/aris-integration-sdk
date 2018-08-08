@@ -130,8 +130,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="generate-protobuf-files.cmd" />
     <None Include="README.md" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

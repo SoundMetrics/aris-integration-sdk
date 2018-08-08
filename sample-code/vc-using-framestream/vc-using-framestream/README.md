@@ -24,6 +24,8 @@ This solution may be built with Visual Studio or msbuild. The project uses the s
 
 This project also makes use of the Boost libraries via Nuget packages.
 
+> **Note:** Visual Studio 15.x brought warnings while building the vcpkg version of google/protobuf. `_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS` is defined for the preprocessor in order to silence them.
+
 ## Specific examples
 
 Pointers to some interesting bits of the sample code:

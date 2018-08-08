@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SoundMetrics.Aris.Comms.Integration.Test": {
+      "commandName": "Project",
+      "commandLineArgs": "--all -sn 24"
+    }
+  }
+}
