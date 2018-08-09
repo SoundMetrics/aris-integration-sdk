@@ -1,4 +1,4 @@
-@ECHO OFF
+REM @ECHO OFF
 REM build-vc-programs.cmd
 
 REM This script does the following:
@@ -26,9 +26,10 @@ IF "%VisualStudioVersion%" == "" GOTO VSCmdPrompt
 
 pushd submodules\vcpkg
 call .\bootstrap-vcpkg.bat
-ECHO Build completed.
+ECHO vcpkg build completed.
 
 REM per https://github.com/Microsoft/vcpkg/issues/645
+if not exist downloads mkdir downloads
 echo "." > downloads\AlwaysAllowEverything
 dir downloads\Always*
 
@@ -43,8 +44,10 @@ REM Build the programs
 
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore tools\arislog\arislog.sln
 
-msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
+pushd tools\arislog\arislog
+msbuild ..\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
+popd
 
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
@@ -58,11 +61,9 @@ IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
-ECHO Build completed.
 GOTO End
 
 :VSCmdPrompt
-ECHO This script must be run from within a Visual Studio Developer Command prompt.
 EXIT /B 1
 
 :End
