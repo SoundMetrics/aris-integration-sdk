@@ -26,13 +26,16 @@ IF "%VisualStudioVersion%" == "" GOTO VSCmdPrompt
 
 pushd submodules\vcpkg
 call .\bootstrap-vcpkg.bat
-ECHO Build completed.
+ECHO vcpkg build completed.
 
 REM per https://github.com/Microsoft/vcpkg/issues/645
 echo "." > downloads\AlwaysAllowEverything
+echo Show downloads\Always
 dir downloads\Always*
 
+ECHO ** A **
 vcpkg install protobuf:x86-windows-static
+ECHO ** B **
 vcpkg install protobuf:x64-windows-static
 ECHO Installs completed.
 
@@ -41,20 +44,26 @@ popd
 REM ---------------------------------------------------------------------------
 REM Build the programs
 
+ECHO ** C **
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore tools\arislog\arislog.sln
 
+ECHO ** D **
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
+ECHO ** E **
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
+ECHO ** F **
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore sample-code\vc-using-framestream\vc-using-framestream.sln
 
+ECHO ** G **
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
+ECHO ** H **
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
