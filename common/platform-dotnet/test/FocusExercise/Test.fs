@@ -101,7 +101,7 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
             Log.Error("Timed out waiting for sonar connection")
             exit 2
 
-        let showUnits range () = // add unit for use as partial application below
+        let showUnits range () = // add unit argument for use as partial application below
             match getAFrame conduit (TimeSpan.FromSeconds(2.0)) with
             | Some readyFrame ->
                 let frame = readyFrame.Frame
