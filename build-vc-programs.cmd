@@ -31,6 +31,8 @@ ECHO vcpkg build completed.
 REM per https://github.com/Microsoft/vcpkg/issues/645
 echo "." > downloads\AlwaysAllowEverything
 echo Show downloads\Always
+cd
+dir
 dir downloads\Always*
 
 ECHO ** A **
