@@ -31,14 +31,9 @@ ECHO vcpkg build completed.
 REM per https://github.com/Microsoft/vcpkg/issues/645
 if not exist downloads mkdir downloads
 echo "." > downloads\AlwaysAllowEverything
-echo Show downloads\Always
-cd
-dir
 dir downloads\Always*
 
-ECHO ** A **
 vcpkg install protobuf:x86-windows-static
-ECHO ** B **
 vcpkg install protobuf:x64-windows-static
 ECHO Installs completed.
 
@@ -47,38 +42,28 @@ popd
 REM ---------------------------------------------------------------------------
 REM Build the programs
 
-ECHO ** C **
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore tools\arislog\arislog.sln
 
-ECHO ** D **
 pushd tools\arislog\arislog
-cd
-dir
 msbuild ..\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 popd
 
-ECHO ** E **
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
-ECHO ** F **
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore sample-code\vc-using-framestream\vc-using-framestream.sln
 
-ECHO ** G **
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
-ECHO ** H **
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
-ECHO Build completed.
 GOTO End
 
 :VSCmdPrompt
-ECHO This script must be run from within a Visual Studio Developer Command prompt.
 EXIT /B 1
 
 :End
