@@ -7,8 +7,10 @@ open System.Net
 
 // Very common types belong to the SoundMetrics.Common namespace.
 
+/// Defines the serial number for an ARIS sonar. These are numeric only.
 type ArisSerialNumber = uint32
 
+/// Defines the system types for ARIS: 1200, 1800, and 3000.
 type ArisSystemType = Aris1800 = 0 | Aris3000 = 1 | Aris1200 = 2
 
 
@@ -54,6 +56,11 @@ module ArisBeaconDetails =
 
     type ArisModel = Explorer | Defender of DefenderState | Voyager
 
+    /// A beacon is sent to indicate the presence of an ARIS. ARIS Explorer and
+    /// ARIS Voyager send one beacon with the Model field indicating the type.
+    /// An ARIS Defender sends two beacons: one of model Explorer, and one of model
+    /// Defender. In a Defender's case, the beacon of model Explorer is always busy--
+    /// you cannot control the Defender directly.
     type ArisBeacon = {
         Model :             ArisModel
         SystemType :        ArisSystemType

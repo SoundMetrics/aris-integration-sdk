@@ -168,6 +168,8 @@ module internal BeaconListener =
         cleanCollection collection isExpired
 
 
+// ----------------------------------------------------------------------------
+
 open System.Collections.ObjectModel
 open System.Net
 open System.Reactive
@@ -179,6 +181,9 @@ open BeaconListener
 open Serilog
 open Udp
 
+/// Provides access to the beacons of various Sound Metrics devices.
+/// See <see cref="CreateForArisExplorerAndVoyager"/> and
+/// <see cref="CreateForArisDefender"/> for simple construction.
 [<Sealed>]
 type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, bool>) as self =
     // ctor(Func<_,_>) is the primary ctor as it helps on the C# side.
@@ -278,9 +283,16 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
     member bl.Dispose() = (bl :> IDisposable).Dispose()
     override __.Finalize() = dispose false
 
+    /// Access by subscription of all Sound Metrics devices.
+    /// <seealso cref="NetworkDevice"/>
     member __.AllBeacons = beaconSubject :> IObservable<NetworkDevice>
+
+    /// An observable collection of ARIS Explorer and ARIS Voyager beacons.
     member __.ArisExplorerBeacons = arisExplorerCollection
+
+    /// An observable collection of ARIS Defender beacons.
     member __.ArisDefenderBeacons = arisDefenderCollection
+
     member internal __.ArisCommandModuleBeacons = arisCommandModuleCollection
 
     /// Factory function to create a beacon listener that sees only ARIS Explorer
