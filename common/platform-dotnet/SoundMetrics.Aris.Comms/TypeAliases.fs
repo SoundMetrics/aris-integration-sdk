@@ -9,5 +9,5 @@ namespace SoundMetrics.Aris.Comms
 type AcousticSettingsCookie = uint32
 type FrameIndex = int
 type Port = int
-type SerialNumber = int
+type SerialNumber = uint32
 type FU = uint32

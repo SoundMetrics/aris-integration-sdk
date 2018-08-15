@@ -93,38 +93,43 @@ type internal AcousticSettingsApplied =
 open SonarConfig
 
 module internal SettingsDetails =
+    open SoundMetrics.Common
+
     let defaultSettingsMap =
-        [ SystemType.Aris1200, { FrameRate =        1.0f</s>
+        [ ArisSystemType.Aris1200,
+                               { FrameRate =        1.0f</s>
                                  SampleCount =      1000u
                                  SampleStartDelay = 4000<Us>
                                  CyclePeriod =      32400<Us>
                                  SamplePeriod =     28<Us>
                                  PulseWidth =       24<Us>
-                                 PingMode = getDefaultPingModeForSystemType SystemType.Aris1200
+                                 PingMode = getDefaultPingModeForSystemType ArisSystemType.Aris1200
                                  EnableTransmit =   true
                                  Frequency =        Frequency.High
                                  Enable150Volts =   true
                                  ReceiverGain =     20.0f }
 
-          SystemType.Aris1800, { FrameRate =        1.0f</s>
+          ArisSystemType.Aris1800,
+                               { FrameRate =        1.0f</s>
                                  SampleCount =      1000u
                                  SampleStartDelay = 2000<Us>
                                  CyclePeriod =      19400<Us>
                                  SamplePeriod =     17<Us>
                                  PulseWidth =       14<Us>
-                                 PingMode = getDefaultPingModeForSystemType SystemType.Aris1800
+                                 PingMode = getDefaultPingModeForSystemType ArisSystemType.Aris1800
                                  EnableTransmit =   true
                                  Frequency =        Frequency.High
                                  Enable150Volts =   true
                                  ReceiverGain =     18.0f }
 
-          SystemType.Aris3000, { FrameRate =        1.0f</s>
+          ArisSystemType.Aris3000,
+                               { FrameRate =        1.0f</s>
                                  SampleCount =      1000u
                                  SampleStartDelay = 1300<Us>
                                  CyclePeriod =      6700<Us>
                                  SamplePeriod =     5<Us>
                                  PulseWidth =       5<Us>
-                                 PingMode = getDefaultPingModeForSystemType SystemType.Aris3000
+                                 PingMode = getDefaultPingModeForSystemType ArisSystemType.Aris3000
                                  EnableTransmit =   true
                                  Frequency =        Frequency.High
                                  Enable150Volts =   true

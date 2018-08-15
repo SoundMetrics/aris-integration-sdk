@@ -3,6 +3,7 @@ namespace WpfTestBench
 open SoundMetrics.Aris.Comms
 open System
 open System.Threading
+open SoundMetrics.Common
 
 [<Sealed>]
 type Model (syncContext : SynchronizationContext) =
@@ -10,12 +11,7 @@ type Model (syncContext : SynchronizationContext) =
     let mutable disposed = false
 
     let beaconListener =
-            BeaconListeners.createSonarBeaconListener
-                (TimeSpan.FromSeconds(30.0))
-                syncContext
-                Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
-                None // callbacks
-
+            BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(30.0))
     let dispose () =    if not disposed then
                             beaconListener.Dispose()
                             disposed <- true
@@ -26,4 +22,4 @@ type Model (syncContext : SynchronizationContext) =
 
     member me.Dispose() = (me :> IDisposable).Dispose()
 
-    member __.Beacons = beaconListener.Beacons
+    member __.Beacons = beaconListener.AllBeacons

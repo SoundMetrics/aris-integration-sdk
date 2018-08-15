@@ -4,25 +4,23 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
-open SoundMetrics.Aris.Config
 open SoundMetrics.Aris.Comms
+open SoundMetrics.Common
 open System
 open System.Net
-open System.Reactive.Linq
-open System.Reactive.Subjects
 open System.Threading.Tasks
 
 module internal ArisConduitHelpers =
 
     type ParsedTargetId =
-    | SN of sn: SerialNumber
+    | SN of sn: ArisSerialNumber
     | IP of ip: IPAddress
     | Unknown of msg: string
 
     /// Contains the context required to correctly set focus. Each of the fields affects focus.
     /// You should generally get this context from a frame received from the sonar.
     type FocusContext = {
-        SystemType: SystemType
+        SystemType: ArisSystemType
         Temperature: float<degC>
         Depth: float<m>
         Salinity: Salinity
@@ -53,7 +51,7 @@ module internal ArisConduitHelpers =
         try
             let parsed, sn = UInt32.TryParse(s)
             if parsed then
-                Task.FromResult (SN (int sn))
+                Task.FromResult (SN sn)
             else
                 let parsed, ip = IPAddress.TryParse(s)
                 if parsed then
@@ -72,8 +70,8 @@ module internal ArisConduitHelpers =
 
 
 module internal ArisConduitDetails =
-    open System.Diagnostics
     open System.Net.NetworkInformation
+    open SoundMetrics.Common
 
     let logNewArisConduit (targetSonar : string) (initialAcousticSettings : AcousticSettings) =
         Log.Information("New ARIS conduit {targetSonar}; initial={initialAcousticSettings}",
@@ -114,7 +112,7 @@ module internal ArisConduitDetails =
                             with
                                 | ex -> Log.Warning("Could not enumerate network interfaces: {exMsg}", ex.Message)
 
-    let listenForBeacon (available: AvailableSonars) matchBeacon (beaconTarget : string) onFound =
+    let listenForBeacon (available: BeaconListener) matchBeacon (beaconTarget : string) onFound =
 
         let disposed = ref false
         let guardObject = Object()
@@ -129,10 +127,14 @@ module internal ArisConduitDetails =
 
         Log.Information("listenForBeacon: watching for beacon for '{target}'", beaconTarget)
         listener :=
-            Some (available.Beacons.Subscribe(fun beacon ->
-                        if matchBeacon beacon then
-                            Log.Information("listenForBeacon: matched beacon for sonar {sn} at {ipAddr}", beacon.SerialNumber, beacon.SrcIpAddr)
-                            onFound beacon
-                            cleanUp()))
+            Some (available.AllBeacons.Subscribe(fun device ->
+                        match device with
+                        | Aris beacon ->
+                            if matchBeacon beacon then
+                                Log.Information("listenForBeacon: matched beacon for sonar {sn} at {ipAddr}", beacon.SerialNumber, beacon.IPAddress)
+                                onFound beacon
+                                cleanUp()
+                        | _ -> () )
+            )
         { new IDisposable with
             member __.Dispose() = cleanUp() }

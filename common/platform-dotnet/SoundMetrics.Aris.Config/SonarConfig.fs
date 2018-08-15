@@ -31,13 +31,6 @@ with
 
 type Frequency = Low = 0 | High = 1
 
-type SystemType =
-    | Aris1800 = 0
-    | Aris3000 = 1
-    | Aris1200 = 2
-    | DidsonStd = 3
-    | DidsonLR = 4
-
 module SonarConfig =
 
     type Range<'t> = { Name: string; Min: 't; Max: 't }
@@ -71,6 +64,7 @@ module SonarConfig =
         let inline constrainRangeMax<'T when 'T : comparison> range (max : 'T) = subrangeOf range range.Min max
 
     open RangeImpl
+    open SoundMetrics.Common
 
     // Min/max values per ARIS Engineering Test Command List
 
@@ -90,7 +84,7 @@ module SonarConfig =
     let CyclePeriodMargin = 360<Us>
 
     type SystemTypeRanges = {
-        SystemType:             SystemType
+        SystemType:             ArisSystemType
         PulseWidthRange:        Range<int<Us>>
         SampleStartDelayRange:  Range<int<Us>>
         SamplePeriodRange:      Range<int<Us>>
@@ -100,7 +94,7 @@ module SonarConfig =
     }
 
     let systemTypeRangeMap =
-        [ { SystemType = SystemType.Aris1800
+        [ { SystemType =            ArisSystemType.Aris1800
             PulseWidthRange =       constrainRangeMax PulseWidthRange          40<Us>
             SampleStartDelayRange = constrainRangeMax SampleStartDelayRange 36000<Us>
             SamplePeriodRange =     constrainRangeMax SamplePeriodRange        32<Us>
@@ -108,7 +102,7 @@ module SonarConfig =
             WindowStartRange =      constrainRangeMax WindowStartRange       25.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange         50.0<m>
           }
-          { SystemType = SystemType.Aris3000
+          { SystemType =            ArisSystemType.Aris3000
             PulseWidthRange =       constrainRangeMax PulseWidthRange          24<Us>
             SampleStartDelayRange = constrainRangeMax SampleStartDelayRange 18000<Us>
             SamplePeriodRange =     constrainRangeMax SamplePeriodRange        26<Us>
@@ -116,7 +110,7 @@ module SonarConfig =
             WindowStartRange =      constrainRangeMax WindowStartRange       12.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange         20.0<m>
           }
-          { SystemType = SystemType.Aris1200
+          { SystemType =            ArisSystemType.Aris1200
             PulseWidthRange =       constrainRangeMax PulseWidthRange          80<Us>
             SampleStartDelayRange = constrainRangeMax SampleStartDelayRange 60000<Us>
             SamplePeriodRange =     constrainRangeMax SamplePeriodRange        40<Us>
@@ -150,14 +144,12 @@ module SonarConfig =
           |> Map.ofList
 
     type SystemTypePingModeInfo =
-        { systemType: SystemType; defaultPingMode: PingMode; validPingModes: PingMode list }
+        { systemType: ArisSystemType; defaultPingMode: PingMode; validPingModes: PingMode list }
 
     let systemTypeToPingModeMap = 
-        [ { systemType = SystemType.Aris1200;  defaultPingMode = PingMode1; validPingModes = [ PingMode1 ] }
-          { systemType = SystemType.Aris1800;  defaultPingMode = PingMode3; validPingModes = [ PingMode1; PingMode3 ] }
-          { systemType = SystemType.Aris3000;  defaultPingMode = PingMode9; validPingModes = [ PingMode6; PingMode9 ] }
-          // { systemType = SystemType.DidsonStd; defaultPingMode = 1; validPingModes = [ 1; 2 ] }
-          // { systemType = SystemType.DidsonLR;  defaultPingMode = 1; validPingModes = [ 1; 2 ] }
+        [ { systemType = ArisSystemType.Aris1200;  defaultPingMode = PingMode1; validPingModes = [ PingMode1 ] }
+          { systemType = ArisSystemType.Aris1800;  defaultPingMode = PingMode3; validPingModes = [ PingMode1; PingMode3 ] }
+          { systemType = ArisSystemType.Aris3000;  defaultPingMode = PingMode9; validPingModes = [ PingMode6; PingMode9 ] }
           ]
           |> List.map (fun elem -> elem.systemType, elem)
           |> Map.ofList
