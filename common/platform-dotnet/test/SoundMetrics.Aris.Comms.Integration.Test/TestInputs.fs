@@ -1,7 +1,7 @@
 ﻿module TestInputs
 
-open SoundMetrics.Aris.Comms
+open SoundMetrics.Common
 
 type TestInputs = {
-    SerialNumber : SerialNumber option
+    SerialNumber : ArisSerialNumber option
 }

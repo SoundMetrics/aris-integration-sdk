@@ -4,13 +4,14 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal
+open SoundMetrics.Common
+open SoundMetrics.Common.ArisBeaconDetails
 open SoundMetrics.Scripting
 open System
 open System.Threading
 open System.Windows.Threading
 
 type FU = int
-type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
 
 
 //-----------------------------------------------------------------------------
@@ -22,7 +23,7 @@ type AvailableSonars = Beacons.BeaconSource<SonarBeacon, SerialNumber>
 // Framework (Desktop).
 //-----------------------------------------------------------------------------
 
-let getArisBeacon (availables : AvailableSonars) targetSN : SonarBeacon option =
+let getArisBeacon (availables : BeaconListener) targetSN : ArisBeacon option =
 
     let timeout = TimeSpan.FromSeconds(4.0)
 
@@ -31,7 +32,7 @@ let getArisBeacon (availables : AvailableSonars) targetSN : SonarBeacon option =
         let frame = DispatcherFrame()
         Async.Start (async {
             try
-                let! b = waitForExplorerBySerialNumberAsync availables timeout targetSN
+                let! b = availables.WaitForArisBySerialNumberAsync targetSN timeout
                 someBeacon <- b
             finally
                 frame.Continue <- false
@@ -44,6 +45,7 @@ let getArisBeacon (availables : AvailableSonars) targetSN : SonarBeacon option =
 //-----------------------------------------------------------------------------
 
 open SoundMetrics.Scripting.EventMatcher
+open SoundMetrics.Aris.Config
 
 
 let runTest eventSource (series : SetupAndMatch<SyslogMessage, unit> array) timeout =
@@ -78,18 +80,18 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
     SynchronizationContext.SetSynchronizationContext(DispatcherSynchronizationContext())
     assert (SynchronizationContext.Current <> null)
 
-    use availables = BeaconListeners.createDefaultSonarBeaconListener SynchronizationContext.Current
+    use availables = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(15.0))
 
-    let targetSN = 24
+    let targetSN = 24u
     let beacon = getArisBeacon availables targetSN
 
-    let runTest (beacon : SonarBeacon) =
+    let runTest (beacon : ArisBeacon) =
         Log.Information("Running test...")
         Log.Information("Traget sonar beacon={beacon}", beacon)
-        use conduit = new ArisConduit(
+        use conduit =
+            new ArisConduit(
                         AcousticSettings.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
-                        availables,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 
         // wait for connection

@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.Aris.Comms
+open SoundMetrics.Common
 open System
 
 module internal SonarConnectionDetails =
@@ -121,7 +122,7 @@ module internal SonarConnectionDetails =
                 let client = new TcpClient()
                 try
                     client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true)
-                    let ep = IPEndPoint(ipAddress, NetworkConstants.SonarTcpNOListenPort) // port 56888
+                    let ep = IPEndPoint(ipAddress, NetworkConstants.ArisSonarTcpNOListenPort) // port 56888
                     client.Connect(ep)
                     Some client
                 with

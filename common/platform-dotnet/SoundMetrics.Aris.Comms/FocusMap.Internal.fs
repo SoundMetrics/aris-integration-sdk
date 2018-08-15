@@ -5,7 +5,7 @@ namespace SoundMetrics.Aris.Comms.Internal
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Comms
-open SoundMetrics.Aris.Config
+open SoundMetrics.Common
 
 module internal FocusUnits =
     open FocusMapTypes
@@ -18,19 +18,19 @@ module internal FocusMapDetails =
     open FocusMapTypes
     open NumericHelpers
 
-    let getFocusMapTriplet (systemType : SystemType) telephotoLens =
+    let getFocusMapTriplet (systemType : ArisSystemType) telephotoLens =
 
         let focusMap =
             match telephotoLens, systemType with
             | true, _ -> focusMapTelephoto
-            | false, SystemType.Aris3000 -> focusMap3000
+            | false, ArisSystemType.Aris3000 -> focusMap3000
             | false, _ -> focusMap12001800
 
         Log.Verbose (sprintf "Selected focus map for %A/telephoto=%A" systemType telephotoLens)
 
         focusMap
 
-    let getFocusMap (systemType : SystemType) salinity telephotoLens =
+    let getFocusMap (systemType : ArisSystemType) salinity telephotoLens =
 
         let triplet = getFocusMapTriplet systemType telephotoLens
 
@@ -81,7 +81,7 @@ module internal FocusMapDetails =
         FocusMap : FocusMap
     }
 
-    let lookUpConstrainUnits (systemType : SystemType) (range : float32) (temp : float32) salinity telephotoLens =
+    let lookUpConstrainUnits (systemType : ArisSystemType) (range : float32) (temp : float32) salinity telephotoLens =
 
         let constrainedSalinity = constrainSalinity salinity
 
@@ -102,7 +102,7 @@ module internal FocusMapDetails =
         FocusMap : FocusMap
     }
 
-    let lookUpConstrainRange (systemType : SystemType) (focusUnits : FU) (temp : float32) salinity telephotoLens =
+    let lookUpConstrainRange (systemType : ArisSystemType) (focusUnits : FU) (temp : float32) salinity telephotoLens =
 
         let constrainedSalinity = constrainSalinity salinity
 
@@ -193,7 +193,7 @@ module internal FocusMapDetails =
     }
 
     // Internal only!
-    let mapFocusUnitsToRange (systemType : SystemType)
+    let mapFocusUnitsToRange (systemType : ArisSystemType)
                              (focusUnits : FU)
                              (temperatureC : float<degC>)
                              (salinity : Salinity)
@@ -207,7 +207,7 @@ module internal FocusMapDetails =
         range
 
     // Internal only!
-    let mapRangeToFocusUnits (systemType: SystemType)
+    let mapRangeToFocusUnits (systemType: ArisSystemType)
                              (range : float<m>)
                              (temperatureC : float<degC>)
                              (salinity : Salinity)

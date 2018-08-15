@@ -8,6 +8,8 @@ open Serilog
 open TestInputs
 open TestList
 
+open SoundMetrics.Common.ArisBeaconDetails
+
 type ProgramActionResult = Skipped | Performed
 type ProgramAction = ParseResults<ProgramArgs> -> ProgramActionResult
 
@@ -26,7 +28,7 @@ let runAllTests (args : ParseResults<ProgramArgs>) =
         Log.Information("Run all tests")
         let inputs = {
             SerialNumber = if args.Contains Serial_Number then
-                                Some (int (args.GetResult(Serial_Number)))
+                                Some (args.GetResult(Serial_Number))
                            else
                                 None
         }

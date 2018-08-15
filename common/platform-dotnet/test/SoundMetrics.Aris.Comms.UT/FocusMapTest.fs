@@ -4,7 +4,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal.FocusMapDetails
-open SoundMetrics.Aris.Config
+open SoundMetrics.Common
 open System
 
 [<TestClass>]
@@ -20,13 +20,13 @@ type FocusMapTest () =
         Assert.AreEqual(eigthColdFUs, triplet.FreshMap.FocusUnitsByTemp.[0].[7])
 
     [<TestMethod>]
-    member __.``getFocusMapTriplet telephoto``() = testMapPoints SystemType.Aris1800 true 2.0f 49us
+    member __.``getFocusMapTriplet telephoto``() = testMapPoints ArisSystemType.Aris1800 true 2.0f 49us
 
     [<TestMethod>]
-    member __.``getFocusMapTriplet 1800``() = testMapPoints SystemType.Aris1800 false 1.6f 614us
+    member __.``getFocusMapTriplet 1800``() = testMapPoints ArisSystemType.Aris1800 false 1.6f 614us
 
     [<TestMethod>]
-    member __.``getFocusMapTriplet 3000``() = testMapPoints SystemType.Aris3000 false 1.4f 413us
+    member __.``getFocusMapTriplet 3000``() = testMapPoints ArisSystemType.Aris3000 false 1.4f 413us
 
     [<TestMethod>]
     member __.``Sanity check for 1800 map``() =
@@ -35,7 +35,7 @@ type FocusMapTest () =
         let range = 1.0<m>
         let temp = 25.0<degC>
         let salinity = Salinity.Fresh
-        let systemType = SystemType.Aris1800
+        let systemType = ArisSystemType.Aris1800
         let isTelephoto = false
 
         let expected = 212us
@@ -70,7 +70,7 @@ type FocusMapTest () =
         for range, expected in testCases do
             let range' = 1.0<m> * range
             let actual = 
-                (mapRangeToFocusUnits SystemType.Aris1800 range' 24.0<degC> Salinity.Fresh false).FocusUnits
+                (mapRangeToFocusUnits ArisSystemType.Aris1800 range' 24.0<degC> Salinity.Fresh false).FocusUnits
             printfn "input=%f; expected=%u; actual=%u" range expected actual
 
             Assert.AreEqual(expected, actual)
@@ -82,10 +82,10 @@ type FocusMapTest () =
     member __.``Test slope of range to focus units``() =
 
         let systemTests = [|
-            SystemType.Aris1200, false
-            SystemType.Aris1800, false
-            SystemType.Aris1800, true
-            SystemType.Aris3000, false
+            ArisSystemType.Aris1200, false
+            ArisSystemType.Aris1800, false
+            ArisSystemType.Aris1800, true
+            ArisSystemType.Aris3000, false
         |]
 
         let salinities = [| Salinity.Fresh; Salinity.Brackish; Salinity.Seawater |];

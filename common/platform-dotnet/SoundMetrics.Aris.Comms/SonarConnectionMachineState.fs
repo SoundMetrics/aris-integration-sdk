@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open Serilog
 open SoundMetrics.Aris.Comms
+open SoundMetrics.Common
 open System
 open System.Diagnostics
 open System.Net
@@ -14,6 +15,7 @@ open System.Threading.Tasks.Dataflow
 
 /// Implementation of SonarConnection's state machine.
 module internal SonarConnectionMachineState =
+    open SoundMetrics.Common.ArisBeaconDetails
 
     let logConnectionStateChange (targetSonar : string) (state : string) =
         Log.Information("Connection state of '{targetSonar}' changed to '{state}'", targetSonar, state)
@@ -22,7 +24,7 @@ module internal SonarConnectionMachineState =
 
     /// Types of events that are queued on the connection; these affect connection state.
     type CxnEventType = | KeepAliveTick
-                        | Beacon of SonarBeacon
+                        | Beacon of ArisBeacon
                         | Command of Aris.Command
                         | LostConnection
                         | Quit
@@ -121,7 +123,7 @@ module internal SonarConnectionMachineState =
     let buildCmdLink (ip: IPAddress) =
         let client = new TcpClient()
         client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true)
-        let ep = IPEndPoint(ip, NetworkConstants.SonarTcpNOListenPort) // port 56888
+        let ep = IPEndPoint(ip, NetworkConstants.ArisSonarTcpNOListenPort) // port 56888
         client.Connect(ep)
         client
 
@@ -143,7 +145,7 @@ module internal SonarConnectionMachineState =
 
             | Beacon beacon ->
                 let connect () =
-                    let targetAddr = beacon.SrcIpAddr
+                    let targetAddr = beacon.IPAddress
                     try
                         let cmdLink = buildCmdLink targetAddr
                         let frameSinkAddr = (cmdLink.Client.LocalEndPoint :?> IPEndPoint).Address
@@ -158,14 +160,14 @@ module internal SonarConnectionMachineState =
                     
                 match state.machineState with
                 | SonarNotFound ->
-                    state.ChangeState (foundSonar (beacon.SrcIpAddr) state.machineState)
+                    state.ChangeState (foundSonar (beacon.IPAddress) state.machineState)
                     connect()
-                | Connected (_ip, cmdLink) -> assert ((cmdLink.Client.RemoteEndPoint :?> IPEndPoint).Address = beacon.SrcIpAddr)
+                | Connected (_ip, cmdLink) -> assert ((cmdLink.Client.RemoteEndPoint :?> IPEndPoint).Address = beacon.IPAddress)
                 | NotConnected ip
                 | ConnectionRefused ip ->
-                    if ip <> beacon.SrcIpAddr then
+                    if ip <> beacon.IPAddress then
                         state.ChangeState (lostSonar state.machineState)
-                        state.ChangeState (foundSonar beacon.SrcIpAddr state.machineState)
+                        state.ChangeState (foundSonar beacon.IPAddress state.machineState)
                     connect()
                 | Closed -> ()
 
@@ -222,11 +224,21 @@ module internal SonarConnectionMachineState =
     /// Wires up and subscribes to all the input events; returns a list of subscriptions
     /// that must be disposed on final disposal of the connection.
     let wireUpInputEvents (evQueue: ITargetBlock<CxnEvent>) (keepAliveTimer: IObservable<int64>)
-                          (available: AvailableSonars) (matchBeacon: SonarBeacon -> bool) =
+                          (available: BeaconListener) (matchBeacon: ArisBeacon -> bool) =
         let subscriptions = [
             keepAliveTimer.Subscribe(fun _ -> evQueue.Post(mkEventNoCallback KeepAliveTick) |> ignore)
-            available.Beacons
-                     .Where(fun beacon -> matchBeacon(beacon))
+            available.AllBeacons
+                     .Where(fun device ->
+                        match device with
+                        | Aris beacon -> matchBeacon(beacon)
+                        | _ -> false )
+                     .Select(fun device ->
+                        match device with
+                        | Aris beacon -> beacon
+                        | _ ->
+                            // Can't fail, see .Where above.
+                            failwithf "Unexpected device type: %s" (device.GetType().Name)
+                     )
                      .Subscribe(fun b -> evQueue.Post(mkEventNoCallback (Beacon b)) |> ignore)
         ]
         subscriptions

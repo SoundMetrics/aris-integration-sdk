@@ -3,6 +3,7 @@
 open SoundMetrics.Aris.Comms
 
 open SoundMetrics.Aris.Comms.Internal
+open SoundMetrics.Common
 open FrameProcessing
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
@@ -17,20 +18,16 @@ let recordingStats (inputs : TestInputs) =
              | None -> failwith "No serial number was provided"
 
     // Console doesn't have a sync context by default, we need one for the beacon listener.
-    let syncContext = Threading.SynchronizationContext()
-    use availability =
-            BeaconListeners.createSonarBeaconListener
-                (TimeSpan.FromSeconds(30.0))
-                syncContext
-                Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
-                None // callbacks
+    Threading.SynchronizationContext.SetSynchronizationContext(Threading.SynchronizationContext())
 
+    use availability =
+            BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(30.0))
     let timeoutPeriod = TimeSpan.FromSeconds(10.0)
 
-    match Async.RunSynchronously(FindSonar.findArisAsync availability timeoutPeriod sn) with
+    match Async.RunSynchronously(availability.WaitForArisBySerialNumberAsync sn timeoutPeriod) with
     | Some beacon ->
         Log.Information("ARIS {sn}, software version {softwareVersion}, found at {targetIpAddr}",
-                        sn, beacon.SoftwareVersion, beacon.SrcIpAddr)
+                        sn, beacon.SoftwareVersion, beacon.IPAddress)
 
         let initialSettings =
             let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
@@ -39,7 +36,7 @@ let recordingStats (inputs : TestInputs) =
         let skipFrames = 10
         let sampleCountWanted = 500
         let perfSink = SampledConduitPerfSink(sampleCountWanted, skipFrames)
-        use conduit = new ArisConduit(initialSettings, sn, availability,
+        use conduit = new ArisConduit(initialSettings, sn,
                                       FrameStreamReliabilityPolicy.DropPartialFrames,
                                       perfSink)
 

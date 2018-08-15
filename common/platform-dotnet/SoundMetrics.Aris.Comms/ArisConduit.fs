@@ -6,6 +6,8 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SoundMetrics.Aris.Config
 open SoundMetrics.Aris.Comms.Internal
+open SoundMetrics.Common
+open SoundMetrics.Common.ArisBeaconDetails
 open System
 open System.Net
 open System.Reactive.Linq
@@ -27,18 +29,18 @@ type RequestedSettings =
 
 
 type ArisConduit private (initialAcousticSettings : AcousticSettings,
-                          available : AvailableSonars,
                           targetSonar : string,
-                          matchBeacon : SonarBeacon -> bool,
+                          matchBeacon : ArisBeacon -> bool,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
                           perfSink : ConduitPerfSink) as self =
 
     let disposed = ref false
     let disposingSignal = new ManualResetEventSlim()
-    let mutable serialNumber: Nullable<SerialNumber> = Nullable<SerialNumber>()
+    let available = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(15.0))
+    let mutable serialNumber: Nullable<ArisSerialNumber> = Nullable<ArisSerialNumber>()
     let mutable snListener: IDisposable = null
     let mutable setSalinity: (Frame -> unit) = fun _ -> ()
-    let systemType: SystemType option ref = ref None
+    let systemType: ArisSystemType option ref = ref None
     let cts = new CancellationTokenSource()
     let cxnMgrDone = new ManualResetEventSlim()
     let earlyFrameSubject = new Subject<ReadyFrame>() // Spur from early in the graph
@@ -135,31 +137,28 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                                       matchBeacon
                                       targetSonar
                                       (fun beacon ->
-                                        self.SerialNumber <- Nullable<SerialNumber>(beacon.SerialNumber))
+                                        self.SerialNumber <- Nullable<ArisSerialNumber>(beacon.SerialNumber))
 
         logNewArisConduit targetSonar initialAcousticSettings
 
     /// Find the sonar by its serial number.
-    new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy) =
+    new(initialAcousticSettings, sn, frameStreamReliabilityPolicy) =
             new ArisConduit(initialAcousticSettings,
-                            availableSonars,
                             sn.ToString(),
                             (fun beacon -> beacon.SerialNumber = sn),
                             frameStreamReliabilityPolicy,
                             ConduitPerfSink.None)
 
     /// Find the sonar by its IP address
-    new(initialAcousticSettings, ipAddress, availableSonars, frameStreamReliabilityPolicy) = 
+    new(initialAcousticSettings, ipAddress, frameStreamReliabilityPolicy) = 
             new ArisConduit(initialAcousticSettings,
-                            availableSonars,
                             ipAddress.ToString(),
-                            (fun beacon -> beacon.SrcIpAddr = ipAddress),
+                            (fun beacon -> beacon.IPAddress = ipAddress),
                             frameStreamReliabilityPolicy,
                             ConduitPerfSink.None)
 
-    internal new(initialAcousticSettings, sn, availableSonars, frameStreamReliabilityPolicy, perfSink) =
+    internal new(initialAcousticSettings, sn, frameStreamReliabilityPolicy, perfSink) =
             new ArisConduit(initialAcousticSettings,
-                            availableSonars,
                             sn.ToString(),
                             (fun beacon -> beacon.SerialNumber = sn),
                             frameStreamReliabilityPolicy,
@@ -221,7 +220,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
 
     member __.SerialNumber
         with get () = serialNumber
-        and private set (sn : Nullable<SerialNumber>) = serialNumber <- sn
+        and private set (sn : Nullable<ArisSerialNumber>) = serialNumber <- sn
 
     member __.ConnectionState with get () = cxnStateSubject :> ISubject<ConnectionState>
 

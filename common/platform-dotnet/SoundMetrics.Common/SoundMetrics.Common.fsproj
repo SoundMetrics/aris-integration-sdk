@@ -3,22 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Version>1.0.9-alpha</Version>
-    <Company>Sound Metrics Corporation</Company>
-    <Product>ARIS 2 Configuration</Product>
+    <Authors>Sound Metrics Corporation</Authors>
+    <Product>Common Communications (managed)</Product>
+    <Description>Common communications support.</Description>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
     <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Authors>Sound Metrics Corporation</Authors>
-    <AssemblyVersion>1.0.9.0</AssemblyVersion>
-    <FileVersion>1.0.9.0</FileVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -27,15 +19,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SonarConfig.fs" />
+    <Compile Include="Devices.fs" />
+    <Compile Include="UdpListener.fs" />
+    <Compile Include="NetworkConstants.fs" />
+    <Compile Include="BeaconListener.fs" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Common\SoundMetrics.Common.fsproj" />
+    <PackageReference Include="Serilog" Version="2.7.1" />
+    <PackageReference Include="System.Reactive" Version="4.0.0" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

@@ -52,6 +52,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Scripting", "S
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting.Desktop", "SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj", "{17F62268-0D61-414E-8FA3-44C29CDC9A2A}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Common", "SoundMetrics.Common\SoundMetrics.Common.fsproj", "{533D46E8-6D43-4389-9028-B2FDE4FC791B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -126,6 +128,10 @@ Global
 		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17F62268-0D61-414E-8FA3-44C29CDC9A2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{533D46E8-6D43-4389-9028-B2FDE4FC791B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{533D46E8-6D43-4389-9028-B2FDE4FC791B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{533D46E8-6D43-4389-9028-B2FDE4FC791B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{533D46E8-6D43-4389-9028-B2FDE4FC791B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

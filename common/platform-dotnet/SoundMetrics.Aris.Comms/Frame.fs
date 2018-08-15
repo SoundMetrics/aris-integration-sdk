@@ -2,12 +2,13 @@
 
 namespace SoundMetrics.Aris.Comms
 
-open Aris.FileTypes
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
-open SoundMetrics.Aris.Config
 open System
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
+open Aris.FileTypes
+open SoundMetrics.Aris.Config
+open SoundMetrics.Common
 open SoundMetrics.NativeMemory
 
 //exception IndeterminateSettingsException
@@ -38,7 +39,7 @@ type ArisFrameHeaderExtensions =
     static member IsTelephoto(hdr : ArisFrameHeader ref) = (!hdr).LargeLens <> 0u
 
     [<Extension>]
-    static member SystemType(hdr : ArisFrameHeader ref) = enum<SystemType> (int (!hdr).TheSystemType)
+    static member SystemType(hdr : ArisFrameHeader ref) = enum<ArisSystemType> (int (!hdr).TheSystemType)
 
 /// Note that the SampleData must be disposed. This record does not do so as
 /// buffers are recomposed in new Frame instances.

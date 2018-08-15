@@ -2,6 +2,7 @@
 
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal
+open SoundMetrics.Common
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open System
@@ -15,27 +16,23 @@ let testBasicConnection (inputs : TestInputs) =
              | None -> failwith "No serial number was provided"
 
     // Console doesn't have a sync context by default, we need one for the beacon listener.
-    let syncContext = Threading.SynchronizationContext()
-    use availability =
-            BeaconListeners.createSonarBeaconListener
-                (TimeSpan.FromSeconds(30.0))
-                syncContext
-                Beacons.BeaconExpirationPolicy.KeepExpiredBeacons
-                None // callbacks
+    Threading.SynchronizationContext.SetSynchronizationContext(Threading.SynchronizationContext())
+
+    use availability = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(30.0))
 
     let findTimeout = TimeSpan.FromSeconds(10.0)
 
-    match Async.RunSynchronously(FindSonar.findArisAsync availability findTimeout sn) with
+    match Async.RunSynchronously(availability.WaitForArisBySerialNumberAsync sn findTimeout) with
     | Some beacon ->
         Log.Information("ARIS {sn}, software version {softwareVersion}, found at {targetIpAddr}",
-                        sn, beacon.SoftwareVersion, beacon.SrcIpAddr)
+                        sn, beacon.SoftwareVersion, beacon.IPAddress)
 
         let initialSettings =
             let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
             { defaultSettings with FrameRate = 15.0f</s> }
 
         let perfSink = SampledConduitPerfSink(1000, 10)
-        use conduit = new ArisConduit(initialSettings, sn, availability,
+        use conduit = new ArisConduit(initialSettings, sn,
                                       FrameStreamReliabilityPolicy.DropPartialFrames,
                                       perfSink)
 
