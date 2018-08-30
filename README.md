@@ -2,6 +2,8 @@
 This SDK supports connecting to and commanding ARIS Explorer and ARIS Voyager sonars. (Connecting to an ARIS Defender is not supported).
 For information on ARIS frame formats, see [ARIS File SDK](https://github.com/SoundMetrics/aris-file-sdk).
 
+> **Note:** if you are using Protocol Buffers version 3 to control an ARIS, you must use ARIS onboard software version 2.7._x_ or later. You can update the onboard software from within ARIScope.
+
 ## Contents
 
 ### Documentation
