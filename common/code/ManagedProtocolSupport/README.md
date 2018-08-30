@@ -1,5 +1,7 @@
 # Managed Protocol Support
 
+> **Note:** this folder will be made obsolete by `SoundMetrics.Platform`, elsewhere in this repository.
+
 ## `SoundMetrics.Aris2.Protocols`
 
 Folder [SoundMetrics.Aris2.Protocols](SoundMetrics.Aris2.Protocols) contains a C# assembly project that implements helper functions for building the Google Protocol Buffers-based commands that you send to an ARIS to control it. This assembly covers only the commonly-used commands.
