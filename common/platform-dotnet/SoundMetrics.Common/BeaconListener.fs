@@ -26,15 +26,20 @@ module internal BeaconListener =
             let av = SonarAvailability.Parser.ParseFrom(pkt.UdpResult.Buffer)
             let beacon =
                 let model =
-                    let isVoyager = av.SystemVariants.Enabled |> Seq.contains VoyagerVariant
-                    if isVoyager then
-                        Voyager
-                    else
+                    defaultArg
+                        (av.SystemVariants // possibly null
+                            |> Option.ofObj
+                            |> Option.map (fun variants ->
+                                if variants.Enabled |> Seq.contains VoyagerVariant then
+                                    Voyager
+                                else
+                                    Explorer
+                            ))
                         Explorer
 
                 {
                     Model =             model
-                    SystemType =    enum (int av.SystemType)
+                    SystemType =        enum (int av.SystemType)
                     SerialNumber =      av.SerialNumber
                     SoftwareVersion =   toSoftwareVersion av.SoftwareVersion
                     Timestamp =         pkt.Timestamp
