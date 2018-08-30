@@ -1,6 +1,6 @@
 # Managed Protocol Support
 
-> **Note:** this folder will be made obsolete by `SoundMetrics.Platform`, elsewhere in this repository.
+> **Note:** this folder will be made obsolete by `common/platform-dotnet`, elsewhere in this repository.
 
 ## `SoundMetrics.Aris2.Protocols`
 
