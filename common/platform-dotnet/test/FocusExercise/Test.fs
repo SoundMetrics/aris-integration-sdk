@@ -112,14 +112,14 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
                                             range)
             | None -> Log.Error("Attempt to get a frame failed")
 
-        let range1 = 1.0<m>
-        let range2 = 3.0<m>
+        let range1 = 1.0f<m>
+        let range2 = 3.0f<m>
 
         let series = [|
             {
                 SetupAndMatch.Description = "My first step"
                 SetUp = fun _ ->    conduit.SetSalinity(Salinity.Brackish)
-                                    conduit.RequestFocusDistance(range1 + 1.0<m>)
+                                    conduit.RequestFocusDistance(range1 + 1.0f<m>)
                                     conduit.RequestFocusDistance(range1)
                                     true
                 Expecteds =
