@@ -1,0 +1,21 @@
+﻿<Window x:Class="SsdpAdHocTestWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SsdpAdHocTestWPF"
+        mc:Ignorable="d"
+        Title="SSDP Ad Hoc Test" Height="450" Width="800">
+    <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Label Content="Ambient Messages" HorizontalAlignment="Left" d:LayoutOverrides="Height"/>
+        <ListBox x:Name="AmbientMessages" Grid.Row="1" ItemsSource="{Binding AmbientMessages}"/>
+    </Grid>
+</Window>
