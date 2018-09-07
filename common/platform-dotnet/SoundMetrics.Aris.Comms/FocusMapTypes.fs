@@ -106,8 +106,12 @@ module internal FocusMapTypes =
             let inputRange = inputR - inputL
             let outputRange = outputR - outputL
 
-            let inputRatio = (input - inputL) / inputRange
-            let value = outputL + (inputRatio * outputRange)
+            let value =
+                if inputRange = 0.0f then
+                    outputL
+                else
+                    let inputRatio = (input - inputL) / inputRange
+                    outputL + (inputRatio * outputRange)
 
             Log.Verbose (sprintf "interpolate %A inputRange=[%A - %A]; outputRange=[%A - %A] -> %A"
                             input inputL inputR outputL outputR value)
@@ -147,6 +151,7 @@ module internal FocusMapTypes =
     with
         member m.MinRange = m.FocusDistances.[0]
         member m.MaxRange = m.FocusDistances.[m.FocusDistances.Length - 1]
+        override m.ToString() = sprintf "FocusMap '%s'" m.Name
 
     type FocusMapInputs = {
         FocusDistances : float32 array

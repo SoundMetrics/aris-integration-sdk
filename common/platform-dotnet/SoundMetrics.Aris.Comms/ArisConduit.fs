@@ -267,9 +267,9 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
     /// Requests the supplied settings; returns a copy with the cookie attached to the request.
     member __.RequestAcousticSettings settings : RequestedSettings = requestAcousticSettings settings
 
-    member __.RequestFocusDistance (range: float<m>) =
+    member __.RequestFocusDistance (range: float32<m>) =
 
-        if range < 0.0<m> then
+        if range < 0.0f<m> then
             invalidArg "range" "Range must be greater than zero"
         queueCmd (makeFocusCmd range)
 

@@ -195,10 +195,8 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
 
     let shouldInclude device = filter.Invoke(device)
     let syncContext =   let ctx = SynchronizationContext.Current
-                        if ctx = null then
+                        if isNull ctx then
                             failwith "No SynchronizationContext is set"
-                        let hash = ctx.GetHashCode()
-                        printfn "thd=%s; hash=%d ctx=%A" Threading.Thread.CurrentThread.Name hash ctx // TODO REMOVE
                         ctx
 
     let arisExplorerCollection = ObservableCollection<ArisBeacon>()
