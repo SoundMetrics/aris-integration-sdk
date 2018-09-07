@@ -41,11 +41,11 @@ module internal ArisCommands =
         )
 
     [<CompiledName("MakeFocusCmd")>]
-    let makeFocusCmd (requestedFocus: float<m>) =
+    let makeFocusCmd (requestedFocus: float32<m>) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetFocus,
             FocusPosition = Aris.Command.Types.SetFocusPosition(
-                FocusRange = float32 (requestedFocus / 1.0<m>)
+                FocusRange = float32 (requestedFocus / 1.0f<m>)
             )
         )
 

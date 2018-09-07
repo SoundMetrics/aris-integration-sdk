@@ -1,0 +1,32 @@
+﻿# This is a script for driving an ARIS. The syntax is as follows:
+#
+# Commands must be entirely on one line.
+# Commands are not case sensitive.
+# Lines that start with # are comments.
+# These are the commands:
+#
+#   wait 1 - specify how many seconds to wait.
+#
+#   label name - specify a target for goto.
+#
+#   focus 2 - tell the sonar to focus at 2 meters.
+#
+#   goto name - tell the script to jump to a label.
+
+wait 1
+
+label start
+    focus 0
+    wait 2
+
+    # let's do some more:
+    focus 2
+    wait 2
+
+    focus 4
+    wait 2
+
+    focus 6
+    wait 2
+
+    goto alpha
