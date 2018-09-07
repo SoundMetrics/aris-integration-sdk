@@ -98,6 +98,27 @@ module TestInput =
             |> Map.ofSeq
 
 
+    let checkGotos (parsedLines : ParsedLine list) =
+
+        let labelMap = makeLabelMap parsedLines
+        let gotoTargets =
+            parsedLines
+                |> Seq.map (fun pl ->
+                    match pl.Statement with
+                    | Statement.Goto label -> Some (label, pl.LineNumber)
+                    | _ -> None)
+                |> Seq.choose id
+
+        let mutable isGood = true
+
+        for target, lineNo in gotoTargets do
+            if not (labelMap.ContainsKey(target)) then
+                Log.Error("Undefined label {label} referenced on line {lineNo}", target, lineNo)
+                isGood <- false
+
+        isGood
+
+
     let findStatementByLabel targetLabel (parsedLines : ParsedLine list) =
 
         parsedLines |> Seq.mapi (fun i t -> i, t)
@@ -230,14 +251,17 @@ let parse (input : TextReader) : Result<Script, ParseError> =
 
     match parseLine 1u [] with
     | Ok statements ->
-        match getDuplicateLabel statements with
-        | None -> Ok (Script statements)
-        | Some statement ->
-            match statement with
-            | (label, lineNos) ->
-                Error { Message = sprintf "Duplicate labels found: '%s' on lines %s" label
-                                    (String.Join(", ", lineNos |> Seq.map string))
-                        LineNumber = 1u }
+        if checkGotos statements then
+            match getDuplicateLabel statements with
+            | None -> Ok (Script statements)
+            | Some statement ->
+                match statement with
+                | (label, lineNos) ->
+                    Error { Message = sprintf "Duplicate labels found: '%s' on lines %s" label
+                                        (String.Join(", ", lineNos |> Seq.map string))
+                            LineNumber = 1u }
+        else
+            Error { Message = "Terminating evaluation"; LineNumber = 1u }
     | Error msg -> Error msg
 
 

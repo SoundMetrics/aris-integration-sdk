@@ -79,7 +79,7 @@ let main _argv =
 
     Thread.CurrentThread.Name <- "Main thread"
 
-    let argParser = ArgumentParser.Create<Arguments>(programName = "VoyagerFocusTest.exe")
+    let argParser = ArgumentParser.Create<Arguments>(programName = "ArisScript.exe")
     try
         let argResults = argParser.ParseCommandLine()
 

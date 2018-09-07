@@ -60,7 +60,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SsdpAdHocTestWPF", "SsdpAdH
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SsdpAdHocTest.Model", "SsdpAdHocTest.Model\SsdpAdHocTest.Model.fsproj", "{BD734147-CF6A-4ACF-8390-6EBC3E08DA47}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArisScript", "VoyagerFocusTest\ArisScript.fsproj", "{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArisScript", "ArisScript\ArisScript.fsproj", "{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
