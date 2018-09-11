@@ -2,21 +2,20 @@
 
 namespace SoundMetrics.Common
 
-open SsdpListener
+open SsdpInterfaceInputs
 open System
 open System.Reactive.Subjects
 open System.Threading
-open System.Text
+open System.Threading.Tasks.Dataflow
 
 type SsdpClient () =
 
     let mutable disposed = false
     let cts = new CancellationTokenSource()
-    let messages = new Subject<string>()
-    let rw = new SsdpReaderWriter()
-    let rwSub = rw.Packets.Subscribe(fun pkt ->
-        let s = Encoding.ASCII.GetString pkt.UdpResult.Buffer
-        messages.OnNext s)
+    let messages = new Subject<_>()
+    let listener = new MultiInterfaceListener()
+
+    let listenerLink = listener.Packets.LinkTo(ActionBlock<_>(messages.OnNext))
 
     let dispose isDisposing =
         if isDisposing then
@@ -27,8 +26,8 @@ type SsdpClient () =
 
             // Clean up managed resources
             cts.Dispose()
-            rwSub.Dispose()
-            rw.Dispose()
+            listenerLink.Dispose()
+            listener.Dispose()
             messages.Dispose()
 
         // Clean up native resources

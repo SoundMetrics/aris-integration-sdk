@@ -2,6 +2,7 @@
 
 namespace SoundMetrics.Common
 
+open Serilog
 open System
 open System.Net
 open System.Net.NetworkInformation
@@ -19,40 +20,11 @@ open System.Threading
 
 *)
 
+open SsdpMessages
+
 module private SsdpNetworkInterfaces =
 
-    //let nics = NetworkInterface.GetAllNetworkInterfaces()
-    //for nic in nics |> Seq.filter (fun nic ->
-    //    nic.OperationalStatus = NetworkInformation.OperationalStatus.Up
-    //    && nic.NetworkInterfaceType <> NetworkInterfaceType.Loopback) do
-
-    //    if nic.Supports(System.Net.NetworkInformation.NetworkInterfaceComponent.IPv4) then
-    //        printfn "%s" nic.Description
-
-    //        printfn "  Type     = %A" nic.NetworkInterfaceType
-    //        printfn "  OpStatus = %A" nic.OperationalStatus
-    //        printfn "  Speed    = %A" nic.Speed
-    //        printfn "  PhysAddr = %A" (nic.GetPhysicalAddress())
-
-    //        let props = nic.GetIPProperties()
-    //        printfn "  Unicasts ="
-    //        props.UnicastAddresses |> Seq.map (fun a ->
-    //                                    let a = (a :> IPAddressInformation)
-    //                                    a.Address, a.IsTransient)
-    //                               |> Seq.iter (fun (addr, transient) ->
-    //                                printfn "    %A (transient=%A)" addr transient)
-
-    //        let v4Props = props.GetIPv4Properties()
-
-    //        if isNull v4Props then
-    //            printfn "   No IPv4 information available"
-    //        else
-    //            printfn "    Index          = %d" v4Props.Index
-    //            printfn "    MTU            = %d" v4Props.Mtu
-    //            printfn "    APIPA active   = %A" v4Props.IsAutomaticPrivateAddressingActive
-    //            printfn "    APIPA enabled  = %A" v4Props.IsAutomaticPrivateAddressingEnabled
-
-    let getNics () =
+    let getSsdpNics () =
 
         NetworkInterface.GetAllNetworkInterfaces()
             |> Seq.filter (fun nic ->
@@ -61,17 +33,14 @@ module private SsdpNetworkInterfaces =
                     && nic.NetworkInterfaceType <> NetworkInterfaceType.Loopback)
             |> Seq.toArray
 
-module private SsdpInterfaceInputs =
+module internal SsdpInterfaceInputs =
     open System.Threading.Tasks.Dataflow
     open System.Net.Sockets
-    open System.Net.NetworkInformation
 
     // SSDP uses a multicast address a specific multicast address and port number.
     let SsdpAddressIPv4 = IPAddress.Parse("239.255.255.250")
     let SsdpPortIPv4 = 1900
     let SsdpEndPointIPv4 = IPEndPoint(SsdpAddressIPv4, SsdpPortIPv4)
-
-    type MsgReceived = { UdpResult : UdpReceiveResult; Timestamp : DateTime }
 
     let allowedAddressFamilies =
         [ AddressFamily.InterNetwork; AddressFamily.InterNetworkV6 ]
@@ -127,16 +96,19 @@ module private SsdpInterfaceInputs =
             // Switched to task-based rather than wrapping in Async as sometimes the Async
             // just never completes. And that prevents the process from terminating.
 
-            let task = udp.ReceiveAsync()
-            let action = Action<System.Threading.Tasks.Task<UdpReceiveResult>>(fun t ->
-                let now = DateTime.Now
-                let keepGoing = t.IsCompleted && not t.IsFaulted && not cts.IsCancellationRequested
-                if keepGoing then
-                    target.Post (Packet { UdpResult = task.Result; Timestamp = now }) |> ignore
-                    listen()
-                else
-                    doneSignal.Set() )
-            task.ContinueWith(action) |> ignore
+            try
+                let task = udp.ReceiveAsync()
+                let action = Action<System.Threading.Tasks.Task<UdpReceiveResult>>(fun t ->
+                    let now = DateTimeOffset.Now
+                    let keepGoing = t.IsCompleted && not t.IsFaulted && not cts.IsCancellationRequested
+                    if keepGoing then
+                        target.Post (Packet { UdpResult = task.Result; Timestamp = now }) |> ignore
+                        listen()
+                    else
+                        doneSignal.Set() )
+                task.ContinueWith(action) |> ignore
+            with
+                :? ObjectDisposedException -> () // A chance of this when closing the socket.
 
         let dispose isDisposing =
             if isDisposing then
@@ -156,8 +128,8 @@ module private SsdpInterfaceInputs =
 
         do
             udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
-            udp.Client.Bind (new IPEndPoint(IPAddress.Any (*IPAddress.Parse("192.168.10.145")*), SsdpPortIPv4)) // TODO .Any on right ifc
-            udp.JoinMulticastGroup(SsdpAddressIPv4, IPAddress.Any (*IPAddress.Parse("192.168.10.145")*))
+            udp.Client.Bind(IPEndPoint(addr, SsdpPortIPv4)) // TODO .Any on right ifc
+            udp.JoinMulticastGroup(SsdpAddressIPv4, addr)
             listen()
 
         interface IDisposable with
@@ -173,12 +145,14 @@ module private SsdpInterfaceInputs =
         let mutable interfaceMap = Map.empty<string, Interface>
         let mutable listenerMap = Map.empty<string, InterfaceListener>
         let inputBuffer = BufferBlock<_>()
-        let outputBuffer = BufferBlock<_>()
+        let outputBuffer = BufferBlock<SsdpMessageTraits * SsdpMessage>()
 
         let processInterfaceInput = function
             | NetworkChanged ->
+                Log.Information("A network change occurred.")
+
                 let newNics =
-                    SsdpNetworkInterfaces.getNics()
+                    SsdpNetworkInterfaces.getSsdpNics()
                         |> Seq.map Interface.FromNetworkInterface
                         |> Seq.choose id // drop Nones
                         |> Seq.map (fun ifc -> ifc.Id, ifc)
@@ -187,6 +161,7 @@ module private SsdpInterfaceInputs =
                 let expiredListeners =
                     interfaceMap |> Seq.filter (fun kvp -> not (newNics.ContainsKey kvp.Key))
                 for kvp in expiredListeners do
+                    Log.Information("  removing {name}", kvp.Value.Name)
                     interfaceMap <- interfaceMap.Remove(kvp.Key)
                     let old = listenerMap.[kvp.Key]
                     old.Dispose()
@@ -195,11 +170,16 @@ module private SsdpInterfaceInputs =
                 let newListeners =
                     newNics |> Seq.filter (fun kvp -> not (interfaceMap.ContainsKey kvp.Key))
                 for kvp in newListeners do
+                    Log.Information("  adding {name}", kvp.Value.Name)
                     interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
                     let listener = new InterfaceListener(kvp.Value.Address, inputBuffer)
                     listenerMap <- listenerMap.Add(kvp.Key, listener)
-            | Packet udpResult -> ()
 
+            | Packet udpResult ->
+                let traits = SsdpMessageTraits.From(udpResult)
+                match SsdpMessage.From(udpResult) with
+                | Ok msg -> outputBuffer.Post((traits, msg)) |> ignore
+                | Error msg -> Log.Information("Bad message: {msg}", msg)
 
 
         let processor = ActionBlock<_>(processInterfaceInput)
@@ -246,86 +226,3 @@ module private SsdpInterfaceInputs =
         override __.Finalize() = dispose false
 
         member __.Packets = outputBuffer :> ISourceBlock<_>
-
-
-module internal SsdpListener =
-    open System.Net.Sockets
-    open System.Reactive.Subjects
-
-    // SSDP uses a multicast address a specific multicast address and port number.
-    let SsdpAddressIPv4 = IPAddress.Parse("239.255.255.250")
-    let SsdpPortIPv4 = 1900
-    let SsdpEndPointIPv4 = IPEndPoint(SsdpAddressIPv4, SsdpPortIPv4)
-
-    type MsgReceived = { UdpResult : UdpReceiveResult; Timestamp : DateTime }
-
-    type SsdpReaderWriter () =
-
-        // Shutdown
-        let mutable disposed = false
-        let cts = new CancellationTokenSource ()
-        let doneSignal = new ManualResetEventSlim ()
-
-        let _remove = new SsdpInterfaceInputs.MultiInterfaceListener()
-
-        // Get & publish packets
-        let packetSubject = new Subject<MsgReceived> ()
-        let udp = new UdpClient()
-
-        let rec listen () =
-
-            // Switched to task-based rather than wrapping in Async as sometimes the Async
-            // just never completes. And that prevents the process from terminating.
-
-            let task = udp.ReceiveAsync()
-            let action = Action<System.Threading.Tasks.Task<UdpReceiveResult>>(fun t ->
-                let now = DateTime.Now
-                let keepGoing = t.IsCompleted && not t.IsFaulted && not cts.IsCancellationRequested
-                if keepGoing then
-                    packetSubject.OnNext { UdpResult = task.Result; Timestamp = now }
-                    listen()
-                else
-                    doneSignal.Set() )
-            task.ContinueWith(action) |> ignore
-
-        let dispose isDisposing =
-            if isDisposing then
-                // Clean up managed resources
-                if disposed then
-                    raise (ObjectDisposedException "ReaderWriter")
-
-                disposed <- true
-
-                // Stop listening to the socket
-                cts.Cancel ()
-                udp.Close () // Because UdpClient doesn't know about cancellation--may make it throw.
-                doneSignal.Wait ()
-
-                // Clean up
-                packetSubject.OnCompleted ()
-
-                let otherDisposables : IDisposable list = [udp; packetSubject; cts; doneSignal]
-                otherDisposables |> List.iter (fun d -> if d <> null then d.Dispose())
-
-            // Clean up native resources
-            ()
-
-
-        do
-            udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
-            udp.Client.Bind (new IPEndPoint(IPAddress.Any (*IPAddress.Parse("192.168.10.145")*), SsdpPortIPv4)) // TODO .Any on right ifc
-            udp.JoinMulticastGroup(SsdpAddressIPv4, IPAddress.Any (*IPAddress.Parse("192.168.10.145")*))
-            listen()
-
-        interface IDisposable with
-
-            override me.Dispose() = dispose true
-                                    GC.SuppressFinalize me
-        member me.Dispose() = (me :> IDisposable).Dispose()
-        override __.Finalize() = dispose false
-
-        member __.Packets : IObservable<MsgReceived> = packetSubject :> IObservable<_>
-
-        member __.SendUnicastAsync (buf : byte array) (ep : IPEndPoint) = udp.SendAsync(buf, buf.Length, ep)
-
-        member __.SendMulticast (buf : byte array) = udp.SendAsync(buf, buf.Length, SsdpEndPointIPv4)

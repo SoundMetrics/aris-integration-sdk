@@ -15,12 +15,13 @@ type TheModel (syncCtx : SynchronizationContext) =
     let ambientMessages = ObservableCollection<string>()
     let client = new SsdpClient()
 
-    let onReceive msg =
+    let onReceive (traits : SsdpMessages.SsdpMessageTraits, _msg) =
         let callback = fun _ ->
             if ambientMessages.Count >= 100 then
                 ambientMessages.RemoveAt(ambientMessages.Count - 1)
         
-            ambientMessages.Insert(0, msg)
+            let s = _msg.GetType().Name// traits.RawContent
+            ambientMessages.Insert(0, s)
         syncCtx.Post(SendOrPostCallback callback, ())
 
     let clientSub = client.Messages.Subscribe(onReceive)

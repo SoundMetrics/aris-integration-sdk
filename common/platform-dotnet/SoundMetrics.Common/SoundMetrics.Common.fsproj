@@ -21,6 +21,7 @@
   <ItemGroup>
     <Compile Include="Devices.fs" />
     <Compile Include="UdpListener.fs" />
+    <Compile Include="SsdpMessages.fs" />
     <Compile Include="SsdpListener.fs" />
     <Compile Include="SsdpClient.fs" />
     <Compile Include="SsdpService.fs" />
