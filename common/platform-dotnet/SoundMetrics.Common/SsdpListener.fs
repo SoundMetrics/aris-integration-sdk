@@ -24,6 +24,7 @@ open SsdpMessages
 
 module private SsdpNetworkInterfaces =
 
+    /// Fetches the NICs of interest for SDSP.
     let getSsdpNics () =
 
         NetworkInterface.GetAllNetworkInterfaces()
@@ -39,14 +40,18 @@ module internal SsdpInterfaceInputs =
 
     // SSDP uses a multicast address a specific multicast address and port number.
     let SsdpAddressIPv4 = IPAddress.Parse("239.255.255.250")
+    
+    [<Literal>]
     let SsdpPortIPv4 = 1900
+
     let SsdpEndPointIPv4 = IPEndPoint(SsdpAddressIPv4, SsdpPortIPv4)
 
-    let allowedAddressFamilies =
-        [ AddressFamily.InterNetwork; AddressFamily.InterNetworkV6 ]
+    let private allowedAddressFamilies =
+        [ AddressFamily.InterNetwork // IPv4
+          AddressFamily.InterNetworkV6 ]
         |> Set
 
-    let selectUnicastAddress (nic : NetworkInterface) =
+    let private selectUnicastAddress (nic : NetworkInterface) =
 
         // Prefer IPv4, allow IPv6
         let isAllowedFamily (af, _) = allowedAddressFamilies.Contains af
@@ -65,6 +70,7 @@ module internal SsdpInterfaceInputs =
         else
             Some (addrs |> Seq.head |> snd)
 
+    /// A network interface.
     type Interface = {
         Id      : string
         Name    : string
@@ -80,10 +86,11 @@ module internal SsdpInterfaceInputs =
 
     // It would be nice if NetworkAddressChanged returned some useful information, but alas...
     // so we just have a catch-all input that triggers some contemplation of what interfaces
-    // are still available. Then, to serialize operations, we push packets in through the same
-    // buffer block.
+    // are still available. Then, to serialize operations in a thread-safe manner, we push
+    // packets in through the same buffer block.
     type SsdpInterfaceInputs = NetworkChanged | Packet of MsgReceived
 
+    /// Listens for packets on a given IP address. Packets are posted to `target`.
     type InterfaceListener (addr : IPAddress, target : ITargetBlock<SsdpInterfaceInputs>) =
 
         let mutable disposed = false
@@ -138,7 +145,7 @@ module internal SsdpInterfaceInputs =
         member me.Dispose() = (me :> IDisposable).Dispose()
         override __.Finalize() = dispose false
 
-
+    /// Listens for SSDP messages on multiple NICs. Messages are published on `Messages`.
     type MultiInterfaceListener () =
 
         let mutable disposed = false
@@ -147,40 +154,44 @@ module internal SsdpInterfaceInputs =
         let inputBuffer = BufferBlock<_>()
         let outputBuffer = BufferBlock<SsdpMessageTraits * SsdpMessage>()
 
+        let updateInterfaceMap () =
+
+            Log.Information("A network change occurred.")
+
+            let newNics =
+                SsdpNetworkInterfaces.getSsdpNics()
+                    |> Seq.map Interface.FromNetworkInterface
+                    |> Seq.choose id // drop Nones
+                    |> Seq.map (fun ifc -> ifc.Id, ifc)
+                    |> Map.ofSeq
+
+            let expiredListeners =
+                interfaceMap |> Seq.filter (fun kvp -> not (newNics.ContainsKey kvp.Key))
+            for kvp in expiredListeners do
+                Log.Information("  removing {name}", kvp.Value.Name)
+                interfaceMap <- interfaceMap.Remove(kvp.Key)
+                let old = listenerMap.[kvp.Key]
+                old.Dispose()
+                listenerMap <- listenerMap.Remove(kvp.Key)
+
+            let newListeners =
+                newNics |> Seq.filter (fun kvp -> not (interfaceMap.ContainsKey kvp.Key))
+            for kvp in newListeners do
+                Log.Information("  adding {name}", kvp.Value.Name)
+                interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
+                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer)
+                listenerMap <- listenerMap.Add(kvp.Key, listener)
+
+        let handlePacket udpResult =
+
+            let traits = SsdpMessageTraits.From(udpResult)
+            match SsdpMessage.From(udpResult) with
+            | Ok msg -> outputBuffer.Post((traits, msg)) |> ignore
+            | Error msg -> Log.Information("Bad message: {msg}", msg)
+
         let processInterfaceInput = function
-            | NetworkChanged ->
-                Log.Information("A network change occurred.")
-
-                let newNics =
-                    SsdpNetworkInterfaces.getSsdpNics()
-                        |> Seq.map Interface.FromNetworkInterface
-                        |> Seq.choose id // drop Nones
-                        |> Seq.map (fun ifc -> ifc.Id, ifc)
-                        |> Map.ofSeq
-
-                let expiredListeners =
-                    interfaceMap |> Seq.filter (fun kvp -> not (newNics.ContainsKey kvp.Key))
-                for kvp in expiredListeners do
-                    Log.Information("  removing {name}", kvp.Value.Name)
-                    interfaceMap <- interfaceMap.Remove(kvp.Key)
-                    let old = listenerMap.[kvp.Key]
-                    old.Dispose()
-                    listenerMap <- listenerMap.Remove(kvp.Key)
-
-                let newListeners =
-                    newNics |> Seq.filter (fun kvp -> not (interfaceMap.ContainsKey kvp.Key))
-                for kvp in newListeners do
-                    Log.Information("  adding {name}", kvp.Value.Name)
-                    interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
-                    let listener = new InterfaceListener(kvp.Value.Address, inputBuffer)
-                    listenerMap <- listenerMap.Add(kvp.Key, listener)
-
-            | Packet udpResult ->
-                let traits = SsdpMessageTraits.From(udpResult)
-                match SsdpMessage.From(udpResult) with
-                | Ok msg -> outputBuffer.Post((traits, msg)) |> ignore
-                | Error msg -> Log.Information("Bad message: {msg}", msg)
-
+            | NetworkChanged ->     updateInterfaceMap ()
+            | Packet udpResult ->   handlePacket udpResult
 
         let processor = ActionBlock<_>(processInterfaceInput)
 
@@ -225,4 +236,4 @@ module internal SsdpInterfaceInputs =
         member me.Dispose() = (me :> IDisposable).Dispose()
         override __.Finalize() = dispose false
 
-        member __.Packets = outputBuffer :> ISourceBlock<_>
+        member __.Messages = outputBuffer :> ISourceBlock<_>

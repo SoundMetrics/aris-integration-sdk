@@ -2,6 +2,10 @@
 
 namespace SoundMetrics.Common
 
+    (*
+        This file provides generic support for listening to a socket for UDP packets.
+    *)
+
 open System
 open System.Net
 open System.Net.Sockets

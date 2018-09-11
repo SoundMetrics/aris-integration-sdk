@@ -2,21 +2,31 @@
 
 namespace SoundMetrics.Common
 
+    (*
+        This file defines SSDP messages.
+        See https://tools.ietf.org/html/draft-cai-ssdp-v1-03
+    *)
+
 module SsdpMessages =
     open Serilog
     open System
     open System.Net
     open System.Net.Sockets
     open System.Text
-    open System.Transactions
 
     type internal MsgReceived = { UdpResult : UdpReceiveResult; Timestamp : DateTimeOffset }
 
     type CacheControl = Dummy
 
+    /// Traits of a received SSDP message.
     type SsdpMessageTraits = {
+        /// The payload of the message converted to a string.
         RawContent      : string
+
+        /// The time at which the message was received.
         Timestamp       : DateTimeOffset
+
+        /// The origin of the message.
         RemoteEndPoint  : IPEndPoint
     }
     with
@@ -25,6 +35,7 @@ module SsdpMessages =
               Timestamp = packet.Timestamp
               RemoteEndPoint = packet.UdpResult.RemoteEndPoint }
 
+    /// Represents an SSDP NOTIFY message.
     type SsdpNotifyMessage = {
         Host            : IPEndPoint
         CacheControl    : CacheControl
@@ -35,14 +46,16 @@ module SsdpMessages =
         USN             : string
     }
 
+    /// Represents an SSDP M-SEARCH message.
     type SsdpMSearchMessage = {
         Host            : IPEndPoint
         MAN             : string
-        MX              : string // TODO ?? ###############
+        MX              : string
         ST              : string
         UserAgent       : string
     }
 
+    /// Discriminated union for types of SSDP messages.
     type SsdpMessage =
         | Notify of SsdpNotifyMessage
         | MSearch of SsdpMSearchMessage
@@ -50,6 +63,8 @@ module SsdpMessages =
 
     module internal SsdpMsgDetails =
 
+        /// Fetches the verb from the string--assuming you're sending the contents
+        /// of an SSDP message.
         let getVerb (s : string) =
 
             let idxSpace = s.IndexOfAny([| ' '; '\t' |])
@@ -58,6 +73,7 @@ module SsdpMessages =
             else
                 Ok (s.Substring(0, idxSpace).ToUpperInvariant())
 
+        /// Splits a single "name: value" pair passed in.
         let splitNVP (line : string) =
             match line.IndexOf(':') with
             | -1 -> Error line
@@ -67,6 +83,7 @@ module SsdpMessages =
                 Ok (name, value)
             | _ -> Error line
 
+        /// Parses a "w.x.y.z:1900"-style endpoint.
         let parseEndPoint (s : string) =
             let splits = s.Split(':')
             match splits with
@@ -78,6 +95,8 @@ module SsdpMessages =
                 | _ -> None
             | _ -> None
 
+        /// Parses the name-value pairs from the header of an SSDP message,
+        /// skipping the first line and stopping at the first empty line.
         let getHeaderValueMap (content : string) =
 
             let allLines = content.Split([| '\n'; '\r' |])
@@ -96,14 +115,17 @@ module SsdpMessages =
 
             map
 
-        let inline applyBuilders builderMap state key value =
-            if builderMap |> Map.containsKey key then
-                let fn = builderMap.[key]
+        /// Applies mapped functions to build a key-value map.
+        /// The functions in the map are keyed by name, such as HOST.
+        /// The state is the type of message being built.
+        let inline makeKeyValuePair functionMap state key value =
+            if functionMap |> Map.containsKey key then
+                let fn = functionMap.[key]
                 fn state value
             else
                 state
 
-        let notifyBuilders =
+        let private notifyBuilders = // At module scope to create it only once.
             [
                 "HOST",     fun msg value ->
                                 match parseEndPoint value with
@@ -123,7 +145,8 @@ module SsdpMessages =
             ]
             |> Map.ofList
 
-        let parseNotify (content : string) _msg =
+        /// Parses an SSDP NOTIFY message.
+        let private parseNotify (content : string) _msg =
             
             let map = getHeaderValueMap content
             let msg =
@@ -133,9 +156,9 @@ module SsdpMessages =
                     Location = IPEndPoint(0L, 0)
                     NT = ""; NTS = ""; Server = ""; USN = ""
                 }
-            Notify (map |> Map.fold (applyBuilders notifyBuilders) msg)
+            Notify (map |> Map.fold (makeKeyValuePair notifyBuilders) msg)
 
-        let mSearchBuilders =
+        let private mSearchBuilders =  // At module scope to create it only once.
             [
                 "HOST",     fun msg value ->
                                 match parseEndPoint value with
@@ -148,7 +171,8 @@ module SsdpMessages =
             ]
             |> Map.ofList
 
-        let parseMSearch (content : string) _msg =
+        /// Parses an SSDP M-SEARCH message.
+        let private parseMSearch (content : string) _msg =
 
             let map = getHeaderValueMap content
             let msg =
@@ -156,23 +180,24 @@ module SsdpMessages =
                     SsdpMSearchMessage.Host = IPEndPoint(0L, 0)
                     MAN = ""; MX = ""; ST = ""; UserAgent = ""
                 }
-            MSearch (map |> Map.fold (applyBuilders mSearchBuilders) msg)
+            MSearch (map |> Map.fold (makeKeyValuePair mSearchBuilders) msg)
 
-        let parseUnknown (content : string) (msg : MsgReceived) : SsdpMessage =
+        let private parseUnknown (content : string) (msg : MsgReceived) : SsdpMessage =
             Unhandled (Encoding.UTF8.GetString(msg.UdpResult.Buffer))
 
-        let verbMap =
+        let private verbParserMap =
             [
                 "NOTIFY",   parseNotify
                 "M-SEARCH", parseMSearch
             ]
             |> Map.ofList
 
-        let verbToParser verb =
+        let private verbToParser verb =
 
-            match verbMap.TryGetValue(verb) with
-            | true, parser -> Ok parser
-            | false, _ -> Ok parseUnknown
+            if verbParserMap |> Map.containsKey verb then
+                Ok verbParserMap.[verb]
+            else
+                Ok parseUnknown
 
         let parse (msg : MsgReceived) =
 

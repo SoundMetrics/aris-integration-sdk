@@ -8,7 +8,6 @@ open System.Threading
 type SsdpService (periodicAnnouncement : TimeSpan option) =
 
     let mutable disposed = false
-    let cts = new CancellationTokenSource()
 
     let dispose isDisposing =
         if isDisposing then
@@ -18,7 +17,7 @@ type SsdpService (periodicAnnouncement : TimeSpan option) =
             disposed <- true
 
             // Clean up managed resources
-            cts.Dispose()
+            ()
 
         // Clean up native resources
         ()
