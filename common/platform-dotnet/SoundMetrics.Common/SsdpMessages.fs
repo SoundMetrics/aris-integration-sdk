@@ -14,9 +14,13 @@ module SsdpMessages =
     open System.Net.Sockets
     open System.Text
 
+    /// Container for a received packet and a timestamp.
     type internal MsgReceived = { UdpResult : UdpReceiveResult; Timestamp : DateTimeOffset }
 
-    type CacheControl = Dummy
+    type CacheControl = Empty // TODO ############################
+
+    //-------------------------------------------------------------------------
+    // SSDP Messages
 
     /// Traits of a received SSDP message.
     type SsdpMessageTraits = {
@@ -39,8 +43,8 @@ module SsdpMessages =
     type SsdpNotifyMessage = {
         Host            : IPEndPoint
         CacheControl    : CacheControl
-        Location        : IPEndPoint
-        NT              : string
+        Location        : string // generally a valid URL
+        ST              : string
         NTS             : string
         Server          : string
         USN             : string
@@ -61,7 +65,12 @@ module SsdpMessages =
         | MSearch of SsdpMSearchMessage
         | Unhandled of content : string
 
-    module internal SsdpMsgDetails =
+    //-------------------------------------------------------------------------
+    // SerDes
+
+    module internal SsdpMsgDeserialize =
+
+        // Parse message headers ----------------------------------------------
 
         /// Fetches the verb from the string--assuming you're sending the contents
         /// of an SSDP message.
@@ -115,17 +124,59 @@ module SsdpMessages =
 
             map
 
-        /// Applies mapped functions to build a key-value map.
-        /// The functions in the map are keyed by name, such as HOST.
-        /// The state is the type of message being built.
-        let inline makeKeyValuePair functionMap state key value =
+        (*---------------------------------------------------------------------
+
+            Message Object Construction
+
+            We construct SSDP message objects from a received packet. The
+            packet looks something like this:
+
+                NOTIFY * HTTP/1.1\r\n
+                Host: 239.255.255.250:1900\r\n
+                Cache-Control: max-age=4\r\n
+                Location: 192.168.10.164:55456\r\n
+                NT: uuid:4E50646A-B607-4ECB-9676-8DC10ABE8A5F\r\n
+                NTS: ssdp:alive\r\n
+                SERVER: windows/6.2 IntelUSBoverIP:1/1\r\n
+                USN: uuid:4E50646A-B607-4ECB-9676-8DC10ABE8A5F::IntelUSBoverIP:1\r\n
+                \r\n
+                ...
+
+            In order to parse that into an object, we
+
+                1.  Determine the message type from the first line (NOTIFY).
+
+                2.  Parse the remaining lines, up to the first empty line, as
+                    name-value pairs.
+
+                3.  Using a dictionary of field setter functions, fold over the
+                    name-value pairs and, if there is a setter function available
+                    for that field, use it to create an updated object.
+
+                4.  The output of the fold is the object representation of the message.
+        *)
+
+
+        // Helper function for applying a fold to a key-value map
+        // (args key and value are an entry in this map).
+        // The key and value args are from a received SSDP message.
+        // The state of the fold is the message being built.
+        // If the key, e.g., HOST, is in the function map, the function
+        // for HOST is applied and creates a new state (object).
+        //
+        // (The functions in the map are keyed by name, such as HOST,
+        // for which the value is probably 239.255.255.250:1900.)
+        let inline private applyValueToMsg functionMap state key value =
             if functionMap |> Map.containsKey key then
                 let fn = functionMap.[key]
                 fn state value
             else
                 state
 
-        let private notifyBuilders = // At module scope to create it only once.
+        //---------------------------------------------------------------------
+        // Parse the NOTIFY message
+
+        let private notifyFieldSetters = // At module scope to create it only once.
             [
                 "HOST",     fun msg value ->
                                 match parseEndPoint value with
@@ -133,11 +184,8 @@ module SsdpMessages =
                                 | None -> msg
                 "CACHE-CONTROL",
                             fun msg value -> msg // TODO #######################
-                "LOCATION", fun msg value ->
-                                match parseEndPoint value with
-                                | Some ep -> { msg with Location = ep }
-                                | None -> msg
-                "NT",       fun msg value -> { msg with NT = value }
+                "LOCATION", fun msg value -> { msg with Location = value }
+                "NT",       fun msg value -> { msg with ST = value }
                 "NTS",      fun msg value -> { msg with NTS = value }
                 "SERVER",   fun msg value -> { msg with Server = value }
                 "USN",      fun msg value -> { msg with USN = value }
@@ -146,19 +194,22 @@ module SsdpMessages =
             |> Map.ofList
 
         /// Parses an SSDP NOTIFY message.
-        let private parseNotify (content : string) _msg =
+        let private parseNotify (content : string) =
             
-            let map = getHeaderValueMap content
-            let msg =
+            let headerValues = getHeaderValueMap content
+            let initialState =
                 {
                     SsdpNotifyMessage.Host = IPEndPoint(0L, 0)
-                    CacheControl = Dummy
-                    Location = IPEndPoint(0L, 0)
-                    NT = ""; NTS = ""; Server = ""; USN = ""
+                    CacheControl = Empty
+                    Location = ""
+                    ST = ""; NTS = ""; Server = ""; USN = ""
                 }
-            Notify (map |> Map.fold (makeKeyValuePair notifyBuilders) msg)
+            Notify (headerValues |> Map.fold (applyValueToMsg notifyFieldSetters) initialState)
 
-        let private mSearchBuilders =  // At module scope to create it only once.
+        //---------------------------------------------------------------------
+        // Parse the M-SEARCH message
+
+        let private mSearchFieldSetters =  // At module scope to create it only once.
             [
                 "HOST",     fun msg value ->
                                 match parseEndPoint value with
@@ -172,18 +223,18 @@ module SsdpMessages =
             |> Map.ofList
 
         /// Parses an SSDP M-SEARCH message.
-        let private parseMSearch (content : string) _msg =
+        let private parseMSearch (content : string) =
 
-            let map = getHeaderValueMap content
-            let msg =
+            let headerValues = getHeaderValueMap content
+            let initialState =
                 {
                     SsdpMSearchMessage.Host = IPEndPoint(0L, 0)
                     MAN = ""; MX = ""; ST = ""; UserAgent = ""
                 }
-            MSearch (map |> Map.fold (makeKeyValuePair mSearchBuilders) msg)
+            MSearch (headerValues |> Map.fold (applyValueToMsg mSearchFieldSetters) initialState)
 
-        let private parseUnknown (content : string) (msg : MsgReceived) : SsdpMessage =
-            Unhandled (Encoding.UTF8.GetString(msg.UdpResult.Buffer))
+        /// Parses message types we're not handling.
+        let private parseUnknown (content : string) : SsdpMessage = Unhandled content
 
         let private verbParserMap =
             [
@@ -199,14 +250,57 @@ module SsdpMessages =
             else
                 Ok parseUnknown
 
-        let parse (msg : MsgReceived) =
+        let deserialize (msg : MsgReceived) =
 
             let content = Encoding.UTF8.GetString(msg.UdpResult.Buffer)
 
             getVerb content
             |> Result.bind verbToParser
-            |> Result.map (fun parse -> parse content msg)
+            |> Result.map (fun parse -> parse content)
 
+    module internal SsdpMsgSerialize =
+        let CRLF = "\r\n"
+
+        let serializeNotify (msg : SsdpNotifyMessage) =
+
+            let s =
+                "NOTIFY * HTTP/1.1" + CRLF
+                + (sprintf "Host:%s:%d" (msg.Host.Address.ToString()) msg.Host.Port) + CRLF
+                + (sprintf "ST:%s" msg.ST) + CRLF
+                + (sprintf "NTS:%s" msg.NTS) + CRLF
+                + (sprintf "Location:%s" msg.Location) + CRLF
+                + (sprintf "USN:%s" msg.USN) + CRLF
+                // Skipping cache-control for now.
+                + (sprintf "Server:%s" msg.Server) + CRLF
+                + CRLF
+            Encoding.ASCII.GetBytes(s)
+
+        let serializeMSearch (msg : SsdpMSearchMessage) =
+
+            let s =
+                "M-SEARCH * HTTP/1.1" + CRLF
+                + (sprintf "Host:%s:%d" (msg.Host.Address.ToString()) msg.Host.Port) + CRLF
+                + (sprintf "ST:%s" msg.ST) + CRLF
+                + (sprintf "MAN:%s" msg.MAN) + CRLF
+                + CRLF
+            Encoding.ASCII.GetBytes(s)
+
+        let serialize = function
+            | Notify msg ->     serializeNotify msg
+            | MSearch msg ->    serializeMSearch msg
+            | Unhandled _ ->    failwith "not supported"
+
+    //-------------------------------------------------------------------------
+    // SerDes helpers
+
+    open SsdpMsgSerialize
+    open SsdpMsgDeserialize
 
     type SsdpMessage with
-        static member internal From(packet : MsgReceived) = SsdpMsgDetails.parse packet
+        static member internal From(packet : MsgReceived) : Result<SsdpMessage, string> =
+            
+            deserialize packet
+
+        static member internal ToPacket (message : SsdpMessage) : byte array =
+
+            serialize message
