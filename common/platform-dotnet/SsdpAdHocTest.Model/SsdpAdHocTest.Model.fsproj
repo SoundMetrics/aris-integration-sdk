@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SoundMetrics.Common\SoundMetrics.Common.fsproj" />
-    <ProjectReference Include="..\SoundMetrics.SSDP\SoundMetrics.SSDP.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
