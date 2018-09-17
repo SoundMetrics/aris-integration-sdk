@@ -43,6 +43,6 @@ type SsdpClient () =
     member me.Dispose() = (me :> IDisposable).Dispose()
     override __.Finalize() = dispose false
 
-    member internal __.Messages = messages :> IObservable<_>
+    member __.Messages = messages :> IObservable<_>
 
-    member internal __.MessageSourceBlock = listener.Messages :> ISourceBlock<_>
+    member __.MessageSourceBlock = listener.Messages :> ISourceBlock<_>

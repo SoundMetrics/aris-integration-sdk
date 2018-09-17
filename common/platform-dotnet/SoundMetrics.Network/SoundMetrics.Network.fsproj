@@ -5,12 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Model.fs" />
+    <Compile Include="UdpListener.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Common\SoundMetrics.Common.fsproj" />
-    <ProjectReference Include="..\SoundMetrics.SSDP\SoundMetrics.SSDP.fsproj" />
+    <PackageReference Include="System.Reactive" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>

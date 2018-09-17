@@ -7,7 +7,7 @@ namespace SoundMetrics.Common
         See https://tools.ietf.org/html/draft-cai-ssdp-v1-03
     *)
 
-module internal SsdpMessages =
+module SsdpMessages =
     open Serilog
     open System
     open System.Net

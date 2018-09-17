@@ -20,11 +20,6 @@
 
   <ItemGroup>
     <Compile Include="Devices.fs" />
-    <Compile Include="UdpListener.fs" />
-    <Compile Include="SsdpMessages.fs" />
-    <Compile Include="SsdpListener.fs" />
-    <Compile Include="SsdpClient.fs" />
-    <Compile Include="SsdpService.fs" />
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="BeaconListener.fs" />
     <Compile Include="AssemblyInfo.fs" />
@@ -32,13 +27,11 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.7.1" />
-    <PackageReference Include="System.Reactive" Version="4.0.0" />
-    <PackageReference Include="System.Reactive.Linq" Version="4.0.0" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
+    <ProjectReference Include="..\SoundMetrics.Network\SoundMetrics.Network.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
