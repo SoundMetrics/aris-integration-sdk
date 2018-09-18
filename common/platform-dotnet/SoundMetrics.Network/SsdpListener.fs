@@ -1,6 +1,6 @@
-﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+﻿// Copyright 2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Common
+namespace SoundMetrics.Network
 
 open Serilog
 open System
@@ -22,10 +22,11 @@ open System.Threading
 
 open SsdpMessages
 
-module private SsdpNetworkInterfaces =
+module internal SsdpNetworkInterfaces =
+    open System.Net.Sockets
 
-    /// Fetches the NICs of interest for SDSP.
-    let getSsdpNics () =
+    /// Fetches the NICs of interest for SSDP.
+    let private getSsdpNics () =
 
         NetworkInterface.GetAllNetworkInterfaces()
             |> Seq.filter (fun nic ->
@@ -33,18 +34,6 @@ module private SsdpNetworkInterfaces =
                     && nic.Supports(NetworkInterfaceComponent.IPv4)
                     && nic.NetworkInterfaceType <> NetworkInterfaceType.Loopback)
             |> Seq.toArray
-
-module internal SsdpInterfaceInputs =
-    open System.Threading.Tasks.Dataflow
-    open System.Net.Sockets
-
-    // SSDP uses a multicast address a specific multicast address and port number.
-    let SsdpAddressIPv4 = IPAddress.Parse("239.255.255.250")
-    
-    [<Literal>]
-    let SsdpPortIPv4 = 1900
-
-    let SsdpEndPointIPv4 = IPEndPoint(SsdpAddressIPv4, SsdpPortIPv4)
 
     let private allowedAddressFamilies =
         [ AddressFamily.InterNetwork // IPv4
@@ -83,6 +72,25 @@ module internal SsdpInterfaceInputs =
                     { Id = nic.Id
                       Name = nic.Description
                       Address = addr })
+
+    /// Fetches the NICs of interest for SSDP.
+    let getSspdInterfaces () =
+
+        getSsdpNics()
+            |> Seq.map Interface.FromNetworkInterface
+            |> Seq.choose id // drop Nones
+
+    /// Fetches the addresses of NICs of interest for SSDP.
+    let getSspdAddresses () =
+
+        getSspdInterfaces() |> Seq.map (fun ifc -> ifc.Address)
+
+
+module internal SsdpInterfaceInputs =
+    open SsdpConstants
+    open SsdpNetworkInterfaces
+    open System.Threading.Tasks.Dataflow
+    open System.Net.Sockets
 
     // It would be nice if NetworkAddressChanged returned some useful information, but alas...
     // so we just have a catch-all input that triggers some contemplation of what interfaces
@@ -135,8 +143,8 @@ module internal SsdpInterfaceInputs =
 
         do
             udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
-            udp.Client.Bind(IPEndPoint(addr, SsdpPortIPv4)) // TODO .Any on right ifc
-            udp.JoinMulticastGroup(SsdpAddressIPv4, addr)
+            udp.Client.Bind(IPEndPoint(addr, SsdpEndPointIPv4.Port)) // TODO .Any on right ifc
+            udp.JoinMulticastGroup(SsdpEndPointIPv4.Address, addr)
             listen()
 
         interface IDisposable with
@@ -152,16 +160,14 @@ module internal SsdpInterfaceInputs =
         let mutable interfaceMap = Map.empty<string, Interface>
         let mutable listenerMap = Map.empty<string, InterfaceListener>
         let inputBuffer = BufferBlock<_>()
-        let outputBuffer = BufferBlock<SsdpMessageTraits * SsdpMessage>()
+        let outputBuffer = BufferBlock<SsdpMessageProperties * SsdpMessage>()
 
         let updateInterfaceMap () =
 
             Log.Information("A network change occurred.")
 
             let newNics =
-                SsdpNetworkInterfaces.getSsdpNics()
-                    |> Seq.map Interface.FromNetworkInterface
-                    |> Seq.choose id // drop Nones
+                SsdpNetworkInterfaces.getSspdInterfaces()
                     |> Seq.map (fun ifc -> ifc.Id, ifc)
                     |> Map.ofSeq
 
@@ -184,7 +190,7 @@ module internal SsdpInterfaceInputs =
 
         let handlePacket udpResult =
 
-            let traits = SsdpMessageTraits.From(udpResult)
+            let traits = SsdpMessageProperties.From(udpResult)
             match SsdpMessage.From(udpResult) with
             | Ok msg -> outputBuffer.Post((traits, msg)) |> ignore
             | Error msg -> Log.Information("Bad message: {msg}", msg)

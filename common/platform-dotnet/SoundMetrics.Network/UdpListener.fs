@@ -1,6 +1,6 @@
 ﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Common
+namespace SoundMetrics.Network
 
     (*
         This file provides generic support for listening to a socket for UDP packets.

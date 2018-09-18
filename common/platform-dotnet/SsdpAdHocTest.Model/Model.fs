@@ -1,6 +1,6 @@
 namespace SsdpAdHocTest.Model
 
-open SoundMetrics.Common
+open SoundMetrics.Network
 open System.Collections.ObjectModel
 open System
 open System.Threading
@@ -15,7 +15,7 @@ type TheModel (syncCtx : SynchronizationContext) =
     let ambientMessages = ObservableCollection<string>()
     let client = new SsdpClient()
 
-    let onReceive (traits : SsdpMessages.SsdpMessageTraits, _msg) =
+    let onReceive (traits : SsdpMessages.SsdpMessageProperties, _msg) =
         let callback = fun _ ->
             if ambientMessages.Count >= 100 then
                 ambientMessages.RemoveAt(ambientMessages.Count - 1)

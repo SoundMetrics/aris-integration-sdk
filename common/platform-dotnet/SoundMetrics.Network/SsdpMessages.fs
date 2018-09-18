@@ -1,6 +1,6 @@
-﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+﻿// Copyright 2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Common
+namespace SoundMetrics.Network
 
     (*
         This file defines SSDP messages.
@@ -23,7 +23,7 @@ module SsdpMessages =
     // SSDP Messages
 
     /// Traits of a received SSDP message.
-    type SsdpMessageTraits = {
+    type SsdpMessageProperties = {
         /// The payload of the message converted to a string.
         RawContent      : string
 
@@ -55,7 +55,7 @@ module SsdpMessages =
         Host            : IPEndPoint
         MAN             : string
         MX              : string
-        ST              : string
+        NT              : string
         UserAgent       : string
     }
 
@@ -68,7 +68,7 @@ module SsdpMessages =
     //-------------------------------------------------------------------------
     // SerDes
 
-    module internal SsdpMsgDeserialize =
+    module private SsdpMsgDeserialize =
 
         // Parse message headers ----------------------------------------------
 
@@ -166,7 +166,7 @@ module SsdpMessages =
         //
         // (The functions in the map are keyed by name, such as HOST,
         // for which the value is probably 239.255.255.250:1900.)
-        let inline private applyValueToMsg functionMap state key value =
+        let inline applyValueToMsg functionMap state key value =
             if functionMap |> Map.containsKey key then
                 let fn = functionMap.[key]
                 fn state value
@@ -176,7 +176,7 @@ module SsdpMessages =
         //---------------------------------------------------------------------
         // Parse the NOTIFY message
 
-        let private notifyFieldSetters = // At module scope to create it only once.
+        let notifyFieldSetters = // At module scope to create it only once.
             [
                 "HOST",     fun msg value ->
                                 match parseEndPoint value with
@@ -194,7 +194,7 @@ module SsdpMessages =
             |> Map.ofList
 
         /// Parses an SSDP NOTIFY message.
-        let private parseNotify (content : string) =
+        let parseNotify (content : string) =
             
             let headerValues = getHeaderValueMap content
             let initialState =
@@ -209,41 +209,41 @@ module SsdpMessages =
         //---------------------------------------------------------------------
         // Parse the M-SEARCH message
 
-        let private mSearchFieldSetters =  // At module scope to create it only once.
+        let mSearchFieldSetters =  // At module scope to create it only once.
             [
                 "HOST",     fun msg value ->
                                 match parseEndPoint value with
                                 | Some ep -> { msg with SsdpMSearchMessage.Host = ep }
                                 | None -> msg
                 "MAN",      fun msg value -> { msg with MAN = value }
-                "MX",       fun msg value -> { msg with MX = value }
-                "ST",       fun msg value -> { msg with ST = value }
+                //"MX",       fun msg value -> { msg with MX = value } // TODO ????
+                "NT",       fun msg value -> { msg with NT = value }
                 "USER-AGENT", fun msg value -> { msg with UserAgent = value }
             ]
             |> Map.ofList
 
         /// Parses an SSDP M-SEARCH message.
-        let private parseMSearch (content : string) =
+        let parseMSearch (content : string) =
 
             let headerValues = getHeaderValueMap content
             let initialState =
                 {
                     SsdpMSearchMessage.Host = IPEndPoint(0L, 0)
-                    MAN = ""; MX = ""; ST = ""; UserAgent = ""
+                    MAN = ""; MX = ""; NT = ""; UserAgent = ""
                 }
             MSearch (headerValues |> Map.fold (applyValueToMsg mSearchFieldSetters) initialState)
 
         /// Parses message types we're not handling.
-        let private parseUnknown (content : string) : SsdpMessage = Unhandled content
+        let parseUnknown (content : string) : SsdpMessage = Unhandled content
 
-        let private verbParserMap =
+        let verbParserMap =
             [
                 "NOTIFY",   parseNotify
                 "M-SEARCH", parseMSearch
             ]
             |> Map.ofList
 
-        let private verbToParser verb =
+        let verbToParser verb =
 
             if verbParserMap |> Map.containsKey verb then
                 Ok verbParserMap.[verb]
@@ -258,7 +258,7 @@ module SsdpMessages =
             |> Result.bind verbToParser
             |> Result.map (fun parse -> parse content)
 
-    module internal SsdpMsgSerialize =
+    module private SsdpMsgSerialize =
         let CRLF = "\r\n"
 
         let serializeNotify (msg : SsdpNotifyMessage) =
@@ -266,7 +266,7 @@ module SsdpMessages =
             let s =
                 "NOTIFY * HTTP/1.1" + CRLF
                 + (sprintf "Host:%s:%d" (msg.Host.Address.ToString()) msg.Host.Port) + CRLF
-                + (sprintf "ST:%s" msg.ST) + CRLF
+                + (sprintf "NT:%s" msg.ST) + CRLF
                 + (sprintf "NTS:%s" msg.NTS) + CRLF
                 + (sprintf "Location:%s" msg.Location) + CRLF
                 + (sprintf "USN:%s" msg.USN) + CRLF
@@ -280,7 +280,7 @@ module SsdpMessages =
             let s =
                 "M-SEARCH * HTTP/1.1" + CRLF
                 + (sprintf "Host:%s:%d" (msg.Host.Address.ToString()) msg.Host.Port) + CRLF
-                + (sprintf "ST:%s" msg.ST) + CRLF
+                + (sprintf "NT:%s" msg.NT) + CRLF
                 + (sprintf "MAN:%s" msg.MAN) + CRLF
                 + CRLF
             Encoding.ASCII.GetBytes(s)
