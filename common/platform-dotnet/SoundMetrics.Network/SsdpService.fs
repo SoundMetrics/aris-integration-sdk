@@ -55,7 +55,8 @@ module internal SsdpServiceDetails =
                     |> queueOutgoing)
 
             | MSearch _ -> () // Discovery request service type is not supported by this service.
-            | Notify _ -> failwith "not implemented"
+            | Notify _ ->   failwith "not implemented"
+            | Response _ -> failwith "not implemented"
             | Unhandled _ -> ()
         else
             () // If the service doesn't claim to be alive, we don't send anything out.

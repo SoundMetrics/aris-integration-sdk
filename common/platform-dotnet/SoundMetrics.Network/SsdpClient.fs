@@ -59,7 +59,7 @@ type SsdpClient () =
     static member SearchAsync (serviceType : string,
                                userAgent : string,
                                timeout : TimeSpan,
-                               onMessage : SsdpMessage -> unit) =
+                               onMessage : (SsdpMessageProperties * SsdpMessage) -> unit) =
 
         let configUdp (addr : IPAddress) =
             let udp = new UdpClient()
@@ -71,9 +71,11 @@ type SsdpClient () =
         async {
 
             // Funnel all responses into a single-threaded queue.
-            let queue = BufferBlock<byte array>()
+            let queue = BufferBlock<_>()
             let processor =
-                ActionBlock<_>(fun packet -> onMessage (SsdpMessage.FromResponse packet))
+                ActionBlock<_>(fun struct (packet, timestamp, ep) ->
+                                    let props = SsdpMessageProperties.From(packet,timestamp, ep)
+                                    onMessage (props, SsdpMessage.FromResponse packet))
             use _processorLink = queue.LinkTo(processor)
 
             let packet =
@@ -95,7 +97,9 @@ type SsdpClient () =
                                                   |> ignore)
 
             let! results =
-                let callback packet _timestamp = queue.Post(packet) |> ignore
+                let callback packet timestamp ep =
+                    let props = struct (packet, timestamp, ep)
+                    queue.Post(props) |> ignore
                 sockets
                 |> Seq.map (UdpListenerWithTimeout.listenAsync timeout callback)
                 |> Async.Parallel
@@ -110,7 +114,7 @@ type SsdpClient () =
     static member SearchCSharp (serviceType : string,
                                 userAgent : string,
                                 timeout : TimeSpan,
-                                onMessage : Action<SsdpMessage>) : Task<bool> =
+                                onMessage : Action<(SsdpMessageProperties * SsdpMessage)>) : Task<bool> =
 
         let callback = fun msg -> onMessage.Invoke(msg)
         Async.StartAsTask(SsdpClient.SearchAsync(serviceType, userAgent, timeout, callback))

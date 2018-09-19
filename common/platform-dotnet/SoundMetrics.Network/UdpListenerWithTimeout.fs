@@ -11,7 +11,7 @@ module internal UdpListenerWithTimeout =
     let private noOpCallback _ = ()
 
     let listenAsync (timeout : TimeSpan)
-                    (callback : byte array -> DateTimeOffset -> unit)
+                    (callback : byte array -> DateTimeOffset -> IPEndPoint -> unit)
                     (udp : UdpClient) =
         async {
             let mutable keepGoing = true
@@ -29,5 +29,5 @@ module internal UdpListenerWithTimeout =
                         let timestamp = DateTimeOffset.Now
                         let ep = IPEndPoint(0L, 0)
                         let bytes = udp.EndReceive(iar, ref ep)
-                        callback bytes timestamp
+                        callback bytes timestamp ep
         }

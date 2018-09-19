@@ -38,6 +38,10 @@ module SsdpMessages =
             { RawContent = Encoding.UTF8.GetString(packet.UdpResult.Buffer)
               Timestamp = packet.Timestamp
               RemoteEndPoint = packet.UdpResult.RemoteEndPoint }
+        static member internal From(packet : byte array, timestamp, ep) =
+            { RawContent = Encoding.UTF8.GetString(packet)
+              Timestamp = timestamp
+              RemoteEndPoint = ep }
 
     /// Represents an SSDP NOTIFY message.
     type SsdpNotifyMessage = {
@@ -62,6 +66,7 @@ module SsdpMessages =
     /// Discriminated union for types of SSDP messages.
     type SsdpMessage =
         | Notify of SsdpNotifyMessage
+        | Response of SsdpNotifyMessage
         | MSearch of SsdpMSearchMessage
         | Unhandled of content : string
 
@@ -193,9 +198,8 @@ module SsdpMessages =
             ]
             |> Map.ofList
 
-        /// Parses an SSDP NOTIFY message.
-        let parseNotify (content : string) =
-            
+        let parseNotifyContents (content : string) =
+
             let headerValues = getHeaderValueMap content
             let initialState =
                 {
@@ -204,14 +208,20 @@ module SsdpMessages =
                     Location = ""
                     ST = ""; NTS = ""; Server = ""; USN = ""
                 }
-            Notify (headerValues |> Map.fold (applyValueToMsg notifyFieldSetters) initialState)
+            headerValues |> Map.fold (applyValueToMsg notifyFieldSetters) initialState
+
+        /// Parses an SSDP NOTIFY message.
+        let parseNotify (content : string) =
+
+            Notify (parseNotifyContents content)
 
         //---------------------------------------------------------------------
         // Parse a response packet
 
         let parseResponse (packet : byte array) =
 
-            Encoding.ASCII.GetString(packet) |> parseNotify
+            let contents = Encoding.ASCII.GetString(packet) |> parseNotifyContents
+            Response contents
 
         //---------------------------------------------------------------------
         // Parse the M-SEARCH message
@@ -283,6 +293,20 @@ module SsdpMessages =
                 + CRLF
             Encoding.ASCII.GetBytes(s)
 
+        let serializeResponse (msg : SsdpNotifyMessage) =
+
+            let s =
+                "HTTP/1.1 200 OK" + CRLF
+                + (sprintf "Host:%s:%d" (msg.Host.Address.ToString()) msg.Host.Port) + CRLF
+                + (sprintf "NT:%s" msg.ST) + CRLF
+                + (sprintf "NTS:%s" msg.NTS) + CRLF
+                + (sprintf "Location:%s" msg.Location) + CRLF
+                + (sprintf "USN:%s" msg.USN) + CRLF
+                // Skipping cache-control for now.
+                + (sprintf "Server:%s" msg.Server) + CRLF
+                + CRLF
+            Encoding.ASCII.GetBytes(s)
+
         let serializeMSearch (msg : SsdpMSearchMessage) =
 
             let s =
@@ -296,6 +320,7 @@ module SsdpMessages =
 
         let serialize = function
             | Notify msg ->     serializeNotify msg
+            | Response msg ->   serializeResponse msg
             | MSearch msg ->    serializeMSearch msg
             | Unhandled _ ->    failwith "not supported"
 
