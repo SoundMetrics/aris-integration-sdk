@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="fracas" Version="1.0.0-beta" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SoundMetrics.Common\SoundMetrics.Common.fsproj" />
   </ItemGroup>
 

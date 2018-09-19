@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="UdpListener.fs" />
+    <Compile Include="UdpListenerWithTimeout.fs" />
     <Compile Include="SsdpMessages.fs" />
     <Compile Include="SsdpConstants.fs" />
     <Compile Include="SsdpListener.fs" />

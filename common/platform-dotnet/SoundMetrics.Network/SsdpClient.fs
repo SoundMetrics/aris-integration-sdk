@@ -53,34 +53,64 @@ type SsdpClient () =
     /// TPL Dataflow source of messages, used internally.
     member internal __.MessageSourceBlock = listener.Messages :> ISourceBlock<_>
 
-    /// Request information from a service.
+    /// Request information from a service. `onMessage` may be called on multiple
+    /// threads concurrently.
     [<CompiledName("SearchFSharp")>]
-    static member SearchAsync (serviceType : string, userAgent : string) = async {
+    static member SearchAsync (serviceType : string,
+                               userAgent : string,
+                               timeout : TimeSpan,
+                               onMessage : SsdpMessage -> unit) =
+
+        let configUdp (addr : IPAddress) =
+            let udp = new UdpClient()
+            udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
+            udp.Client.Bind(IPEndPoint(addr, 0))
+            udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
+            udp
+
+        async {
+
+            // Funnel all responses into a single-threaded queue.
+            let queue = BufferBlock<byte array>()
+            let processor =
+                ActionBlock<_>(fun packet -> onMessage (SsdpMessage.FromResponse packet))
+            use _processorLink = queue.LinkTo(processor)
 
             let packet =
                 MSearch
                     {
                         Host        = SsdpConstants.SsdpEndPointIPv4
-                        MAN         = "ssdp:discover"
+                        MAN         = "\"ssdp:discover\""
                         MX          = ""
-                        NT          = serviceType
+                        ST          = serviceType
                         UserAgent   = userAgent
                     }
                 |> SsdpMessage.ToPacket
 
             let addrs = SsdpNetworkInterfaces.getSspdAddresses() |> Seq.cache
-            for addr in addrs do
-                use udp = new UdpClient()
-                udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
-                udp.Client.Bind(IPEndPoint(addr, SsdpConstants.SsdpEndPointIPv4.Port))
-                udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
-                udp.Send(packet, packet.Length, SsdpConstants.SsdpEndPointIPv4) |> ignore
+            let sockets = addrs |> Seq.map configUdp |> Seq.toList
+            sockets |> List.iter (fun udp -> udp.Send(packet,
+                                                      packet.Length,
+                                                      SsdpConstants.SsdpEndPointIPv4)
+                                                  |> ignore)
 
-            return not (addrs |> Seq.isEmpty)
+            let! results =
+                let callback packet _timestamp = queue.Post(packet) |> ignore
+                sockets
+                |> Seq.map (UdpListenerWithTimeout.listenAsync timeout callback)
+                |> Async.Parallel
+                // No guarantee here; with a timeout some could starve, but at least there
+                // likely won't be many active network interfaces.
+
+            return results.Length > 0
         }
 
     /// Request information from a service.
     [<CompiledName("SearchAsync")>]
-    static member SearchCSharp (serviceType : string, userAgent : string) : Task<bool> =
+    static member SearchCSharp (serviceType : string,
+                                userAgent : string,
+                                timeout : TimeSpan,
+                                onMessage : Action<SsdpMessage>) : Task<bool> =
 
-        Async.StartAsTask(SsdpClient.SearchAsync(serviceType, userAgent))
+        let callback = fun msg -> onMessage.Invoke(msg)
+        Async.StartAsTask(SsdpClient.SearchAsync(serviceType, userAgent, timeout, callback))

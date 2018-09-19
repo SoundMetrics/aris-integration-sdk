@@ -191,7 +191,7 @@ module internal SsdpInterfaceInputs =
         let handlePacket udpResult =
 
             let traits = SsdpMessageProperties.From(udpResult)
-            match SsdpMessage.From(udpResult) with
+            match SsdpMessage.FromMulticast(udpResult) with
             | Ok msg -> outputBuffer.Post((traits, msg)) |> ignore
             | Error msg -> Log.Information("Bad message: {msg}", msg)
 

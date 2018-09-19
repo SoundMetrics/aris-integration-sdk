@@ -55,7 +55,7 @@ module SsdpMessages =
         Host            : IPEndPoint
         MAN             : string
         MX              : string
-        NT              : string
+        ST              : string
         UserAgent       : string
     }
 
@@ -136,7 +136,7 @@ module SsdpMessages =
                 Cache-Control: max-age=4\r\n
                 Location: 192.168.10.164:55456\r\n
                 NT: uuid:4E50646A-B607-4ECB-9676-8DC10ABE8A5F\r\n
-                NTS: ssdp:alive\r\n
+                NTS: "ssdp:alive"\r\n
                 SERVER: windows/6.2 IntelUSBoverIP:1/1\r\n
                 USN: uuid:4E50646A-B607-4ECB-9676-8DC10ABE8A5F::IntelUSBoverIP:1\r\n
                 \r\n
@@ -207,6 +207,13 @@ module SsdpMessages =
             Notify (headerValues |> Map.fold (applyValueToMsg notifyFieldSetters) initialState)
 
         //---------------------------------------------------------------------
+        // Parse a response packet
+
+        let parseResponse (packet : byte array) =
+
+            Encoding.ASCII.GetString(packet) |> parseNotify
+
+        //---------------------------------------------------------------------
         // Parse the M-SEARCH message
 
         let mSearchFieldSetters =  // At module scope to create it only once.
@@ -217,7 +224,7 @@ module SsdpMessages =
                                 | None -> msg
                 "MAN",      fun msg value -> { msg with MAN = value }
                 //"MX",       fun msg value -> { msg with MX = value } // TODO ????
-                "NT",       fun msg value -> { msg with NT = value }
+                "ST",       fun msg value -> { msg with ST = value }
                 "USER-AGENT", fun msg value -> { msg with UserAgent = value }
             ]
             |> Map.ofList
@@ -229,7 +236,7 @@ module SsdpMessages =
             let initialState =
                 {
                     SsdpMSearchMessage.Host = IPEndPoint(0L, 0)
-                    MAN = ""; MX = ""; NT = ""; UserAgent = ""
+                    MAN = ""; MX = ""; ST = ""; UserAgent = ""
                 }
             MSearch (headerValues |> Map.fold (applyValueToMsg mSearchFieldSetters) initialState)
 
@@ -258,6 +265,7 @@ module SsdpMessages =
             |> Result.bind verbToParser
             |> Result.map (fun parse -> parse content)
 
+
     module private SsdpMsgSerialize =
         let CRLF = "\r\n"
 
@@ -280,8 +288,9 @@ module SsdpMessages =
             let s =
                 "M-SEARCH * HTTP/1.1" + CRLF
                 + (sprintf "Host:%s:%d" (msg.Host.Address.ToString()) msg.Host.Port) + CRLF
-                + (sprintf "NT:%s" msg.NT) + CRLF
+                + (sprintf "ST:%s" msg.ST) + CRLF
                 + (sprintf "MAN:%s" msg.MAN) + CRLF
+                + (sprintf "USER-AGENT:%s" msg.UserAgent) + CRLF
                 + CRLF
             Encoding.ASCII.GetBytes(s)
 
@@ -297,9 +306,13 @@ module SsdpMessages =
     open SsdpMsgDeserialize
 
     type SsdpMessage with
-        static member internal From(packet : MsgReceived) : Result<SsdpMessage, string> =
+        static member internal FromMulticast(packet : MsgReceived) : Result<SsdpMessage, string> =
             
             deserialize packet
+
+        static member internal FromResponse (packet : byte array) : SsdpMessage =
+
+            parseResponse packet
 
         static member internal ToPacket (message : SsdpMessage) : byte array =
 

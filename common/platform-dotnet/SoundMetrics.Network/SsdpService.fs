@@ -34,7 +34,7 @@ module internal SsdpServiceDetails =
                 Server = stInfo.Server
                 USN = stInfo.UniqueServerName
                 CacheControl = Empty
-                NTS = "ssdp:alive"
+                NTS = "\"ssdp:alive\""
             }
 
     let handleIncomingMessage (supportedServices : Set<string>) (callbacks : ISsdpServiceCallbacks) queueOutgoing msgAndTraits =
@@ -42,8 +42,8 @@ module internal SsdpServiceDetails =
         if callbacks.IsAlive then
             let _, msg = msgAndTraits
             match msg with
-            | MSearch msg when supportedServices |> Set.contains msg.NT ->
-                let serviceInfos = callbacks.GetServiceTypeInfo(msg.NT)
+            | MSearch msg when supportedServices |> Set.contains msg.ST ->
+                let serviceInfos = callbacks.GetServiceTypeInfo(msg.ST)
                 if isNull (box serviceInfos) then
                     failwith "GetServiceTypeInfo must not return null"
 

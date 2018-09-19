@@ -4,7 +4,7 @@ namespace SoundMetrics.Common
 
 open ArisBeaconDetails
 open ArisCommandModuleDetails
-open SoundMetrics.Network.Udp
+open SoundMetrics.Network
 open System
 
 module internal BeaconListener =
@@ -175,6 +175,7 @@ module internal BeaconListener =
 
 // ----------------------------------------------------------------------------
 
+open Serilog
 open System.Collections.ObjectModel
 open System.Net
 open System.Reactive
@@ -183,7 +184,6 @@ open System.Reactive.Subjects
 open System.Threading
 open System.Threading.Tasks
 open BeaconListener
-open Serilog
 
 /// Provides access to the beacons of various Sound Metrics devices.
 /// See <see cref="CreateForArisExplorerAndVoyager"/> and
