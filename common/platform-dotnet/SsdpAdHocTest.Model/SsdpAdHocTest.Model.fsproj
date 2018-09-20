@@ -5,7 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MyService.fs" />
     <Compile Include="Model.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="fracas" Version="1.0.0-beta" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.5.0" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
 </Project>

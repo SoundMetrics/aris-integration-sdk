@@ -9,13 +9,34 @@
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
+            <ColumnDefinition Width="8"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Label Content="Ambient Messages" HorizontalAlignment="Left" d:LayoutOverrides="Height"/>
         <ListBox x:Name="AmbientMessages" Grid.Row="1" ItemsSource="{Binding AmbientMessages}"/>
+        <StackPanel Grid.Row="2" Margin="2 4">
+            <CheckBox Content="Ambient enabled" IsChecked="{Binding IsAmbientEnabled}"/>
+            <CheckBox Content="Notify only" IsChecked="{Binding IsNotifyOnly}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Margin="2 4">
+            <Button Width="120" Height="28" Content="Search known good"
+                    Command="{Binding SearchKnownGoodCommand}"
+                    IsEnabled="{Binding IsSendEnabled}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="1">
+            <TextBlock>Service test</TextBlock>
+            <Button Width="160" Height="28" Content="Send self-service request"
+                    HorizontalAlignment="Left" Margin="0 4"
+                    Command="{Binding SearchSelfServiceCommand}"
+                    IsEnabled="{Binding IsSelfEnabled}"/>
+            <ListBox ItemsSource="{Binding SelfSearchProgress}"
+                     Height="200" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+        </StackPanel>
     </Grid>
 </Window>

@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Blend for Visual Studio 15
+# Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.Messages", "SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj", "{847203F0-D0A0-4459-9DA4-8A2172F115E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.Messages", "SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj", "{847203F0-D0A0-4459-9DA4-8A2172F115E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetProtobufTools", "GetProtobufTools\GetProtobufTools.csproj", "{C257A627-5838-45B9-8A1B-1D1532F30ADE}"
 EndProject
@@ -32,7 +32,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.Int
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.NativeMemory", "SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj", "{178917D9-6103-4A65-85A3-E7C1048775FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.ReorderCS", "SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj", "{38FA1FAF-03D8-4D44-8449-642440D741C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.ReorderCS", "SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj", "{38FA1FAF-03D8-4D44-8449-642440D741C5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WPF", "WPF", "{1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}"
 EndProject
@@ -58,9 +58,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SSDP", "SSDP", "{221716C1-5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SsdpAdHocTestWPF", "SsdpAdHocTestWPF\SsdpAdHocTestWPF.csproj", "{ABB6208B-95D0-4B83-BAE2-FBDACA4F8482}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SsdpAdHocTest.Model", "SsdpAdHocTest.Model\SsdpAdHocTest.Model.fsproj", "{BD734147-CF6A-4ACF-8390-6EBC3E08DA47}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SsdpAdHocTest.Model", "SsdpAdHocTest.Model\SsdpAdHocTest.Model.fsproj", "{BD734147-CF6A-4ACF-8390-6EBC3E08DA47}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArisScript", "ArisScript\ArisScript.fsproj", "{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Network", "SoundMetrics.Network\SoundMetrics.Network.fsproj", "{374A55EE-1D9A-48A5-A44E-FAAD0197A323}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +154,10 @@ Global
 		{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

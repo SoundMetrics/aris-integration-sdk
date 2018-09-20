@@ -4,11 +4,11 @@ namespace SoundMetrics.Common
 
 open ArisBeaconDetails
 open ArisCommandModuleDetails
+open SoundMetrics.Network
 open System
 
 module internal BeaconListener =
     open System.Collections.ObjectModel
-    open Udp
 
     type SonarAvailability  = Aris.Availability
     type DefenderAvailability = Defender.Availability
@@ -21,7 +21,7 @@ module internal BeaconListener =
     let toDefenderSoftwareVersion (ver: DefenderAvailability.Types.SoftwareVersion) =
         { Major = int ver.Major; Minor = int ver.Minor; BuildNumber = int ver.Buildnumber }
 
-    let toArisExplorerOrVoyagerBeacon (pkt : Udp.UdpReceived) : ArisBeacon option =
+    let toArisExplorerOrVoyagerBeacon (pkt : UdpReceived) : ArisBeacon option =
         try
             let av = SonarAvailability.Parser.ParseFrom(pkt.UdpResult.Buffer)
             let beacon =
@@ -51,7 +51,7 @@ module internal BeaconListener =
         with
             _ -> None
 
-    let toArisDefenderBeacon (pkt : Udp.UdpReceived) : ArisBeacon option =
+    let toArisDefenderBeacon (pkt : UdpReceived) : ArisBeacon option =
         try
             let av = DefenderAvailability.Parser.ParseFrom(pkt.UdpResult.Buffer)
             let defenderState = {
@@ -77,7 +77,7 @@ module internal BeaconListener =
         with
             _ -> None
 
-    let toArisCommandModuleBeacon (pkt : Udp.UdpReceived) : ArisCommandModuleBeacon option =
+    let toArisCommandModuleBeacon (pkt : UdpReceived) : ArisCommandModuleBeacon option =
 
         try
             let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(pkt.UdpResult.Buffer)
@@ -175,6 +175,7 @@ module internal BeaconListener =
 
 // ----------------------------------------------------------------------------
 
+open Serilog
 open System.Collections.ObjectModel
 open System.Net
 open System.Reactive
@@ -183,8 +184,6 @@ open System.Reactive.Subjects
 open System.Threading
 open System.Threading.Tasks
 open BeaconListener
-open Serilog
-open Udp
 
 /// Provides access to the beacons of various Sound Metrics devices.
 /// See <see cref="CreateForArisExplorerAndVoyager"/> and
