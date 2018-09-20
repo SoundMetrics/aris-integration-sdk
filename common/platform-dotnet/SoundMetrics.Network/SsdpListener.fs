@@ -99,7 +99,9 @@ module internal SsdpInterfaceInputs =
     type SsdpInterfaceInputs = NetworkChanged | Packet of MsgReceived
 
     /// Listens for packets on a given IP address. Packets are posted to `target`.
-    type InterfaceListener (addr : IPAddress, target : ITargetBlock<SsdpInterfaceInputs>) =
+    type InterfaceListener (addr : IPAddress,
+                            target : ITargetBlock<SsdpInterfaceInputs>,
+                            multicastLoopback : bool) =
 
         let mutable disposed = false
         let cts = new CancellationTokenSource ()
@@ -146,6 +148,7 @@ module internal SsdpInterfaceInputs =
             udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
             udp.Client.Bind(IPEndPoint(addr, SsdpEndPointIPv4.Port)) // TODO .Any on right ifc
             udp.JoinMulticastGroup(SsdpEndPointIPv4.Address, addr)
+            udp.MulticastLoopback <- multicastLoopback
             listen()
 
         interface IDisposable with
@@ -155,7 +158,7 @@ module internal SsdpInterfaceInputs =
         override __.Finalize() = dispose false
 
     /// Listens for SSDP messages on multiple NICs. Messages are published on `Messages`.
-    type MultiInterfaceListener () =
+    type MultiInterfaceListener (multicastLoopback : bool) =
 
         let mutable disposed = false
         let mutable interfaceMap = Map.empty<string, Interface>
@@ -186,7 +189,7 @@ module internal SsdpInterfaceInputs =
             for kvp in newListeners do
                 Log.Information("  adding {name}", kvp.Value.Name)
                 interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
-                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer)
+                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback)
                 listenerMap <- listenerMap.Add(kvp.Key, listener)
 
         let handlePacket udpResult =

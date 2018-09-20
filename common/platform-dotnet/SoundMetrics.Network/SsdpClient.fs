@@ -11,19 +11,16 @@ open SsdpMessages
 open System
 open System.Net
 open System.Net.Sockets
-open System.Reactive.Subjects
 open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
 
 /// Client interface for listening to SSDP messages.
-type SsdpClient () =
+type SsdpClient (name : string, multicastLoopback : bool) =
 
     let mutable disposed = false
-    let messages = new Subject<_>()
-    let listener = new MultiInterfaceListener()
+    let listener = new MultiInterfaceListener(multicastLoopback)
 
-    // Shim from TPL dataflow to Reactive.
-    let listenerLink = listener.Messages.LinkTo(ActionBlock<_>(messages.OnNext))
+    let outputBuffer = BufferBlock()
 
     let dispose isDisposing =
         if isDisposing then
@@ -33,9 +30,7 @@ type SsdpClient () =
             disposed <- true
 
             // Clean up managed resources
-            listenerLink.Dispose()
             listener.Dispose()
-            messages.Dispose()
 
         // Clean up native resources
         ()
@@ -47,11 +42,11 @@ type SsdpClient () =
     member me.Dispose() = (me :> IDisposable).Dispose()
     override __.Finalize() = dispose false
 
-    /// Reactive observable of SSDP messages.
-    member __.Messages = messages :> IObservable<_>
-
     /// TPL Dataflow source of messages, used internally.
-    member internal __.MessageSourceBlock = listener.Messages :> ISourceBlock<_>
+    member __.Messages = listener.Messages :> ISourceBlock<_>
+
+    /// Useful for debugging.
+    member __.Name = name
 
     /// Request information from a service. `onMessage` may be called on multiple
     /// threads concurrently.
@@ -59,6 +54,7 @@ type SsdpClient () =
     static member SearchAsync (serviceType : string,
                                userAgent : string,
                                timeout : TimeSpan,
+                               multicastLoopback : bool,
                                onMessage : (SsdpMessageProperties * SsdpMessage) -> unit) =
 
         let configUdp (addr : IPAddress) =
@@ -66,6 +62,7 @@ type SsdpClient () =
             udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
             udp.Client.Bind(IPEndPoint(addr, 0))
             udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
+            udp.MulticastLoopback <- multicastLoopback
             udp
 
         async {
@@ -117,4 +114,4 @@ type SsdpClient () =
                                 onMessage : Action<(SsdpMessageProperties * SsdpMessage)>) : Task<bool> =
 
         let callback = fun msg -> onMessage.Invoke(msg)
-        Async.StartAsTask(SsdpClient.SearchAsync(serviceType, userAgent, timeout, callback))
+        Async.StartAsTask(SsdpClient.SearchAsync(serviceType, userAgent, timeout, true, callback))

@@ -118,7 +118,7 @@ module SsdpMessages =
         /// skipping the first line and stopping at the first empty line.
         let getHeaderValueMap (content : string) =
 
-            let allLines = content.Split([| '\n'; '\r' |])
+            let allLines = content.Split([| '\n'; '\r' |], StringSplitOptions.RemoveEmptyEntries)
             let lines =
                 allLines |> Seq.skip 1
                          |> Seq.takeWhile (fun line -> not (String.IsNullOrWhiteSpace(line)))
@@ -218,7 +218,8 @@ module SsdpMessages =
         /// Parses an SSDP NOTIFY message.
         let parseNotify (content : string) =
 
-            Notify (parseNotifyContents content)
+            let contents = parseNotifyContents content
+            Notify contents
 
         //---------------------------------------------------------------------
         // Parse a response packet

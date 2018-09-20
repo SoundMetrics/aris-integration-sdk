@@ -81,13 +81,13 @@ module internal SsdpServiceDetails =
                 serviceInfo |> buildNotifyAliveMsg msgProps.LocalEndPoint.Address
                             |> Option.iter (fun aliveMsg ->
                                 aliveMsg |> SsdpMessage.ToPacket
-                                         |> queueOutgoing
+                                         |> queueOutgoing msgProps.RemoteEndPoint
                             )
 
-        | MSearch _ -> () // Discovery request service type is not supported by this service.
-        | Notify _ ->   failwith "not implemented"
-        | Response _ -> failwith "not implemented"
-        | Unhandled _ -> ()
+        | MSearch _ ->  () // Discovery request service type is not supported by this service.
+        | Notify _ ->   () // Ignoring notify messages.
+        | Response _ -> () // Ignoring response messages; these should happen.
+        | Unhandled _ ->() // Unhandled, by definition.
 
     let buildInfoRequest (info : ServicePrivateInfo) =
 
@@ -109,8 +109,11 @@ module internal SsdpInfoServing =
 
         let buf = Array.zeroCreate<byte> 1000
         let mutable cb = 0
-        while (cb = tcp.Client.Receive(buf)) && cb <> 0 do
-            printfn "### %s" (Encoding.ASCII.GetString(buf, 0, cb)) // TODO REMOVE
+        let read () =
+            let cb = tcp.Client.Receive(buf)
+            cb <> 0
+
+        while read() do
             () // Don't pay any attention to the contents, we'll respond regardless. TODO ??
 
     let sendInfoRequest (tcp : TcpClient) (info : ServicePrivateInfo) =
@@ -138,7 +141,11 @@ module internal SsdpInfoServing =
 
     let createInfoListeners (ifcs : Interface seq) =
 
-        ifcs |> Seq.map (fun ifc -> new TcpListener(ifc.Address, 0))
+        ifcs |> Seq.map (fun ifc -> let listener = new TcpListener(ifc.Address, 0)
+                                    // Need to start the listener now so we get a port number
+                                    // below for buildServiceInfos.
+                                    listener.Start()
+                                    listener)
 
     let buildServiceInfos (serviceTypes : SsdpServiceInfo seq) =
 
@@ -164,7 +171,6 @@ module internal SsdpInfoServing =
 
         for svc in svcs do
             for (_loc, listener) in svc.Listeners do
-                listener.Start()
                 beginAcceptClientConnection listener svc
 
     let cleanUpInfoListeners (svcs : ServicePrivateInfo seq) =
@@ -177,10 +183,12 @@ module internal SsdpInfoServing =
 open SsdpInfoServing
 open SsdpServiceDetails
 
-type SsdpService (supportedServiceTypes : SsdpServiceInfo seq) =
+type SsdpService (name : string, supportedServiceTypes : SsdpServiceInfo seq, multicastLoopback : bool) =
 
     let mutable disposed = false
-    let ssdpClient = new SsdpClient()
+    let ssdpClient =
+        let clientName = sprintf "SsdpService[%s].Client" name
+        new SsdpClient(clientName, multicastLoopback)
     let outgoingMessageQueue = new BufferBlock<_>()
     let svcMap =
         let toKvp svc = svc.ServiceInfo.ServiceType, svc
@@ -189,15 +197,18 @@ type SsdpService (supportedServiceTypes : SsdpServiceInfo seq) =
                     |> Map.ofSeq
     let outgoingSocket = new UdpClient()
 
-    let sendSsdpMessage packet =
-        outgoingSocket.Send(packet, packet.Length, SsdpConstants.SsdpEndPointIPv4) |> ignore
+    let sendSsdpMessage (ep, packet) =
+        Async.Start(async {
+            do! Async.Sleep(100) // delay a bit before responding
+            outgoingSocket.Send(packet, packet.Length, ep) |> ignore
+        })
 
-    let postOutgoing pkt = outgoingMessageQueue.Post(pkt) |> ignore
+    let postOutgoing ep pkt = outgoingMessageQueue.Post(ep, pkt) |> ignore
 
     let messageSub =
         // Partial application here
         let handleIncoming = handleIncomingSsdp svcMap postOutgoing
-        ssdpClient.MessageSourceBlock.LinkTo(ActionBlock<_>(handleIncoming))
+        ssdpClient.Messages.LinkTo(ActionBlock<_>(handleIncoming))
     let outgoingSub = outgoingMessageQueue.LinkTo(ActionBlock<_>(sendSsdpMessage))
 
     let dispose isDisposing =
@@ -232,3 +243,5 @@ type SsdpService (supportedServiceTypes : SsdpServiceInfo seq) =
 
     member me.Dispose() = (me :> IDisposable).Dispose()
     override __.Finalize() = dispose false
+
+    member __.Name = name

@@ -29,5 +29,14 @@
                     Command="{Binding SearchKnownGoodCommand}"
                     IsEnabled="{Binding IsSendEnabled}"/>
         </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="1">
+            <TextBlock>Service test</TextBlock>
+            <Button Width="160" Height="28" Content="Send self-service request"
+                    HorizontalAlignment="Left" Margin="0 4"
+                    Command="{Binding SearchSelfServiceCommand}"
+                    IsEnabled="{Binding IsSelfEnabled}"/>
+            <ListBox ItemsSource="{Binding SelfSearchProgress}"
+                     Height="200" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+        </StackPanel>
     </Grid>
 </Window>

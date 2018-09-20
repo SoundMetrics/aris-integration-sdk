@@ -5,6 +5,7 @@ open SoundMetrics.Network.SsdpMessages
 open System.Collections.ObjectModel
 open System
 open System.Threading
+open System.Threading.Tasks.Dataflow
 
 type AmbientMessage = {
     Content : string
@@ -16,11 +17,16 @@ type TheModel (syncCtx : SynchronizationContext) as self =
 
     let mutable disposed = false
     let ambientMessages = ObservableCollection<string>()
-    let client = new SsdpClient()
+    let client = new SsdpClient("TheModel.Client", multicastLoopback = true)
+    let selfServiceType = "SsdpAdHocTest.Model.MyService"
+    let _ssdpService = MyService.buildSsdpService selfServiceType (Guid.NewGuid().ToString())
+                            "this is a service, this is only a service"
+                            true // multicast loopback
 
     let isAmbientEnabled =  self |> fracas.mkField <@ self.IsAmbientEnabled @>  true
     let isNotifyOnly =      self |> fracas.mkField <@ self.IsNotifyOnly @>      true
     let isSendEnabled =     self |> fracas.mkField <@ self.IsSendEnabled @>     true
+    let isSelfEnabled =     self |> fracas.mkField <@ self.IsSelfEnabled @>     true
 
     let onReceive (props : SsdpMessages.SsdpMessageProperties, msg) =
         let showMsg =
@@ -39,11 +45,13 @@ type TheModel (syncCtx : SynchronizationContext) as self =
                 ambientMessages.Insert(0, s)
             syncCtx.Post(SendOrPostCallback callback, ())
 
+    let onReceiveAction = ActionBlock<_>(onReceive)
+
     let searchKnownGood _ =
             let service = "urn:schemas-upnp-org:service:Power:1"
             let ua = "SsdpAdHocTestWPF"
             isSendEnabled.Value <- false
-            SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), onReceive)
+            SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), false, onReceive)
 
     let searchKnownGoodCommand =
         let cleanUp _ = isSendEnabled.Value <- true
@@ -55,7 +63,44 @@ type TheModel (syncCtx : SynchronizationContext) as self =
                                       (fun () -> None)
                                       []
 
-    let clientSub = client.Messages.Subscribe(onReceive)
+    let selfSearchProgress = ObservableCollection<string>()
+
+    let searchSelf _ =
+
+        isSelfEnabled.Value <- false // on the UI thread
+        selfSearchProgress.Clear()
+        selfSearchProgress.Add("Searching self...")
+
+        let update =
+            let uiCtx = SynchronizationContext.Current
+            fun msg -> uiCtx.Post(SendOrPostCallback
+                                        (fun _ -> selfSearchProgress.Add(msg)),
+                                  ())
+                        
+
+        async {
+            do! Async.Sleep(1000)
+            let service = selfServiceType
+            let ua = "SsdpAdHocTestWPF"
+            update "Running search..."
+            let onReceive' (o : SsdpMessageProperties * SsdpMessage) =
+                let props, _msg = o
+                update ("Got a message!: " + props.RawContent)
+                onReceive o
+            return! SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), true, onReceive')
+        }
+
+    let searchSelfServiceCommand =
+        let cleanUp _ = isSelfEnabled.Value <- true
+        self |> fracas.mkAsyncCommand (fun _ -> true)
+                                      searchSelf
+                                      cleanUp
+                                      cleanUp
+                                      cleanUp
+                                      (fun () -> None)
+                                      []
+
+    let clientLink = client.Messages.LinkTo(onReceiveAction)
 
     let dispose isDisposing =
         if isDisposing then
@@ -65,7 +110,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
             disposed <- true
 
             // Clean up managed resources
-            clientSub.Dispose()
+            clientLink.Dispose()
             client.Dispose()
 
         // Clean up native resources
@@ -87,5 +132,9 @@ type TheModel (syncCtx : SynchronizationContext) as self =
         with get () = isNotifyOnly.Value
         and set newValue = isNotifyOnly.Value <- newValue
     member __.IsSendEnabled = isSendEnabled.Value
+    member __.IsSelfEnabled = isSelfEnabled.Value
 
     member __.SearchKnownGoodCommand = searchKnownGoodCommand.ICommand
+    member __.SearchSelfServiceCommand = searchSelfServiceCommand.ICommand
+
+    member __.SelfSearchProgress = selfSearchProgress
