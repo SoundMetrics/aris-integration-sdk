@@ -117,7 +117,8 @@ module internal SsdpInterfaceInputs =
                     let now = DateTimeOffset.Now
                     let keepGoing = t.IsCompleted && not t.IsFaulted && not cts.IsCancellationRequested
                     if keepGoing then
-                        target.Post (Packet { UdpResult = task.Result; Timestamp = now }) |> ignore
+                        let localEP = udp.Client.LocalEndPoint :?> IPEndPoint
+                        target.Post (Packet { UdpResult = task.Result; LocalEndPoint = localEP; Timestamp = now }) |> ignore
                         listen()
                     else
                         doneSignal.Set() )

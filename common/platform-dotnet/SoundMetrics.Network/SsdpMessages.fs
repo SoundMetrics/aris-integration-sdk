@@ -15,7 +15,7 @@ module SsdpMessages =
     open System.Text
 
     /// Container for a received packet and a timestamp.
-    type internal MsgReceived = { UdpResult : UdpReceiveResult; Timestamp : DateTimeOffset }
+    type internal MsgReceived = { UdpResult : UdpReceiveResult; LocalEndPoint : IPEndPoint; Timestamp : DateTimeOffset }
 
     type CacheControl = Empty // TODO ############################
 
@@ -30,6 +30,9 @@ module SsdpMessages =
         /// The time at which the message was received.
         Timestamp       : DateTimeOffset
 
+        /// The endpoint receiving the message.
+        LocalEndPoint   : IPEndPoint
+
         /// The origin of the message.
         RemoteEndPoint  : IPEndPoint
     }
@@ -37,11 +40,13 @@ module SsdpMessages =
         static member internal From(packet : MsgReceived) = 
             { RawContent = Encoding.UTF8.GetString(packet.UdpResult.Buffer)
               Timestamp = packet.Timestamp
+              LocalEndPoint = packet.LocalEndPoint
               RemoteEndPoint = packet.UdpResult.RemoteEndPoint }
-        static member internal From(packet : byte array, timestamp, ep) =
+        static member internal From(packet : byte array, timestamp, localEP, remoteEP) =
             { RawContent = Encoding.UTF8.GetString(packet)
               Timestamp = timestamp
-              RemoteEndPoint = ep }
+              LocalEndPoint = localEP
+              RemoteEndPoint = remoteEP }
 
     /// Represents an SSDP NOTIFY message.
     type SsdpNotifyMessage = {

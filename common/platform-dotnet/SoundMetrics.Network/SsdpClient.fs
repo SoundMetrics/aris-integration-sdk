@@ -73,8 +73,8 @@ type SsdpClient () =
             // Funnel all responses into a single-threaded queue.
             let queue = BufferBlock<_>()
             let processor =
-                ActionBlock<_>(fun struct (packet, timestamp, ep) ->
-                                    let props = SsdpMessageProperties.From(packet,timestamp, ep)
+                ActionBlock<_>(fun struct (packet, timestamp, localEP, remoteEP) ->
+                                    let props = SsdpMessageProperties.From(packet,timestamp, localEP, remoteEP)
                                     onMessage (props, SsdpMessage.FromResponse packet))
             use _processorLink = queue.LinkTo(processor)
 
@@ -97,8 +97,8 @@ type SsdpClient () =
                                                   |> ignore)
 
             let! results =
-                let callback packet timestamp ep =
-                    let props = struct (packet, timestamp, ep)
+                let callback packet timestamp localEP remoteEP =
+                    let props = struct (packet, timestamp, localEP, remoteEP)
                     queue.Post(props) |> ignore
                 sockets
                 |> Seq.map (UdpListenerWithTimeout.listenAsync timeout callback)
