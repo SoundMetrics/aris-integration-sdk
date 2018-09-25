@@ -3,19 +3,24 @@
 $package_version = Get-Content "ver.platform.txt"
 '$package_version=' + $package_version
 
+$output_directory = ".\built-nuget-packages"
+'$output_directory=' + $output_directory
+
 # Add the build output nuget packages to our local package source.
 
 $local_nuget_source = '\\build\SMC-Nuget-Packages'
 
 $package_names = @(
-    'SoundMetrics.Aris.Comms'
-    'SoundMetrics.Aris.Config'
-    'SoundMetrics.Aris.Messages'
-    'SoundMetrics.Aris.FrameHeaderInjection'
-    'SoundMetrics.Aris.ReorderCS'
-    'SoundMetrics.NativeMemory'
-    'SoundMetrics.Scripting'
-    'SoundMetrics.Scripting.Desktop'
+    "SoundMetrics.Aris.Comms"
+    "SoundMetrics.Aris.Config"
+    "SoundMetrics.Aris.FrameHeaderInjection"
+    "SoundMetrics.Aris.Messages"
+    "SoundMetrics.Aris.ReorderCS"
+    "SoundMetrics.Common"
+    "SoundMetrics.NativeMemory"
+    "SoundMetrics.Network"
+    "SoundMetrics.Scripting"
+    "SoundMetrics.Scripting.Desktop"
 )
 
 $package_locations = @(
