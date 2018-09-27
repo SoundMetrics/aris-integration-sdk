@@ -19,6 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="QueuedSynchronizationContext.fs" />
     <Compile Include="Devices.fs" />
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="BeaconListener.fs" />
