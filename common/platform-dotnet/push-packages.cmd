@@ -1,3 +1,5 @@
+@ECHO OFF
+
 if "%NUGET_API_KEY%" == "" goto NO_KEY
 if "%1" == "" goto MISSING_INPUT_FOLDER
 
