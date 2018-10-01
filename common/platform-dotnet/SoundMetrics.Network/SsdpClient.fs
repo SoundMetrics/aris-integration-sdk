@@ -42,7 +42,7 @@ type SsdpClient (name : string, multicastLoopback : bool) =
     member me.Dispose() = (me :> IDisposable).Dispose()
     override __.Finalize() = dispose false
 
-    /// TPL Dataflow source of messages, used internally.
+    /// TPL Dataflow source of messages.
     member __.Messages = listener.Messages :> ISourceBlock<_>
 
     /// Useful for debugging.
