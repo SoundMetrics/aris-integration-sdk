@@ -10,7 +10,7 @@ open System.Threading
 /// Based on the implementation found here:
 /// http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
 [<Sealed>]
-type QueuedSynchronizationContext(ct : CancellationToken) =
+type QueuedSynchronizationContext private (ct : CancellationToken) =
 
     inherit SynchronizationContext()
 
@@ -61,7 +61,8 @@ type QueuedSynchronizationContext(ct : CancellationToken) =
     member __.Complete() = workQueue.CompleteAdding()
 
 
-    static member RunOnAThread (ct : CancellationToken) =
+    /// Creates a QueuedSynchronizationContext.
+    static member RunOnAThread (ct : CancellationToken) : QueuedSynchronizationContext =
 
         let context = new QueuedSynchronizationContext(ct)
 
