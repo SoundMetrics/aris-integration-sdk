@@ -10,7 +10,7 @@ open System.Threading
 /// Based on the implementation found here:
 /// http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
 [<Sealed>]
-type QueuedSynchronizationContext private (ct : CancellationToken) =
+type QueuedSynchronizationContext (ct : CancellationToken) as self =
 
     inherit SynchronizationContext()
 
@@ -18,6 +18,8 @@ type QueuedSynchronizationContext private (ct : CancellationToken) =
     let workQueue = new BlockingCollection<_>()
     let doneSignal = new ManualResetEventSlim()
 
+    do
+        Thread(self.RunOnCurrentThread).Start()
 
     interface System.IDisposable with
         member c.Dispose() =
@@ -60,15 +62,3 @@ type QueuedSynchronizationContext private (ct : CancellationToken) =
     /// Notifies the context that no more work will arrive.
     member __.Complete() = workQueue.CompleteAdding()
 
-
-    /// Creates a QueuedSynchronizationContext.
-    static member RunOnAThread (ct : CancellationToken) : QueuedSynchronizationContext =
-
-        let context = new QueuedSynchronizationContext(ct)
-
-        let threadProc () = context.RunOnCurrentThread()
-
-        let thread = Thread(threadProc)
-
-        thread.Start()
-        context
