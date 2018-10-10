@@ -158,7 +158,7 @@ module internal SsdpInterfaceInputs =
         override __.Finalize() = dispose false
 
     /// Listens for SSDP messages on multiple NICs. Messages are published on `Messages`.
-    type MultiInterfaceListener (multicastLoopback : bool) =
+    type MultiInterfaceListener (multicastLoopback : bool) as self =
 
         let mutable disposed = false
         let mutable interfaceMap = Map.empty<string, Interface>
@@ -168,7 +168,8 @@ module internal SsdpInterfaceInputs =
 
         let updateInterfaceMap () =
 
-            Log.Information("A network change occurred.")
+            let listener = sprintf "listener [%08X]: " (self.GetHashCode())
+            Log.Information(listener + "A network change occurred.")
 
             let newNics =
                 SsdpNetworkInterfaces.getSspdInterfaces()
@@ -178,7 +179,7 @@ module internal SsdpInterfaceInputs =
             let expiredListeners =
                 interfaceMap |> Seq.filter (fun kvp -> not (newNics.ContainsKey kvp.Key))
             for kvp in expiredListeners do
-                Log.Information("  removing {name}", kvp.Value.Name)
+                Log.Information(listener + "  removing {name}; {address}", kvp.Value.Name, kvp.Value.Address)
                 interfaceMap <- interfaceMap.Remove(kvp.Key)
                 let old = listenerMap.[kvp.Key]
                 old.Dispose()
@@ -187,7 +188,7 @@ module internal SsdpInterfaceInputs =
             let newListeners =
                 newNics |> Seq.filter (fun kvp -> not (interfaceMap.ContainsKey kvp.Key))
             for kvp in newListeners do
-                Log.Information("  adding {name}", kvp.Value.Name)
+                Log.Information(listener + "  adding {name}; {address}", kvp.Value.Name, kvp.Value.Address)
                 interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
                 let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback)
                 listenerMap <- listenerMap.Add(kvp.Key, listener)

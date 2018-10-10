@@ -16,6 +16,6 @@ module MyService =
             }
         ]
 
-        new SsdpService("MyService", svcs, multicastLoopback)
+        new SsdpService("MyService", svcs, multicastLoopback, debugLogging = true)
 
 

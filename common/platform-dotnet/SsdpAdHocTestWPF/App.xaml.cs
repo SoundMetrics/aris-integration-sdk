@@ -19,7 +19,7 @@ namespace SsdpAdHocTestWPF
             Thread.CurrentThread.Name = "UI thread";
 
             Log.Logger = (new LoggerConfiguration())
-                    //.MinimumLevel.Debug()
+                    .MinimumLevel.Debug()
                     .WriteTo.Trace(outputTemplate: LoggingTemplate)
                     .CreateLogger();
             Log.Information("Logging initialized.");

@@ -19,7 +19,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
     let ambientMessages = ObservableCollection<string>()
     let client = new SsdpClient("TheModel.Client", multicastLoopback = true)
     let selfServiceType = "SsdpAdHocTest.Model.MyService"
-    let _ssdpService = MyService.buildSsdpService selfServiceType (Guid.NewGuid().ToString())
+    let _ssdpService = MyService.buildSsdpService selfServiceType ("SsdpAdHocTestWPF-" + Guid.NewGuid().ToString())
                             "this is a service, this is only a service"
                             true // multicast loopback
 

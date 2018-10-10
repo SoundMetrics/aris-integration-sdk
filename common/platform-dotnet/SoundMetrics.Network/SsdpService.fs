@@ -33,6 +33,7 @@ type SsdpServiceInfo = {
 }
 
 module internal SsdpServiceDetails =
+    open Serilog.Events
 
     [<Literal>]
     let CRLF = "\r\n"
@@ -45,7 +46,9 @@ module internal SsdpServiceDetails =
         Listeners   : (Location * TcpListener) list
     }
 
-    let buildNotifyAliveMsg (ifcAddr : IPAddress) (info : ServicePrivateInfo) =
+    let buildNotifyAliveMsg debugLogging
+                            (ifcAddr : IPAddress)
+                            (info : ServicePrivateInfo) =
 
         let matchingListener =
             info.Listeners |> Seq.filter (fun (_, listener) ->
@@ -53,10 +56,14 @@ module internal SsdpServiceDetails =
                                             ifcAddr = ep.Address)
                            |> Seq.cache
         if matchingListener |> Seq.isEmpty then
-            Log.Information("Couldn't find listener for interface address {addr}", ifcAddr)
+            Log.Warning("Couldn't find listener for interface address {addr}", ifcAddr)
             None
         else
             let si = info.ServiceInfo
+
+            if debugLogging && Log.IsEnabled(LogEventLevel.Debug) then
+                Log.Debug("buildNotifyAliveMsg: build message for {usn}", si.UniqueServerName)
+
             let location, _listener = matchingListener |> Seq.head
             Some
                 (Notify
@@ -70,15 +77,16 @@ module internal SsdpServiceDetails =
                         NTS = "\"ssdp:alive\""
                     })
 
-    let handleIncomingSsdp (serviceInfoMap : Map<string, ServicePrivateInfo>)
-                            queueOutgoing
-                            ((msgProps, msg) : SsdpMessageProperties * SsdpMessage) =
+    let handleIncomingSsdp debugLogging
+                           (serviceInfoMap : Map<string, ServicePrivateInfo>)
+                           queueOutgoing
+                           ((msgProps, msg) : SsdpMessageProperties * SsdpMessage) =
 
         match msg with
         | MSearch msg when serviceInfoMap |> Map.containsKey msg.ST ->
             let serviceInfo = serviceInfoMap.[msg.ST]
             if serviceInfo.ServiceInfo.IsActive() then
-                serviceInfo |> buildNotifyAliveMsg msgProps.LocalEndPoint.Address
+                serviceInfo |> buildNotifyAliveMsg debugLogging msgProps.LocalEndPoint.Address
                             |> Option.iter (fun aliveMsg ->
                                 aliveMsg |> SsdpMessage.ToPacket
                                          |> queueOutgoing msgProps.RemoteEndPoint
@@ -88,6 +96,21 @@ module internal SsdpServiceDetails =
         | Notify _ ->   () // Ignoring notify messages.
         | Response _ -> () // Ignoring response messages; these should happen.
         | Unhandled _ ->() // Unhandled, by definition.
+
+    let sendUnsolicitedAlive debugLogging queueOutgoing (serviceInfoMap : Map<string, ServicePrivateInfo>) =
+
+        for kvp in serviceInfoMap do
+            let priv = kvp.Value
+
+            for (_location, listener) in priv.Listeners do
+                let addr = (listener.LocalEndpoint :?> IPEndPoint).Address
+
+                match buildNotifyAliveMsg debugLogging addr priv with
+                | Some aliveMsg ->
+                    aliveMsg |> SsdpMessage.ToPacket
+                             |> queueOutgoing SsdpConstants.SsdpEndPointIPv4
+                | None -> ()
+        
 
     let buildInfoRequest (info : ServicePrivateInfo) =
 
@@ -182,8 +205,12 @@ module internal SsdpInfoServing =
 
 open SsdpInfoServing
 open SsdpServiceDetails
+open Serilog.Events
 
-type SsdpService (name : string, supportedServiceTypes : SsdpServiceInfo seq, multicastLoopback : bool) =
+type SsdpService (name : string,
+                  supportedServiceTypes : SsdpServiceInfo seq,
+                  multicastLoopback : bool,
+                  debugLogging : bool) =
 
     let mutable disposed = false
     let ssdpClient =
@@ -197,17 +224,25 @@ type SsdpService (name : string, supportedServiceTypes : SsdpServiceInfo seq, mu
                     |> Map.ofSeq
     let outgoingSocket = new UdpClient()
 
-    let sendSsdpMessage (ep, packet) =
+    let sendSsdpMessage (ep, (packet : byte array)) =
         Async.Start(async {
             do! Async.Sleep(100) // delay a bit before responding
-            outgoingSocket.Send(packet, packet.Length, ep) |> ignore
+
+            let packetSize = packet.Length
+            if debugLogging && Log.IsEnabled(LogEventLevel.Debug) then
+                Log.Debug("sendSsdpMessage: sending {length}-byte packet to {destination}", packetSize, ep)
+
+            let lengthSent = outgoingSocket.Send(packet, packet.Length, ep)
+            if lengthSent <> packetSize then
+                Log.Warning("sendSsdpMessage failed: {lengthSent} of {toSend} bytes sent",
+                            lengthSent, packetSize)
         })
 
     let postOutgoing ep pkt = outgoingMessageQueue.Post(ep, pkt) |> ignore
 
     let messageSub =
         // Partial application here
-        let handleIncoming = handleIncomingSsdp svcMap postOutgoing
+        let handleIncoming = handleIncomingSsdp debugLogging svcMap postOutgoing
         ssdpClient.Messages.LinkTo(ActionBlock<_>(handleIncoming))
     let outgoingSub = outgoingMessageQueue.LinkTo(ActionBlock<_>(sendSsdpMessage))
 
@@ -216,6 +251,7 @@ type SsdpService (name : string, supportedServiceTypes : SsdpServiceInfo seq, mu
             if disposed then
                 raise (ObjectDisposedException("SsdpService"))
 
+            Log.Debug("Disposing SsdpService.")
             disposed <- true
 
             // Clean up managed resources
@@ -235,7 +271,16 @@ type SsdpService (name : string, supportedServiceTypes : SsdpServiceInfo seq, mu
         if svcMap.Count = 0 then
             invalidArg "supportedServiceTypes" "Must not be empty"
 
+        if Log.IsEnabled(LogEventLevel.Debug) then
+            Log.Debug("SsdpService.ctor: {name}; {serviceCount} service(s)", name, svcMap.Count)
+            for kvp in svcMap do
+                let info = sprintf "%A" kvp.Value
+                Log.Debug("SsdpService.ctor:   {svcName} {info}", kvp.Key, info)
+
         svcMap |> Seq.map (fun kvp -> kvp.Value) |> initInfoListeners
+
+        Log.Debug("SsdpService.ctor: sending initial alive message")
+        sendUnsolicitedAlive debugLogging postOutgoing svcMap
 
     interface IDisposable with
         override me.Dispose () =   dispose true
