@@ -71,7 +71,7 @@
       <HintPath>..\packages\Argu.5.1.0\lib\net45\Argu.dll</HintPath>
     </Reference>
     <Reference Include="fracas.standard">
-      <HintPath>..\packages\fracas.1.0.0-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
+      <HintPath>..\packages\fracas.1.0.2-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
@@ -82,7 +82,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
     <Reference Include="Serilog">
-      <HintPath>..\packages\Serilog.2.5.0\lib\net46\Serilog.dll</HintPath>
+      <HintPath>..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Sinks.Console">
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>

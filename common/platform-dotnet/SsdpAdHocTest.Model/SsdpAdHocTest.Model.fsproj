@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="fracas" Version="1.0.0-beta" />
+    <PackageReference Include="fracas" Version="1.0.2-beta" />
   </ItemGroup>
 
   <ItemGroup>
