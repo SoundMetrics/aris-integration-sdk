@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="NetworkSupport.fs" />
     <Compile Include="UdpListener.fs" />
     <Compile Include="UdpListenerWithTimeout.fs" />
     <Compile Include="SsdpMessages.fs" />

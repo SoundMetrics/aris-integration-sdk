@@ -101,7 +101,8 @@ module internal SsdpInterfaceInputs =
     /// Listens for packets on a given IP address. Packets are posted to `target`.
     type InterfaceListener (addr : IPAddress,
                             target : ITargetBlock<SsdpInterfaceInputs>,
-                            multicastLoopback : bool) =
+                            multicastLoopback : bool,
+                            debugLogging : bool) =
 
         let mutable disposed = false
         let cts = new CancellationTokenSource ()
@@ -120,7 +121,11 @@ module internal SsdpInterfaceInputs =
                     let keepGoing = t.IsCompleted && not t.IsFaulted && not cts.IsCancellationRequested
                     if keepGoing then
                         let localEP = udp.Client.LocalEndPoint :?> IPEndPoint
-                        target.Post (Packet { UdpResult = task.Result; LocalEndPoint = localEP; Timestamp = now }) |> ignore
+                        let udpResult = task.Result
+                        if debugLogging then
+                            Log.Debug("InterfaceListener: {localIP} received packet of {length} bytes from {remoteIP}", 
+                                      localEP, udpResult.Buffer.Length, udpResult.RemoteEndPoint)
+                        target.Post (Packet { UdpResult = udpResult; LocalEndPoint = localEP; Timestamp = now }) |> ignore
                         listen()
                     else
                         doneSignal.Set() )
@@ -158,7 +163,7 @@ module internal SsdpInterfaceInputs =
         override __.Finalize() = dispose false
 
     /// Listens for SSDP messages on multiple NICs. Messages are published on `Messages`.
-    type MultiInterfaceListener (multicastLoopback : bool) as self =
+    type MultiInterfaceListener (multicastLoopback : bool, debugLogging : bool) as self =
 
         let mutable disposed = false
         let mutable interfaceMap = Map.empty<string, Interface>
@@ -190,7 +195,7 @@ module internal SsdpInterfaceInputs =
             for kvp in newListeners do
                 Log.Information(listener + "  adding {name}; {address}", kvp.Value.Name, kvp.Value.Address)
                 interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
-                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback)
+                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback, debugLogging)
                 listenerMap <- listenerMap.Add(kvp.Key, listener)
 
         let handlePacket udpResult =

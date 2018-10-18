@@ -39,7 +39,6 @@
     <Compile Include="TypeAliases.fs" />
     <Compile Include="PerformanceTiming.fs" />
     <Compile Include="ConduitPerfSink.fs" />
-    <Compile Include="NetworkSupport.fs" />
     <Compile Include="AcousticSettings.fs" />
     <Compile Include="AcousticMath.Internal.fs" />
     <Compile Include="AcousticMath.fs" />

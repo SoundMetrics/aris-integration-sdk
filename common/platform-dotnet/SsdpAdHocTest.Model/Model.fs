@@ -17,7 +17,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
 
     let mutable disposed = false
     let ambientMessages = ObservableCollection<string>()
-    let client = new SsdpClient("TheModel.Client", multicastLoopback = true)
+    let client = new SsdpClient("TheModel.Client", multicastLoopback = true, debugLogging = true)
     let selfServiceType = "SsdpAdHocTest.Model.MyService"
     let _ssdpService = MyService.buildSsdpService selfServiceType ("SsdpAdHocTestWPF-" + Guid.NewGuid().ToString())
                             "this is a service, this is only a service"
@@ -85,7 +85,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
             update "Running search..."
             let onReceive' (o : SsdpMessageProperties * SsdpMessage) =
                 let props, _msg = o
-                update ("Got a message!: " + props.RawContent)
+                update (sprintf "Got a message from %A:\n%s" props.RemoteEndPoint props.RawContent)
                 onReceive o
             return! SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), true, onReceive')
         }

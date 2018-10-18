@@ -1,6 +1,6 @@
 ﻿// Copyright 2015-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Comms.Internal
+namespace SoundMetrics.Network
 
 module internal NetworkSupport =
 

@@ -15,10 +15,10 @@ open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
 
 /// Client interface for listening to SSDP messages.
-type SsdpClient (name : string, multicastLoopback : bool) =
+type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
 
     let mutable disposed = false
-    let listener = new MultiInterfaceListener(multicastLoopback)
+    let listener = new MultiInterfaceListener(multicastLoopback, debugLogging)
 
     let outputBuffer = BufferBlock()
 

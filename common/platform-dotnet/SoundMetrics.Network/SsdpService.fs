@@ -79,7 +79,7 @@ module internal SsdpServiceDetails =
 
     let handleIncomingSsdp debugLogging
                            (serviceInfoMap : Map<string, ServicePrivateInfo>)
-                           queueOutgoing
+                           sendPacket
                            ((msgProps, msg) : SsdpMessageProperties * SsdpMessage) =
 
         match msg with
@@ -89,7 +89,7 @@ module internal SsdpServiceDetails =
                 serviceInfo |> buildNotifyAliveMsg debugLogging msgProps.LocalEndPoint.Address
                             |> Option.iter (fun aliveMsg ->
                                 aliveMsg |> SsdpMessage.ToPacket
-                                         |> queueOutgoing msgProps.RemoteEndPoint
+                                         |> sendPacket msgProps.RemoteEndPoint
                             )
 
         | MSearch _ ->  () // Discovery request service type is not supported by this service.
@@ -97,7 +97,7 @@ module internal SsdpServiceDetails =
         | Response _ -> () // Ignoring response messages; these should happen.
         | Unhandled _ ->() // Unhandled, by definition.
 
-    let sendUnsolicitedAlive debugLogging queueOutgoing (serviceInfoMap : Map<string, ServicePrivateInfo>) =
+    let sendUnsolicitedAlive debugLogging (serviceInfoMap : Map<string, ServicePrivateInfo>) =
 
         for kvp in serviceInfoMap do
             let priv = kvp.Value
@@ -107,8 +107,11 @@ module internal SsdpServiceDetails =
 
                 match buildNotifyAliveMsg debugLogging addr priv with
                 | Some aliveMsg ->
+                    use udp = new UdpClient(IPEndPoint(addr, 0))
+                    let sendPacket ep (buffer : byte array) =
+                        udp.Send(buffer, buffer.Length, ep) |> ignore
                     aliveMsg |> SsdpMessage.ToPacket
-                             |> queueOutgoing SsdpConstants.SsdpEndPointIPv4
+                             |> sendPacket SsdpConstants.SsdpEndPointIPv4
                 | None -> ()
         
 
@@ -202,10 +205,17 @@ module internal SsdpInfoServing =
             for (_loc, listener) in svc.Listeners do
                 listener.Stop()
 
+    type ServiceAction =
+        | InfoRequest of (SsdpMessageProperties * SsdpMessage)
+        //| PeriodicAliveMessage // TODO
+        | SendAlive
+        | Drain of (unit -> unit)
+
 
 open SsdpInfoServing
 open SsdpServiceDetails
 open Serilog.Events
+open System.Threading
 
 type SsdpService (name : string,
                   supportedServiceTypes : SsdpServiceInfo seq,
@@ -215,36 +225,67 @@ type SsdpService (name : string,
     let mutable disposed = false
     let ssdpClient =
         let clientName = sprintf "SsdpService[%s].Client" name
-        new SsdpClient(clientName, multicastLoopback)
-    let outgoingMessageQueue = new BufferBlock<_>()
+        new SsdpClient(clientName, multicastLoopback, debugLogging)
+
     let svcMap =
         let toKvp svc = svc.ServiceInfo.ServiceType, svc
         buildServiceInfos supportedServiceTypes
                     |> Seq.map toKvp
                     |> Map.ofSeq
-    let outgoingSocket = new UdpClient()
 
-    let sendSsdpMessage (ep, (packet : byte array)) =
-        Async.Start(async {
-            do! Async.Sleep(100) // delay a bit before responding
+    let actionQueue = new BufferBlock<_>()
 
-            let packetSize = packet.Length
-            if debugLogging && Log.IsEnabled(LogEventLevel.Debug) then
-                Log.Debug("sendSsdpMessage: sending {length}-byte packet to {destination}", packetSize, ep)
+    //let outgoingSocket =
+    //    let socket = new UdpClient()
+    //    socket.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address)
+    //    socket.MulticastLoopback <- true
+    //    socket
 
-            let lengthSent = outgoingSocket.Send(packet, packet.Length, ep)
-            if lengthSent <> packetSize then
-                Log.Warning("sendSsdpMessage failed: {lengthSent} of {toSend} bytes sent",
-                            lengthSent, packetSize)
-        })
+    //let sendSsdpMessage (ep, (packet : byte array)) =
+    //    Async.Start(async {
+    //        do! Async.Sleep(100) // delay a bit before responding, per protocol description
 
-    let postOutgoing ep pkt = outgoingMessageQueue.Post(ep, pkt) |> ignore
+    //        let packetSize = packet.Length
+    //        if debugLogging && Log.IsEnabled(LogEventLevel.Debug) then
+    //            Log.Debug("sendSsdpMessage: sending {length}-byte packet to {destination}", packetSize, ep)
+
+    //        let lengthSent = outgoingSocket.Send(packet, packet.Length, ep)
+    //        if lengthSent <> packetSize then
+    //            Log.Warning("sendSsdpMessage failed: {lengthSent} of {toSend} bytes sent",
+    //                        lengthSent, packetSize)
+    //    })
+
+    //### let postOutgoing ep pkt = outgoingMessageQueue.Post(ep, pkt) |> ignore
+
+    let actionHandler = new ActionBlock<_>(fun action ->
+            let sendPacket (localAddr : IPAddress) (ep : IPEndPoint) (buffer : byte array) =
+                use udp = new UdpClient(IPEndPoint(localAddr, 0))
+                if ep = SsdpConstants.SsdpEndPointIPv4 then
+                    udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address)
+                    udp.MulticastLoopback <- true
+
+                Log.Information("SsdpService: sending {length} bytes to {ep}", buffer.Length, ep)
+                if not (udp.Send(buffer, buffer.Length, ep) = buffer.Length) then
+                    Log.Warning("SsdpService: send package failed")
+
+            match action with
+            | InfoRequest msgInfo ->
+                Async.Start(async {
+                    do! Async.Sleep(100) // delay a bit before responding, per protocol description
+                    let localAddr =
+                        let props = msgInfo |> fst
+                        NetworkSupport.findLocalIPAddress props.RemoteEndPoint.Address IPAddress.Any
+
+                    handleIncomingSsdp debugLogging svcMap (sendPacket localAddr) msgInfo
+                })
+            | SendAlive -> sendUnsolicitedAlive debugLogging svcMap
+            | Drain notify -> notify()
+        )
+    let actionSub = actionQueue.LinkTo(actionHandler)
 
     let messageSub =
-        // Partial application here
-        let handleIncoming = handleIncomingSsdp debugLogging svcMap postOutgoing
-        ssdpClient.Messages.LinkTo(ActionBlock<_>(handleIncoming))
-    let outgoingSub = outgoingMessageQueue.LinkTo(ActionBlock<_>(sendSsdpMessage))
+        let queueRequest msg = actionQueue.Post (InfoRequest msg) |> ignore
+        ssdpClient.Messages.LinkTo(ActionBlock<_>(queueRequest))
 
     let dispose isDisposing =
         if isDisposing then
@@ -257,10 +298,18 @@ type SsdpService (name : string,
             // Clean up managed resources
             svcMap |> Seq.map (fun kvp -> kvp.Value) |> cleanUpInfoListeners
 
+            // Drop the incoming link before draining the buffer.
             messageSub.Dispose()
-            outgoingSub.Dispose()
             ssdpClient.Dispose()
-            outgoingSocket.Dispose()
+
+            use isDrained = new ManualResetEventSlim()
+            actionQueue.Post(Drain (fun () -> isDrained.Set())) |> ignore
+            if not (isDrained.Wait(TimeSpan.FromSeconds(0.5))) then
+                Log.Warning("SsdpService: timed out waiting to drain action queue")
+
+            actionSub.Dispose()
+            //outgoingSub.Dispose()
+            //outgoingSocket.Dispose()
 
         // Clean up native resources
         ()
@@ -280,7 +329,7 @@ type SsdpService (name : string,
         svcMap |> Seq.map (fun kvp -> kvp.Value) |> initInfoListeners
 
         Log.Debug("SsdpService.ctor: sending initial alive message")
-        sendUnsolicitedAlive debugLogging postOutgoing svcMap
+        actionQueue.Post SendAlive |> ignore
 
     interface IDisposable with
         override me.Dispose () =   dispose true
