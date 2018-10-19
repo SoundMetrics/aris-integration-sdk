@@ -140,7 +140,7 @@ module internal SsdpInfoServing =
             cb <> 0
 
         while read() do
-            () // Don't pay any attention to the contents, we'll respond regardless. TODO ??
+            () // Don't pay any attention to the contents, we'll respond regardless.
 
     let sendInfoRequest (tcp : TcpClient) (info : ServicePrivateInfo) =
 
@@ -207,9 +207,16 @@ module internal SsdpInfoServing =
 
     type ServiceAction =
         | InfoRequest of (SsdpMessageProperties * SsdpMessage)
-        //| PeriodicAliveMessage // TODO
+        | PeriodicAliveMessage
         | SendAlive
         | Drain of (unit -> unit)
+
+    let mkPeriodicAction (period : TimeSpan) action =
+
+        let timer =
+            let state = None
+            new System.Threading.Timer((fun _ -> action()), state, period, period)
+        timer :> IDisposable
 
 
 open SsdpInfoServing
@@ -219,6 +226,7 @@ open System.Threading
 
 type SsdpService (name : string,
                   supportedServiceTypes : SsdpServiceInfo seq,
+                  aliveAnnouncementPeriod : TimeSpan,
                   multicastLoopback : bool,
                   debugLogging : bool) =
 
@@ -278,7 +286,9 @@ type SsdpService (name : string,
 
                     handleIncomingSsdp debugLogging svcMap (sendPacket localAddr) msgInfo
                 })
-            | SendAlive -> sendUnsolicitedAlive debugLogging svcMap
+
+            | SendAlive | PeriodicAliveMessage ->
+                sendUnsolicitedAlive debugLogging svcMap
             | Drain notify -> notify()
         )
     let actionSub = actionQueue.LinkTo(actionHandler)
@@ -286,6 +296,9 @@ type SsdpService (name : string,
     let messageSub =
         let queueRequest msg = actionQueue.Post (InfoRequest msg) |> ignore
         ssdpClient.Messages.LinkTo(ActionBlock<_>(queueRequest))
+
+    let periodicAliveAction = mkPeriodicAction aliveAnnouncementPeriod
+                                               (fun () -> actionQueue.Post PeriodicAliveMessage |> ignore)
 
     let dispose isDisposing =
         if isDisposing then
@@ -296,6 +309,9 @@ type SsdpService (name : string,
             disposed <- true
 
             // Clean up managed resources
+
+            periodicAliveAction.Dispose()
+
             svcMap |> Seq.map (fun kvp -> kvp.Value) |> cleanUpInfoListeners
 
             // Drop the incoming link before draining the buffer.

@@ -2,6 +2,7 @@
 
 module MyService =
     open SoundMetrics.Network
+    open System
 
     let buildSsdpService serviceType usn body multicastLoopback =
 
@@ -16,6 +17,7 @@ module MyService =
             }
         ]
 
-        new SsdpService("MyService", svcs, multicastLoopback, debugLogging = true)
+        let announcementPeriod = TimeSpan.FromSeconds(5.0)
+        new SsdpService("MyService", svcs, announcementPeriod, multicastLoopback, debugLogging = true)
 
 
