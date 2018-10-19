@@ -135,12 +135,9 @@ module internal SsdpInfoServing =
 
         let buf = Array.zeroCreate<byte> 1000
         let mutable cb = 0
-        let read () =
-            let cb = tcp.Client.Receive(buf)
-            cb <> 0
 
-        while read() do
-            () // Don't pay any attention to the contents, we'll respond regardless.
+        while tcp.Client.Available > 0 do
+            tcp.Client.Receive(buf) |> ignore // Don't pay any attention to the contents, we'll respond regardless.
 
     let sendInfoRequest (tcp : TcpClient) (info : ServicePrivateInfo) =
 
@@ -160,10 +157,9 @@ module internal SsdpInfoServing =
     and onAcceptClientConnection (iar : IAsyncResult) =
 
         let listener, svc = iar.AsyncState :?> (TcpListener * ServicePrivateInfo)
-        if iar.IsCompleted then
-            let client = listener.EndAcceptTcpClient(iar)
-            processClientConnection client svc
-            beginAcceptClientConnection listener svc
+        let client = listener.EndAcceptTcpClient(iar)
+        processClientConnection client svc
+        beginAcceptClientConnection listener svc
 
     let createInfoListeners (ifcs : Interface seq) =
 
