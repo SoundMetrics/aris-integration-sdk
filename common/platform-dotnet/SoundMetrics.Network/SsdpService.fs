@@ -118,6 +118,9 @@ module internal SsdpServiceDetails =
     let buildInfoRequest (info : ServicePrivateInfo) =
 
         let body = info.ServiceInfo.GetServiceBodyText()
+        if isNull body then
+            raise (ArgumentNullException("(return)", "GetServiceBodyText must not return null"))
+
         let header =    "HTTP/1.1 200 OK" + CRLF
                         + (sprintf "CONTENT-LENGTH: %d" (Encoding.ASCII.GetByteCount body)) + CRLF
                         + (sprintf "CONTENT-TYPE: %s" info.ServiceInfo.MimeType) + CRLF
