@@ -242,28 +242,6 @@ type SsdpService (name : string,
 
     let actionQueue = new BufferBlock<_>()
 
-    //let outgoingSocket =
-    //    let socket = new UdpClient()
-    //    socket.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address)
-    //    socket.MulticastLoopback <- true
-    //    socket
-
-    //let sendSsdpMessage (ep, (packet : byte array)) =
-    //    Async.Start(async {
-    //        do! Async.Sleep(100) // delay a bit before responding, per protocol description
-
-    //        let packetSize = packet.Length
-    //        if debugLogging && Log.IsEnabled(LogEventLevel.Debug) then
-    //            Log.Debug("sendSsdpMessage: sending {length}-byte packet to {destination}", packetSize, ep)
-
-    //        let lengthSent = outgoingSocket.Send(packet, packet.Length, ep)
-    //        if lengthSent <> packetSize then
-    //            Log.Warning("sendSsdpMessage failed: {lengthSent} of {toSend} bytes sent",
-    //                        lengthSent, packetSize)
-    //    })
-
-    //### let postOutgoing ep pkt = outgoingMessageQueue.Post(ep, pkt) |> ignore
-
     let actionHandler = new ActionBlock<_>(fun action ->
             let sendPacket (localAddr : IPAddress) (ep : IPEndPoint) (buffer : byte array) =
                 use udp = new UdpClient(IPEndPoint(localAddr, 0))
@@ -323,8 +301,6 @@ type SsdpService (name : string,
                 Log.Warning("SsdpService: timed out waiting to drain action queue")
 
             actionSub.Dispose()
-            //outgoingSub.Dispose()
-            //outgoingSocket.Dispose()
 
         // Clean up native resources
         ()
