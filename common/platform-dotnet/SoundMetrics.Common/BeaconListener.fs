@@ -192,6 +192,8 @@ open BeaconListener
 type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, bool>) as self =
     // ctor(Func<_,_>) is the primary ctor as it helps on the C# side.
 
+    let mutable disposed = false
+
     let shouldInclude device = filter.Invoke(device)
     let syncContext =   let ctx = SynchronizationContext.Current
                         if isNull ctx then
@@ -264,6 +266,10 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
     let dispose disposing =
 
         if disposing then
+            if disposed then
+                raise (ObjectDisposedException "BeaconListener")
+
+            disposed <- true
             // Clean up managed resources
             beaconSubject.OnCompleted()
             let disposables : IDisposable list = [
