@@ -14,6 +14,18 @@ open System.Net.Sockets
 open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
 
+module private SsdpClientDetails =
+
+    let configUdp multicastLoopback (addr : IPAddress) =
+        let udp = new UdpClient()
+        udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
+        udp.Client.Bind(IPEndPoint(addr, 0))
+        udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
+        udp.MulticastLoopback <- multicastLoopback
+        udp
+
+open SsdpClientDetails
+
 /// Client interface for listening to SSDP messages.
 type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
 
@@ -48,6 +60,35 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
     /// Useful for debugging.
     member __.Name = name
 
+    /// Request information from a service. Assumes you'll handle messages via an instance
+    /// of SsdpClient.
+    static member SendServiceQueryAsync (serviceType : string,
+                                         userAgent : string,
+                                         multicastLoopback : bool) : Task<bool> =
+
+        async {
+            let packet =
+                MSearch
+                    {
+                        Host        = SsdpConstants.SsdpEndPointIPv4
+                        MAN         = "\"ssdp:discover\""
+                        MX          = ""
+                        ST          = serviceType
+                        UserAgent   = userAgent
+                    }
+                |> SsdpMessage.ToPacket
+
+            let addrs = SsdpNetworkInterfaces.getSspdAddresses() |> Seq.cache
+            let sockets = addrs |> Seq.map (configUdp multicastLoopback) |> Seq.toList
+            sockets |> List.iter (fun udp -> udp.Send(packet,
+                                                      packet.Length,
+                                                      SsdpConstants.SsdpEndPointIPv4)
+                                                  |> ignore
+                                             udp.Close())
+            return addrs |> Seq.length > 0
+        }
+        |> Async.StartAsTask
+
     /// Request information from a service. `onMessage` may be called on multiple
     /// threads concurrently.
     [<CompiledName("SearchFSharp")>]
@@ -56,14 +97,6 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
                                timeout : TimeSpan,
                                multicastLoopback : bool,
                                onMessage : (SsdpMessageProperties * SsdpMessage) -> unit) =
-
-        let configUdp (addr : IPAddress) =
-            let udp = new UdpClient()
-            udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true)
-            udp.Client.Bind(IPEndPoint(addr, 0))
-            udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
-            udp.MulticastLoopback <- multicastLoopback
-            udp
 
         async {
 
@@ -87,7 +120,7 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
                 |> SsdpMessage.ToPacket
 
             let addrs = SsdpNetworkInterfaces.getSspdAddresses() |> Seq.cache
-            let sockets = addrs |> Seq.map configUdp |> Seq.toList
+            let sockets = addrs |> Seq.map (configUdp multicastLoopback) |> Seq.toList
             sockets |> List.iter (fun udp -> udp.Send(packet,
                                                       packet.Length,
                                                       SsdpConstants.SsdpEndPointIPv4)
@@ -102,6 +135,8 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
                 |> Async.Parallel
                 // No guarantee here; with a timeout some could starve, but at least there
                 // likely won't be many active network interfaces.
+
+            sockets |> List.iter (fun s -> s.Close())
 
             return results.Length > 0
         }
