@@ -10,6 +10,7 @@ namespace SoundMetrics.Network
 module SsdpMessages =
     open Serilog
     open System
+    open System.Diagnostics
     open System.Net
     open System.Net.Sockets
     open System.Text
@@ -35,18 +36,23 @@ module SsdpMessages =
 
         /// The origin of the message.
         RemoteEndPoint  : IPEndPoint
+
+        /// Stopwatch for measuring performance during development.
+        Stopwatch : Stopwatch
     }
     with
         static member internal From(packet : MsgReceived) = 
             { RawContent = Encoding.UTF8.GetString(packet.UdpResult.Buffer)
               Timestamp = packet.Timestamp
               LocalEndPoint = packet.LocalEndPoint
-              RemoteEndPoint = packet.UdpResult.RemoteEndPoint }
+              RemoteEndPoint = packet.UdpResult.RemoteEndPoint
+              Stopwatch = Stopwatch.StartNew() }
         static member internal From(packet : byte array, timestamp, localEP, remoteEP) =
             { RawContent = Encoding.UTF8.GetString(packet)
               Timestamp = timestamp
               LocalEndPoint = localEP
-              RemoteEndPoint = remoteEP }
+              RemoteEndPoint = remoteEP
+              Stopwatch = Stopwatch.StartNew() }
 
     /// Represents an SSDP NOTIFY message.
     type SsdpNotifyMessage = {
