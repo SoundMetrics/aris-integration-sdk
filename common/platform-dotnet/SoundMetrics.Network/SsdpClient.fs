@@ -96,7 +96,7 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
                                userAgent : string,
                                timeout : TimeSpan,
                                multicastLoopback : bool,
-                               onMessage : (SsdpMessageProperties * SsdpMessage) -> unit) =
+                               onMessage : SsdpMessageReceived -> unit) =
 
         async {
 
@@ -105,7 +105,7 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
             let processor =
                 ActionBlock<_>(fun struct (packet, timestamp, localEP, remoteEP) ->
                                     let props = SsdpMessageProperties.From(packet,timestamp, localEP, remoteEP)
-                                    onMessage (props, SsdpMessage.FromResponse packet))
+                                    onMessage { Properties = props; Message = SsdpMessage.FromResponse packet })
             use _processorLink = queue.LinkTo(processor)
 
             let packet =
@@ -146,7 +146,7 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
     static member SearchCSharp (serviceType : string,
                                 userAgent : string,
                                 timeout : TimeSpan,
-                                onMessage : Action<(SsdpMessageProperties * SsdpMessage)>) : Task<bool> =
+                                onMessage : Action<SsdpMessageReceived>) : Task<bool> =
 
         let callback = fun msg -> onMessage.Invoke(msg)
         Async.StartAsTask(SsdpClient.SearchAsync(serviceType, userAgent, timeout, true, callback))

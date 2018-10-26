@@ -28,10 +28,10 @@ type TheModel (syncCtx : SynchronizationContext) as self =
     let isSendEnabled =     self |> fracas.mkField <@ self.IsSendEnabled @>     true
     let isSelfEnabled =     self |> fracas.mkField <@ self.IsSelfEnabled @>     true
 
-    let onReceive (props : SsdpMessages.SsdpMessageProperties, msg) =
+    let onReceive (recvd : SsdpMessages.SsdpMessageReceived) =
         let showMsg =
             isAmbientEnabled.Value &&
-                match msg, isNotifyOnly.Value with
+                match recvd.Message, isNotifyOnly.Value with
                 | Notify _, _ -> true
                 | Response _, _ -> true
                 | _, nOnly -> not nOnly
@@ -41,7 +41,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
                 if ambientMessages.Count >= 100 then
                     ambientMessages.RemoveAt(ambientMessages.Count - 1)
         
-                let s = props.RawContent
+                let s = recvd.Properties.RawContent
                 ambientMessages.Insert(0, s)
             syncCtx.Post(SendOrPostCallback callback, ())
 
@@ -83,10 +83,10 @@ type TheModel (syncCtx : SynchronizationContext) as self =
             let service = selfServiceType
             let ua = "SsdpAdHocTestWPF"
             update "Running search..."
-            let onReceive' (o : SsdpMessageProperties * SsdpMessage) =
-                let props, _msg = o
-                update (sprintf "Got a message from %A:\n%s" props.RemoteEndPoint props.RawContent)
-                onReceive o
+            let onReceive' (recvd : SsdpMessageReceived) =
+                update (sprintf "Got a message from %A:\n%s"
+                    recvd.Properties.RemoteEndPoint recvd.Properties.RawContent)
+                onReceive recvd
             return! SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), true, onReceive')
         }
 

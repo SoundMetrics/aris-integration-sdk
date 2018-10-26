@@ -81,6 +81,11 @@ module SsdpMessages =
         | MSearch of SsdpMSearchMessage
         | Unhandled of content : string
 
+    type SsdpMessageReceived = {
+        Properties : SsdpMessageProperties
+        Message : SsdpMessage
+    }
+
     //-------------------------------------------------------------------------
     // SerDes
 

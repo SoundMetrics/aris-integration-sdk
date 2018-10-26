@@ -80,16 +80,16 @@ module internal SsdpServiceDetails =
     let handleIncomingSsdp debugLogging
                            (serviceInfoMap : Map<string, ServicePrivateInfo>)
                            sendPacket
-                           ((msgProps, msg) : SsdpMessageProperties * SsdpMessage) =
+                           (recvd : SsdpMessageReceived) =
 
-        match msg with
+        match recvd.Message with
         | MSearch msg when serviceInfoMap |> Map.containsKey msg.ST ->
             let serviceInfo = serviceInfoMap.[msg.ST]
             if serviceInfo.ServiceInfo.IsActive() then
-                serviceInfo |> buildNotifyAliveMsg debugLogging msgProps.LocalEndPoint.Address
+                serviceInfo |> buildNotifyAliveMsg debugLogging recvd.Properties.LocalEndPoint.Address
                             |> Option.iter (fun aliveMsg ->
                                 aliveMsg |> SsdpMessage.ToPacket
-                                         |> sendPacket msgProps.RemoteEndPoint
+                                         |> sendPacket recvd.Properties.RemoteEndPoint
                             )
 
         | MSearch _ ->  () // Discovery request service type is not supported by this service.
@@ -205,7 +205,7 @@ module internal SsdpInfoServing =
                 listener.Stop()
 
     type ServiceAction =
-        | InfoRequest of (SsdpMessageProperties * SsdpMessage)
+        | InfoRequest of SsdpMessageReceived
         | PeriodicAliveMessage
         | SendAlive
         | Drain of (unit -> unit)
@@ -254,14 +254,13 @@ type SsdpService (name : string,
                     Log.Warning("SsdpService: send package failed")
 
             match action with
-            | InfoRequest msgInfo ->
+            | InfoRequest recvd ->
                 Async.Start(async {
                     do! Async.Sleep(100) // delay a bit before responding, per protocol description
                     let localAddr =
-                        let props = msgInfo |> fst
-                        NetworkSupport.findLocalIPAddress props.RemoteEndPoint.Address IPAddress.Any
+                        NetworkSupport.findLocalIPAddress recvd.Properties.RemoteEndPoint.Address IPAddress.Any
 
-                    handleIncomingSsdp debugLogging svcMap (sendPacket localAddr) msgInfo
+                    handleIncomingSsdp debugLogging svcMap (sendPacket localAddr) recvd
                 })
 
             | SendAlive | PeriodicAliveMessage ->

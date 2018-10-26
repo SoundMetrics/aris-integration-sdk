@@ -169,7 +169,7 @@ module internal SsdpInterfaceInputs =
         let mutable interfaceMap = Map.empty<string, Interface>
         let mutable listenerMap = Map.empty<string, InterfaceListener>
         let inputBuffer = BufferBlock<_>()
-        let outputBuffer = BufferBlock<SsdpMessageProperties * SsdpMessage>()
+        let outputBuffer = BufferBlock<SsdpMessageReceived>()
 
         let updateInterfaceMap () =
 
@@ -200,9 +200,9 @@ module internal SsdpInterfaceInputs =
 
         let handlePacket udpResult =
 
-            let traits = SsdpMessageProperties.From(udpResult)
+            let props = SsdpMessageProperties.From(udpResult)
             match SsdpMessage.FromMulticast(udpResult) with
-            | Ok msg -> outputBuffer.Post((traits, msg)) |> ignore
+            | Ok msg -> outputBuffer.Post({ Properties = props; Message = msg }) |> ignore
             | Error msg -> Log.Information("Bad message: {msg}", msg)
 
         let processInterfaceInput = function
