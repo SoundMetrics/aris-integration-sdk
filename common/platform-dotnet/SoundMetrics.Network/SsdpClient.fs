@@ -22,6 +22,8 @@ module private SsdpClientDetails =
         udp.Client.Bind(IPEndPoint(addr, 0))
         udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
         udp.MulticastLoopback <- multicastLoopback
+        Diagnostics.Trace.TraceInformation(sprintf "### configUdp: SSDP client for %A bound to %A; MulticastLoopback=%A"
+            udp.Client.LocalEndPoint udp.Client.RemoteEndPoint udp.MulticastLoopback)
         udp
 
 open SsdpClientDetails

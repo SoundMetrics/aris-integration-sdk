@@ -125,9 +125,11 @@ module internal SsdpInterfaceInputs =
                         if debugLogging then
                             Log.Verbose("InterfaceListener: {localIP} received packet of {length} bytes from {remoteIP}", 
                                         localEP, udpResult.Buffer.Length, udpResult.RemoteEndPoint)
+                        Diagnostics.Trace.TraceInformation(sprintf "### listen: received a packet of length %d" udpResult.Buffer.Length)
                         target.Post (Packet { UdpResult = udpResult; LocalEndPoint = localEP; Timestamp = now }) |> ignore
                         listen()
                     else
+                        Diagnostics.Trace.TraceInformation("### listen: keepGoing==false")
                         doneSignal.Set() )
                 task.ContinueWith(action) |> ignore
             with
@@ -154,6 +156,8 @@ module internal SsdpInterfaceInputs =
             udp.Client.Bind(IPEndPoint(addr, SsdpEndPointIPv4.Port)) // TODO .Any on right ifc
             udp.JoinMulticastGroup(SsdpEndPointIPv4.Address, addr)
             udp.MulticastLoopback <- multicastLoopback
+            Diagnostics.Trace.TraceInformation(sprintf "### InterfaceListener: SSDP client for %A bound to %A; MulticastLoopback=%A"
+                udp.Client.LocalEndPoint udp.Client.RemoteEndPoint udp.MulticastLoopback)
             listen()
 
         interface IDisposable with
