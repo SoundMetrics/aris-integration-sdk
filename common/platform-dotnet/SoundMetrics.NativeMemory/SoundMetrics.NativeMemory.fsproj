@@ -7,6 +7,7 @@
     <Product>Native Buffer</Product>
     <Description>Native buffer for use with managed code. The buffer is allocated on the native heap rather than managed memory, as our buffers would be put in LOH if they were managed.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
     <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
@@ -23,6 +24,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="BuildInfo.fs" />
     <Compile Include="NativeBuffer.fs" />
   </ItemGroup>
 
@@ -30,5 +33,9 @@
     <PackageReference Update="FSharp.Core" Version="4.5.2" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)generate-build-info.cmd ^&#xD;&#xA;  $(SolutionDir) ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.NativeMemory ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%&#xD;&#xA;" />
+  </Target>
 
 </Project>

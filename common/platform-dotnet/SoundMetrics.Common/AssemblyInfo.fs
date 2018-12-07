@@ -6,4 +6,11 @@ open System.Runtime.CompilerServices
 
 [<assembly: InternalsVisibleTo("SoundMetrics.Aris.Comms")>]
 
-do ()
+[<assembly: System.Reflection.AssemblyCompanyAttribute("Sound Metrics Corporation")>]
+[<assembly: System.Reflection.AssemblyConfigurationAttribute("Release")>]
+[<assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright (c) 2014-2018 Sound Metrics Corporation")>]
+[<assembly: System.Reflection.AssemblyDescriptionAttribute("Common communications support.")>]
+[<assembly: System.Reflection.AssemblyProductAttribute("Common Communications (managed)")>]
+[<assembly: System.Reflection.AssemblyTitleAttribute("SoundMetrics.Common")>]
+
+do()

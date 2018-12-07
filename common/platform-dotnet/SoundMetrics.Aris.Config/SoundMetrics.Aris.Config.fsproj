@@ -11,6 +11,7 @@
     <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Authors>Sound Metrics Corporation</Authors>
     <AssemblyVersion>1.0.9.0</AssemblyVersion>
     <FileVersion>1.0.9.0</FileVersion>
@@ -27,6 +28,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="BuildInfo.fs" />
     <Compile Include="SonarConfig.fs" />
   </ItemGroup>
 
@@ -38,5 +41,9 @@
     <PackageReference Update="FSharp.Core" Version="4.5.2" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)generate-build-info.cmd ^&#xD;&#xA;  $(SolutionDir) ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Aris.Config ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
+  </Target>
 
 </Project>

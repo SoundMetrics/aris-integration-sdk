@@ -5,6 +5,7 @@
     <FSharpCoreImplicitPackageVersion>4.5.*</FSharpCoreImplicitPackageVersion>
     <Version>1.0.9-alpha</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Company>Sound Metrics Corporation</Company>
     <Authors>Sound Metrics Corporation</Authors>
     <Product>ARIS 2 Communications (managed)</Product>
@@ -31,6 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BuildInfo.fs" />
     <Compile Include="AssemblyAttributes.fs" />
     <Compile Include="AsyncTaskTracker.fs" />
     <Compile Include="LanguageUtils.Internal.fs" />
@@ -94,5 +96,9 @@
     <PackageReference Update="FSharp.Core" Version="4.5.2" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)generate-build-info.cmd ^&#xD;&#xA;  $(SolutionDir) ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Aris.Comms ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
+  </Target>
 
 </Project>

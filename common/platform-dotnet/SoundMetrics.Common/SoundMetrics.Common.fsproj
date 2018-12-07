@@ -7,6 +7,8 @@
     <Product>Common Communications (managed)</Product>
     <Description>Common communications support.</Description>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
@@ -19,6 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BuildInfo.fs" />
     <Compile Include="QueuedSynchronizationContext.fs" />
     <Compile Include="Devices.fs" />
     <Compile Include="NetworkConstants.fs" />
@@ -39,5 +42,9 @@
     <PackageReference Update="FSharp.Core" Version="4.5.2" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)generate-build-info.cmd ^&#xD;&#xA;  $(SolutionDir) ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Common ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
+  </Target>
 
 </Project>

@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Authors>Sound Metrics Corporation</Authors>
     <FileVersion>1.0.9.0</FileVersion>
     <AssemblyVersion>1.0.9.0</AssemblyVersion>
@@ -25,6 +26,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="BuildInfo.fs" />
     <Compile Include="FrameHeaderUpdate.fs" />
     <Compile Include="FrameHeaderUpdateRaw.fs" />
     <Compile Include="FrameHeaderInfoUpdateMessage.fs" />
@@ -34,5 +37,9 @@
     <PackageReference Update="FSharp.Core" Version="4.5.2" />
     <PackageReference Update="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)generate-build-info.cmd ^&#xD;&#xA;  $(SolutionDir) ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Aris.FrameHeaderInjection ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%&#xD;&#xA;" />
+  </Target>
 
 </Project>
