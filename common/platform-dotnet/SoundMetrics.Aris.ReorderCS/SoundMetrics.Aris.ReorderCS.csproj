@@ -9,7 +9,6 @@
     <Company>Sound Metrics Corporation</Company>
     <Description>ARIS 2 reorder code</Description>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
-    <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

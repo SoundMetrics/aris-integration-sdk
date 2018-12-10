@@ -21,6 +21,8 @@ ECHO BUILD_VCS_NUMBER=[%BUILD_VCS_NUMBER%]
 
 
 dotnet run ^
+  --no-build ^
+  --no-restore ^
   --project "%SOLUTION_DIR%..\..\submodules\build-tools\BuildInfo\BuildInfo.fsproj" ^
   -c %CONFIG% ^
   -- ^

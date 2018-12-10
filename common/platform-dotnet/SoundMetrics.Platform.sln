@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.Messages", "SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj", "{847203F0-D0A0-4459-9DA4-8A2172F115E5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetProtobufTools", "GetProtobufTools\GetProtobufTools.csproj", "{C257A627-5838-45B9-8A1B-1D1532F30ADE}"
 EndProject
@@ -21,10 +24,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms", "SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj", "{74B8EB49-4248-43CB-9D69-AF71B4D68E66}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Config", "SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj", "{7274DF9E-EC20-4BE8-A24F-16BBC8E164D0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.FrameHeaderInjection", "SoundMetrics.Aris.FrameHeaderInjection\SoundMetrics.Aris.FrameHeaderInjection.fsproj", "{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{41D1886B-1540-4597-A6AA-6D9CFC1EE247}"
 EndProject
@@ -33,16 +45,28 @@ EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.Integration.Test", "test\SoundMetrics.Aris.Comms.Integration.Test\SoundMetrics.Aris.Comms.Integration.Test.fsproj", "{0515F65D-AE6A-4943-9B75-84C41A6C65EF}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.NativeMemory", "SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj", "{178917D9-6103-4A65-85A3-E7C1048775FF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.ReorderCS", "SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj", "{38FA1FAF-03D8-4D44-8449-642440D741C5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WPF", "WPF", "{1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.DataVisualization", "WPF\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj", "{BE7E1388-706E-44D7-96F6-D5CEBF2317F6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTestBench", "WPF\WpfTestBench\WpfTestBench.csproj", "{3F22DCB6-D360-43E2-8380-4968C896B13C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.PaletteShader", "SoundMetrics.Aris.PaletteShader\SoundMetrics.Aris.PaletteShader.csproj", "{9BC3B74C-6BFA-43C3-8DBC-48DD988AA591}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "WpfTestBench.Model", "WPF\WpfTestBench.Model\WpfTestBench.Model.fsproj", "{D831C646-E00A-4361-974C-D1A5CE15B660}"
 EndProject
@@ -53,8 +77,14 @@ EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Scripting", "SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj", "{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting.Desktop", "SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj", "{17F62268-0D61-414E-8FA3-44C29CDC9A2A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Common", "SoundMetrics.Common\SoundMetrics.Common.fsproj", "{533D46E8-6D43-4389-9028-B2FDE4FC791B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SSDP", "SSDP", "{221716C1-566A-4E28-AA29-F613334C454E}"
 EndProject
@@ -65,8 +95,13 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArisScript", "ArisScript\ArisScript.fsproj", "{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Network", "SoundMetrics.Network\SoundMetrics.Network.fsproj", "{374A55EE-1D9A-48A5-A44E-FAAD0197A323}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{942EC4E4-BC89-4D0B-A6E7-E6BA0308C22B}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "BuildInfo", "..\..\submodules\build-tools\BuildInfo\BuildInfo.fsproj", "{57705067-6871-4C9B-B788-0EE9D0694EBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -162,6 +197,10 @@ Global
 		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{374A55EE-1D9A-48A5-A44E-FAAD0197A323}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57705067-6871-4C9B-B788-0EE9D0694EBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57705067-6871-4C9B-B788-0EE9D0694EBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57705067-6871-4C9B-B788-0EE9D0694EBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57705067-6871-4C9B-B788-0EE9D0694EBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

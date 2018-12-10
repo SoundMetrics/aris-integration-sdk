@@ -25,6 +25,7 @@ generated/
 *.exe
 BuildInfo.cs
 BuildInfo.fs
+common/platform-dotnet/built-nuget-packages/
 
 # Visual Studo 2015 cache/options directory
 .vs/

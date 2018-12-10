@@ -11,7 +11,6 @@
     <Product>ARIS 2 Communications (managed)</Product>
     <Description>Provides a high-level communications implementation for ARIS 2.</Description>
     <Copyright>Copyright (c) 2014-2018 Sound Metrics Corporation</Copyright>
-    <PackageLicenseUrl>https://github.com/SoundMetrics/aris-integration-sdk/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -98,7 +97,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)generate-build-info.cmd ^&#xD;&#xA;  $(SolutionDir) ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Aris.Comms ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
+    <Exec Command="$(ProjectDir)..\generate-build-info.cmd ^&#xD;&#xA;  $(ProjectDir)..\ ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Aris.Comms ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
   </Target>
 
 </Project>
