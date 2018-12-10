@@ -64,6 +64,8 @@ IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 GOTO End
 
 :VSCmdPrompt
+ECHO Couldn't find environment variable 'VisualStudioVersion'.
+ECHO Are you at a Visual Studio developer command prompt?
 EXIT /B 1
 
 :End
