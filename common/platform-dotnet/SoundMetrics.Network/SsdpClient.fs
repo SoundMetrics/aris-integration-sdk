@@ -83,7 +83,7 @@ type SsdpClient (name : string, multicastLoopback : bool) =
 
             let addrs = SsdpNetworkInterfaces.getSspdAddresses() |> Seq.cache
             Log.Debug("SendServiceQueryAsync: to {addrs}",
-                String.Join(";", (addrs |> Seq.map (fun addr -> addr.ToString()))))
+                String.Join("; ", (addrs |> Seq.map (fun addr -> addr.ToString()))))
 
             let sockets = addrs |> Seq.map (configUdp multicastLoopback) |> Seq.toList
             sockets |> List.iter (fun udp -> udp.Send(packet,

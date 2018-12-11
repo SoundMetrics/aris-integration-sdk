@@ -10,7 +10,7 @@ namespace SsdpAdHocTestWPF
     public partial class App : Application
     {
         const string LoggingTemplate =
-            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}; thr={ThreadId}] {Message:lj}{NewLine}{Exception}";
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -20,10 +20,8 @@ namespace SsdpAdHocTestWPF
 
             Log.Logger = (new LoggerConfiguration())
                     .MinimumLevel.Debug()
+                    .Enrich.WithThreadId()
                     .WriteTo.Trace(outputTemplate: LoggingTemplate)
-#if DEBUG
-                    .WriteTo.Debug(outputTemplate: LoggingTemplate)
-#endif
                     .CreateLogger();
             Log.Information("Logging initialized.");
         }

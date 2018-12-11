@@ -155,8 +155,8 @@ module internal SsdpInterfaceInputs =
             udp.Client.Bind(IPEndPoint(addr, SsdpEndPointIPv4.Port)) // TODO .Any on right ifc
             udp.JoinMulticastGroup(SsdpEndPointIPv4.Address, addr)
             udp.MulticastLoopback <- multicastLoopback
-            Log.Debug("InterfaceListener: SSDP client for {localEP} bound to {remoteEP}; MulticastLoopback={multicastLoopback}",
-                udp.Client.LocalEndPoint, udp.Client.RemoteEndPoint, udp.MulticastLoopback)
+            Log.Debug("InterfaceListener: SSDP client for at {localEP}; MulticastLoopback={multicastLoopback}",
+                udp.Client.LocalEndPoint, udp.MulticastLoopback)
             listen()
 
         interface IDisposable with
@@ -177,17 +177,24 @@ module internal SsdpInterfaceInputs =
 
         let updateInterfaceMap () =
 
-            Log.Information(listener + "A network change occurred.")
+            Log.Information(listener + "A network change occurred; starting listeners: {listenerCount}",
+                listenerMap.Count)
 
             let newNics =
                 SsdpNetworkInterfaces.getSspdInterfaces()
                     |> Seq.map (fun ifc -> ifc.Id, ifc)
                     |> Map.ofSeq
+            newNics |> Map.iter (fun _ value ->
+                Log.Debug("updateInterfaceMap: found interface {interface}", value.Id))
 
             let expiredListeners =
                 interfaceMap |> Seq.filter (fun kvp -> not (newNics.ContainsKey kvp.Key))
+                             |> Seq.cache
+            expiredListeners |> Seq.iter (fun kvp ->
+                Log.Debug("updateInterfaceMap: expired listener: {expiredListener}", kvp.Key))
+
             for kvp in expiredListeners do
-                Log.Information(listener + "  removing {name}; {address}", kvp.Value.Name, kvp.Value.Address)
+                Log.Information(listener + "  removing {name} at {address}", kvp.Value.Name, kvp.Value.Address)
                 interfaceMap <- interfaceMap.Remove(kvp.Key)
                 let old = listenerMap.[kvp.Key]
                 old.Dispose()
@@ -195,11 +202,17 @@ module internal SsdpInterfaceInputs =
 
             let newListeners =
                 newNics |> Seq.filter (fun kvp -> not (interfaceMap.ContainsKey kvp.Key))
+                        |> Seq.cache
+            newListeners |> Seq.iter (fun kvp ->
+                Log.Debug("updateInterfaceMap: new listener: {newListener}", kvp.Key))
+
             for kvp in newListeners do
-                Log.Information(listener + "  adding {name}; {address}", kvp.Value.Name, kvp.Value.Address)
+                Log.Information(listener + "  adding {name} at {address}", kvp.Value.Name, kvp.Value.Address)
                 interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
                 let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback)
                 listenerMap <- listenerMap.Add(kvp.Key, listener)
+
+            Log.Information(listener + "Ending listeners: {listenerCount}", listenerMap.Count)
 
         let handlePacket udpResult =
 
