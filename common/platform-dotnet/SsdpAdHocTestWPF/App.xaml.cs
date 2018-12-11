@@ -10,7 +10,7 @@ namespace SsdpAdHocTestWPF
     public partial class App : Application
     {
         const string LoggingTemplate =
-            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}; thr={ThreadId}] {Message:lj}{NewLine}{Exception}";
+            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} thr={ThreadId}] {Message:lj}{NewLine}{Exception}";
 
         protected override void OnStartup(StartupEventArgs e)
         {
