@@ -2,6 +2,7 @@
 
 namespace SoundMetrics.Network
 
+open Serilog
 open System
 open System.Net
 open System.Net.Sockets
@@ -21,6 +22,7 @@ module internal UdpListenerWithTimeout =
             while keepGoing do
                 let remainingTimeout = deadline - DateTimeOffset.Now
                 if remainingTimeout <= TimeSpan.Zero then
+                    Log.Debug("listenAsync: timed out")
                     keepGoing <- false
                 else
                     let iar = udp.BeginReceive(AsyncCallback noOpCallback, ())

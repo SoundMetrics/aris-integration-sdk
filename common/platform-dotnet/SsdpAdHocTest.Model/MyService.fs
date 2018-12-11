@@ -18,6 +18,6 @@ module MyService =
         ]
 
         let announcementPeriod = TimeSpan.FromSeconds(5.0)
-        new SsdpService("MyService", svcs, announcementPeriod, multicastLoopback, debugLogging = true)
+        new SsdpService("MyService", svcs, announcementPeriod, multicastLoopback)
 
 

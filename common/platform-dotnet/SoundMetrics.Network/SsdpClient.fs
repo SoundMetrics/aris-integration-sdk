@@ -6,6 +6,7 @@ namespace SoundMetrics.Network
         Provides a public interface for listening to SSDP messages.
     *)
 
+open Serilog
 open SsdpInterfaceInputs
 open SsdpMessages
 open System
@@ -22,17 +23,17 @@ module private SsdpClientDetails =
         udp.Client.Bind(IPEndPoint(addr, 0))
         udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
         udp.MulticastLoopback <- multicastLoopback
-        Diagnostics.Trace.TraceInformation(sprintf "### configUdp: SSDP client for %A bound to %A; MulticastLoopback=%A"
-            udp.Client.LocalEndPoint udp.Client.RemoteEndPoint udp.MulticastLoopback)
+        Log.Debug("configUdp: SSDP client for {localEP} bound to {remoteEP}; MulticastLoopback={multicastLoopback}",
+            udp.Client.LocalEndPoint, udp.Client.RemoteEndPoint, udp.MulticastLoopback)
         udp
 
 open SsdpClientDetails
 
 /// Client interface for listening to SSDP messages.
-type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
+type SsdpClient (name : string, multicastLoopback : bool) =
 
     let mutable disposed = false
-    let listener = new MultiInterfaceListener(multicastLoopback, debugLogging)
+    let listener = new MultiInterfaceListener(multicastLoopback)
 
     let outputBuffer = BufferBlock()
 
@@ -81,6 +82,9 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
                 |> SsdpMessage.ToPacket
 
             let addrs = SsdpNetworkInterfaces.getSspdAddresses() |> Seq.cache
+            Log.Debug("SendServiceQueryAsync: to {addrs}",
+                String.Join(";", (addrs |> Seq.map (fun addr -> addr.ToString()))))
+
             let sockets = addrs |> Seq.map (configUdp multicastLoopback) |> Seq.toList
             sockets |> List.iter (fun udp -> udp.Send(packet,
                                                       packet.Length,
@@ -105,7 +109,8 @@ type SsdpClient (name : string, multicastLoopback : bool, debugLogging : bool) =
             // Funnel all responses into a single-threaded queue.
             let queue = BufferBlock<_>()
             let processor =
-                ActionBlock<_>(fun struct (packet, timestamp, localEP, remoteEP) ->
+                ActionBlock<_>(fun struct (packet, timestamp, localEP, remoteEP : IPEndPoint) ->
+                                    Log.Debug("SearchAsync: received response from {remoteEP}", remoteEP)
                                     let props = SsdpMessageProperties.From(packet,timestamp, localEP, remoteEP)
                                     onMessage { Properties = props; Message = SsdpMessage.FromResponse packet })
             use _processorLink = queue.LinkTo(processor)

@@ -6,6 +6,7 @@ namespace SoundMetrics.Network
         This file provides generic support for listening to a socket for UDP packets.
     *)
 
+open Serilog
 open System
 open System.Net
 open System.Net.Sockets
@@ -37,12 +38,14 @@ type UdpListener (addr : IPAddress, port, reuseAddr : bool) =
                 packetSubject.OnNext { UdpResult = task.Result; Timestamp = now }
                 listen()
             else
+                Log.Debug("UdpListener: done")
                 doneSignal.Set() )
         task.ContinueWith(action) |> ignore
 
     do
-        udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, reuseAddr);
-        udp.Client.Bind (new IPEndPoint(addr, port));
+        udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, reuseAddr)
+        udp.Client.Bind (new IPEndPoint(addr, port))
+        Log.Debug("UdpListener: opened on {ipAddr}", udp.Client.LocalEndPoint)
         listen()
 
     interface IDisposable with

@@ -46,8 +46,7 @@ module internal SsdpServiceDetails =
         Listeners   : (Location * TcpListener) list
     }
 
-    let buildNotifyAliveMsg debugLogging
-                            (ifcAddr : IPAddress)
+    let buildNotifyAliveMsg (ifcAddr : IPAddress)
                             (info : ServicePrivateInfo) =
 
         let matchingListener =
@@ -56,13 +55,12 @@ module internal SsdpServiceDetails =
                                             ifcAddr = ep.Address)
                            |> Seq.cache
         if matchingListener |> Seq.isEmpty then
-            Log.Warning("Couldn't find listener for interface address {addr}", ifcAddr)
+            Log.Warning("buildNotifyAliveMsg: Couldn't find listener for interface address {addr}", ifcAddr)
             None
         else
             let si = info.ServiceInfo
 
-            if debugLogging && Log.IsEnabled(LogEventLevel.Debug) then
-                Log.Debug("buildNotifyAliveMsg: build message for {usn}", si.UniqueServerName)
+            Log.Debug("buildNotifyAliveMsg: build message for [{ipAddr}] {usn}", ifcAddr, si.UniqueServerName)
 
             let location, _listener = matchingListener |> Seq.head
             Some
@@ -77,16 +75,17 @@ module internal SsdpServiceDetails =
                         NTS = "\"ssdp:alive\""
                     })
 
-    let handleIncomingSsdp debugLogging
-                           (serviceInfoMap : Map<string, ServicePrivateInfo>)
+    let handleIncomingSsdp (serviceInfoMap : Map<string, ServicePrivateInfo>)
                            sendPacket
                            (recvd : SsdpMessageReceived) =
 
         match recvd.Message with
         | MSearch msg when serviceInfoMap |> Map.containsKey msg.ST ->
+            Log.Debug("handleIncomingSsdp: Received MSearch from {host}", msg.Host)
+
             let serviceInfo = serviceInfoMap.[msg.ST]
             if serviceInfo.ServiceInfo.IsActive() then
-                serviceInfo |> buildNotifyAliveMsg debugLogging recvd.Properties.LocalEndPoint.Address
+                serviceInfo |> buildNotifyAliveMsg recvd.Properties.LocalEndPoint.Address
                             |> Option.iter (fun aliveMsg ->
                                 aliveMsg |> SsdpMessage.ToPacket
                                          |> sendPacket recvd.Properties.RemoteEndPoint
@@ -97,7 +96,7 @@ module internal SsdpServiceDetails =
         | Response _ -> () // Ignoring response messages; these should happen.
         | Unhandled _ ->() // Unhandled, by definition.
 
-    let sendUnsolicitedAlive debugLogging (serviceInfoMap : Map<string, ServicePrivateInfo>) =
+    let sendUnsolicitedAlive (serviceInfoMap : Map<string, ServicePrivateInfo>) =
 
         for kvp in serviceInfoMap do
             let priv = kvp.Value
@@ -105,7 +104,7 @@ module internal SsdpServiceDetails =
             for (_location, listener) in priv.Listeners do
                 let addr = (listener.LocalEndpoint :?> IPEndPoint).Address
 
-                match buildNotifyAliveMsg debugLogging addr priv with
+                match buildNotifyAliveMsg addr priv with
                 | Some aliveMsg ->
                     use udp = new UdpClient(IPEndPoint(addr, 0))
                     let sendPacket ep (buffer : byte array) =
@@ -161,6 +160,8 @@ module internal SsdpInfoServing =
 
         let listener, svc = iar.AsyncState :?> (TcpListener * ServicePrivateInfo)
         let client = listener.EndAcceptTcpClient(iar)
+        Log.Debug("onAcceptClientConnection: accepted client on {localEP} for {remoteEP}",
+            client.Client.LocalEndPoint, client.Client.RemoteEndPoint)
         processClientConnection client svc
         beginAcceptClientConnection listener svc
 
@@ -226,13 +227,12 @@ open System.Threading
 type SsdpService (name : string,
                   supportedServiceTypes : SsdpServiceInfo seq,
                   aliveAnnouncementPeriod : TimeSpan,
-                  multicastLoopback : bool,
-                  debugLogging : bool) =
+                  multicastLoopback : bool) =
 
     let mutable disposed = false
     let ssdpClient =
         let clientName = sprintf "SsdpService[%s].Client" name
-        new SsdpClient(clientName, multicastLoopback, debugLogging)
+        new SsdpClient(clientName, multicastLoopback)
 
     let svcMap =
         let toKvp svc = svc.ServiceInfo.ServiceType, svc
@@ -260,11 +260,11 @@ type SsdpService (name : string,
                     let localAddr =
                         NetworkSupport.findLocalIPAddress recvd.Properties.RemoteEndPoint.Address IPAddress.Any
 
-                    handleIncomingSsdp debugLogging svcMap (sendPacket localAddr) recvd
+                    handleIncomingSsdp svcMap (sendPacket localAddr) recvd
                 })
 
             | SendAlive | PeriodicAliveMessage ->
-                sendUnsolicitedAlive debugLogging svcMap
+                sendUnsolicitedAlive svcMap
             | Drain notify -> notify()
         )
     let actionSub = actionQueue.LinkTo(actionHandler)

@@ -57,7 +57,9 @@ module internal SsdpNetworkInterfaces =
         if addrs |> Seq.isEmpty then
             None
         else
-            Some (addrs |> Seq.head |> snd)
+            let ipAddr = addrs |> Seq.head |> snd
+            Log.Debug("selectUnicastAddress: selected {ipAddr}", ipAddr)
+            Some ipAddr
 
     /// A network interface.
     type Interface = {
@@ -101,8 +103,7 @@ module internal SsdpInterfaceInputs =
     /// Listens for packets on a given IP address. Packets are posted to `target`.
     type InterfaceListener (addr : IPAddress,
                             target : ITargetBlock<SsdpInterfaceInputs>,
-                            multicastLoopback : bool,
-                            debugLogging : bool) =
+                            multicastLoopback : bool) =
 
         let mutable disposed = false
         let cts = new CancellationTokenSource ()
@@ -122,14 +123,12 @@ module internal SsdpInterfaceInputs =
                     if keepGoing then
                         let localEP = udp.Client.LocalEndPoint :?> IPEndPoint
                         let udpResult = task.Result
-                        if debugLogging then
-                            Log.Verbose("InterfaceListener: {localIP} received packet of {length} bytes from {remoteIP}", 
+                        Log.Debug("InterfaceListener.listen: {localEP} received packet of {length} bytes from {remoteIP}", 
                                         localEP, udpResult.Buffer.Length, udpResult.RemoteEndPoint)
-                        Diagnostics.Trace.TraceInformation(sprintf "### listen: received a packet of length %d" udpResult.Buffer.Length)
                         target.Post (Packet { UdpResult = udpResult; LocalEndPoint = localEP; Timestamp = now }) |> ignore
                         listen()
                     else
-                        Diagnostics.Trace.TraceInformation("### listen: keepGoing==false")
+                        Log.Debug("InterfaceListener.listen: {localEP} keepGoing==false", udp.Client.LocalEndPoint)
                         doneSignal.Set() )
                 task.ContinueWith(action) |> ignore
             with
@@ -156,8 +155,8 @@ module internal SsdpInterfaceInputs =
             udp.Client.Bind(IPEndPoint(addr, SsdpEndPointIPv4.Port)) // TODO .Any on right ifc
             udp.JoinMulticastGroup(SsdpEndPointIPv4.Address, addr)
             udp.MulticastLoopback <- multicastLoopback
-            Diagnostics.Trace.TraceInformation(sprintf "### InterfaceListener: SSDP client for %A bound to %A; MulticastLoopback=%A"
-                udp.Client.LocalEndPoint udp.Client.RemoteEndPoint udp.MulticastLoopback)
+            Log.Debug("InterfaceListener: SSDP client for {localEP} bound to {remoteEP}; MulticastLoopback={multicastLoopback}",
+                udp.Client.LocalEndPoint, udp.Client.RemoteEndPoint, udp.MulticastLoopback)
             listen()
 
         interface IDisposable with
@@ -167,17 +166,17 @@ module internal SsdpInterfaceInputs =
         override __.Finalize() = dispose false
 
     /// Listens for SSDP messages on multiple NICs. Messages are published on `Messages`.
-    type MultiInterfaceListener (multicastLoopback : bool, debugLogging : bool) as self =
+    type MultiInterfaceListener (multicastLoopback : bool) as self =
 
         let mutable disposed = false
         let mutable interfaceMap = Map.empty<string, Interface>
         let mutable listenerMap = Map.empty<string, InterfaceListener>
         let inputBuffer = BufferBlock<_>()
         let outputBuffer = BufferBlock<SsdpMessageReceived>()
+        let listener = sprintf "MultiInterfaceListener [%08X]: " (self.GetHashCode())
 
         let updateInterfaceMap () =
 
-            let listener = sprintf "listener [%08X]: " (self.GetHashCode())
             Log.Information(listener + "A network change occurred.")
 
             let newNics =
@@ -199,7 +198,7 @@ module internal SsdpInterfaceInputs =
             for kvp in newListeners do
                 Log.Information(listener + "  adding {name}; {address}", kvp.Value.Name, kvp.Value.Address)
                 interfaceMap <- interfaceMap.Add(kvp.Key, kvp.Value)
-                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback, debugLogging)
+                let listener = new InterfaceListener(kvp.Value.Address, inputBuffer, multicastLoopback)
                 listenerMap <- listenerMap.Add(kvp.Key, listener)
 
         let handlePacket udpResult =
@@ -207,7 +206,7 @@ module internal SsdpInterfaceInputs =
             let props = SsdpMessageProperties.From(udpResult)
             match SsdpMessage.FromMulticast(udpResult) with
             | Ok msg -> outputBuffer.Post({ Properties = props; Message = msg }) |> ignore
-            | Error msg -> Log.Information("Bad message: {msg}", msg)
+            | Error msg -> Log.Information(listener + "Bad message: {msg}", msg)
 
         let processInterfaceInput = function
             | NetworkChanged ->     updateInterfaceMap ()
@@ -238,6 +237,7 @@ module internal SsdpInterfaceInputs =
                 if disposed then
                     raise (ObjectDisposedException "SsdpInterfaceInputs.MultiInterfaceListener")
 
+                Log.Debug(listener + "disposing")
                 // Clean up managed resources
                 removeEventListeners()
                 links |> Seq.iter (fun d -> d.Dispose())
