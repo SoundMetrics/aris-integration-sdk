@@ -21,6 +21,9 @@ namespace SsdpAdHocTestWPF
             Log.Logger = (new LoggerConfiguration())
                     .MinimumLevel.Debug()
                     .WriteTo.Trace(outputTemplate: LoggingTemplate)
+#if DEBUG
+                    .WriteTo.Debug(outputTemplate: LoggingTemplate)
+#endif
                     .CreateLogger();
             Log.Information("Logging initialized.");
         }
