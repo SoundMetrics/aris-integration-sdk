@@ -218,7 +218,9 @@ module internal SsdpInterfaceInputs =
 
             let props = SsdpMessageProperties.From(udpResult)
             match SsdpMessage.FromMulticast(udpResult) with
-            | Ok msg -> outputBuffer.Post({ Properties = props; Message = msg }) |> ignore
+            | Ok msg ->
+                Log.Debug(listener + "message received of type {type}", msg.GetType().Name)
+                outputBuffer.Post({ Properties = props; Message = msg }) |> ignore
             | Error msg -> Log.Information(listener + "Bad message: {msg}", msg)
 
         let processInterfaceInput = function
