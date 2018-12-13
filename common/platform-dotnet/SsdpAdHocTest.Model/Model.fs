@@ -51,7 +51,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
             let service = "urn:schemas-upnp-org:service:Power:1"
             let ua = "SsdpAdHocTestWPF"
             isSendEnabled.Value <- false
-            SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), false, onReceive)
+            searchAsync(service, ua, TimeSpan.FromSeconds(5.0), false, onReceive)
 
     let searchKnownGoodCommand =
         let cleanUp _ = isSendEnabled.Value <- true
@@ -87,7 +87,7 @@ type TheModel (syncCtx : SynchronizationContext) as self =
                 update (sprintf "Got a message from %A:\n%s"
                     recvd.Properties.RemoteEndPoint recvd.Properties.RawContent)
                 onReceive recvd
-            return! SsdpClient.SearchAsync(service, ua, TimeSpan.FromSeconds(5.0), true, onReceive')
+            return! searchAsync(service, ua, TimeSpan.FromSeconds(5.0), true, onReceive')
         }
 
     let searchSelfServiceCommand =
