@@ -12,12 +12,10 @@ module MyService =
                 Server = "windows/soundmetrics-com/MyService"
                 UniqueServerName = usn
                 MimeType = "text/x.kvp"
-                IsActive = fun () -> true
-                GetServiceBodyText = fun () -> body
+                IsActive = Func<_>(fun () -> true)
+                GetServiceBodyText = Func<_>(fun () -> body)
             }
         ]
 
         let announcementPeriod = TimeSpan.FromSeconds(5.0)
         new SsdpService("MyService", svcs, announcementPeriod, multicastLoopback)
-
-

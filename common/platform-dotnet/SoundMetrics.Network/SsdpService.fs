@@ -25,11 +25,11 @@ type SsdpServiceInfo = {
     MimeType            : string
 
     /// Callback to determine if the serivce is active.
-    IsActive            : unit -> bool
+    IsActive            : Func<bool>
 
     /// Callback to retrieve body text for Location requests
     /// (the HTTP interaction is managed by SsdpService).
-    GetServiceBodyText  : unit -> string
+    GetServiceBodyText  : Func<string>
 }
 
 module internal SsdpServiceDetails =
@@ -84,7 +84,7 @@ module internal SsdpServiceDetails =
             Log.Debug("handleIncomingSsdp: Received MSearch from {host}", msg.Host)
 
             let serviceInfo = serviceInfoMap.[msg.ST]
-            if serviceInfo.ServiceInfo.IsActive() then
+            if serviceInfo.ServiceInfo.IsActive.Invoke() then
                 serviceInfo |> buildNotifyAliveMsg recvd.Properties.LocalEndPoint.Address
                             |> Option.iter (fun aliveMsg ->
                                 aliveMsg |> SsdpMessage.ToPacket
@@ -116,7 +116,7 @@ module internal SsdpServiceDetails =
 
     let buildInfoRequest (info : ServicePrivateInfo) =
 
-        let body = info.ServiceInfo.GetServiceBodyText()
+        let body = info.ServiceInfo.GetServiceBodyText.Invoke()
         if isNull body then
             raise (ArgumentNullException("(return)", "GetServiceBodyText must not return null"))
 
