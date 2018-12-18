@@ -6,7 +6,10 @@ open System.Threading.Tasks.Dataflow
 
 module Graph =
 
-    let inline (^<|) f a = f a
+    // This has right associativity so, more or less, the graph binds from
+    // right to left. Pointing the arrow right may be less correct in that
+    // respect, but it is more readable when you're looking at a graph.
+    let inline (^|>) f a = f a
 
     let inline fst (item, _, _) = item
     let inline snd (_, item, _) = item
