@@ -66,7 +66,10 @@ module Graph =
 
         action :> ITargetBlock<'T>, leaves, disposables
 
-    type GraphHandle<'T> (root : RH<'T>) =
+    open Serilog // No logging above this line, please.
+    open System.Diagnostics
+
+    type GraphHandle<'T> (name : string, root : RH<'T>) =
 
         let mutable disposed = false
         let mutable completing = false
@@ -79,11 +82,18 @@ module Graph =
 
         let dispose disposing =
 
+            let sw = Stopwatch.StartNew()
+
             if disposed then
-                raise (ObjectDisposedException "GraphHandle")
+                let msg = sprintf "An attempt was made to dispose an already-disposed GraphHandle '%s'"
+                                  name
+                let exn = (ObjectDisposedException ("GraphHandle", msg))
+                Log.Error(exn, msg)
+                raise exn
 
             if disposing then
                 disposed <- true
+                Log.Verbose("Disposing GraphHandle '{name}'", name)
 
                 if not completing then
                     completeAndWait (TimeSpan.FromSeconds(1.0)) |> ignore
@@ -91,8 +101,12 @@ module Graph =
                 // Clean up managed resources
                 disposables |> List.iter (fun d -> d.Dispose())
 
+                Log.Verbose("Disposing GraphHandle '{name}' duration: {duration}", sw.Elapsed)
+
             // Clean up unmanaged resources
             ()
+
+        do Log.Verbose("Constructed GraphHandle '{name}'")
 
         interface IDisposable with
             member me.Dispose() = dispose true
@@ -104,7 +118,11 @@ module Graph =
         member __.Post(t : 'T) : bool =
 
             if disposed then
-                raise (ObjectDisposedException "GraphHandle")
+                let msg = sprintf "An attempt was made to Post to an already-disposed GraphHandle '%s'"
+                                  name
+                let exn = (ObjectDisposedException ("GraphHandle", msg))
+                Log.Error(exn, msg)
+                raise exn
 
             if not completing then
                 root.Post(t)
