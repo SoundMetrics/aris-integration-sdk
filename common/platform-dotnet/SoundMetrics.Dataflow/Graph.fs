@@ -34,6 +34,20 @@ module Graph =
         let d = buffer.LinkTo(rh, dfbOptions)
         buffer :> ITargetBlock<'T>, leaves, d :: disposables
 
+    let private completeTargets (template : Task) (targets : ITargetBlock<_> seq) =
+
+        // This logic is patterned after that in section 3 of
+        // "Guide to Implementing Custom TPL Dataflow Blocks"
+        // https://download.microsoft.com/download/1/6/1/1615555D-287C-4159-8491-8E5644C43CBA/Guide%20to%20Implementing%20Custom%20TPL%20Dataflow%20Blocks.pdf
+
+        let complete : ITargetBlock<_> -> unit =
+            if template.IsFaulted then
+                fun target -> target.Fault(template.Exception)
+            else
+                fun target -> target.Complete()
+
+        targets |> Seq.iter complete
+
     let tee<'T> (rhs : Tuple<ITargetBlock<'T>, Task list, IDisposable list> list) =
 
         let cached = rhs |> Seq.cache
@@ -43,8 +57,8 @@ module Graph =
         let action = ActionBlock<'T>(fun t ->
                         targets |> Seq.iter (fun target -> target.Post(t) |> ignore))
 
-        action.Completion.ContinueWith(fun _ ->
-                targets |> Seq.iter (fun target -> target.Complete())
+        action.Completion.ContinueWith(
+                fun completion -> targets |> completeTargets completion
             )
             |> ignore
 
@@ -56,13 +70,15 @@ module Graph =
         let d = tf.LinkTo(rhs, dfbOptions)
         tf :> ITargetBlock<'T>, leaves, d :: disposables
 
-    let filter<'T> (predicate : 'T -> bool) (rh : ITargetBlock<'T>, leaves, disposables) =
+    let filter<'T> (predicate : 'T -> bool) (target : ITargetBlock<'T>, leaves, disposables) =
 
         let action = ActionBlock<'T>(fun t ->
                         if predicate t then
-                            rh.Post(t) |> ignore)
+                            target.Post(t) |> ignore)
 
-        action.Completion.ContinueWith(fun _ -> rh.Complete()) |> ignore
+        action.Completion.ContinueWith(
+                fun completion -> target |> Seq.singleton |> completeTargets completion
+            ) |> ignore
 
         action :> ITargetBlock<'T>, leaves, disposables
 
