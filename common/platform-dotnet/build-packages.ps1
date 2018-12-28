@@ -26,6 +26,7 @@ $dotnetStandardAssemblies = @(
     "SoundMetrics.Aris.Messages"
     "SoundMetrics.Aris.ReorderCS"
     "SoundMetrics.Common"
+    "SoundMetrics.Data"
     "SoundMetrics.Dataflow"
     "SoundMetrics.NativeMemory"
     "SoundMetrics.Network"
