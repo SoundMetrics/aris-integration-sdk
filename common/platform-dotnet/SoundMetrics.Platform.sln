@@ -103,7 +103,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{942EC4E4
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "BuildInfo", "..\..\submodules\build-tools\BuildInfo\BuildInfo.fsproj", "{57705067-6871-4C9B-B788-0EE9D0694EBC}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Dataflow", "SoundMetrics.Dataflow\SoundMetrics.Dataflow.fsproj", "{213D4734-2DBB-4368-9172-191EB7F0B885}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Dataflow", "SoundMetrics.Dataflow\SoundMetrics.Dataflow.fsproj", "{213D4734-2DBB-4368-9172-191EB7F0B885}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Data", "SoundMetrics.Data\SoundMetrics.Data.fsproj", "{54581C26-13C4-4EDF-B080-3D4F7009BD0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -207,6 +209,10 @@ Global
 		{213D4734-2DBB-4368-9172-191EB7F0B885}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{213D4734-2DBB-4368-9172-191EB7F0B885}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{213D4734-2DBB-4368-9172-191EB7F0B885}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54581C26-13C4-4EDF-B080-3D4F7009BD0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54581C26-13C4-4EDF-B080-3D4F7009BD0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54581C26-13C4-4EDF-B080-3D4F7009BD0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54581C26-13C4-4EDF-B080-3D4F7009BD0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
