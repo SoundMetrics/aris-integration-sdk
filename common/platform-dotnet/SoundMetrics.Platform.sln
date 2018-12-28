@@ -75,6 +75,9 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FocusExercise", "test\FocusExercise\FocusExercise.fsproj", "{5E40044D-64A5-4F99-AF88-11190E38D469}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Scripting", "SoundMetrics.Scripting\SoundMetrics.Scripting.fsproj", "{8E219FB0-DBF5-4BD7-89D8-32B579F3DDA2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Scripting.Desktop", "SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj", "{17F62268-0D61-414E-8FA3-44C29CDC9A2A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -104,8 +107,14 @@ EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "BuildInfo", "..\..\submodules\build-tools\BuildInfo\BuildInfo.fsproj", "{57705067-6871-4C9B-B788-0EE9D0694EBC}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Dataflow", "SoundMetrics.Dataflow\SoundMetrics.Dataflow.fsproj", "{213D4734-2DBB-4368-9172-191EB7F0B885}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Data", "SoundMetrics.Data\SoundMetrics.Data.fsproj", "{54581C26-13C4-4EDF-B080-3D4F7009BD0D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

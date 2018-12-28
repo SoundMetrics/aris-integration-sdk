@@ -33,37 +33,38 @@ type Frequency = Low = 0 | High = 1
 
 module SonarConfig =
 
-    type Range<'t> = { Name: string; Min: 't; Max: 't }
-    with
-        override rng.ToString() = sprintf "%s %A-%A" rng.Name rng.Min rng.Max
+    //type Range<'t> = { Name: string; Min: 't; Max: 't }
+    //with
+    //    override rng.ToString() = sprintf "%s %A-%A" rng.Name rng.Min rng.Max
 
-    [<CompiledName("RangeContains")>]
-    let contains value range =
-        assert (range.Min <= range.Max)
-        range.Min <= value && value <= range.Max
+    //[<CompiledName("RangeContains")>]
+    //let contains value range =
+    //    assert (range.Min <= range.Max)
+    //    range.Min <= value && value <= range.Max
 
-    module internal RangeImpl =
+    //module internal RangeImpl =
 
-        let inline range<'T when 'T : comparison> name (min: 'T) (max: 'T) = { Name = name; Min = min; Max = max }
-
-
-        let inline isSubrangeOf<'T when 'T : comparison> (original : Range<'T>) subrange =
-
-            original |> contains subrange.Min && original |> contains subrange.Max
+    //    let inline range<'T when 'T : comparison> name (min: 'T) (max: 'T) = { Name = name; Min = min; Max = max }
 
 
-        let inline subrangeOf<'T when 'T : comparison> range (min : 'T) (max : 'T) =
+    //    let inline isSubrangeOf<'T when 'T : comparison> (original : Range<'T>) subrange =
 
-            let subrange = { Name = range.Name; Min = min; Max = max }
-            if not (subrange |> isSubrangeOf range) then
-                invalidArg "min" "subrange falls outside original range"
-
-            subrange
+    //        original |> contains subrange.Min && original |> contains subrange.Max
 
 
-        let inline constrainRangeMax<'T when 'T : comparison> range (max : 'T) = subrangeOf range range.Min max
+    //    let inline subrangeOf<'T when 'T : comparison> range (min : 'T) (max : 'T) =
 
-    open RangeImpl
+    //        let subrange = { Name = range.Name; Min = min; Max = max }
+    //        if not (subrange |> isSubrangeOf range) then
+    //            invalidArg "min" "subrange falls outside original range"
+
+    //        subrange
+
+
+    //    let inline constrainRangeMax<'T when 'T : comparison> range (max : 'T) = subrangeOf range range.Min max
+
+    open SoundMetrics.Data
+    open SoundMetrics.Data.Range
     open SoundMetrics.Common
 
     // Min/max values per ARIS Engineering Test Command List

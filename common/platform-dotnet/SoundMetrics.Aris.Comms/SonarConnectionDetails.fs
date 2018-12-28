@@ -10,6 +10,7 @@ open System
 module internal SonarConnectionDetails =
 
     open SoundMetrics.Aris.Config
+    open SoundMetrics.Data
     open System.Net
     open System.Net.Sockets
     open System.Threading.Tasks.Dataflow
@@ -50,7 +51,7 @@ module internal SonarConnectionDetails =
 
         let settingsValidators =
             let simpleRangeCheck value range =
-                if range |> SonarConfig.contains value then
+                if range |> Range.contains value then
                     None
                 else
                     Some (sprintf "Value %A is out of range %s" value (range.ToString()))

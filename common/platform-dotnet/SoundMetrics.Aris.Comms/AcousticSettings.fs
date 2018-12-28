@@ -135,6 +135,8 @@ module internal SettingsDetails =
                                  Enable150Volts =   true
                                  ReceiverGain =     12.0f } ]
         |> Map.ofList
+
+open SoundMetrics.Data.Range
  
 type AcousticSettings with
     static member DefaultAcousticSettingsFor systemType = SettingsDetails.defaultSettingsMap.[systemType]
