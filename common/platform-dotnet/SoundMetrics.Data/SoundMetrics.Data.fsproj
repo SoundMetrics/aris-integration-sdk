@@ -2,10 +2,25 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageProjectUrl>https://github.com/SoundMetrics/aris-integration-sdk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoundMetrics/aris-integration-sdk</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BuildInfo.fs" />
     <Compile Include="Range.fs" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(ProjectDir)..\generate-build-info.cmd ^&#xD;&#xA;  $(ProjectDir)..\ ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Data ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
+  </Target>
 
 </Project>

@@ -8,7 +8,9 @@ module Range =
 
     [<CompiledName("RangeContains")>]
     let contains value range =
-        assert (range.Min <= range.Max)
+        if range.Min > range.Max then
+            failwith "Negative range is not allowed."
+
         range.Min <= value && value <= range.Max
 
     let inline range<'T when 'T : comparison> name (min: 'T) (max: 'T) = { Name = name; Min = min; Max = max }
