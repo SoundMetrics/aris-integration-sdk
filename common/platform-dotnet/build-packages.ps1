@@ -4,7 +4,15 @@ Param(
 
 'Building packages...'
 
-$package_version = (Get-Content "ver.platform.txt") + "." + $build_number
+$git_hash = Invoke-Expression "git rev-parse HEAD"
+'$git_hash=' + $git_hash
+
+$file_date = Get-Date -Format FileDate
+
+$package_version = (Get-Content "ver.platform.txt") `
+                        + ".$build_number" `
+                        + "+$file_date" `
+                        + "-git-$git_hash"
 '$package_version=' + $package_version
 
 $split_version = $package_version.Split("-")[0]
