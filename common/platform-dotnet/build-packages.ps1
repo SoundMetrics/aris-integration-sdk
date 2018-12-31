@@ -50,13 +50,22 @@ Foreach ($el in $dotnetStandardAssemblies) {
 
     # Now continue normally.
 
-    dotnet pack -c Release --output ../$output_directory /p:Version=$split_version /p:PackageVersion=$package_version $el
+    dotnet pack -c Release `
+                --output ../$output_directory `
+                /p:Version=$split_version `
+                /p:PackageVersion=$package_version `
+                $el
 }
 
 # .NET Desktop assemblies
 
 # We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat)
-.\.nuget\nuget.exe pack -NoPackageAnalysis -Verbosity detailed -Version $package_version -Properties Configuration=Release -OutputDirectory $output_directory .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
+.\.nuget\nuget.exe pack -NoPackageAnalysis `
+                        -Verbosity detailed `
+                        -Version $package_version `
+                        -Properties Configuration=Release `
+                        -OutputDirectory $output_directory `
+                        .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
 
 cp push-packages.cmd $output_directory
 ls $output_directory
