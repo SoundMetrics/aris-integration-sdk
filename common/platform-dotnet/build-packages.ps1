@@ -6,7 +6,11 @@ Param(
 'Building packages...'
 
 # The build agent has to pass in the git hash as it's not using git locally.
-if ($git_hash -eq "") { $git_hash = Invoke-Expression "git rev-parse HEAD" }
+if ($git_hash -eq "") { $git_hash = Invoke-Expression "git rev-parse --short HEAD" }
+
+# Don't let the version number get past 64 characters long (nuget limit)--
+# use the short hash of what the build server provides.
+$git_hash = $git_hash.Substring(0, 7)
 '$git_hash=' + $git_hash
 
 $file_date = Get-Date -Format FileDate
