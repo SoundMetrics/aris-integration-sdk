@@ -55,7 +55,8 @@ Foreach ($el in $dotnetStandardAssemblies) {
 
 # .NET Desktop assemblies
 
-.\.nuget\nuget.exe pack -Verbosity detailed -Version $package_version -Properties Configuration=Release -OutputDirectory $output_directory .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
+# We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat)
+.\.nuget\nuget.exe pack -NoPackageAnalysis -Verbosity detailed -Version $package_version -Properties Configuration=Release -OutputDirectory $output_directory .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
 
 cp push-packages.cmd $output_directory
 ls $output_directory
