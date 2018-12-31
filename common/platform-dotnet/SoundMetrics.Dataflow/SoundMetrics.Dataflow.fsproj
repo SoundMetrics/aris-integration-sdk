@@ -6,6 +6,7 @@
     <FileVersion>1</FileVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <NoWarn>NU5105</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

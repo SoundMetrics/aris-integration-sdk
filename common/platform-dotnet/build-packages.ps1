@@ -4,7 +4,7 @@ Param(
 
 'Building packages...'
 
-$package_version = Get-Content "ver.platform.txt"
+$package_version = (Get-Content "ver.platform.txt") + "." + $build_number
 '$package_version=' + $package_version
 
 $split_version = $package_version.Split("-")[0]
