@@ -65,6 +65,7 @@ Foreach ($el in $dotnetStandardAssemblies) {
     # Now continue normally.
 
     dotnet pack -c Release `
+                --include-source `
                 --output ../$output_directory `
                 /p:Version=$split_version `
                 /p:PackageVersion=$package_version `
@@ -76,6 +77,7 @@ Foreach ($el in $dotnetStandardAssemblies) {
 # We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat)
 .\.nuget\nuget.exe pack -NoPackageAnalysis `
                         -Verbosity detailed `
+                        -Symbols `
                         -Version $package_version `
                         -Properties Configuration=Release `
                         -OutputDirectory $output_directory `
