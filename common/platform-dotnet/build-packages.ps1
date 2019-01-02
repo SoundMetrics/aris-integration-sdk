@@ -5,6 +5,9 @@ Param(
 
 'Building packages...'
 
+$dotnet_version = Invoke-Expression "dotnet --version"
+'$dotnet_version=' + $dotnet_version
+
 # The build agent has to pass in the git hash as it's not using git locally.
 if ($git_hash -eq "") { $git_hash = Invoke-Expression "git rev-parse --short HEAD" }
 
