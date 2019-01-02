@@ -66,6 +66,7 @@ Foreach ($el in $dotnetStandardAssemblies) {
 
     dotnet pack -c Release `
                 --include-source `
+                -p:SymbolPackageFormat=snupkg `
                 --output ../$output_directory `
                 /p:Version=$split_version `
                 /p:PackageVersion=$package_version `
@@ -78,6 +79,7 @@ Foreach ($el in $dotnetStandardAssemblies) {
 .\.nuget\nuget.exe pack -NoPackageAnalysis `
                         -Verbosity detailed `
                         -Symbols `
+                        -SymbolPackageFormat snupkg `
                         -Version $package_version `
                         -Properties Configuration=Release `
                         -OutputDirectory $output_directory `
