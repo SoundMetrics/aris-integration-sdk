@@ -70,10 +70,16 @@ Foreach ($el in $dotnetStandardAssemblies) {
     # We prevent building again as that causes a mismatch in PDB file against the
     # assemblies produced by the build server. The build server is the canonical,
     # only source for published executables.
+    #
+    # # If only. I am fed up with these tools, trying to get the symbol packages
+    # # published successfully is completely wedged by the fact that I cannot
+    # # current prevent this command from rebuilding assemblies. The PDBs end up
+    # # not matching checksum on the assembly and cannot be published on nuget.org.
+    # # Removing the following:
+    # #   
+    # #   --no-build --include-source -p:SymbolPackageFormat=snupkg
+    # #   
     dotnet pack -c Release `
-                --no-build `
-                --include-source `
-                -p:SymbolPackageFormat=snupkg `
                 --output ../$output_directory `
                 /p:Version=$split_version `
                 /p:PackageVersion=$package_version `
@@ -82,11 +88,14 @@ Foreach ($el in $dotnetStandardAssemblies) {
 
 # .NET Desktop assemblies
 
-# We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat)
-.\.nuget\nuget.exe pack -NoPackageAnalysis `
-                        -Verbosity detailed `
-                        -Symbols `
-                        -SymbolPackageFormat snupkg `
+# We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat).
+#
+# # Again, wedged, as above. Removing the following:
+# #   
+# #   -Symbols -SymbolPackageFormat snupkg
+# #   
+.\.nuget\nuget.exe pack -Verbosity detailed `
+                        -NoPackageAnalysis `
                         -Version $package_version `
                         -Properties Configuration=Release `
                         -OutputDirectory $output_directory `
