@@ -3,7 +3,10 @@
 if "%NUGET_API_KEY%" == "" goto NO_KEY
 if "%1" == "" goto MISSING_INPUT_FOLDER
 
-for %%f in (%1\*.nupkg %1\*.snupkg) do dotnet nuget push %%f --api-key %NUGET_API_KEY% --source https://nuget.org/
+for %%f in (%1\*.nupkg %1\*.snupkg) do (
+    ECHO Pushing %%f
+    dotnet nuget push %%f --api-key %NUGET_API_KEY% --source https://nuget.org/
+)
 
 GOTO END
 
