@@ -67,7 +67,11 @@ Foreach ($el in $dotnetStandardAssemblies) {
 
     # Now continue normally.
 
+    # We prevent building again as that causes a mismatch in PDB file against the
+    # assemblies produced by the build server. The build server is the canonical,
+    # only source for published executables.
     dotnet pack -c Release `
+                --no-build `
                 --include-source `
                 -p:SymbolPackageFormat=snupkg `
                 --output ../$output_directory `
