@@ -258,7 +258,7 @@ type SsdpService (name : string,
                 Async.Start(async {
                     do! Async.Sleep(100) // delay a bit before responding, per protocol description
                     let localAddr =
-                        NetworkSupport.findLocalIPAddress recvd.Properties.RemoteEndPoint.Address IPAddress.Any
+                        NetworkSupport.findLocalIPAddress(recvd.Properties.RemoteEndPoint.Address, IPAddress.Any)
 
                     handleIncomingSsdp svcMap (sendPacket localAddr) recvd
                 })

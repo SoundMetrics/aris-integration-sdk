@@ -71,7 +71,6 @@ module internal ArisConduitHelpers =
 
 module internal ArisConduitDetails =
     open System.Net.NetworkInformation
-    open SoundMetrics.Common
 
     let logNewArisConduit (targetSonar : string) (initialAcousticSettings : AcousticSettings) =
         Log.Information("New ARIS conduit {targetSonar}; initial={initialAcousticSettings}",

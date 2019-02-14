@@ -2,35 +2,39 @@
 
 namespace SoundMetrics.Network
 
-module internal NetworkSupport =
+module NetworkSupport =
 
     open System.Net
     open System.Net.NetworkInformation
+    open System.Net.Sockets
 
     // Based on
     // http://blogs.msdn.com/b/knom/archive/2008/12/31/ip-address-calculations-with-c-subnetmasks-networks.aspx
-    let getNetworkAddress (addr : IPAddress) (subnetMask : IPAddress) =
+    [<CompiledName("GetNetworkAddress")>]
+    let getNetworkAddress2 (addr : IPAddress, subnetMask : IPAddress) : IPAddress =
 
         let addrBytes = addr.GetAddressBytes()
         let subnetBytes = subnetMask.GetAddressBytes()
 
         if addrBytes.Length <> subnetBytes.Length then
-            None
-        else
-            let netBytes =
-                Seq.zip addrBytes subnetBytes
-                          |> Seq.map (fun (a, s) -> a &&& s)
-                          |> Seq.toArray
-            Some (IPAddress(netBytes))
+            failwithf "Unexpectedly different address lengths"
+                
+        let netBytes =
+            let arr = Array.zeroCreate<byte> addrBytes.Length
+            for idx = 0 to arr.Length - 1 do
+                arr.[idx] <- addrBytes.[idx] &&& subnetBytes.[idx]
+            arr
+
+        IPAddress netBytes
 
 
-    let isInSameSubnet addr1 addr2 subnetMask =
+    let internal isInSameSubnet addr1 addr2 subnetMask =
 
-        match getNetworkAddress addr1 subnetMask, getNetworkAddress addr2 subnetMask with
-        | Some n1, Some n2 -> n1 = n2
-        | _ -> false
+        getNetworkAddress2(addr1, subnetMask) = getNetworkAddress2(addr2, subnetMask)
 
-    let findLocalIPAddress remoteIPAddress fallbackAddress =
+
+    [<CompiledName("FindLocalIPAddress")>]
+    let internal findLocalIPAddress (remoteIPAddress, fallbackAddress) : IPAddress =
 
         let addrs = seq {
             for nic in NetworkInterface.GetAllNetworkInterfaces() do
@@ -44,3 +48,29 @@ module internal NetworkSupport =
 
         let fallback = seq { yield fallbackAddress }
         fallback |> Seq.append addrs |> Seq.head
+
+    [<Struct>]
+    type IPv4Interface = {
+        Address : IPAddress
+        SubnetMask : IPAddress
+    }
+    with
+        member ifc.GetNetworkAddress () : IPAddress =
+            getNetworkAddress2 (ifc.Address, ifc.SubnetMask)
+
+        member ifc.IsTargetInSubnet (target : IPAddress) : bool =
+            isInSameSubnet target ifc.Address ifc.SubnetMask
+
+    /// Report the currently available IPv4 interfaces.
+    [<CompiledName("FindUpIPv4Interfaces")>]
+    let findUpIPv4Interfaces () : IPv4Interface array =
+
+        NetworkInterface.GetAllNetworkInterfaces()
+            |> Seq.filter (fun nic -> nic.OperationalStatus = OperationalStatus.Up)
+            |> Seq.map (fun nic ->
+                nic.GetIPProperties().UnicastAddresses
+                    |> Seq.filter (fun addr -> addr.Address.AddressFamily = AddressFamily.InterNetwork)
+                    |> Seq.map (fun addr -> { Address = addr.Address; SubnetMask = addr.IPv4Mask })
+            )
+        |> Seq.collect id
+        |> Seq.toArray

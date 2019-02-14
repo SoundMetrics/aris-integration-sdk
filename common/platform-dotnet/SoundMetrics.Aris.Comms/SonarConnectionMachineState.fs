@@ -6,7 +6,6 @@ open Serilog
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Common
 open System
-open System.Diagnostics
 open System.Net
 open System.Net.Sockets
 open System.Reactive.Linq
