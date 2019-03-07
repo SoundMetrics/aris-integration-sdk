@@ -6,7 +6,6 @@ open System.Net
 open System.Net.NetworkInformation
 open System.Reactive.Subjects
 open System.Threading
-open System.Threading.Tasks
 
 module DeviceReachability =
     type ReachabilityStatus = Nominal | NotReachable
@@ -112,24 +111,25 @@ type DeviceReachability (getAddress: Func<IPAddress>, postToDispatcher: Action<A
     let rec sendPing () =
 
         if terminate = 0 then
-            try
-                let targetAddress = getAddress.Invoke()
+            let targetAddress = getAddress.Invoke()
 
-                ping.SendPingAsync(targetAddress, Details.pingTimeout)
-                    .ContinueWith(handlePingResult) |> ignore
-            with
-            | :? ObjectDisposedException -> () // Race condition between asynchronous task and dispose.
-            | ex ->
-                Trace.TraceWarning(sprintf "Unexpected exception in DeviceReachability.sendPing: '%s" ex.Message)
-            ()
+            async {
+                try
+                    let! pingReply = Async.AwaitTask (ping.SendPingAsync(targetAddress, Details.pingTimeout))
+                    handlePingResult pingReply
+                with
+                | :? ObjectDisposedException -> () // Race condition between asynchronous task and dispose.
+                | ex ->
+                    Trace.TraceWarning(sprintf "Unexpected exception in DeviceReachability.sendPing: '%s" ex.Message)
+            } |> Async.Start
         else
             () // Don't do anything more.
 
 
-    and handlePingResult (reply: Task<PingReply>) =
+    and handlePingResult (reply: PingReply) =
 
         if terminate = 0 then
-            state <- handleEventFSM DateTime.Now state reply.Result.Status
+            state <- handleEventFSM DateTime.Now state reply.Status
             let newReachability =
                 match state with
                 | Details.NotReachable -> ReachabilityStatus.NotReachable
@@ -138,7 +138,11 @@ type DeviceReachability (getAddress: Func<IPAddress>, postToDispatcher: Action<A
             let updateReachability = Action(fun () -> self.Reachability <- newReachability)
             postToDispatcher.Invoke(updateReachability)
 
-            Task.Delay(Details.pingInterval).ContinueWith(fun _ -> sendPing()) |> ignore
+            async {
+                let delay = int (Details.pingInterval.TotalMilliseconds)
+                do! Async.Sleep delay
+                sendPing()
+            } |> Async.Start
         else
             () // Don't do anything more.
 
