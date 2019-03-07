@@ -4,8 +4,8 @@ open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 
 [<TestClass>]
-type TestClass () =
+type deviceReachabilityTest () =
 
     [<TestMethod>]
-    member this.TestMethodPassing () =
+    member __.Dummy () =
         Assert.IsTrue(false);
