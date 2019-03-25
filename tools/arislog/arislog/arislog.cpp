@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "AvailabilityListener.h"
 #include "syslog.h"
+#include <cstdint>
+#include <cstddef>
 
 //---------------------------------------------------------------------------
 
@@ -47,7 +49,7 @@ WORD map_severity_to_color(unsigned severity) {
   constexpr unsigned Warning = 4;       // Warning : warning conditions
   constexpr unsigned Notice = 5;        // Notice : normal but significant condition
   constexpr unsigned Informational = 6; // Informational : informational messages
-  constexpr unsigned Debug = 7;         // Debug : debug - level messages 
+  constexpr unsigned Debug = 7;         // Debug : debug - level messages
 
   if (severity <= Error) {
     return logentry.Error;
@@ -169,13 +171,21 @@ int main()
 
 //-----------------------------------------------------------------------------
 
+#define APP_NAME "arislog"
+
 void write_initial_output() {
   constexpr char * dividerDashes = "-----------------------------------------------------------------------------";
+
+  constexpr int bits = sizeof(int*) * CHAR_BIT;
+  static_assert(bits == 32 || bits == 64, "Unexpected bit size");
+  constexpr char* titleLine =
+      bits == 32 ? APP_NAME " (32 bits)" : APP_NAME " (64 bits)";
+
   static const struct {
     uint16_t ta;
     const char * msg;
   } initialOutput[] = {
-    { meta.Info, "arislog" },
+    { meta.Info, titleLine },
     { meta.LowKey, dividerDashes },
     { meta.LowKey, "This application displays messages received from syslog relays." },
     { meta.LowKey, "Messages are displayed here only after the first connection from this PC." },
