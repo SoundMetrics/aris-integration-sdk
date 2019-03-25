@@ -1,6 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by resources.rc
+// Used by arislog.rc
+//
 
 // Next default values for new objects
 // 
