@@ -145,6 +145,7 @@ int main()
 
         std::cout << '[' << facility << '/' << severity << ' ';
         std::tie(knownAddress, serialNumber) = availability.GetSerialNumber(addr);
+
         if (knownAddress) {
           std::cout << "ARIS " << serialNumber;
         }
