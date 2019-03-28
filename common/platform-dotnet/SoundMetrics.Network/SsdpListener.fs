@@ -123,7 +123,7 @@ module internal SsdpInterfaceInputs =
                     if keepGoing then
                         let localEP = udp.Client.LocalEndPoint :?> IPEndPoint
                         let udpResult = task.Result
-                        Log.Debug("InterfaceListener.listen: {localEP} received packet of {length} bytes from {remoteIP}", 
+                        Log.Debug("InterfaceListener.listen: {localEP} received packet of {length} bytes from {remoteIP}",
                                         localEP, udpResult.Buffer.Length, udpResult.RemoteEndPoint)
                         target.Post (Packet { UdpResult = udpResult; LocalEndPoint = localEP; Timestamp = now }) |> ignore
                         listen()
