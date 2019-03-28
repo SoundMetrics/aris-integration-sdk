@@ -18,7 +18,7 @@ module SsdpMessages =
     /// Container for a received packet and a timestamp.
     type internal MsgReceived = { UdpResult : UdpReceiveResult; LocalEndPoint : IPEndPoint; Timestamp : DateTimeOffset }
 
-    type CacheControl = Empty // TODO ############################
+    type CacheControl = Empty // Not implemented.
 
     //-------------------------------------------------------------------------
     // SSDP Messages
@@ -41,7 +41,7 @@ module SsdpMessages =
         Stopwatch : Stopwatch
     }
     with
-        static member internal From(packet : MsgReceived) = 
+        static member internal From(packet : MsgReceived) =
             { RawContent = Encoding.UTF8.GetString(packet.UdpResult.Buffer)
               Timestamp = packet.Timestamp
               LocalEndPoint = packet.LocalEndPoint
@@ -204,7 +204,7 @@ module SsdpMessages =
                                 | Some ep -> { msg with SsdpNotifyMessage.Host = ep }
                                 | None -> msg
                 "CACHE-CONTROL",
-                            fun msg value -> msg // TODO #######################
+                            fun msg _value -> msg
                 "LOCATION", fun msg value -> { msg with Location = value }
                 "NT",       fun msg value -> { msg with ST = value }
                 "NTS",      fun msg value -> { msg with NTS = value }
@@ -250,7 +250,7 @@ module SsdpMessages =
                                 | Some ep -> { msg with SsdpMSearchMessage.Host = ep }
                                 | None -> msg
                 "MAN",      fun msg value -> { msg with MAN = value }
-                //"MX",       fun msg value -> { msg with MX = value } // TODO ????
+                //"MX",       fun msg value -> { msg with MX = value }
                 "ST",       fun msg value -> { msg with ST = value }
                 "USER-AGENT", fun msg value -> { msg with UserAgent = value }
             ]
@@ -349,7 +349,7 @@ module SsdpMessages =
 
     type SsdpMessage with
         static member internal FromMulticast(packet : MsgReceived) : Result<SsdpMessage, string> =
-            
+
             deserialize packet
 
         static member internal FromResponse (packet : byte array) : SsdpMessage =
