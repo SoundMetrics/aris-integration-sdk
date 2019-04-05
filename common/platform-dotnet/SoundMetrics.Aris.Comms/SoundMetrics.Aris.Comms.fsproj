@@ -86,6 +86,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SoundMetrics.Aris.AcousticSettings\SoundMetrics.Aris.AcousticSettings.fsproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.ReorderCS\SoundMetrics.Aris.ReorderCS.csproj" />
