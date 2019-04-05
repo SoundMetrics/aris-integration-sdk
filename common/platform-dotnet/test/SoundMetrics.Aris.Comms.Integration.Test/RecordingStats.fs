@@ -30,7 +30,7 @@ let recordingStats (inputs : TestInputs) =
                         sn, beacon.SoftwareVersion, beacon.IPAddress)
 
         let initialSettings =
-            let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
+            let defaultSettings = AcousticSettingsRaw.DefaultAcousticSettingsFor beacon.SystemType
             { defaultSettings with FrameRate = 15.0f</s> }
 
         let skipFrames = 10

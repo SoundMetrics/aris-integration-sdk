@@ -90,7 +90,7 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
         Log.Information("Traget sonar beacon={beacon}", beacon)
         use conduit =
             new ArisConduit(
-                        AcousticSettings.DefaultAcousticSettingsFor(beacon.SystemType),
+                        AcousticSettingsRaw.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 

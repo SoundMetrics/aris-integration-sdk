@@ -137,13 +137,13 @@ module AcousticMath =
         rate
 
     [<CompiledName("ConstrainAcousticSettings")>]
-    let constrainAcousticSettings systemType (s: AcousticSettings) antiAliasing : AcousticSettings * bool =
+    let constrainAcousticSettings systemType (s: AcousticSettingsRaw) antiAliasing : AcousticSettingsRaw * bool =
         let maximumFrameRate =
             calculateMaximumFrameRate  systemType s.PingMode s.SampleStartDelay s.SampleCount s.SamplePeriod antiAliasing
         let adjustedFrameRate = min s.FrameRate maximumFrameRate
 
         let isConstrained = s.FrameRate <> adjustedFrameRate
         let constrainedSettings = { s with FrameRate = adjustedFrameRate }
-        if isConstrained then Log.Information("constrainAcousticSettings: constrained; {settings}", (AcousticSettings.diff s constrainedSettings))
+        if isConstrained then Log.Information("constrainAcousticSettings: constrained; {settings}", (AcousticSettingsRaw.diff s constrainedSettings))
         constrainedSettings, isConstrained
 

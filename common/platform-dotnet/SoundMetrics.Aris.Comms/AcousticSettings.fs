@@ -11,7 +11,7 @@ type Salinity =
     | Brackish = 15
     | Seawater = 35
 
-type AcousticSettings = {
+type AcousticSettingsRaw = {
     FrameRate: float32</s>
     SampleCount: uint32
     SampleStartDelay: int<Us>
@@ -54,7 +54,7 @@ with
             if l <> r then
                 buf.AppendFormat("{0}{1}: {2} => {3}", (if !count > 0 then "; " else ""), name, l, r) |> ignore
                 count := !count + 1
-                
+
         addDiff "fr"     left.FrameRate         right.FrameRate
         addDiff "sc"     left.SampleCount       right.SampleCount
         addDiff "ssd"    left.SampleStartDelay  right.SampleStartDelay
@@ -73,14 +73,14 @@ with
 /// a specific AcousticSettings so the protocols can refer to settings commands.
 type internal AcousticSettingsVersioned = {
     Cookie : AcousticSettingsCookie
-    Settings: AcousticSettings
+    Settings: AcousticSettingsRaw
 }
 with
     static member InvalidAcousticSettingsCookie = 0u
 
     static member Invalid = {
         Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie
-        Settings = AcousticSettings.Invalid
+        Settings = AcousticSettingsRaw.Invalid
     }
 
 /// Used to track the latest acoustic settings applied.
@@ -88,7 +88,7 @@ type internal AcousticSettingsApplied =
     | Uninitialized
     | Applied of AcousticSettingsVersioned
     | Constrained of AcousticSettingsVersioned
-    | Invalid of cookie: AcousticSettingsCookie * settings: AcousticSettings
+    | Invalid of cookie: AcousticSettingsCookie * settings: AcousticSettingsRaw
 
 open SonarConfig
 
@@ -137,8 +137,8 @@ module internal SettingsDetails =
         |> Map.ofList
 
 open SoundMetrics.Data.Range
- 
-type AcousticSettings with
+
+type AcousticSettingsRaw with
     static member DefaultAcousticSettingsFor systemType = SettingsDetails.defaultSettingsMap.[systemType]
 
     member internal s.Validate () =
@@ -147,9 +147,9 @@ type AcousticSettings with
         let adjustedCyclePeriod = s.SampleStartDelay + (s.SamplePeriod * int s.SampleCount) + 360<Us>
 
         let NoError = ""
-        let rawResults = 
+        let rawResults =
             [
-                (if SampleCountRange |> contains s.SampleCount 
+                (if SampleCountRange |> contains s.SampleCount
                     then NoError
                     else sprintf "sampleCount '%d' is out-of-range" s.SampleCount)
                 (if SampleCountRange |> contains s.SampleCount

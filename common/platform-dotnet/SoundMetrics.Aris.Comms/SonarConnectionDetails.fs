@@ -16,7 +16,7 @@ module internal SonarConnectionDetails =
     open System.Threading.Tasks.Dataflow
 
     type ValidatedSettings =
-        | Valid of AcousticSettings
+        | Valid of AcousticSettingsRaw
         | ValidationError of string
 
     module internal SettingsHelpers =

@@ -24,11 +24,11 @@ open ArisConduitDetails
 
 
 type RequestedSettings =
-    | SettingsApplied of versioned : AcousticSettings * constrained : bool
+    | SettingsApplied of versioned : AcousticSettingsRaw * constrained : bool
     | SettingsDeclined of string
 
 
-type ArisConduit private (initialAcousticSettings : AcousticSettings,
+type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
                           targetSonar : string,
                           matchBeacon : ArisBeacon -> bool,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
@@ -103,7 +103,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
 
         cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
 
-    let requestAcousticSettings (settings: AcousticSettings): RequestedSettings =
+    let requestAcousticSettings (settings: AcousticSettingsRaw): RequestedSettings =
 
         Log.Information(
             "ArisConduit({target}): requesting acoustic settings {settings}",
