@@ -151,9 +151,6 @@ module AcousticMath =
 
         // The cyclePeriodFactor is an empirical value based on measured maximum frame rates as a function of
         // SamplePeriod and SamplesPerBeam.
-        // Valid for FPGA code in CPU2 as of March 2014...maximum frame rates may increase when FPGA data
-        // transfer time is reduced by cutting wait states on the CPU<-->FPGA<-->Sample RAM bus.
-        // Set cyclePeriodFactor to 0 for pure acoustic frame rate limit (for testing only)
 
         // From measured achievable frame rates, there is a rough break in the slope of frame rate versus
         // SamplesPerBeam at SamplesPerBeam == 2000.  Use a higher (by BoostFactor = 2) slope when
