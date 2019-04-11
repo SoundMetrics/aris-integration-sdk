@@ -124,11 +124,6 @@
       <Project>{74b8eb49-4248-43cb-9d69-af71b4d68e66}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj">
-      <Name>SoundMetrics.Aris.Config</Name>
-      <Project>{7274df9e-ec20-4be8-a24f-16bbc8e164d0}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj">
       <Name>SoundMetrics.Aris.Messages</Name>
       <Project>{847203f0-d0a0-4459-9da4-8a2172f115e5}</Project>
