@@ -98,7 +98,7 @@ module internal ArisCommands =
         )
 
     [<CompiledName("MakeSalinityCmd")>]
-    let makeSalinityCmd (salinity : Salinity) =
+    let makeSalinityCmd (salinity : SoundMetrics.Aris.AcousticSettings.Salinity) =
         Aris.Command(
             Type = Aris.Command.Types.CommandType.SetSalinity,
             Salinity = Aris.Command.Types.SetSalinity(

@@ -29,9 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="BuildInfo.fs" />
-    <Compile Include="SonarConfig.fs" />
   </ItemGroup>
 
   <ItemGroup>

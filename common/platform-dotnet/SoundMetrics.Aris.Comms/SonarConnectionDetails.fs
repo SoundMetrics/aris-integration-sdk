@@ -9,7 +9,7 @@ open System
 
 module internal SonarConnectionDetails =
 
-    open SoundMetrics.Aris.Config
+    open SoundMetrics.Aris.AcousticSettings
     open SoundMetrics.Data
     open System.Net
     open System.Net.Sockets
@@ -24,7 +24,7 @@ module internal SonarConnectionDetails =
         type AcousticSettingsCookieTracker() =
             let last: AcousticSettingsCookie ref = ref 0u
             let next() = last := !last + 1u ; !last
-    
+
             member __.ApplyNewCookie settings = { Cookie = next(); Settings = settings }
 
             type AcousticSettingsVersioned with

@@ -7,8 +7,7 @@ open System
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 open Aris.FileTypes
-open SoundMetrics.Aris.Config
-open SoundMetrics.Common
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.NativeMemory
 
 //exception IndeterminateSettingsException

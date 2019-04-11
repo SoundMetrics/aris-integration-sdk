@@ -1,10 +1,13 @@
 // Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
 
-namespace SoundMetrics.Aris.Config
+namespace SoundMetrics.Aris.AcousticSettings
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
 [<Measure>] type Us // Microseconds
+
+/// Defines the system types for ARIS: 1200, 1800, and 3000.
+type ArisSystemType = Aris1800 = 0 | Aris3000 = 1 | Aris1200 = 2
 
 type PingMode = PingMode1 | PingMode3 | PingMode6 | PingMode9 | InvalidPingMode of uint32
 with
@@ -35,7 +38,6 @@ module SonarConfig =
 
     open SoundMetrics.Data
     open SoundMetrics.Data.Range
-    open SoundMetrics.Common
 
     // Min/max values per ARIS Engineering Test Command List
 
@@ -117,7 +119,7 @@ module SonarConfig =
     type SystemTypePingModeInfo =
         { systemType: ArisSystemType; defaultPingMode: PingMode; validPingModes: PingMode list }
 
-    let systemTypeToPingModeMap = 
+    let systemTypeToPingModeMap =
         [ { systemType = ArisSystemType.Aris1200;  defaultPingMode = PingMode1; validPingModes = [ PingMode1 ] }
           { systemType = ArisSystemType.Aris1800;  defaultPingMode = PingMode3; validPingModes = [ PingMode1; PingMode3 ] }
           { systemType = ArisSystemType.Aris3000;  defaultPingMode = PingMode9; validPingModes = [ PingMode6; PingMode9 ] }

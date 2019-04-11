@@ -2,6 +2,7 @@
 
 namespace SoundMetrics.Common
 
+open SoundMetrics.Aris.AcousticSettings
 open System
 open System.Net
 
@@ -9,9 +10,6 @@ open System.Net
 
 /// Defines the serial number for an ARIS sonar. These are numeric only.
 type ArisSerialNumber = uint32
-
-/// Defines the system types for ARIS: 1200, 1800, and 3000.
-type ArisSystemType = Aris1800 = 0 | Aris3000 = 1 | Aris1200 = 2
 
 
 module ArisBeaconDetails =

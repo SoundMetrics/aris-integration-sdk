@@ -4,8 +4,8 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms
-open SoundMetrics.Common
 
 module internal FocusUnits =
     open FocusMapTypes

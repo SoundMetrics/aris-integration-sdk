@@ -4,7 +4,7 @@ namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
-open SoundMetrics.Aris.Config
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Common
 open SoundMetrics.Common.ArisBeaconDetails
@@ -118,10 +118,10 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
 
                 // We need to know the system type in order to constrain settings, so until then we
                 // don't constrain. System type is gleaned in ArisConduit.buildFrameStreamSubscription.
-                let constrainedSettings, constrained =
+                let struct (constrainedSettings, constrained) =
                     match !systemType with
                     | Some systemType -> AcousticMath.constrainAcousticSettings systemType settings antiAliasing
-                    | None -> settings, false
+                    | None -> struct (settings, false)
 
                 let settings = if constrained then constrainedSettings else settings
                 let versionedSettings = cookieTracker.ApplyNewCookie settings
@@ -150,7 +150,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
                             ConduitPerfSink.None)
 
     /// Find the sonar by its IP address
-    new(initialAcousticSettings, ipAddress, frameStreamReliabilityPolicy) = 
+    new(initialAcousticSettings, ipAddress, frameStreamReliabilityPolicy) =
             new ArisConduit(initialAcousticSettings,
                             ipAddress.ToString(),
                             (fun beacon -> beacon.IPAddress = ipAddress),
@@ -192,7 +192,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
             match cxnState with
             | ConnectionState.Connected _ -> ()
             | _ -> frameStreamListener.Flush() // Resets frame index tracker
-            
+
             cxnStateSubject.OnNext(cxnState)
 
         member __.OnInitializeConnection frameSinkAddress =
@@ -225,7 +225,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
     member __.ConnectionState with get () = cxnStateSubject :> ISubject<ConnectionState>
 
     member ac.WaitForConnectionAsync (timeout : TimeSpan) : Task<bool> =
-        
+
         let doneSignal = new ManualResetEventSlim(false)
         let mutable reachedState = false
 

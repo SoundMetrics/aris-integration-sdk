@@ -7,6 +7,7 @@ open System.IO
 type FocusRange = float32
 
 module TestInput =
+    open SoundMetrics.Aris.AcousticSettings
     open SoundMetrics.Aris.Comms
     open ArisSupport
     open SoundMetrics.Common

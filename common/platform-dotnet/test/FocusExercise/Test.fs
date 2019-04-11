@@ -45,7 +45,7 @@ let getArisBeacon (availables : BeaconListener) targetSN : ArisBeacon option =
 //-----------------------------------------------------------------------------
 
 open SoundMetrics.Scripting.EventMatcher
-open SoundMetrics.Aris.Config
+open SoundMetrics.Aris.AcousticSettings
 
 
 let runTest eventSource (series : SetupAndMatch<SyslogMessage, unit> array) timeout =

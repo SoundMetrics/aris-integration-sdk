@@ -3,7 +3,6 @@
 namespace SoundMetrics.Aris.Comms.Internal
 
 open SoundMetrics.Aris.Comms
-open SoundMetrics.Aris.Config
 open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.NativeMemory
 open PerformanceTiming
@@ -49,6 +48,7 @@ module internal FrameProcessing =
         static member Quit (workUnit: WorkUnit) = { Work = ProcessedFrameType.Quit; EnqueueTime = workUnit.enqueueTime }
 
     module internal FrameProcessing =
+        open SoundMetrics.Aris.AcousticSettings
 
         type FrameBuffer = {
             FrameIndex: FrameIndex
@@ -108,10 +108,10 @@ module internal FrameProcessing =
         let generateHistogram (fb : FrameBuffer) =
 
             let struct (histogram, sw) = timeThis (fun _sw ->
-            
+
                 let buildHistogram (source : nativeptr<byte>, length) =
                     FrameHistogram.Generate(source, length)
-            
+
                 fb.SampleData |> NativeBuffer.map buildHistogram
             )
 

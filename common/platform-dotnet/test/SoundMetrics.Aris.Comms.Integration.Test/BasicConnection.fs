@@ -1,5 +1,6 @@
 ﻿module BasicConnection
 
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Common
