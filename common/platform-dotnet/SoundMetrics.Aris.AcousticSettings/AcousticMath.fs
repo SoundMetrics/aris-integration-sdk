@@ -6,6 +6,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SonarConfig
 open SoundMetrics.Data.Range
+open System.Text
 
 
 type Salinity =
@@ -50,26 +51,33 @@ with
     }
 
     static member diff left right =
-        let buf = System.Text.StringBuilder()
-        let count = ref 0
-        let addDiff (name: string) l r =
+
+        let addDiff name l r accum =
+
             if l <> r then
-                buf.AppendFormat("{0}{1}: {2} => {3}", (if !count > 0 then "; " else ""), name, l, r) |> ignore
-                count := !count + 1
+                let msg = sprintf "%s: %A => %A" name l r
+                msg :: accum // reverse order
+            else
+                accum
 
-        addDiff "fr"     left.FrameRate         right.FrameRate
-        addDiff "sc"     left.SampleCount       right.SampleCount
-        addDiff "ssd"    left.SampleStartDelay  right.SampleStartDelay
-        addDiff "cp"     left.CyclePeriod       right.CyclePeriod
-        addDiff "sp"     left.SamplePeriod      right.SamplePeriod
-        addDiff "pw"     left.PulseWidth        right.PulseWidth
-        addDiff "pm"     left.PingMode          right.PingMode
-        addDiff "tx"     left.EnableTransmit    right.EnableTransmit
-        addDiff "freq"   left.Frequency         right.Frequency
-        addDiff "150v"   left.Enable150Volts    right.Enable150Volts
-        addDiff "recvgn" left.ReceiverGain      right.ReceiverGain
+        let differences =
+            []
+            |> addDiff "fr"        left.FrameRate          right.FrameRate
+            |> addDiff "sc"        left.SampleCount        right.SampleCount
+            |> addDiff "ssd"       left.SampleStartDelay   right.SampleStartDelay
+            |> addDiff "cp"        left.CyclePeriod        right.CyclePeriod
+            |> addDiff "sp"        left.SamplePeriod       right.SamplePeriod
+            |> addDiff "pw"        left.PulseWidth         right.PulseWidth
+            |> addDiff "pm"        left.PingMode           right.PingMode
+            |> addDiff "tx"        left.EnableTransmit     right.EnableTransmit
+            |> addDiff "freq"      left.Frequency          right.Frequency
+            |> addDiff "150v"      left.Enable150Volts     right.Enable150Volts
+            |> addDiff "recvgn"    left.ReceiverGain       right.ReceiverGain
+            |> List.rev
 
-        buf.ToString()
+        match differences with
+        | [] -> ValueNone
+        | ds -> ValueSome (System.String.Join("; ", ds))
 
 module AcousticMath =
 
