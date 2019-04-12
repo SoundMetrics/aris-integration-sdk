@@ -34,7 +34,6 @@
     <Compile Include="SonarConfig.fs" />
     <Compile Include="AcousticMath.Internal.fs" />
     <Compile Include="AcousticMath.fs" />
-    <Compile Include="ISettingsStore.fs" />
   </ItemGroup>
 
   <ItemGroup>
