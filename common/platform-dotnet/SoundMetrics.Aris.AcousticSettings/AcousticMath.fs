@@ -6,7 +6,6 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SonarConfig
 open SoundMetrics.Data.Range
-open System.Text
 
 
 type Salinity =
