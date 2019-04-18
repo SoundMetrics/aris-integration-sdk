@@ -29,6 +29,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ExSettingsStructure.fs" />
+    <Compile Include="ExBunnyHillSettings.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SonarConfig.fs" />
