@@ -29,13 +29,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="ExSettingsStructure.fs" />
-    <Compile Include="ExBunnyHillSettings.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SonarConfig.fs" />
     <Compile Include="AcousticMath.Internal.fs" />
     <Compile Include="AcousticMath.fs" />
+    <Compile Include="ExSettingsStructure.fs" />
+    <Compile Include="ExBunnyHillSettings.fs" />
   </ItemGroup>
 
   <ItemGroup>

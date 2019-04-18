@@ -2,6 +2,8 @@
 
 namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
+open System
+
 type Range = float32
 
 type BunnyHillSettings = {
@@ -18,8 +20,8 @@ module BunnyHill =
     [<CompiledName("BunnyHillProjection")>]
     let bunnyHillProjection =
 
-        let toSettings externalContext (bunnyHill : BunnyHillSettings) =
-            { PingMode = 12 }
+        let toSettings externalContext (bunnyHill : BunnyHillSettings) : DeviceSettings =
+            failwith "nyi"
 
         let change bunnyHill change : BunnyHillSettings =
 
@@ -40,6 +42,8 @@ module BunnyHill =
                 struct (min s e, max s e)
             { WindowStart = windowStart; WindowEnd = windowEnd }
 
-        { ToSettings = toSettings
-          Constrain = constrain
-          Change = change }
+        {
+            ToDeviceSettings = Func<SystemContext,BunnyHillSettings,DeviceSettings>(toSettings)
+            Constrain = Func<BunnyHillSettings,BunnyHillSettings>(constrain)
+            Change = Func<BunnyHillSettings,BunnyHillChange,BunnyHillSettings>(change)
+        }
