@@ -19,7 +19,7 @@ type ArisSystemType = SoundMetrics.Aris.AcousticSettings.ArisSystemType
 
 // Formerly "AcousticSettings," these are the settings we send to the sonar to
 // instruct it to form images.
-type DeviceSettings = {
+type AcquisitionSettings = {
     FrameRate: float32</s>
     SampleCount: uint32
     SampleStartDelay: int<Us>
@@ -85,7 +85,7 @@ with
         | ds -> ValueSome (System.String.Join("; ", ds))
 
     static member Diff(left, right) =
-        match DeviceSettings.diff left right with
+        match AcquisitionSettings.diff left right with
         | ValueSome s -> s
         | ValueNone -> ""
 
@@ -112,7 +112,7 @@ type ProjectionMap<'P,'C> = {
     Constrain:          Func<'P,'P>
 
     /// Transforms from a projection of settings to actual device settings.
-    ToDeviceSettings:   Func<SystemContext,'P,DeviceSettings>
+    ToDeviceSettings:   Func<SystemContext,'P,AcquisitionSettings>
 }
 
 //-----------------------------------------------------------------------------
@@ -128,7 +128,7 @@ module internal DeviceSettingsNormalization =
 
     /// Transforms to device settings that conform to guidelines for safely
     /// and successfully producing images.
-    let normalize (settings : DeviceSettings) =
+    let normalize (settings : AcquisitionSettings) =
 
         failwith "nyi"
 
@@ -136,7 +136,7 @@ module ProjectionChange =
 
     open DeviceSettingsNormalization
 
-    let private getComputedValues extCtx (deviceSettings: DeviceSettings) =
+    let private getComputedValues extCtx (deviceSettings: AcquisitionSettings) =
         failwith "nyi"
         //{ Resolution = 6.9f<mm>; AutoFocusRange = 4.0f<m>; SoundSpeed = 1500.0f<m/s> }
 
@@ -150,7 +150,7 @@ module ProjectionChange =
                                 (projection: 'P)
                                 (changes: 'C seq)
                                 externalContext
-                                : struct ('P * DeviceSettings * ComputedValues) =
+                                : struct ('P * AcquisitionSettings * ComputedValues) =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for interop.)
         let change projection change = pmap.Change.Invoke(projection, change)

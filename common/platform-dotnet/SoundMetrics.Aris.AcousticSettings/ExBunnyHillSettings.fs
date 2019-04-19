@@ -20,7 +20,7 @@ module BunnyHill =
     [<CompiledName("BunnyHillProjection")>]
     let bunnyHillProjection =
 
-        let toSettings externalContext (bunnyHill : BunnyHillSettings) : DeviceSettings =
+        let toSettings externalContext (bunnyHill : BunnyHillSettings) : AcquisitionSettings =
             failwith "nyi"
 
         let change bunnyHill change : BunnyHillSettings =
@@ -43,7 +43,7 @@ module BunnyHill =
             { WindowStart = windowStart; WindowEnd = windowEnd }
 
         {
-            ToDeviceSettings = Func<SystemContext,BunnyHillSettings,DeviceSettings>(toSettings)
+            ToDeviceSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
             Constrain = Func<BunnyHillSettings,BunnyHillSettings>(constrain)
             Change = Func<BunnyHillSettings,BunnyHillChange,BunnyHillSettings>(change)
         }
