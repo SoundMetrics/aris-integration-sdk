@@ -47,11 +47,8 @@ module BunnyHill =
                 struct (min s e, max s e)
             { DownrangeWindow = { Start = windowStart; End = windowEnd } }
 
-        let getRequestedDownrange (bunnyHill: BunnyHillSettings) = bunnyHill.DownrangeWindow
-
         {
             ToDeviceSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
             Constrain = Func<BunnyHillSettings,BunnyHillSettings>(constrain)
             Change = Func<BunnyHillSettings,BunnyHillChange,BunnyHillSettings>(change)
-            GetRequestedDownrange = Func<BunnyHillSettings,DownrangeWindow>(getRequestedDownrange)
         }

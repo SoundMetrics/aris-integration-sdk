@@ -112,9 +112,6 @@ type ProjectionMap<'P,'C> = {
     /// Constrains settings projection 'P in ways that are specific to 'P.
     Constrain:          Func<'P,'P>
 
-    /// Retrieves the requested downrange wndow from the projection.
-    GetRequestedDownrange: Func<'P,DownrangeWindow>
-
     /// Transforms from a projection of settings to actual device settings.
     ToDeviceSettings:   Func<SystemContext,'P,AcquisitionSettings>
 }
@@ -128,7 +125,6 @@ type ComputedValues = {
     SoundSpeed:     float<m/s>
     MaxFrameRate:   float</s>
 
-    RequestedDownrangeWindow:   DownrangeWindow
     ActualDownrangeWindow:      DownrangeWindow
 }
 
@@ -145,7 +141,6 @@ module ProjectionChange =
     open DeviceSettingsNormalization
 
     let private getComputedValues (systemContext: SystemContext)
-                                  (requestedDownrange: DownrangeWindow)
                                   (acquisitionSettings: AcquisitionSettings)
                                   : ComputedValues =
 
@@ -170,7 +165,6 @@ module ProjectionChange =
                                           acquisitionSettings.SamplePeriod
                                           systemContext.AntialiasingPeriod
 
-            RequestedDownrangeWindow = requestedDownrange
             ActualDownrangeWindow = window
         }
 
@@ -196,9 +190,8 @@ module ProjectionChange =
         let constrainedProjection = projectionWithChanges |> constrain
         let acquisitionSettings = toDeviceSettings systemContext constrainedProjection
                                     |> normalize
-        let requestedDownrange = pmap.GetRequestedDownrange.Invoke(projection)
         let computedValues = acquisitionSettings
-                                |> getComputedValues systemContext requestedDownrange
+                                |> getComputedValues systemContext
         struct (constrainedProjection, acquisitionSettings, computedValues)
 
 type ProjectionMap<'P,'C> with
