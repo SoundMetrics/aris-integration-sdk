@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
+open SoundMetrics.Aris.AcousticSettings.AcousticMath
 
 [<Measure>] type degC
 [<Measure>] type mm
@@ -48,7 +49,7 @@ with
         CyclePeriod = 0<Us>
         SamplePeriod = 0<Us>
         PulseWidth = 0<Us>
-        PingMode = PingMode.InvalidPingMode 0u
+        PingMode = PingMode.InvalidPingMode 0
         EnableTransmit = false
         Frequency = Frequency.Low
         Enable150Volts = false
@@ -122,6 +123,9 @@ type ComputedValues = {
     Resolution:     float32<mm>
     AutoFocusRange: float32<m>
     SoundSpeed:     float32<m/s>
+
+    RequestedDownrangeWindow:   DownrangeWindow
+    ActualDownrangeWindow:      DownrangeWindow
 }
 
 module internal DeviceSettingsNormalization =

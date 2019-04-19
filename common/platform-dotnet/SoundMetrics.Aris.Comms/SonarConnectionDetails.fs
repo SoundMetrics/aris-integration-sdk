@@ -35,8 +35,8 @@ module internal SonarConnectionDetails =
                     let settings = cmd.Settings
                     { Cookie = settings.Cookie
                       Settings =
-                          { FrameRate = settings.FrameRate * 1.0f</s>
-                            SampleCount = settings.SamplesPerBeam
+                          { FrameRate = float settings.FrameRate * 1.0</s>
+                            SampleCount = int settings.SamplesPerBeam
                             SampleStartDelay = int settings.SampleStartDelay * 1<Us>
                             CyclePeriod = int settings.CyclePeriod * 1<Us>
                             SamplePeriod = int settings.SamplePeriod * 1<Us>
@@ -45,7 +45,7 @@ module internal SonarConnectionDetails =
                             EnableTransmit = settings.EnableTransmit
                             Frequency = enum (int32 settings.Frequency)
                             Enable150Volts = settings.Enable150Volts
-                            ReceiverGain = settings.ReceiverGain } }
+                            ReceiverGain = int settings.ReceiverGain } }
 
                 member v.ToCommand () = ArisCommands.makeAcousticSettingsCmd v
 
@@ -63,7 +63,7 @@ module internal SonarConnectionDetails =
                 fun settings -> simpleRangeCheck settings.CyclePeriod           SonarConfig.CyclePeriodRange
                 fun settings -> simpleRangeCheck settings.SamplePeriod          SonarConfig.SamplePeriodRange
                 fun settings -> simpleRangeCheck settings.PulseWidth            SonarConfig.PulseWidthRange
-                fun settings -> simpleRangeCheck (uint32 settings.ReceiverGain) SonarConfig.ReceiverGainRange
+                fun settings -> simpleRangeCheck settings.ReceiverGain          SonarConfig.ReceiverGainRange
 
                 fun settings -> match settings.Frequency with
                                 | Frequency.Low | Frequency.High -> None

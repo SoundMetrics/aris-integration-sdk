@@ -25,5 +25,5 @@ type AcousticSettingsRawTest () =
 
         // Not terribly complete
         let a = AcousticSettingsRaw.Invalid
-        let b = { AcousticSettingsRaw.Invalid with SampleCount = a.SampleCount + 1u }
+        let b = { AcousticSettingsRaw.Invalid with SampleCount = a.SampleCount + 1 }
         areNotEqual a b

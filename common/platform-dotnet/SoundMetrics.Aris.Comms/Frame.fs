@@ -86,17 +86,17 @@ type internal ArisFrameExtensions =
     [<Extension>]
     static member internal GetAcousticSettings (f : Frame) =
 
-        let currentSettings = { FrameRate =         f.Header.FrameRate * 1.0f</s>
-                                SampleCount =       f.Header.SamplesPerBeam
+        let currentSettings = { FrameRate =         float f.Header.FrameRate * 1.0</s>
+                                SampleCount =       int f.Header.SamplesPerBeam
                                 SampleStartDelay =  int f.Header.SampleStartDelay * 1<Us>
                                 CyclePeriod =       int f.Header.CyclePeriod * 1<Us>
                                 SamplePeriod =      int f.Header.SamplePeriod * 1<Us>
                                 PulseWidth =        int f.Header.PulseWidth * 1<Us>
-                                PingMode =          PingMode.From (uint32 f.Header.PingMode)
+                                PingMode =          PingMode.From (int f.Header.PingMode)
                                 EnableTransmit =    f.Header.TransmitEnable <> 0u
                                 Frequency =         enum (int f.Header.FrequencyHiLow)
                                 Enable150Volts =    f.Header.Enable150V <> 0u
-                                ReceiverGain =      float32 f.Header.ReceiverGain }
+                                ReceiverGain =      int f.Header.ReceiverGain }
         let cookie, appliedSettings =
             if f.Header.AppliedSettings > f.Header.ConstrainedSettings && f.Header.AppliedSettings > f.Header.InvalidSettings then
                 f.Header.AppliedSettings, Applied { Cookie = f.Header.AppliedSettings; Settings = currentSettings }
@@ -109,16 +109,16 @@ type internal ArisFrameExtensions =
 
         let versionedCurrentSettings =
             { Cookie = cookie
-              Settings = { FrameRate =          f.Header.FrameRate * 1.0f</s>
-                           SampleCount =        f.Header.SamplesPerBeam
+              Settings = { FrameRate =          float f.Header.FrameRate * 1.0</s>
+                           SampleCount =        int f.Header.SamplesPerBeam
                            SampleStartDelay =   int f.Header.SampleStartDelay * 1<Us>
                            CyclePeriod =        int f.Header.CyclePeriod * 1<Us>
                            SamplePeriod =       int f.Header.SamplePeriod * 1<Us>
                            PulseWidth =         int f.Header.PulseWidth * 1<Us>
-                           PingMode =           PingMode.From(f.Header.PingMode)
+                           PingMode =           PingMode.From(int f.Header.PingMode)
                            EnableTransmit =     f.Header.TransmitEnable <> 0u
                            Frequency =          enum (int f.Header.FrequencyHiLow)
                            Enable150Volts =     f.Header.Enable150V <> 0u
-                           ReceiverGain =       float32 f.Header.ReceiverGain } }
+                           ReceiverGain =       int f.Header.ReceiverGain } }
 
         { CurrentSettings = versionedCurrentSettings; AppliedSettings = appliedSettings }

@@ -7,6 +7,8 @@ open Serilog
 open SonarConfig
 open SoundMetrics.Data.Range
 
+type SoundSpeed = float<m/s>
+type FrameRate = float</s>
 
 type Salinity =
     | Fresh = 0
@@ -14,17 +16,18 @@ type Salinity =
     | Seawater = 35
 
 type AcousticSettingsRaw = {
-    FrameRate: float32</s>
-    SampleCount: uint32
-    SampleStartDelay: int<Us>
-    CyclePeriod: int<Us>
-    SamplePeriod: int<Us>
-    PulseWidth: int<Us>
-    PingMode: PingMode
-    EnableTransmit: bool
-    Frequency: Frequency
-    Enable150Volts: bool
-    ReceiverGain: float32 }
+    FrameRate:          FrameRate
+    SampleCount:        int
+    SampleStartDelay:   int<Us>
+    CyclePeriod:        int<Us>
+    SamplePeriod:       int<Us>
+    PulseWidth:         int<Us>
+    PingMode:           PingMode
+    EnableTransmit:     bool
+    Frequency:          Frequency
+    Enable150Volts:     bool
+    ReceiverGain:       int
+}
 with
     override s.ToString () = sprintf "%A" s
 
@@ -36,17 +39,17 @@ with
             s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
 
     static member Invalid = {
-        FrameRate = 1.0f</s>
-        SampleCount = 0u
+        FrameRate = 1.0</s>
+        SampleCount = 0
         SampleStartDelay = 0<Us>
         CyclePeriod = 0<Us>
         SamplePeriod = 0<Us>
         PulseWidth = 0<Us>
-        PingMode = InvalidPingMode 0u
+        PingMode = InvalidPingMode 0
         EnableTransmit = false
         Frequency = Frequency.Low
         Enable150Volts = false
-        ReceiverGain = 0.0f
+        ReceiverGain = 0
     }
 
     static member diff left right =
@@ -91,7 +94,7 @@ module AcousticMath =
     [<CompiledName("CalculateCyclePeriod")>]
     let calculateCyclePeriod systemType
                              (sampleStartDelay: int<Us>)
-                             (sampleCount : uint32)
+                             (sampleCount : int)
                              (samplePeriod: int<Us>)
                              (antiAliasing: int<Us>)
             : int<Us> =
@@ -105,7 +108,7 @@ module AcousticMath =
 
 
     [<CompiledName("CalculateSpeedOfSound")>]
-    let calculateSpeedOfSound (temperature: float) (depth: float) (salinity: float) : float<m/s> =
+    let calculateSpeedOfSound (temperature: float) (depth: float) (salinity: float) : SoundSpeed =
 
         AcousticMathDetails.validateDouble temperature  "temperature"
         AcousticMathDetails.validateDouble depth        "depth"
@@ -114,14 +117,14 @@ module AcousticMath =
         1.0<m/s> * AcousticMathDetails.calculateSpeedOfSound(temperature, depth, salinity)
 
 
-    type WindowSize = {
-        windowStart: float<m>
-        windowLength: float<m>
+    type DownrangeWindow = {
+        Start:  float<m>
+        End:    float<m>
     }
     with
-        member x.midPoint = x.windowStart + (x.windowLength / 2.0)
-        member x.windowEnd = x.windowStart + x.windowLength
-        override x.ToString() = sprintf "{windowStart=%f; windowEnd=%f}" (float x.windowStart) (float x.windowEnd)
+        member x.Length = x.End - x.Start
+        member x.MidPoint = x.Start + (x.Length / 2.0)
+        override x.ToString() = sprintf "{windowStart=%f; windowEnd=%f}" (float x.Start) (float x.End)
 
     [<CompiledName("CalculateWindow")>]
     let calculateWindow (sampleStartDelay: int<Us>)
@@ -135,7 +138,7 @@ module AcousticMath =
         let sspd = calculateSpeedOfSound temperature depth salinity
         let windowStart = sampleStartDelay * sspd / 2.0
         let windowLength = float sampleCount * samplePeriod * sspd / 2.0
-        { windowStart = windowStart; windowLength = windowLength }
+        { Start = windowStart; End = windowStart + windowLength }
 
     [<CompiledName("CalculateSampleStartDelay")>]
     let calculateSampleStartDelay (windowStart: float<m>)
@@ -154,7 +157,7 @@ module AcousticMath =
                                   sampleCount
                                   samplePeriod
                                   antiAliasing
-                                    : float32</s> =
+                                    : float</s> =
 
         // The cyclePeriodFactor is an empirical value based on measured maximum frame rates as a function of
         // SamplePeriod and SamplesPerBeam.
@@ -164,7 +167,7 @@ module AcousticMath =
         // SamplesPerBeam is greater than 2000, and a lower slope for SamplesPerBeam < 2000
 
         let cyclePeriodFactor = let minFactor = 1400.0<Us>
-                                let samplesPerBeamThreshold = 2000u
+                                let samplesPerBeamThreshold = 2000
                                 if sampleCount > samplesPerBeamThreshold then
                                     let boostFactor = 2.0
                                     minFactor + boostFactor * minFactor
@@ -197,7 +200,7 @@ module AcousticMath =
         let cyclePeriod = calculateCyclePeriod systemType sampleStartDelay sampleCount samplePeriod antiAliasing
         let pingsPerFrame = SonarConfig.pingModeConfigurations.[pingMode].PingsPerFrame
         let cycleTimeUsec = (1.0<Us> * (float cyclePeriod) + cyclePeriodFactor) * float pingsPerFrame
-        let rate = min (SonarConfig.FrameRateRange.Max) (float32 (1000000.0<Us> / cycleTimeUsec) * 1.0f</s>)
+        let rate = min (SonarConfig.FrameRateRange.Max) ((1000000.0<Us> / cycleTimeUsec) * 1.0</s>)
         rate
 
     [<CompiledName("ConstrainAcousticSettings")>]
@@ -219,8 +222,8 @@ module internal SettingsDetails =
 
     let defaultSettingsMap =
         [ ArisSystemType.Aris1200,
-                               { FrameRate =        1.0f</s>
-                                 SampleCount =      1000u
+                               { FrameRate =        FrameRateRange.Min
+                                 SampleCount =      1000
                                  SampleStartDelay = 4000<Us>
                                  CyclePeriod =      32400<Us>
                                  SamplePeriod =     28<Us>
@@ -229,11 +232,11 @@ module internal SettingsDetails =
                                  EnableTransmit =   true
                                  Frequency =        Frequency.High
                                  Enable150Volts =   true
-                                 ReceiverGain =     20.0f }
+                                 ReceiverGain =     20 }
 
           ArisSystemType.Aris1800,
-                               { FrameRate =        1.0f</s>
-                                 SampleCount =      1000u
+                               { FrameRate =        FrameRateRange.Min
+                                 SampleCount =      1000
                                  SampleStartDelay = 2000<Us>
                                  CyclePeriod =      19400<Us>
                                  SamplePeriod =     17<Us>
@@ -242,11 +245,11 @@ module internal SettingsDetails =
                                  EnableTransmit =   true
                                  Frequency =        Frequency.High
                                  Enable150Volts =   true
-                                 ReceiverGain =     18.0f }
+                                 ReceiverGain =     18 }
 
           ArisSystemType.Aris3000,
-                               { FrameRate =        1.0f</s>
-                                 SampleCount =      1000u
+                               { FrameRate =        FrameRateRange.Min
+                                 SampleCount =      1000
                                  SampleStartDelay = 1300<Us>
                                  CyclePeriod =      6700<Us>
                                  SamplePeriod =     5<Us>
@@ -255,7 +258,7 @@ module internal SettingsDetails =
                                  EnableTransmit =   true
                                  Frequency =        Frequency.High
                                  Enable150Volts =   true
-                                 ReceiverGain =     12.0f } ]
+                                 ReceiverGain =     12 } ]
         |> Map.ofList
 
 type AcousticSettingsRaw with
@@ -263,7 +266,7 @@ type AcousticSettingsRaw with
 
     member internal s.Validate () =
         let pingsPerFrame = pingModeConfigurations.[s.PingMode].PingsPerFrame
-        let framePeriod = int (ceil (1000000.0f / float32 s.FrameRate)) * 1<Us>
+        let framePeriod = int (ceil (1000000.0 / float s.FrameRate)) * 1<Us>
         let adjustedCyclePeriod = s.SampleStartDelay + (s.SamplePeriod * int s.SampleCount) + 360<Us>
 
         let NoError = ""
@@ -287,9 +290,9 @@ type AcousticSettingsRaw with
                 (if PulseWidthRange |> contains s.PulseWidth
                     then NoError
                     else sprintf "pulseWidth '%d' is out-of-range" (int s.PulseWidth))
-                (if ReceiverGainRange |> contains (uint32 s.ReceiverGain)
+                (if ReceiverGainRange |> contains s.ReceiverGain
                     then NoError
-                    else sprintf "receiverGain '%f' is out-of-range" s.ReceiverGain)
+                    else sprintf "receiverGain '%d' is out-of-range" s.ReceiverGain)
                 (if framePeriod > s.CyclePeriod * int pingsPerFrame
                     then NoError
                     else sprintf "framePeriod '%d' is too small for cycle period; frame rate %f is too fast"

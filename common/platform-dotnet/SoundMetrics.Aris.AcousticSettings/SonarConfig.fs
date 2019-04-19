@@ -9,28 +9,31 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 /// Defines the system types for ARIS: 1200, 1800, and 3000.
 type ArisSystemType = Aris1800 = 0 | Aris3000 = 1 | Aris1200 = 2
 
-type PingMode = PingMode1 | PingMode3 | PingMode6 | PingMode9 | InvalidPingMode of uint32
+type PingMode = PingMode1 | PingMode3 | PingMode6 | PingMode9 | InvalidPingMode of int
 with
     member pm.IsSupported =
         match pm with
         | PingMode1 | PingMode3 | PingMode6 | PingMode9 -> true
         | InvalidPingMode _ -> false
 
-    member pm.ToUInt32 () =
+    member pm.ToInt () =
         match pm with
-        | PingMode1 -> 1u
-        | PingMode3 -> 3u
-        | PingMode6 -> 6u
-        | PingMode9 -> 9u
-        | InvalidPingMode pingMode -> failwithf "Unexpected use of InvalidPingMode: %u" pingMode
+        | PingMode1 -> 1
+        | PingMode3 -> 3
+        | PingMode6 -> 6
+        | PingMode9 -> 9
+        | InvalidPingMode pingMode -> failwithf "Unexpected use of InvalidPingMode: %d" pingMode
 
-    static member From (pingMode : uint32) =
+    static member From (pingMode : int) =
         match pingMode with
-        | 1u -> PingMode1
-        | 3u -> PingMode3
-        | 6u -> PingMode6
-        | 9u -> PingMode9
-        | _ -> invalidArg "pingMode" "Unsupported ping mode"
+        | 1 -> PingMode1
+        | 3 -> PingMode3
+        | 6 -> PingMode6
+        | 9 -> PingMode9
+        | _ -> invalidArg "pingMode" (sprintf "Unsupported ping mode: %d" pingMode)
+
+    // Convenience overload.
+    static member From (pingMode : uint32) = PingMode.From (int pingMode)
 
 type Frequency = Low = 0 | High = 1
 
@@ -41,10 +44,10 @@ module SonarConfig =
 
     // Min/max values per ARIS Engineering Test Command List
 
-    let SampleCountRange =      range "SampleCount"          128u         4096u
-    let FocusPositionRange =    range "FocusPosition"          0u         1000u
-    let ReceiverGainRange =     range "ReceiverGain"           0u           24u
-    let FrameRateRange =        range "FrameRate"           1.0f</s>     15.0f</s>
+    let SampleCountRange =      range "SampleCount"          128          4096
+    let FocusPositionRange =    range "FocusPosition"          0          1000
+    let ReceiverGainRange =     range "ReceiverGain"           0            24
+    let FrameRateRange =        range "FrameRate"            1.0</s>      15.0</s>
 
     let SampleStartDelayRange = range "SampleStartDelay"     930<Us>     60000<Us>
     let CyclePeriodRange =      range "CyclePeriod"         1802<Us>    150000<Us>
@@ -95,24 +98,24 @@ module SonarConfig =
         |> Map.ofList
 
     type PingModeConfig = {
-        PingMode: PingMode
-        ChannelCount: uint32
-        PingsPerFrame: uint32
+        PingMode:       PingMode
+        ChannelCount:   int
+        PingsPerFrame:  int
     }
 
     let pingModeConfigurations =
-        [ { PingMode = PingMode1;           ChannelCount =  48u; PingsPerFrame = 3u }
-          { PingMode = InvalidPingMode 2u;  ChannelCount =  48u; PingsPerFrame = 1u }
-          { PingMode = PingMode3;           ChannelCount =  96u; PingsPerFrame = 6u }
-          { PingMode = InvalidPingMode 4u;  ChannelCount =  96u; PingsPerFrame = 2u }
-          { PingMode = InvalidPingMode 5u;  ChannelCount =  96u; PingsPerFrame = 1u }
-          { PingMode = PingMode6;           ChannelCount =  64u; PingsPerFrame = 4u }
-          { PingMode = InvalidPingMode 7u;  ChannelCount =  64u; PingsPerFrame = 2u }
-          { PingMode = InvalidPingMode 8u;  ChannelCount =  64u; PingsPerFrame = 1u }
-          { PingMode = PingMode9;           ChannelCount = 128u; PingsPerFrame = 8u }
-          { PingMode = InvalidPingMode 10u; ChannelCount = 128u; PingsPerFrame = 4u }
-          { PingMode = InvalidPingMode 11u; ChannelCount = 128u; PingsPerFrame = 2u }
-          { PingMode = InvalidPingMode 12u; ChannelCount = 128u; PingsPerFrame = 1u } ]
+        [ { PingMode = PingMode1;           ChannelCount =  48;  PingsPerFrame = 3 }
+          { PingMode = InvalidPingMode 2;   ChannelCount =  48;  PingsPerFrame = 1 }
+          { PingMode = PingMode3;           ChannelCount =  96;  PingsPerFrame = 6 }
+          { PingMode = InvalidPingMode 4;   ChannelCount =  96;  PingsPerFrame = 2 }
+          { PingMode = InvalidPingMode 5;   ChannelCount =  96;  PingsPerFrame = 1 }
+          { PingMode = PingMode6;           ChannelCount =  64;  PingsPerFrame = 4 }
+          { PingMode = InvalidPingMode 7;   ChannelCount =  64;  PingsPerFrame = 2 }
+          { PingMode = InvalidPingMode 8;   ChannelCount =  64;  PingsPerFrame = 1 }
+          { PingMode = PingMode9;           ChannelCount = 128;  PingsPerFrame = 8 }
+          { PingMode = InvalidPingMode 10;  ChannelCount = 128;  PingsPerFrame = 4 }
+          { PingMode = InvalidPingMode 11;  ChannelCount = 128;  PingsPerFrame = 2 }
+          { PingMode = InvalidPingMode 12;  ChannelCount = 128;  PingsPerFrame = 1 } ]
           |> List.map (fun elem -> elem.PingMode, elem)
           |> Map.ofList
 

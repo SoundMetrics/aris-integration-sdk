@@ -30,7 +30,7 @@ let testBasicConnection (inputs : TestInputs) =
 
         let initialSettings =
             let defaultSettings = AcousticSettingsRaw.DefaultAcousticSettingsFor beacon.SystemType
-            { defaultSettings with FrameRate = 15.0f</s> }
+            { defaultSettings with FrameRate = 15.0</s> }
 
         let perfSink = SampledConduitPerfSink(1000, 10)
         use conduit = new ArisConduit(initialSettings, sn,
