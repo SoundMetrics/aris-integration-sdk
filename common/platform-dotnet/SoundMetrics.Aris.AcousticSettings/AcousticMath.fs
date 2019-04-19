@@ -113,6 +113,18 @@ module AcousticMath =
         member x.MidPoint = x.Start + (x.Length / 2.0)
         override x.ToString() = sprintf "{windowStart=%f; windowEnd=%f}" (float x.Start) (float x.End)
 
+    [<CompiledName("CalculateWindowAtSspd")>]
+    let calculateWindowAtSspd (sampleStartDelay: int<Us>)
+                              (samplePeriod: int<Us>)
+                              (sampleCount: int)
+                              (sspd : SoundSpeed)
+                              : DownrangeWindow =
+        let sampleStartDelay = usToS sampleStartDelay
+        let samplePeriod = usToS samplePeriod
+        let windowStart = sampleStartDelay * sspd / 2.0
+        let windowLength = float sampleCount * samplePeriod * sspd / 2.0
+        { Start = windowStart; End = windowStart + windowLength }
+
     [<CompiledName("CalculateWindow")>]
     let calculateWindow (sampleStartDelay: int<Us>)
                         (samplePeriod: int<Us>)
@@ -121,12 +133,11 @@ module AcousticMath =
                         (depth: float<m>)
                         (salinity: Salinity)
                         : DownrangeWindow =
-        let sampleStartDelay = usToS sampleStartDelay
-        let samplePeriod = usToS samplePeriod
         let sspd = calculateSpeedOfSound temperature depth salinity
-        let windowStart = sampleStartDelay * sspd / 2.0
-        let windowLength = float sampleCount * samplePeriod * sspd / 2.0
-        { Start = windowStart; End = windowStart + windowLength }
+        calculateWindowAtSspd sampleStartDelay
+                              samplePeriod
+                              sampleCount
+                              sspd
 
     [<CompiledName("CalculateSampleStartDelay")>]
     let calculateSampleStartDelay (windowStart: float<m>)

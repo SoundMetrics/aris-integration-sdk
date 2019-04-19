@@ -125,34 +125,48 @@ type ComputedValues = {
     SoundSpeed:     float<m/s>
     MaxFrameRate:   float</s>
 
-    ActualDownrangeWindow:      DownrangeWindow
+    ActualDownrangeWindow: DownrangeWindow
+    ConstrainedAcquisitionSettings: bool
 }
 
 module internal AcquisitionSettingsNormalization =
 
     /// Transforms to device settings that conform to guidelines for safely
     /// and successfully producing images.
-    let normalize (settings : AcquisitionSettings) : AcquisitionSettings =
+    let normalize systemType
+                  antialiasingPeriod
+                  (settings: AcquisitionSettings)
+                  : struct (AcquisitionSettings * bool) =
 
-        failwith "nyi"
+        let maximumFrameRate =
+            calculateMaximumFrameRate systemType
+                                      settings.PingMode
+                                      settings.SampleStartDelay
+                                      settings.SampleCount
+                                      settings.SamplePeriod
+                                      antialiasingPeriod
+        let adjustedFrameRate = min settings.FrameRate maximumFrameRate
+
+        let isConstrained = settings.FrameRate <> adjustedFrameRate
+        let constrainedSettings = { settings with FrameRate = adjustedFrameRate }
+        struct (constrainedSettings, isConstrained)
 
 module ProjectionChange =
 
     open AcquisitionSettingsNormalization
 
     let private getComputedValues (systemContext: SystemContext)
+                                  constrainedAS
                                   (acquisitionSettings: AcquisitionSettings)
                                   : ComputedValues =
 
-        let window = calculateWindow acquisitionSettings.SampleStartDelay
-                                     acquisitionSettings.SamplePeriod
-                                     acquisitionSettings.SampleCount
-                                     systemContext.WaterTemp
-                                     systemContext.Depth
-                                     systemContext.Salinity
         let sspd = calculateSpeedOfSound systemContext.WaterTemp
                                          systemContext.Depth
                                          systemContext.Salinity
+        let window = calculateWindowAtSspd acquisitionSettings.SampleStartDelay
+                                           acquisitionSettings.SamplePeriod
+                                           acquisitionSettings.SampleCount
+                                           sspd
         {
             Resolution = mToMm (window.Length / float acquisitionSettings.SampleCount)
             AutoFocusRange = window.MidPoint
@@ -166,6 +180,7 @@ module ProjectionChange =
                                           systemContext.AntialiasingPeriod
 
             ActualDownrangeWindow = window
+            ConstrainedAcquisitionSettings = constrainedAS
         }
 
     /// Applies changes to a settings projection; produces a new projection,
@@ -189,10 +204,11 @@ module ProjectionChange =
         let constrainedProjection =
             let projectionWithChanges = changes |> Seq.fold change projection
             projectionWithChanges |> constrain
-        let acquisitionSettings = toAcquisitionSettings systemContext constrainedProjection
-                                    |> normalize
+        let struct (acquisitionSettings, constrainedAS) =
+            toAcquisitionSettings systemContext constrainedProjection
+                |> normalize systemContext.SystemType systemContext.AntialiasingPeriod
         let computedValues = acquisitionSettings
-                                |> getComputedValues systemContext
+                                |> getComputedValues systemContext constrainedAS
         struct (constrainedProjection, acquisitionSettings, computedValues)
 
 type ProjectionMap<'P,'C> with
