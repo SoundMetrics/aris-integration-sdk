@@ -2,18 +2,18 @@
 
 namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
 
-type Range = float32
+type DownrangeWindow = SoundMetrics.Aris.AcousticSettings.AcousticMath.DownrangeWindow
 
 type BunnyHillSettings = {
-    WindowStart:    Range
-    WindowEnd:      Range
+    DownrangeWindow:    DownrangeWindow
 }
 
 type BunnyHillChange =
-    | ChangeWindowStart of value: Range
-    | ChangeWindowEnd of value: Range
+    | ChangeWindowStart of value: float<m>
+    | ChangeWindowEnd of value: float<m>
 
 module BunnyHill =
 
@@ -27,20 +27,25 @@ module BunnyHill =
 
             match change with
             | ChangeWindowStart value ->
-                { bunnyHill with WindowStart = value }
+                { bunnyHill with
+                    DownrangeWindow =
+                        { bunnyHill.DownrangeWindow with Start = value } }
             | ChangeWindowEnd value ->
-                { bunnyHill with WindowEnd = value }
+                { bunnyHill with
+                    DownrangeWindow =
+                        { bunnyHill.DownrangeWindow with End = value } }
 
-        let minWindowStart = 0.7f
-        let maxWindowEnd = 20.0f
+        let minWindowStart = 0.7<m>
+        let maxWindowEnd = 20.0<m>
 
         let constrain (bunnyHill : BunnyHillSettings) =
             let minmax f = max minWindowStart (min maxWindowEnd f)
             let struct (windowStart, windowEnd) =
                 let struct (s, e) =
-                    struct (minmax bunnyHill.WindowStart, minmax bunnyHill.WindowEnd)
+                    let downrange = bunnyHill.DownrangeWindow
+                    struct (minmax downrange.Start, minmax downrange.End)
                 struct (min s e, max s e)
-            { WindowStart = windowStart; WindowEnd = windowEnd }
+            { DownrangeWindow = { Start = windowStart; End = windowEnd } }
 
         {
             ToDeviceSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)

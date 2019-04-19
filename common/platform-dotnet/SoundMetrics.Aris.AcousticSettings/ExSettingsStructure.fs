@@ -15,14 +15,15 @@ type PingMode = SoundMetrics.Aris.AcousticSettings.PingMode
 type Frequency = SoundMetrics.Aris.AcousticSettings.Frequency
 type Salinity = SoundMetrics.Aris.AcousticSettings.Salinity
 type ArisSystemType = SoundMetrics.Aris.AcousticSettings.ArisSystemType
+type FrameRate = SoundMetrics.Aris.AcousticSettings.FrameRate
 [<Measure>] type Us // Microseconds
 
 
 // Formerly "AcousticSettings," these are the settings we send to the sonar to
 // instruct it to form images.
 type AcquisitionSettings = {
-    FrameRate: float32</s>
-    SampleCount: uint32
+    FrameRate: FrameRate
+    SampleCount: int
     SampleStartDelay: int<Us>
     CyclePeriod: int<Us>
     SamplePeriod: int<Us>
@@ -31,7 +32,7 @@ type AcquisitionSettings = {
     EnableTransmit: bool
     Frequency: Frequency
     Enable150Volts: bool
-    ReceiverGain: float32 }
+    ReceiverGain: int }
 with
     override s.ToString () = sprintf "%A" s
 
@@ -43,8 +44,8 @@ with
             s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
 
     static member Invalid = {
-        FrameRate = 1.0f</s>
-        SampleCount = 0u
+        FrameRate = 1.0</s>
+        SampleCount = 0
         SampleStartDelay = 0<Us>
         CyclePeriod = 0<Us>
         SamplePeriod = 0<Us>
@@ -53,7 +54,7 @@ with
         EnableTransmit = false
         Frequency = Frequency.Low
         Enable150Volts = false
-        ReceiverGain = 0.0f
+        ReceiverGain = 0
     }
 
     static member diff left right =
@@ -96,7 +97,7 @@ type AuxLensType = None | Telephoto
 /// The context in which the system is operating.
 type SystemContext = {
     SystemType: ArisSystemType
-    WaterTemp:  float32<degC>
+    WaterTemp:  float<degC>
     AuxLens:    AuxLensType
     Salinity:   Salinity
 }
@@ -120,9 +121,9 @@ type ProjectionMap<'P,'C> = {
 
 /// These are computed from inputs given when projecting settings.
 type ComputedValues = {
-    Resolution:     float32<mm>
-    AutoFocusRange: float32<m>
-    SoundSpeed:     float32<m/s>
+    Resolution:     float<mm>
+    AutoFocusRange: float<m>
+    SoundSpeed:     float<m/s>
 
     RequestedDownrangeWindow:   DownrangeWindow
     ActualDownrangeWindow:      DownrangeWindow
