@@ -113,7 +113,7 @@ type ProjectionMap<'P,'C> = {
     Constrain:          Func<'P,'P>
 
     /// Transforms from a projection of settings to actual device settings.
-    ToDeviceSettings:   Func<SystemContext,'P,AcquisitionSettings>
+    ToAcquisitionSettings:   Func<SystemContext,'P,AcquisitionSettings>
 }
 
 //-----------------------------------------------------------------------------
@@ -128,7 +128,7 @@ type ComputedValues = {
     ActualDownrangeWindow:      DownrangeWindow
 }
 
-module internal DeviceSettingsNormalization =
+module internal AcquisitionSettingsNormalization =
 
     /// Transforms to device settings that conform to guidelines for safely
     /// and successfully producing images.
@@ -138,7 +138,7 @@ module internal DeviceSettingsNormalization =
 
 module ProjectionChange =
 
-    open DeviceSettingsNormalization
+    open AcquisitionSettingsNormalization
 
     let private getComputedValues (systemContext: SystemContext)
                                   (acquisitionSettings: AcquisitionSettings)
@@ -183,12 +183,13 @@ module ProjectionChange =
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for interop.)
         let change projection change = pmap.Change.Invoke(projection, change)
         let constrain projection = pmap.Constrain.Invoke(projection)
-        let toDeviceSettings ctx projection : AcquisitionSettings =
-            pmap.ToDeviceSettings.Invoke(ctx, projection)
+        let toAcquisitionSettings ctx projection : AcquisitionSettings =
+            pmap.ToAcquisitionSettings.Invoke(ctx, projection)
 
-        let projectionWithChanges = changes |> Seq.fold change projection
-        let constrainedProjection = projectionWithChanges |> constrain
-        let acquisitionSettings = toDeviceSettings systemContext constrainedProjection
+        let constrainedProjection =
+            let projectionWithChanges = changes |> Seq.fold change projection
+            projectionWithChanges |> constrain
+        let acquisitionSettings = toAcquisitionSettings systemContext constrainedProjection
                                     |> normalize
         let computedValues = acquisitionSettings
                                 |> getComputedValues systemContext

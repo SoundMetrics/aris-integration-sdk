@@ -48,7 +48,7 @@ module BunnyHill =
             { DownrangeWindow = { Start = windowStart; End = windowEnd } }
 
         {
-            ToDeviceSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
+            ToAcquisitionSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
             Constrain = Func<BunnyHillSettings,BunnyHillSettings>(constrain)
             Change = Func<BunnyHillSettings,BunnyHillChange,BunnyHillSettings>(change)
         }
