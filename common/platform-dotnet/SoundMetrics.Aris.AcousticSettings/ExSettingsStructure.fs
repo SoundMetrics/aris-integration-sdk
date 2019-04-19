@@ -110,7 +110,7 @@ type ProjectionMap<'P,'C> = {
     Change:             Func<'P,'C,'P>
 
     /// Constrains settings projection 'P in ways that are specific to 'P.
-    Constrain:          Func<'P,'P>
+    Constrain:          Func<'P,SystemContext,'P>
 
     /// Transforms from a projection of settings to actual device settings.
     ToAcquisitionSettings:   Func<SystemContext,'P,AcquisitionSettings>
@@ -192,18 +192,20 @@ module ProjectionChange =
     let changeProjection<'P,'C> (pmap: ProjectionMap<'P,'C>)
                                 (projection: 'P)
                                 (changes: 'C seq)
-                                systemContext
+                                (systemContext: SystemContext)
                                 : struct ('P * AcquisitionSettings * ComputedValues) =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for interop.)
-        let change projection change = pmap.Change.Invoke(projection, change)
-        let constrain projection = pmap.Constrain.Invoke(projection)
+        let change projection change =
+            pmap.Change.Invoke(projection, change)
+        let constrain systemContext projection =
+            pmap.Constrain.Invoke(projection, systemContext)
         let toAcquisitionSettings ctx projection : AcquisitionSettings =
             pmap.ToAcquisitionSettings.Invoke(ctx, projection)
 
         let constrainedProjection =
             let projectionWithChanges = changes |> Seq.fold change projection
-            projectionWithChanges |> constrain
+            projectionWithChanges |> constrain systemContext
         let struct (acquisitionSettings, constrainedAS) =
             toAcquisitionSettings systemContext constrainedProjection
                 |> normalize systemContext.SystemType systemContext.AntialiasingPeriod

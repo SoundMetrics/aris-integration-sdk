@@ -67,6 +67,7 @@ module SonarConfig =
         WindowEndRange:         Range<float<m>>
     }
 
+    [<CompiledName("SystemTypeRangeMap")>]
     let systemTypeRangeMap =
         [ { SystemType =            ArisSystemType.Aris1800
             PulseWidthRange =       constrainRangeMax PulseWidthRange          40<Us>

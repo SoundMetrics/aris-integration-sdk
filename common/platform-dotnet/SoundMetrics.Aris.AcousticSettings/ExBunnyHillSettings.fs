@@ -20,7 +20,7 @@ module BunnyHill =
     [<CompiledName("BunnyHillProjection")>]
     let bunnyHillProjection =
 
-        let toSettings externalContext (bunnyHill : BunnyHillSettings) : AcquisitionSettings =
+        let toSettings externalContext (bunnyHill: BunnyHillSettings) : AcquisitionSettings =
             failwith "nyi"
 
         let change bunnyHill change : BunnyHillSettings =
@@ -35,11 +35,15 @@ module BunnyHill =
                     DownrangeWindow =
                         { bunnyHill.DownrangeWindow with End = value } }
 
-        let minWindowStart = 0.7<m>
-        let maxWindowEnd = 20.0<m>
+        let constrain (bunnyHill: BunnyHillSettings) (systemContext: SystemContext) =
 
-        let constrain (bunnyHill : BunnyHillSettings) =
-            let minmax f = max minWindowStart (min maxWindowEnd f)
+            let struct (windowStartMin, windowEndMax) =
+                let ranges = SoundMetrics.Aris.AcousticSettings.SonarConfig
+                                .systemTypeRangeMap.[systemContext.SystemType]
+                struct (ranges.WindowStartRange.Min, ranges.WindowEndRange.Max)
+
+            let minmax f = max windowStartMin (min windowEndMax f)
+
             let struct (windowStart, windowEnd) =
                 let struct (s, e) =
                     let downrange = bunnyHill.DownrangeWindow
@@ -49,6 +53,6 @@ module BunnyHill =
 
         {
             ToAcquisitionSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
-            Constrain = Func<BunnyHillSettings,BunnyHillSettings>(constrain)
+            Constrain = Func<BunnyHillSettings,SystemContext,BunnyHillSettings>(constrain)
             Change = Func<BunnyHillSettings,BunnyHillChange,BunnyHillSettings>(change)
         }
