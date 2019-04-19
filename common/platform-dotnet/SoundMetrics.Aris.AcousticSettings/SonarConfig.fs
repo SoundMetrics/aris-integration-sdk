@@ -4,8 +4,6 @@ namespace SoundMetrics.Aris.AcousticSettings
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 
-[<Measure>] type Us // Microseconds
-
 /// Defines the system types for ARIS: 1200, 1800, and 3000.
 type ArisSystemType = Aris1800 = 0 | Aris3000 = 1 | Aris1200 = 2
 

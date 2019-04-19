@@ -29,6 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="UnitsOfMeasure.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SonarConfig.fs" />

@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Common
 open System

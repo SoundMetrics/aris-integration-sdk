@@ -7,14 +7,6 @@ open Serilog
 open SonarConfig
 open SoundMetrics.Data.Range
 
-type SoundSpeed = float<m/s>
-type FrameRate = float</s>
-
-type Salinity =
-    | Fresh = 0
-    | Brackish = 15
-    | Seawater = 35
-
 type AcousticSettingsRaw = {
     FrameRate:          FrameRate
     SampleCount:        int
@@ -83,14 +75,6 @@ with
 
 module AcousticMath =
 
-    let private usPerS = 1000000.0
-
-    let usToS (us: int<Us>): float<s> =
-        (float (us / 1<Us>) / usPerS) * 1.0<s>
-
-    let sToUs (s: float<s>): int<Us> =
-        (int ((s / 1.0<s>) * usPerS)) * 1<Us>
-
     [<CompiledName("CalculateCyclePeriod")>]
     let calculateCyclePeriod systemType
                              (sampleStartDelay: int<Us>)
@@ -108,11 +92,14 @@ module AcousticMath =
 
 
     [<CompiledName("CalculateSpeedOfSound")>]
-    let calculateSpeedOfSound (temperature: float) (depth: float) (salinity: float) : SoundSpeed =
+    let calculateSpeedOfSound (temperature: float<degC>)
+                              (depth: float<m>)
+                              (salinity: Salinity)
+                              : SoundSpeed =
 
-        AcousticMathDetails.validateDouble temperature  "temperature"
-        AcousticMathDetails.validateDouble depth        "depth"
-        AcousticMathDetails.validateDouble salinity     "salinity"
+        AcousticMathDetails.validateDouble (float temperature)  "temperature"
+        AcousticMathDetails.validateDouble (float depth)        "depth"
+        AcousticMathDetails.validateDouble (float salinity)     "salinity"
 
         1.0<m/s> * AcousticMathDetails.calculateSpeedOfSound(temperature, depth, salinity)
 
@@ -130,9 +117,10 @@ module AcousticMath =
     let calculateWindow (sampleStartDelay: int<Us>)
                         (samplePeriod: int<Us>)
                         (sampleCount: int)
-                        temperature
-                        depth
-                        salinity =
+                        (temperature: float<degC>)
+                        (depth: float<m>)
+                        (salinity: Salinity)
+                        : DownrangeWindow =
         let sampleStartDelay = usToS sampleStartDelay
         let samplePeriod = usToS samplePeriod
         let sspd = calculateSpeedOfSound temperature depth salinity
@@ -142,9 +130,10 @@ module AcousticMath =
 
     [<CompiledName("CalculateSampleStartDelay")>]
     let calculateSampleStartDelay (windowStart: float<m>)
-                                  temperature
-                                  depth
-                                  salinity : int<Us> =
+                                  (temperature: float<degC>)
+                                  (depth: float<m>)
+                                  (salinity: Salinity)
+                                  : int<Us> =
         let sspd = calculateSpeedOfSound temperature depth salinity
         let ssd = 2.0 * windowStart / sspd
         sToUs ssd

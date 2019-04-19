@@ -5,9 +5,7 @@ namespace SoundMetrics.Aris.AcousticSettings.Experimental
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
 open SoundMetrics.Aris.AcousticSettings.AcousticMath
-
-[<Measure>] type degC
-[<Measure>] type mm
+open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
 
 // Temporary aliases needed to use existing types without opening the
 // entire namespace into this experimental namespace.
@@ -16,7 +14,6 @@ type Frequency = SoundMetrics.Aris.AcousticSettings.Frequency
 type Salinity = SoundMetrics.Aris.AcousticSettings.Salinity
 type ArisSystemType = SoundMetrics.Aris.AcousticSettings.ArisSystemType
 type FrameRate = SoundMetrics.Aris.AcousticSettings.FrameRate
-[<Measure>] type Us // Microseconds
 
 
 // Formerly "AcousticSettings," these are the settings we send to the sonar to
@@ -98,8 +95,10 @@ type AuxLensType = None | Telephoto
 type SystemContext = {
     SystemType: ArisSystemType
     WaterTemp:  float<degC>
-    AuxLens:    AuxLensType
     Salinity:   Salinity
+    Depth:      float<m>
+    AuxLens:    AuxLensType
+    AntialiasingPeriod: int<Us>
 }
 
 /// Functions related in their effort to affect change, constraint, and conversion
@@ -113,6 +112,9 @@ type ProjectionMap<'P,'C> = {
     /// Constrains settings projection 'P in ways that are specific to 'P.
     Constrain:          Func<'P,'P>
 
+    /// Retrieves the requested downrange wndow from the projection.
+    GetRequestedDownrange: Func<'P,DownrangeWindow>
+
     /// Transforms from a projection of settings to actual device settings.
     ToDeviceSettings:   Func<SystemContext,'P,AcquisitionSettings>
 }
@@ -124,6 +126,7 @@ type ComputedValues = {
     Resolution:     float<mm>
     AutoFocusRange: float<m>
     SoundSpeed:     float<m/s>
+    MaxFrameRate:   float</s>
 
     RequestedDownrangeWindow:   DownrangeWindow
     ActualDownrangeWindow:      DownrangeWindow
@@ -133,7 +136,7 @@ module internal DeviceSettingsNormalization =
 
     /// Transforms to device settings that conform to guidelines for safely
     /// and successfully producing images.
-    let normalize (settings : AcquisitionSettings) =
+    let normalize (settings : AcquisitionSettings) : AcquisitionSettings =
 
         failwith "nyi"
 
@@ -141,9 +144,35 @@ module ProjectionChange =
 
     open DeviceSettingsNormalization
 
-    let private getComputedValues extCtx (deviceSettings: AcquisitionSettings) =
-        failwith "nyi"
-        //{ Resolution = 6.9f<mm>; AutoFocusRange = 4.0f<m>; SoundSpeed = 1500.0f<m/s> }
+    let private getComputedValues (systemContext: SystemContext)
+                                  (requestedDownrange: DownrangeWindow)
+                                  (acquisitionSettings: AcquisitionSettings)
+                                  : ComputedValues =
+
+        let window = calculateWindow acquisitionSettings.SampleStartDelay
+                                     acquisitionSettings.SamplePeriod
+                                     acquisitionSettings.SampleCount
+                                     systemContext.WaterTemp
+                                     systemContext.Depth
+                                     systemContext.Salinity
+        let sspd = calculateSpeedOfSound systemContext.WaterTemp
+                                         systemContext.Depth
+                                         systemContext.Salinity
+        {
+            Resolution = mToMm (window.Length / float acquisitionSettings.SampleCount)
+            AutoFocusRange = window.MidPoint
+            SoundSpeed = sspd
+            MaxFrameRate =
+                calculateMaximumFrameRate systemContext.SystemType
+                                          acquisitionSettings.PingMode
+                                          acquisitionSettings.SampleStartDelay
+                                          acquisitionSettings.SampleCount
+                                          acquisitionSettings.SamplePeriod
+                                          systemContext.AntialiasingPeriod
+
+            RequestedDownrangeWindow = requestedDownrange
+            ActualDownrangeWindow = window
+        }
 
     /// Applies changes to a settings projection; produces a new projection,
     /// device settings, and computed values.
@@ -154,22 +183,25 @@ module ProjectionChange =
     let changeProjection<'P,'C> (pmap: ProjectionMap<'P,'C>)
                                 (projection: 'P)
                                 (changes: 'C seq)
-                                externalContext
+                                systemContext
                                 : struct ('P * AcquisitionSettings * ComputedValues) =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for interop.)
         let change projection change = pmap.Change.Invoke(projection, change)
         let constrain projection = pmap.Constrain.Invoke(projection)
-        let toDeviceSettings ctx projection = pmap.ToDeviceSettings.Invoke(ctx, projection)
+        let toDeviceSettings ctx projection : AcquisitionSettings =
+            pmap.ToDeviceSettings.Invoke(ctx, projection)
 
         let projectionWithChanges = changes |> Seq.fold change projection
         let constrainedProjection = projectionWithChanges |> constrain
-        let deviceSettings = toDeviceSettings externalContext constrainedProjection
-                                |> normalize
-        let computedValues = deviceSettings |> getComputedValues externalContext
-        struct (constrainedProjection, deviceSettings, computedValues)
+        let acquisitionSettings = toDeviceSettings systemContext constrainedProjection
+                                    |> normalize
+        let requestedDownrange = pmap.GetRequestedDownrange.Invoke(projection)
+        let computedValues = acquisitionSettings
+                                |> getComputedValues systemContext requestedDownrange
+        struct (constrainedProjection, acquisitionSettings, computedValues)
 
 type ProjectionMap<'P,'C> with
     /// See ProjectionChange.changeProjection.
-    member map.Apply(projection, changes, externalContext) =
-        ProjectionChange.changeProjection map projection changes externalContext
+    member map.Apply(projection, changes, systemContext) =
+        ProjectionChange.changeProjection map projection changes systemContext

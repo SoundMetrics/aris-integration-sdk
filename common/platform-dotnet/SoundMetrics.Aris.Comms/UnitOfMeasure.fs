@@ -2,9 +2,6 @@
 
 namespace SoundMetrics.Aris.Comms
 
-/// Microseconds
-[<Measure>] type Us
-
 /// Milliseconds
 [<Measure>] type ms
 
