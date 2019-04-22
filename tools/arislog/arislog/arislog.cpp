@@ -9,11 +9,14 @@
 
 //---------------------------------------------------------------------------
 
+// Here's a reference on Windows console colors:
+// https://ss64.com/nt/color.html
+
 constexpr struct {
-  static const WORD Info = 0x4F;    // White on brown
+  static const WORD Info = 0x8F;    // White on brown
   static const WORD Warn = 0x4E;    // Yellow on brown
   static const WORD Error = 0x4C;   // Red on brown
-  static const WORD LowKey = 0x47;  // Med. white on brown
+  static const WORD LowKey = 0x07;  // Med. white on brown
 } meta;
 
 constexpr struct {
@@ -186,7 +189,7 @@ void write_initial_output() {
     uint16_t ta;
     const char * msg;
   } initialOutput[] = {
-    { meta.Info, titleLine },
+    { meta.LowKey, titleLine },
     { meta.LowKey, dividerDashes },
     { meta.LowKey, "This application displays messages received from syslog relays." },
     { meta.LowKey, "Messages are displayed here only after the first connection from this PC." },
@@ -195,13 +198,14 @@ void write_initial_output() {
 
     { meta.Info,              "Legend:" },
     { meta.Info,              "  arislog application message" },
-    { logentry.Info,          "  Informational" },
-    { logentry.Warn,          "  Warning" },
-    { logentry.Error,         "  Error" },
-    { logentry.LowKey,        "  LowKey" },
-    { logentry.SubduedInfo,   "  Subdued Informational" },
-    { logentry.SubduedWarn,   "  Subdued Warning" },
-    { logentry.SubduedError,  "  Subdued Error" },
+    { meta.Info,              "  ARIS log entries:" },
+    { logentry.Info,          "    Informational" },
+    { logentry.Warn,          "    Warning" },
+    { logentry.Error,         "    Error" },
+    { logentry.LowKey,        "    LowKey" },
+    { logentry.SubduedInfo,   "    Subdued Informational" },
+    { logentry.SubduedWarn,   "    Subdued Warning" },
+    { logentry.SubduedError,  "    Subdued Error" },
 
     { meta.LowKey,            dividerDashes },
     { meta.LowKey,            "" },
