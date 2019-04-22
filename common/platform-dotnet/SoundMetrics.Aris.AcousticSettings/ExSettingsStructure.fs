@@ -107,7 +107,7 @@ type SystemContext = {
 type ProjectionMap<'P,'C> = {
     /// Changes a projection instance; 'C is applied to 'P,
     /// producing a new 'P.
-    Change:             Func<'P,'C,'P>
+    Change:             Func<'P,SystemContext,'C,'P>
 
     /// Constrains settings projection 'P in ways that are specific to 'P.
     Constrain:          Func<'P,SystemContext,'P>
@@ -195,9 +195,9 @@ module ProjectionChange =
                                 (systemContext: SystemContext)
                                 : struct ('P * AcquisitionSettings * ComputedValues) =
 
-        // Unwrap the Funcs so we can fold, etc. (Func<> is used for interop.)
+        // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
         let change projection change =
-            pmap.Change.Invoke(projection, change)
+            pmap.Change.Invoke(projection, systemContext, change)
         let constrain systemContext projection =
             pmap.Constrain.Invoke(projection, systemContext)
         let toAcquisitionSettings ctx projection : AcquisitionSettings =
