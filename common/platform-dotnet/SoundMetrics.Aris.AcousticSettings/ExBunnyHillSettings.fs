@@ -23,7 +23,7 @@ module BunnyHill =
         let toSettings externalContext (bunnyHill: BunnyHillSettings) : AcquisitionSettings =
             failwith "nyi"
 
-        let change bunnyHill change : BunnyHillSettings =
+        let change bunnyHill systemContext change : BunnyHillSettings =
 
             match change with
             | ChangeWindowStart value ->
@@ -54,5 +54,5 @@ module BunnyHill =
         {
             ToAcquisitionSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
             Constrain = Func<BunnyHillSettings,SystemContext,BunnyHillSettings>(constrain)
-            Change = Func<BunnyHillSettings,BunnyHillChange,BunnyHillSettings>(change)
+            Change = Func<BunnyHillSettings,SystemContext,BunnyHillChange,BunnyHillSettings>(change)
         }

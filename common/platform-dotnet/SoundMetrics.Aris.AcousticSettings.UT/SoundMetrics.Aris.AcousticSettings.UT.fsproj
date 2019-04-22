@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BunnyHillTests.fs" />
     <Compile Include="AcousticSettingsRawTest.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
