@@ -24,6 +24,7 @@ type BunnyHillTests () =
             AuxLens = AuxLensType.None
             AntialiasingPeriod = 0<Us>
         }
+
         let constrained = bunnyHillProjection.Constrain.Invoke(bh, ctx)
 
         Assert.AreNotEqual<BunnyHillSettings>(bh, constrained, "Must show *some* constraint!")
@@ -31,8 +32,10 @@ type BunnyHillTests () =
     [<TestMethod>]
     member __.``Change window start`` () =
 
-        let bh = { DownrangeWindow = { Start = 3.0<m>; End = 5.0<m> } }
-        let newWindowStart = bh.DownrangeWindow.Start + 0.1<m>
+        let initialStart, initialEnd = 3.0<m>, 5.0<m>
+        let bh = { DownrangeWindow = { Start = initialStart; End = initialEnd } }
+        let newWindowStart = initialStart + 0.1<m>
+        let expectedWindow = { bh.DownrangeWindow with Start = newWindowStart }
         let change = ChangeWindowStart newWindowStart
         let systemContext = {
             SystemType = ArisSystemType.Aris3000
@@ -45,15 +48,18 @@ type BunnyHillTests () =
 
         let changed = bunnyHillProjection.Change.Invoke(bh, systemContext, change)
 
-        Assert.AreEqual(newWindowStart, changed.DownrangeWindow.Start)
-        Assert.AreEqual(bh.DownrangeWindow.End, changed.DownrangeWindow.End)
+        let actualWindow = changed.DownrangeWindow
+        Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
 
     [<TestMethod>]
     member __.``Change window end`` () =
 
-        let bh = { DownrangeWindow = { Start = 3.0<m>; End = 5.0<m> } }
-        let newWindowEnd = bh.DownrangeWindow.End + 0.1<m>
+        let initialStart, initialEnd = 3.0<m>, 5.0<m>
+        let bh = { DownrangeWindow = { Start = initialStart; End = initialEnd } }
+        let newWindowEnd = initialEnd + 0.1<m>
+        let expectedWindow = { bh.DownrangeWindow with End = newWindowEnd }
         let change = ChangeWindowEnd newWindowEnd
+
         let systemContext = {
             SystemType = ArisSystemType.Aris3000
             WaterTemp = 20.0<degC>
@@ -65,5 +71,5 @@ type BunnyHillTests () =
 
         let changed = bunnyHillProjection.Change.Invoke(bh, systemContext, change)
 
-        Assert.AreEqual(bh.DownrangeWindow.Start, changed.DownrangeWindow.Start)
-        Assert.AreEqual(newWindowEnd, changed.DownrangeWindow.End)
+        let actualWindow = changed.DownrangeWindow
+        Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
