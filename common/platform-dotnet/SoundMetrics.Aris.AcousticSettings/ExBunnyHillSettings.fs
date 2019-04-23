@@ -20,7 +20,7 @@ module BunnyHill =
     [<CompiledName("BunnyHillProjection")>]
     let bunnyHillProjection =
 
-        let toSettings externalContext (bunnyHill: BunnyHillSettings) : AcquisitionSettings =
+        let toSettings (bunnyHill: BunnyHillSettings) externalContext : AcquisitionSettings =
             failwith "nyi"
 
         let change bunnyHill systemContext change : BunnyHillSettings =
@@ -52,7 +52,13 @@ module BunnyHill =
             { DownrangeWindow = { Start = windowStart; End = windowEnd } }
 
         {
-            ToAcquisitionSettings = Func<SystemContext,BunnyHillSettings,AcquisitionSettings>(toSettings)
-            Constrain = Func<BunnyHillSettings,SystemContext,BunnyHillSettings>(constrain)
-            Change = Func<BunnyHillSettings,SystemContext,BunnyHillChange,BunnyHillSettings>(change)
+            new IProjectionMap<BunnyHillSettings,BunnyHillChange> with
+                member __.Change projection systemContext changeRequest =
+                    change projection systemContext changeRequest
+
+                member __.Constrain projection systemContext =
+                    constrain projection systemContext
+
+                member __.ToAcquisitionSettings projection systemContext =
+                    toSettings projection systemContext
         }

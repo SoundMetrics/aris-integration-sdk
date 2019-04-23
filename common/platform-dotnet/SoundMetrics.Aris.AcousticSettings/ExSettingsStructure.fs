@@ -103,18 +103,18 @@ type SystemContext = {
 
 /// Functions related in their effort to affect change, constraint, and conversion
 /// to device settings for a particular projection. 'P is the projection type,
-/// 'C is the change type. Using Func<> for interop with C#.
-type ProjectionMap<'P,'C> = {
+/// 'C is the change type.
+type IProjectionMap<'P,'C> =
     /// Changes a projection instance; 'C is applied to 'P,
     /// producing a new 'P.
-    Change:             Func<'P,SystemContext,'C,'P>
+    abstract member Change : 'P -> SystemContext -> 'C -> 'P
 
     /// Constrains settings projection 'P in ways that are specific to 'P.
-    Constrain:          Func<'P,SystemContext,'P>
+    abstract member Constrain : 'P -> SystemContext -> 'P
 
     /// Transforms from a projection of settings to actual device settings.
-    ToAcquisitionSettings:   Func<SystemContext,'P,AcquisitionSettings>
-}
+    abstract member ToAcquisitionSettings : 'P -> SystemContext -> AcquisitionSettings
+
 
 //-----------------------------------------------------------------------------
 
@@ -189,7 +189,7 @@ module ProjectionChange =
     /// more easily interact with, while also determining necessary device
     /// settings to produce appropriate images.
     [<CompiledName("ChangeProjection")>]
-    let changeProjection<'P,'C> (pmap: ProjectionMap<'P,'C>)
+    let changeProjection<'P,'C> (pmap: IProjectionMap<'P,'C>)
                                 (projection: 'P)
                                 (changes: 'C seq)
                                 (systemContext: SystemContext)
@@ -197,23 +197,18 @@ module ProjectionChange =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
         let change projection change =
-            pmap.Change.Invoke(projection, systemContext, change)
+            pmap.Change projection systemContext change
         let constrain systemContext projection =
-            pmap.Constrain.Invoke(projection, systemContext)
-        let toAcquisitionSettings ctx projection : AcquisitionSettings =
-            pmap.ToAcquisitionSettings.Invoke(ctx, projection)
+            pmap.Constrain projection systemContext
+        let toAcquisitionSettings projection ctx : AcquisitionSettings =
+            pmap.ToAcquisitionSettings projection ctx
 
         let constrainedProjection =
             let projectionWithChanges = changes |> Seq.fold change projection
             projectionWithChanges |> constrain systemContext
         let struct (acquisitionSettings, constrainedAS) =
-            toAcquisitionSettings systemContext constrainedProjection
+            toAcquisitionSettings constrainedProjection systemContext
                 |> normalize systemContext.SystemType systemContext.AntialiasingPeriod
         let computedValues = acquisitionSettings
                                 |> getComputedValues systemContext constrainedAS
         struct (constrainedProjection, acquisitionSettings, computedValues)
-
-type ProjectionMap<'P,'C> with
-    /// See ProjectionChange.changeProjection.
-    member map.Apply(projection, changes, systemContext) =
-        ProjectionChange.changeProjection map projection changes systemContext
