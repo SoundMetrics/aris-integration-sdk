@@ -13,9 +13,7 @@ type BunnyHillTests () =
     [<TestMethod>]
     member __.``Show constraint from float32 MIN/MAX`` () =
         let bh = {
-            DownrangeWindow =
-                { Start = Double.MinValue * 1.0<m>
-                  End = Double.MaxValue * 1.0<m> } }
+            DownrangeWindow = { Start = 3.0<m>; End = Double.MaxValue * 1.0<m> } }
         let ctx = {
             SystemType = ArisSystemType.Aris3000
             WaterTemp = 20.0<degC>
@@ -73,3 +71,21 @@ type BunnyHillTests () =
 
         let actualWindow = changed.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
+
+    [<TestMethod>]
+    member __.``To settings`` () =
+
+        let bh = { DownrangeWindow = { Start = 1.0<m>; End = 10.0<m> } }
+
+        let systemContext = {
+            SystemType = ArisSystemType.Aris3000
+            WaterTemp = 20.0<degC>
+            Salinity = Salinity.Seawater
+            Depth = 10.0<m>
+            AuxLens = AuxLensType.None
+            AntialiasingPeriod = 0<Us>
+        }
+
+        let actual = bunnyHillProjection.ToAcquisitionSettings bh systemContext
+
+        Assert.IsNotNull(actual)

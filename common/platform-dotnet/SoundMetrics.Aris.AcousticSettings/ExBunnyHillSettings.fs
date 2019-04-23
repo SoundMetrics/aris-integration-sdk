@@ -20,10 +20,30 @@ module BunnyHill =
     [<CompiledName("BunnyHillProjection")>]
     let bunnyHillProjection =
 
+        let validateWindow (downrange : DownrangeWindow) =
+
+            if Double.IsNaN(float downrange.Start) || Double.IsInfinity(float downrange.Start) then
+                invalidArg "Start" "Is NaN or infinity"
+            if downrange.Start <= 0.0<m> then
+                invalidArg "Start" "Is less than or equal to zero"
+
+            if Double.IsNaN(float downrange.End) || Double.IsInfinity(float downrange.End) then
+                invalidArg "End" "Is NaN or infinity"
+            if downrange.End <= 0.0<m> then
+                invalidArg "End" "Is less than or equal to zero"
+
+            if downrange.Start >= downrange.End then
+                invalidArg "Start" "Is greater or equal to End"
+
+
         let toSettings (bunnyHill: BunnyHillSettings) externalContext : AcquisitionSettings =
-            failwith "nyi"
+
+            validateWindow bunnyHill.DownrangeWindow
+            AcquisitionSettings.Invalid
 
         let change bunnyHill systemContext change : BunnyHillSettings =
+
+            validateWindow bunnyHill.DownrangeWindow
 
             match change with
             | ChangeWindowStart value ->
@@ -36,6 +56,8 @@ module BunnyHill =
                         { bunnyHill.DownrangeWindow with End = value } }
 
         let constrain (bunnyHill: BunnyHillSettings) (systemContext: SystemContext) =
+
+            validateWindow bunnyHill.DownrangeWindow
 
             let struct (windowStartMin, windowEndMax) =
                 let ranges = SoundMetrics.Aris.AcousticSettings.SonarConfig
