@@ -16,8 +16,8 @@ type ArisSystemType = SoundMetrics.Aris.AcousticSettings.ArisSystemType
 type FrameRate = SoundMetrics.Aris.AcousticSettings.FrameRate
 
 
-// Formerly "AcousticSettings," these are the settings we send to the sonar to
-// instruct it to form images.
+/// These are the settings we send to the sonar to instruct it to form images.
+/// TShis F# record has structural equality and comparison built-in.
 type AcousticSettings = {
     FrameRate: FrameRate
     SampleCount: int
@@ -151,7 +151,7 @@ module internal AcquisitionSettingsNormalization =
         let constrainedSettings = { settings with FrameRate = adjustedFrameRate }
         struct (constrainedSettings, isConstrained)
 
-module ProjectionChange =
+module SettingsProjection =
 
     open AcquisitionSettingsNormalization
 
@@ -188,12 +188,12 @@ module ProjectionChange =
     /// Intent: to provide useful projections of settings that users can
     /// more easily interact with, while also determining necessary device
     /// settings to produce appropriate images.
-    [<CompiledName("ChangeProjection")>]
-    let changeProjection<'P,'C> (pmap: IProjectionMap<'P,'C>)
-                                (projection: 'P)
-                                (changes: 'C seq)
-                                (systemContext: SystemContext)
-                                : struct ('P * AcousticSettings * ComputedValues) =
+    [<CompiledName("MapProjectionToSettings")>]
+    let mapProjectionToSettings<'P,'C> (pmap: IProjectionMap<'P,'C>)
+                                       (projection: 'P)
+                                       (changes: 'C seq)
+                                       (systemContext: SystemContext)
+                                       : struct ('P * AcousticSettings * ComputedValues) =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
         let change projection change =
