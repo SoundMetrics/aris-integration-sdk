@@ -1,5 +1,6 @@
 ﻿module BasicConnection
 
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Common
@@ -28,8 +29,8 @@ let testBasicConnection (inputs : TestInputs) =
                         sn, beacon.SoftwareVersion, beacon.IPAddress)
 
         let initialSettings =
-            let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
-            { defaultSettings with FrameRate = 15.0f</s> }
+            let defaultSettings = AcousticSettingsRaw.DefaultAcousticSettingsFor beacon.SystemType
+            { defaultSettings with FrameRate = 15.0</s> }
 
         let perfSink = SampledConduitPerfSink(1000, 10)
         use conduit = new ArisConduit(initialSettings, sn,

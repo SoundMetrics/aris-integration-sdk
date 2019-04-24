@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SoundMetrics.Aris.AcousticSettings\SoundMetrics.Aris.AcousticSettings.fsproj" />
     <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj" />
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

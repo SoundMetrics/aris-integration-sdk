@@ -114,14 +114,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SoundMetrics.Aris.AcousticSettings\SoundMetrics.Aris.AcousticSettings.fsproj">
+      <Name>SoundMetrics.Aris.AcousticSettings</Name>
+      <Project>{e3ba5273-b047-4f71-896f-92121a1c4f8d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj">
       <Name>SoundMetrics.Aris.Comms</Name>
       <Project>{74b8eb49-4248-43cb-9d69-af71b4d68e66}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Config\SoundMetrics.Aris.Config.fsproj">
-      <Name>SoundMetrics.Aris.Config</Name>
-      <Project>{7274df9e-ec20-4be8-a24f-16bbc8e164d0}</Project>
       <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj">

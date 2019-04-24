@@ -1,10 +1,9 @@
 ﻿module RecordingStats
 
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms
-
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Common
-open FrameProcessing
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open System
@@ -30,8 +29,8 @@ let recordingStats (inputs : TestInputs) =
                         sn, beacon.SoftwareVersion, beacon.IPAddress)
 
         let initialSettings =
-            let defaultSettings = AcousticSettings.DefaultAcousticSettingsFor beacon.SystemType
-            { defaultSettings with FrameRate = 15.0f</s> }
+            let defaultSettings = AcousticSettingsRaw.DefaultAcousticSettingsFor beacon.SystemType
+            { defaultSettings with FrameRate = 15.0</s> }
 
         let skipFrames = 10
         let sampleCountWanted = 500

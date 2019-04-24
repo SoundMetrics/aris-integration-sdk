@@ -4,6 +4,7 @@ namespace SoundMetrics.Aris.Comms.Internal
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Common
 open System
@@ -73,14 +74,14 @@ module internal ArisConduitDetails =
     open System.Net.NetworkInformation
     open SoundMetrics.Common
 
-    let logNewArisConduit (targetSonar : string) (initialAcousticSettings : AcousticSettings) =
+    let logNewArisConduit (targetSonar : string) (initialAcousticSettings : AcousticSettingsRaw) =
         Log.Information("New ARIS conduit {targetSonar}; initial={initialAcousticSettings}",
             targetSonar, initialAcousticSettings)
 
     let logCloseArisConduit (targetSonar : string) =
         Log.Information("Close ARIS conduit {targetSonar}", targetSonar)
 
-    
+
     let logSentAcousticSettings (settings : AcousticSettingsVersioned) =
         Log.Information("Sent acoustic settings: {settings}", settings)
 

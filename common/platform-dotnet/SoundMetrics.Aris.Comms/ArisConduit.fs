@@ -4,7 +4,8 @@ namespace SoundMetrics.Aris.Comms
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
-open SoundMetrics.Aris.Config
+open SoundMetrics.Aris.AcousticSettings
+open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Common
 open SoundMetrics.Common.ArisBeaconDetails
@@ -24,11 +25,11 @@ open ArisConduitDetails
 
 
 type RequestedSettings =
-    | SettingsApplied of versioned : AcousticSettings * constrained : bool
+    | SettingsApplied of versioned : AcousticSettingsRaw * constrained : bool
     | SettingsDeclined of string
 
 
-type ArisConduit private (initialAcousticSettings : AcousticSettings,
+type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
                           targetSonar : string,
                           matchBeacon : ArisBeacon -> bool,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
@@ -103,7 +104,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
 
         cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
 
-    let requestAcousticSettings (settings: AcousticSettings): RequestedSettings =
+    let requestAcousticSettings (settings: AcousticSettingsRaw): RequestedSettings =
 
         Log.Information(
             "ArisConduit({target}): requesting acoustic settings {settings}",
@@ -118,10 +119,10 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
 
                 // We need to know the system type in order to constrain settings, so until then we
                 // don't constrain. System type is gleaned in ArisConduit.buildFrameStreamSubscription.
-                let constrainedSettings, constrained =
+                let struct (constrainedSettings, constrained) =
                     match !systemType with
                     | Some systemType -> AcousticMath.constrainAcousticSettings systemType settings antiAliasing
-                    | None -> settings, false
+                    | None -> struct (settings, false)
 
                 let settings = if constrained then constrainedSettings else settings
                 let versionedSettings = cookieTracker.ApplyNewCookie settings
@@ -150,7 +151,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
                             ConduitPerfSink.None)
 
     /// Find the sonar by its IP address
-    new(initialAcousticSettings, ipAddress, frameStreamReliabilityPolicy) = 
+    new(initialAcousticSettings, ipAddress, frameStreamReliabilityPolicy) =
             new ArisConduit(initialAcousticSettings,
                             ipAddress.ToString(),
                             (fun beacon -> beacon.IPAddress = ipAddress),
@@ -192,7 +193,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
             match cxnState with
             | ConnectionState.Connected _ -> ()
             | _ -> frameStreamListener.Flush() // Resets frame index tracker
-            
+
             cxnStateSubject.OnNext(cxnState)
 
         member __.OnInitializeConnection frameSinkAddress =
@@ -225,7 +226,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettings,
     member __.ConnectionState with get () = cxnStateSubject :> ISubject<ConnectionState>
 
     member ac.WaitForConnectionAsync (timeout : TimeSpan) : Task<bool> =
-        
+
         let doneSignal = new ManualResetEventSlim(false)
         let mutable reachedState = false
 

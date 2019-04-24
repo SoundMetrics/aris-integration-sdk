@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Comms.Internal
 
-open SoundMetrics.Aris.Comms
+open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
 open System.Diagnostics
 
 [<AbstractClass>]

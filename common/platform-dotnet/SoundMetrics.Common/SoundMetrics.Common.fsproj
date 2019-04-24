@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SoundMetrics.Aris.AcousticSettings\SoundMetrics.Aris.AcousticSettings.fsproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
     <ProjectReference Include="..\SoundMetrics.Network\SoundMetrics.Network.fsproj" />
   </ItemGroup>

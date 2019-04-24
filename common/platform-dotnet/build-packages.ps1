@@ -37,8 +37,8 @@ $output_directory = ".\built-nuget-packages"
 [System.IO.Directory]::CreateDirectory($output_directory)
 
 $dotnetStandardAssemblies = @(
+    "SoundMetrics.Aris.AcousticSettings"
     "SoundMetrics.Aris.Comms"
-    "SoundMetrics.Aris.Config"
     "SoundMetrics.Aris.FrameHeaderInjection"
     "SoundMetrics.Aris.Messages"
     "SoundMetrics.Aris.ReorderCS"
@@ -76,9 +76,9 @@ Foreach ($el in $dotnetStandardAssemblies) {
     # # current prevent this command from rebuilding assemblies. The PDBs end up
     # # not matching checksum on the assembly and cannot be published on nuget.org.
     # # Removing the following:
-    # #   
+    # #
     # #   --no-build --include-source -p:SymbolPackageFormat=snupkg
-    # #   
+    # #
     dotnet pack -c Release `
                 --output ../$output_directory `
                 /p:Version=$split_version `
@@ -91,9 +91,9 @@ Foreach ($el in $dotnetStandardAssemblies) {
 # We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat).
 #
 # # Again, wedged, as above. Removing the following:
-# #   
+# #
 # #   -Symbols -SymbolPackageFormat snupkg
-# #   
+# #
 .\.nuget\nuget.exe pack -Verbosity detailed `
                         -NoPackageAnalysis `
                         -Version $package_version `

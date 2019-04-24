@@ -45,7 +45,7 @@ let getArisBeacon (availables : BeaconListener) targetSN : ArisBeacon option =
 //-----------------------------------------------------------------------------
 
 open SoundMetrics.Scripting.EventMatcher
-open SoundMetrics.Aris.Config
+open SoundMetrics.Aris.AcousticSettings
 
 
 let runTest eventSource (series : SetupAndMatch<SyslogMessage, unit> array) timeout =
@@ -90,7 +90,7 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
         Log.Information("Traget sonar beacon={beacon}", beacon)
         use conduit =
             new ArisConduit(
-                        AcousticSettings.DefaultAcousticSettingsFor(beacon.SystemType),
+                        AcousticSettingsRaw.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
                         FrameStreamReliabilityPolicy.DropPartialFrames)
 

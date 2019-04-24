@@ -2,10 +2,9 @@
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open SoundMetrics.Aris.AcousticSettings
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal.FocusMapDetails
-open SoundMetrics.Common
-open System
 
 [<TestClass>]
 type FocusMapTest () =
@@ -69,7 +68,7 @@ type FocusMapTest () =
 
         for range, expected in testCases do
             let range' = 1.0<m> * range
-            let actual = 
+            let actual =
                 (mapRangeToFocusUnits ArisSystemType.Aris1800 range' 24.0<degC> Salinity.Fresh false).FocusUnits
             printfn "input=%f; expected=%u; actual=%u" range expected actual
 

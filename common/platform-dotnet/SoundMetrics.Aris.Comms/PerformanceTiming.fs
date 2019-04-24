@@ -2,6 +2,8 @@
 
 namespace SoundMetrics.Aris.Comms.Internal
 
+open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
+
 module internal PerformanceTiming =
     open SoundMetrics.Aris.Comms
     open System
