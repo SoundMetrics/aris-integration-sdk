@@ -25,6 +25,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="Range.fs" />
+    <Compile Include="FineDuration.fs" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
