@@ -42,6 +42,10 @@ type FineDuration private (microseconds : float) =
     static member op_Equality(a : FineDuration, b : FineDuration) = (a = b)
     // op_Inequality for interop with other CLI languages.
     static member op_Inequality(a : FineDuration, b : FineDuration) = (a <> b)
+    // op_GreaterThanOrEqual for interop with other CLI languages.
+    static member op_GreaterThanOrEqual(a : FineDuration, b : FineDuration) = a >= b
+    // op_LessThanOrEqual for interop with other CLI languages.
+    static member op_LessThanOrEqual(a : FineDuration, b : FineDuration) = a <= b
 
     static member Min(a : FineDuration, b : FineDuration) =
         if a < b then a else b
