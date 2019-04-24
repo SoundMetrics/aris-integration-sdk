@@ -18,7 +18,7 @@ type FrameRate = SoundMetrics.Aris.AcousticSettings.FrameRate
 
 // Formerly "AcousticSettings," these are the settings we send to the sonar to
 // instruct it to form images.
-type AcquisitionSettings = {
+type AcousticSettings = {
     FrameRate: FrameRate
     SampleCount: int
     SampleStartDelay: int<Us>
@@ -84,7 +84,7 @@ with
         | ds -> ValueSome (System.String.Join("; ", ds))
 
     static member Diff(left, right) =
-        match AcquisitionSettings.diff left right with
+        match AcousticSettings.diff left right with
         | ValueSome s -> s
         | ValueNone -> ""
 
@@ -113,7 +113,7 @@ type IProjectionMap<'P,'C> =
     abstract member Constrain : 'P -> SystemContext -> 'P
 
     /// Transforms from a projection of settings to actual device settings.
-    abstract member ToAcquisitionSettings : 'P -> SystemContext -> AcquisitionSettings
+    abstract member ToAcquisitionSettings : 'P -> SystemContext -> AcousticSettings
 
 
 //-----------------------------------------------------------------------------
@@ -135,8 +135,8 @@ module internal AcquisitionSettingsNormalization =
     /// and successfully producing images.
     let normalize systemType
                   antialiasingPeriod
-                  (settings: AcquisitionSettings)
-                  : struct (AcquisitionSettings * bool) =
+                  (settings: AcousticSettings)
+                  : struct (AcousticSettings * bool) =
 
         let maximumFrameRate =
             calculateMaximumFrameRate systemType
@@ -157,7 +157,7 @@ module ProjectionChange =
 
     let private getComputedValues (systemContext: SystemContext)
                                   constrainedAS
-                                  (acquisitionSettings: AcquisitionSettings)
+                                  (acquisitionSettings: AcousticSettings)
                                   : ComputedValues =
 
         let sspd = calculateSpeedOfSound systemContext.WaterTemp
@@ -193,14 +193,14 @@ module ProjectionChange =
                                 (projection: 'P)
                                 (changes: 'C seq)
                                 (systemContext: SystemContext)
-                                : struct ('P * AcquisitionSettings * ComputedValues) =
+                                : struct ('P * AcousticSettings * ComputedValues) =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
         let change projection change =
             pmap.Change projection systemContext change
         let constrain systemContext projection =
             pmap.Constrain projection systemContext
-        let toAcquisitionSettings projection ctx : AcquisitionSettings =
+        let toAcquisitionSettings projection ctx : AcousticSettings =
             pmap.ToAcquisitionSettings projection ctx
 
         let constrainedProjection =

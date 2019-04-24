@@ -36,10 +36,10 @@ module BunnyHill =
                 invalidArg "Start" "Is greater or equal to End"
 
 
-        let toSettings (bunnyHill: BunnyHillSettings) externalContext : AcquisitionSettings =
+        let toSettings (bunnyHill: BunnyHillSettings) externalContext : AcousticSettings =
 
             validateWindow bunnyHill.DownrangeWindow
-            AcquisitionSettings.Invalid
+            AcousticSettings.Invalid
 
         let change bunnyHill systemContext change : BunnyHillSettings =
 
