@@ -115,7 +115,9 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Network.UT", "
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.AcousticSettings", "SoundMetrics.Aris.AcousticSettings\SoundMetrics.Aris.AcousticSettings.fsproj", "{E3BA5273-B047-4F71-896F-92121A1C4F8D}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Aris.AcousticSettings.UT", "SoundMetrics.Aris.AcousticSettings.UT\SoundMetrics.Aris.AcousticSettings.UT.fsproj", "{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.AcousticSettings.UT", "SoundMetrics.Aris.AcousticSettings.UT\SoundMetrics.Aris.AcousticSettings.UT.fsproj", "{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Data.UT", "SoundMetrics.Data.UT\SoundMetrics.Data.UT.csproj", "{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -231,6 +233,10 @@ Global
 		{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
