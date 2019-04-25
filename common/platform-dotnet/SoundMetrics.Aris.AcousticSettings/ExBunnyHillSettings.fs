@@ -42,7 +42,7 @@ module BunnyHill =
             validateWindow settings.DownrangeWindow
             AcousticSettings.Invalid
 
-        let change settings systemContext change : BunnyHillSettings =
+        let applyChange settings systemContext change : BunnyHillSettings =
 
             validateWindow settings.DownrangeWindow
 
@@ -57,7 +57,7 @@ module BunnyHill =
                         { settings.DownrangeWindow with End = value } }
             | All newSettings -> newSettings
 
-        let constrain (settings: BunnyHillSettings) (systemContext: SystemContext) =
+        let constrainProjection (settings: BunnyHillSettings) (systemContext: SystemContext) =
 
             validateWindow settings.DownrangeWindow
 
@@ -78,10 +78,10 @@ module BunnyHill =
         {
             new IProjectionMap<BunnyHillSettings,BunnyHillChange> with
                 member __.ApplyChange projection systemContext changeRequest =
-                    change projection systemContext changeRequest
+                    applyChange projection systemContext changeRequest
 
                 member __.ConstrainProjection projection systemContext =
-                    constrain projection systemContext
+                    constrainProjection projection systemContext
 
                 member __.ToAcquisitionSettings projection systemContext =
                     toSettings projection systemContext

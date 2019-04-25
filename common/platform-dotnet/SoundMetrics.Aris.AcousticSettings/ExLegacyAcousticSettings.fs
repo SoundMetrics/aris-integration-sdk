@@ -82,22 +82,24 @@ type LegacyAcousticSettingsChange =
     | TranslateWindow of        downrangeStart: float<m>
     | Antialiasing of           int<Us>
 
+
+[<AutoOpen>]
+module internal LegacyAcousticSettingsDetails =
+
+    let toSettings (settings: LegacyAcousticSettings) externalContext : AcousticSettings =
+
+        failwith "nyi"
+
+    let applyChange settings systemContext change : LegacyAcousticSettings =
+
+        failwith "nyi"
+
+    let constrainProjection (settings: LegacyAcousticSettings) (systemContext: SystemContext) =
+
+        failwith "nyi"
+
+
 module LegacyAcousticSettings =
-
-    [<AutoOpen>]
-    module internal Details =
-
-        let toSettings (settings: LegacyAcousticSettings) externalContext : AcousticSettings =
-
-            failwith "nyi"
-
-        let change settings systemContext change : LegacyAcousticSettings =
-
-            failwith "nyi"
-
-        let constrain (settings: LegacyAcousticSettings) (systemContext: SystemContext) =
-
-            failwith "nyi"
 
     [<CompiledName("LegacyAcousticSettingsProjection")>]
     let legacyAcousticSettingsProjection =
@@ -105,10 +107,10 @@ module LegacyAcousticSettings =
         {
             new IProjectionMap<LegacyAcousticSettings,LegacyAcousticSettingsChange> with
                 member __.ApplyChange projection systemContext changeRequest =
-                    change projection systemContext changeRequest
+                    applyChange projection systemContext changeRequest
 
                 member __.ConstrainProjection projection systemContext =
-                    constrain projection systemContext
+                    constrainProjection projection systemContext
 
                 member __.ToAcquisitionSettings projection systemContext =
                     toSettings projection systemContext
