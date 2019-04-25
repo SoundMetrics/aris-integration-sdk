@@ -37,7 +37,6 @@
     <Compile Include="AcousticMath.fs" />
     <Compile Include="ExSettingsStructure.fs" />
     <Compile Include="ExBunnyHillSettings.fs" />
-    <Compile Include="ExLegacyAcousticSettingsDetails.fs" />
     <Compile Include="ExLegacyAcousticSettings.fs" />
   </ItemGroup>
 

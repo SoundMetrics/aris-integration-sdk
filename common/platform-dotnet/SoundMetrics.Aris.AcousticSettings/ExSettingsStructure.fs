@@ -105,10 +105,10 @@ type SystemContext = {
 type IProjectionMap<'P,'C> =
     /// Changes a projection instance; 'C is applied to 'P,
     /// producing a new 'P.
-    abstract member Change : 'P -> SystemContext -> 'C -> 'P
+    abstract member ApplyChange : 'P -> SystemContext -> 'C -> 'P
 
     /// Constrains settings projection 'P in ways that are specific to 'P.
-    abstract member Constrain : 'P -> SystemContext -> 'P
+    abstract member ConstrainProjection : 'P -> SystemContext -> 'P
 
     /// Transforms from a projection of settings to actual device settings.
     abstract member ToAcquisitionSettings : 'P -> SystemContext -> AcousticSettings
@@ -195,9 +195,9 @@ module SettingsProjection =
 
         // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
         let change projection change =
-            pmap.Change projection systemContext change
+            pmap.ApplyChange projection systemContext change
         let constrain systemContext projection =
-            pmap.Constrain projection systemContext
+            pmap.ConstrainProjection projection systemContext
         let toAcquisitionSettings projection ctx : AcousticSettings =
             pmap.ToAcquisitionSettings projection ctx
 

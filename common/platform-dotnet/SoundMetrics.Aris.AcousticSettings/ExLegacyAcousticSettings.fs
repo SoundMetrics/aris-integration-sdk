@@ -84,8 +84,8 @@ type LegacyAcousticSettingsChange =
 
 module LegacyAcousticSettings =
 
-    [<CompiledName("LegacyAcousticSettingsProjection")>]
-    let legacyAcousticSettingsProjection =
+    [<AutoOpen>]
+    module internal Details =
 
         let toSettings (settings: LegacyAcousticSettings) externalContext : AcousticSettings =
 
@@ -99,12 +99,15 @@ module LegacyAcousticSettings =
 
             failwith "nyi"
 
+    [<CompiledName("LegacyAcousticSettingsProjection")>]
+    let legacyAcousticSettingsProjection =
+
         {
             new IProjectionMap<LegacyAcousticSettings,LegacyAcousticSettingsChange> with
-                member __.Change projection systemContext changeRequest =
+                member __.ApplyChange projection systemContext changeRequest =
                     change projection systemContext changeRequest
 
-                member __.Constrain projection systemContext =
+                member __.ConstrainProjection projection systemContext =
                     constrain projection systemContext
 
                 member __.ToAcquisitionSettings projection systemContext =

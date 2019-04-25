@@ -37,29 +37,29 @@ module BunnyHill =
                 invalidArg "Start" "Is greater or equal to End"
 
 
-        let toSettings (bunnyHill: BunnyHillSettings) externalContext : AcousticSettings =
+        let toSettings (settings: BunnyHillSettings) _externalContext : AcousticSettings =
 
-            validateWindow bunnyHill.DownrangeWindow
+            validateWindow settings.DownrangeWindow
             AcousticSettings.Invalid
 
-        let change bunnyHill systemContext change : BunnyHillSettings =
+        let change settings systemContext change : BunnyHillSettings =
 
-            validateWindow bunnyHill.DownrangeWindow
+            validateWindow settings.DownrangeWindow
 
             match change with
             | ChangeWindowStart value ->
-                { bunnyHill with
+                { settings with
                     DownrangeWindow =
-                        { bunnyHill.DownrangeWindow with Start = value } }
+                        { settings.DownrangeWindow with Start = value } }
             | ChangeWindowEnd value ->
-                { bunnyHill with
+                { settings with
                     DownrangeWindow =
-                        { bunnyHill.DownrangeWindow with End = value } }
+                        { settings.DownrangeWindow with End = value } }
             | All newSettings -> newSettings
 
-        let constrain (bunnyHill: BunnyHillSettings) (systemContext: SystemContext) =
+        let constrain (settings: BunnyHillSettings) (systemContext: SystemContext) =
 
-            validateWindow bunnyHill.DownrangeWindow
+            validateWindow settings.DownrangeWindow
 
             let struct (windowStartMin, windowEndMax) =
                 let ranges = SoundMetrics.Aris.AcousticSettings.SonarConfig
@@ -70,17 +70,17 @@ module BunnyHill =
 
             let struct (windowStart, windowEnd) =
                 let struct (s, e) =
-                    let downrange = bunnyHill.DownrangeWindow
+                    let downrange = settings.DownrangeWindow
                     struct (minmax downrange.Start, minmax downrange.End)
                 struct (min s e, max s e)
             { DownrangeWindow = { Start = windowStart; End = windowEnd } }
 
         {
             new IProjectionMap<BunnyHillSettings,BunnyHillChange> with
-                member __.Change projection systemContext changeRequest =
+                member __.ApplyChange projection systemContext changeRequest =
                     change projection systemContext changeRequest
 
-                member __.Constrain projection systemContext =
+                member __.ConstrainProjection projection systemContext =
                     constrain projection systemContext
 
                 member __.ToAcquisitionSettings projection systemContext =
