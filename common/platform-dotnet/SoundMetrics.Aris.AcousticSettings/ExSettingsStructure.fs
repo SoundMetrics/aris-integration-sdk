@@ -80,13 +80,11 @@ with
             |> List.rev
 
         match differences with
-        | [] -> ValueNone
-        | ds -> ValueSome (System.String.Join("; ", ds))
+        | [] -> None
+        | ds -> Some (System.String.Join("; ", ds))
 
     static member Diff(left, right) =
-        match AcousticSettings.diff left right with
-        | ValueSome s -> s
-        | ValueNone -> ""
+        AcousticSettings.diff left right |> Option.defaultValue ""
 
 /// Supported lens types.
 type AuxLensType = None | Telephoto

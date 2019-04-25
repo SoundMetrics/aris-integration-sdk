@@ -14,6 +14,7 @@ type BunnyHillSettings = {
 type BunnyHillChange =
     | ChangeWindowStart of value: float<m>
     | ChangeWindowEnd of value: float<m>
+    | All of BunnyHillSettings
 
 module BunnyHill =
 
@@ -54,6 +55,7 @@ module BunnyHill =
                 { bunnyHill with
                     DownrangeWindow =
                         { bunnyHill.DownrangeWindow with End = value } }
+            | All newSettings -> newSettings
 
         let constrain (bunnyHill: BunnyHillSettings) (systemContext: SystemContext) =
 
