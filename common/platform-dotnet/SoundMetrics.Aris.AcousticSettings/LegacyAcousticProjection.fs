@@ -7,11 +7,11 @@ open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
 open System
 
 type LegacyFrameRate =
-    | Maximum
-    | Custom of FrameRate
+    | MaximumFrameRate
+    | CustomFrameRate of FrameRate
 
 type LegacyDetail =
-    | Auto
+    | AutoSamplePeriod
     | CustomSamplePeriod of int<Us>
 
 type LegacySampleCount = {
@@ -19,13 +19,13 @@ type LegacySampleCount = {
     IsFixed : bool
 }
 
-type LegacyTransmit = Off | Minimum | Maximum
+type LegacyTransmit = Off | LowPower | HighPower
 
-type LegacyFrequency = Low | High | Auto
+type LegacyFrequency = LowFrequency | HighFrequency | AutoFrequency
 
 type LegacyPulseWidth =
-    | Auto
-    | Custom of int<Us>
+    | AutoPulseWidth
+    | CustomPulseWidth of int<Us>
     | Narrow
     | Medium
     | Wide
@@ -49,14 +49,14 @@ with
     override s.ToString () = sprintf "%A" s
 
     static member Invalid = {
-        FrameRate = LegacyFrameRate.Custom 0.0</s>
+        FrameRate = CustomFrameRate 0.0</s>
         SampleCount = { SampleCount = 0; IsFixed = true }
         SampleStartDelay = 0<Us>
         Detail = CustomSamplePeriod 0<Us>
-        PulseWidth = LegacyPulseWidth.Custom 0<Us>
+        PulseWidth = CustomPulseWidth 0<Us>
         PingMode = PingMode.InvalidPingMode 0
         Transmit = Off
-        Frequency = Low
+        Frequency = LowFrequency
         ReceiverGain = 0
     }
 
