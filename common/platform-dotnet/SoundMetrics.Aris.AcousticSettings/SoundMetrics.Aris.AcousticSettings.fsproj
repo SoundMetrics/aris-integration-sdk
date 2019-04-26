@@ -35,9 +35,11 @@
     <Compile Include="SonarConfig.fs" />
     <Compile Include="AcousticMath.Internal.fs" />
     <Compile Include="AcousticMath.fs" />
-    <Compile Include="ExSettingsStructure.fs" />
-    <Compile Include="ExBunnyHillSettings.fs" />
-    <Compile Include="ExLegacyAcousticSettings.fs" />
+    <Compile Include="SettingsStructure.fs" />
+    <Compile Include="BunnyHillSettings.fs" />
+    <Compile Include="LegacyAcousticSettings.fs" />
+    <Compile Include="LegacyAcousticSettingsDetails.fs" />
+    <Compile Include="AcousticSettingsMappings.fs" />
   </ItemGroup>
 
   <ItemGroup>
