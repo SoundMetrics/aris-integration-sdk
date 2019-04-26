@@ -25,7 +25,7 @@ type BunnyHillTests () =
 
         let constrained = bunnyHillMapping.ConstrainProjection ctx bh
 
-        Assert.AreNotEqual<BunnyHillSettings>(bh, constrained, "Must show *some* constraint!")
+        Assert.AreNotEqual<BunnyHillProjection>(bh, constrained, "Must show *some* constraint!")
 
     [<TestMethod>]
     member __.``Change window start`` () =

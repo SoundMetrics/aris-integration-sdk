@@ -30,11 +30,11 @@ type LegacyPulseWidth =
     | Medium
     | Wide
 
-/// `LegacyAcousticSettings` serves as the projection for `AcousticSettings`
+/// `LegacyAcousticProjection` serves as the projection for `AcousticSettings`
 /// as it was used in past work. While it largely just encloses `AcousticSettings`,
 /// it is still a necessary and type-safe part of the new Projection-to-Settings
 /// scheme. (This type is closer to the "view model" than the "model.")
-type LegacyAcousticSettings = {
+type LegacyAcousticProjection = {
     FrameRate : LegacyFrameRate
     SampleCount : LegacySampleCount
     SampleStartDelay : int<Us>
@@ -60,7 +60,7 @@ with
         ReceiverGain = 0
     }
 
-type LegacyAcousticSettingsChange =
+type LegacyAcousticProjectionChange =
     | FrameRate of          LegacyFrameRate
     | SampleCount of        LegacySampleCount
     | SampleStartDelay of   int<Us>
@@ -70,7 +70,7 @@ type LegacyAcousticSettingsChange =
     | Transmit of           LegacyTransmit
     | Frequency of          LegacyFrequency
     | ReceiverGain of       int
-    | All of                LegacyAcousticSettings
+    | All of                LegacyAcousticProjection
 
     // Higher-level actions
 

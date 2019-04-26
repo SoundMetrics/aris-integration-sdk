@@ -4,13 +4,13 @@ namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
 module AcousticSettingsMappings =
 
-    open LegacyAcousticSettingsDetails
+    open LegacyAcousticProjectionDetails
 
-    [<CompiledName("LegacyAcousticSettingsMapping")>]
-    let legacyAcousticSettingsMapping =
+    [<CompiledName("LegacyAcousticProjectionMapping")>]
+    let legacyAcousticProjectionMapping =
 
         {
-            new IProjectionMap<LegacyAcousticSettings,LegacyAcousticSettingsChange> with
+            new IProjectionMap<LegacyAcousticProjection,LegacyAcousticProjectionChange> with
 
                 member __.ConstrainProjection systemContext projection =
                     constrainProjection systemContext projection
