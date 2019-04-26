@@ -23,7 +23,7 @@ type BunnyHillTests () =
             AntialiasingPeriod = 0<Us>
         }
 
-        let constrained = bunnyHillProjection.ConstrainProjection bh ctx
+        let constrained = bunnyHillMapping.ConstrainProjection ctx bh
 
         Assert.AreNotEqual<BunnyHillSettings>(bh, constrained, "Must show *some* constraint!")
 
@@ -44,7 +44,7 @@ type BunnyHillTests () =
             AntialiasingPeriod = 0<Us>
         }
 
-        let changed = bunnyHillProjection.ApplyChange bh systemContext change
+        let changed = bunnyHillMapping.ApplyChange systemContext bh change
 
         let actualWindow = changed.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
@@ -67,7 +67,7 @@ type BunnyHillTests () =
             AntialiasingPeriod = 0<Us>
         }
 
-        let changed = bunnyHillProjection.ApplyChange bh systemContext change
+        let changed = bunnyHillMapping.ApplyChange systemContext bh change
 
         let actualWindow = changed.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
@@ -86,6 +86,6 @@ type BunnyHillTests () =
             AntialiasingPeriod = 0<Us>
         }
 
-        let actual = bunnyHillProjection.ToAcquisitionSettings bh systemContext
+        let actual = bunnyHillMapping.ToAcquisitionSettings systemContext bh
 
         Assert.IsNotNull(actual)

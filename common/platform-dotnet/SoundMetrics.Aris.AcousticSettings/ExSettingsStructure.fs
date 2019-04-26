@@ -105,13 +105,13 @@ type SystemContext = {
 type IProjectionMap<'P,'C> =
     /// Changes a projection instance; 'C is applied to 'P,
     /// producing a new 'P.
-    abstract member ApplyChange : 'P -> SystemContext -> 'C -> 'P
+    abstract member ApplyChange : SystemContext -> 'P -> 'C -> 'P
 
     /// Constrains settings projection 'P in ways that are specific to 'P.
-    abstract member ConstrainProjection : 'P -> SystemContext -> 'P
+    abstract member ConstrainProjection : SystemContext -> 'P -> 'P
 
     /// Transforms from a projection of settings to actual device settings.
-    abstract member ToAcquisitionSettings : 'P -> SystemContext -> AcousticSettings
+    abstract member ToAcquisitionSettings : SystemContext -> 'P -> AcousticSettings
 
 
 //-----------------------------------------------------------------------------
@@ -131,18 +131,17 @@ module internal AcquisitionSettingsNormalization =
 
     /// Transforms to device settings that conform to guidelines for safely
     /// and successfully producing images.
-    let normalize systemType
-                  antialiasingPeriod
+    let normalize systemContext
                   (settings: AcousticSettings)
                   : struct (AcousticSettings * bool) =
 
         let maximumFrameRate =
-            calculateMaximumFrameRate systemType
+            calculateMaximumFrameRate systemContext.SystemType
                                       settings.PingMode
                                       settings.SampleStartDelay
                                       settings.SampleCount
                                       settings.SamplePeriod
-                                      antialiasingPeriod
+                                      systemContext.AntialiasingPeriod
         let adjustedFrameRate = min settings.FrameRate maximumFrameRate
 
         let isConstrained = settings.FrameRate <> adjustedFrameRate
@@ -187,26 +186,21 @@ module SettingsProjection =
     /// more easily interact with, while also determining necessary device
     /// settings to produce appropriate images.
     [<CompiledName("MapProjectionToSettings")>]
-    let mapProjectionToSettings<'P,'C> (pmap: IProjectionMap<'P,'C>)
+    let mapProjectionToSettings<'P,'C> (systemContext: SystemContext)
+                                       (pmap: IProjectionMap<'P,'C>)
                                        (projection: 'P)
-                                       (changes: 'C seq)
-                                       (systemContext: SystemContext)
+                                       (aChange: 'C)
                                        : struct ('P * AcousticSettings * ComputedValues) =
 
-        // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
-        let change projection change =
-            pmap.ApplyChange projection systemContext change
-        let constrain systemContext projection =
-            pmap.ConstrainProjection projection systemContext
-        let toAcquisitionSettings projection ctx : AcousticSettings =
-            pmap.ToAcquisitionSettings projection ctx
-
         let constrainedProjection =
-            let projectionWithChanges = changes |> Seq.fold change projection
-            projectionWithChanges |> constrain systemContext
+            pmap.ApplyChange systemContext projection aChange
+                |> pmap.ConstrainProjection systemContext
+
         let struct (acquisitionSettings, constrainedAS) =
-            toAcquisitionSettings constrainedProjection systemContext
-                |> normalize systemContext.SystemType systemContext.AntialiasingPeriod
+            pmap.ToAcquisitionSettings systemContext constrainedProjection
+                |> normalize systemContext
+
         let computedValues = acquisitionSettings
                                 |> getComputedValues systemContext constrainedAS
+
         struct (constrainedProjection, acquisitionSettings, computedValues)

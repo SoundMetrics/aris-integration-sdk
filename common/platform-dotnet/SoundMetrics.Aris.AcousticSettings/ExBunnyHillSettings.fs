@@ -18,8 +18,8 @@ type BunnyHillChange =
 
 module BunnyHill =
 
-    [<CompiledName("BunnyHillProjection")>]
-    let bunnyHillProjection =
+    [<CompiledName("BunnyHillMapping")>]
+    let bunnyHillMapping =
 
         let validateWindow (downrange : DownrangeWindow) =
 
@@ -37,12 +37,12 @@ module BunnyHill =
                 invalidArg "Start" "Is greater or equal to End"
 
 
-        let toSettings (settings: BunnyHillSettings) _externalContext : AcousticSettings =
+        let toSettings _externalContext (settings: BunnyHillSettings) : AcousticSettings =
 
             validateWindow settings.DownrangeWindow
             AcousticSettings.Invalid
 
-        let applyChange settings systemContext change : BunnyHillSettings =
+        let applyChange systemContext settings change : BunnyHillSettings =
 
             validateWindow settings.DownrangeWindow
 
@@ -57,7 +57,8 @@ module BunnyHill =
                         { settings.DownrangeWindow with End = value } }
             | All newSettings -> newSettings
 
-        let constrainProjection (settings: BunnyHillSettings) (systemContext: SystemContext) =
+        let constrainProjection (systemContext: SystemContext)
+                                (settings: BunnyHillSettings) =
 
             validateWindow settings.DownrangeWindow
 
@@ -77,8 +78,8 @@ module BunnyHill =
 
         {
             new IProjectionMap<BunnyHillSettings,BunnyHillChange> with
-                member __.ApplyChange projection systemContext changeRequest =
-                    applyChange projection systemContext changeRequest
+                member __.ApplyChange systemContext projection changeRequest =
+                    applyChange systemContext projection changeRequest
 
                 member __.ConstrainProjection projection systemContext =
                     constrainProjection projection systemContext

@@ -22,10 +22,10 @@ type ProjectionChangeTests () =
 
         let action = Action(fun () ->
             SettingsProjection.mapProjectionToSettings
-                BunnyHill.bunnyHillProjection
-                bh
-                [ ChangeWindowStart 1.0<m>]
                 ctx
+                BunnyHill.bunnyHillMapping
+                bh
+                (ChangeWindowStart 1.0<m>)
             |> ignore
         )
         let ex = Assert.ThrowsException<ArgumentException>(action)

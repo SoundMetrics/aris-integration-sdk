@@ -77,8 +77,8 @@ type LegacyAcousticSettingsChange =
     | ResetDefaults
     | ChangeDownrangeStart of   float<m>
     | ChangeDownrangeEnd of     float<m>
-    /// Translates the window up- or down-range while maintaining window size in meters constant
-    /// (unless fixed sample count, etc., come into play).
+
+    /// Translates the window up- or down-range while maintaining window size.
     | TranslateWindow of        downrangeStart: float<m>
     | Antialiasing of           int<Us>
 
@@ -86,33 +86,33 @@ type LegacyAcousticSettingsChange =
 [<AutoOpen>]
 module internal LegacyAcousticSettingsDetails =
 
-    let constrainProjection (settings: LegacyAcousticSettings) (systemContext: SystemContext) =
+    let constrainProjection (systemContext: SystemContext) (settings: LegacyAcousticSettings) =
 
         failwith "nyi"
 
-    let applyChange settings systemContext change : LegacyAcousticSettings =
+    let applyChange systemContext settings change : LegacyAcousticSettings =
 
         failwith "nyi"
 
-    let toSettings (settings: LegacyAcousticSettings) externalContext : AcousticSettings =
+    let toSettings systemContext (settings: LegacyAcousticSettings) : AcousticSettings =
 
         failwith "nyi"
 
 
 module LegacyAcousticSettings =
 
-    [<CompiledName("LegacyAcousticSettingsProjection")>]
-    let legacyAcousticSettingsProjection =
+    [<CompiledName("LegacyAcousticSettingsMapping")>]
+    let legacyAcousticSettingsMapping =
 
         {
             new IProjectionMap<LegacyAcousticSettings,LegacyAcousticSettingsChange> with
 
-                member __.ConstrainProjection projection systemContext =
-                    constrainProjection projection systemContext
+                member __.ConstrainProjection systemContext projection =
+                    constrainProjection systemContext projection
 
-                member __.ApplyChange projection systemContext changeRequest =
-                    applyChange projection systemContext changeRequest
+                member __.ApplyChange systemContext projection changeRequest =
+                    applyChange systemContext projection changeRequest
 
-                member __.ToAcquisitionSettings projection systemContext =
-                    toSettings projection systemContext
+                member __.ToAcquisitionSettings systemContext projection =
+                    toSettings systemContext projection
         }
