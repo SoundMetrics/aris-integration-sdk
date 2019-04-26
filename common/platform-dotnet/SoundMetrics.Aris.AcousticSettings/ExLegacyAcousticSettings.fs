@@ -77,7 +77,7 @@ type LegacyAcousticSettingsChange =
     | ResetDefaults
     | ChangeDownrangeStart of   float<m>
     | ChangeDownrangeEnd of     float<m>
-    /// Translates the window up- or down-range while holding window size in meters constant
+    /// Translates the window up- or down-range while maintaining window size in meters constant
     /// (unless fixed sample count, etc., come into play).
     | TranslateWindow of        downrangeStart: float<m>
     | Antialiasing of           int<Us>
@@ -86,7 +86,7 @@ type LegacyAcousticSettingsChange =
 [<AutoOpen>]
 module internal LegacyAcousticSettingsDetails =
 
-    let toSettings (settings: LegacyAcousticSettings) externalContext : AcousticSettings =
+    let constrainProjection (settings: LegacyAcousticSettings) (systemContext: SystemContext) =
 
         failwith "nyi"
 
@@ -94,7 +94,7 @@ module internal LegacyAcousticSettingsDetails =
 
         failwith "nyi"
 
-    let constrainProjection (settings: LegacyAcousticSettings) (systemContext: SystemContext) =
+    let toSettings (settings: LegacyAcousticSettings) externalContext : AcousticSettings =
 
         failwith "nyi"
 
@@ -106,11 +106,12 @@ module LegacyAcousticSettings =
 
         {
             new IProjectionMap<LegacyAcousticSettings,LegacyAcousticSettingsChange> with
-                member __.ApplyChange projection systemContext changeRequest =
-                    applyChange projection systemContext changeRequest
 
                 member __.ConstrainProjection projection systemContext =
                     constrainProjection projection systemContext
+
+                member __.ApplyChange projection systemContext changeRequest =
+                    applyChange projection systemContext changeRequest
 
                 member __.ToAcquisitionSettings projection systemContext =
                     toSettings projection systemContext

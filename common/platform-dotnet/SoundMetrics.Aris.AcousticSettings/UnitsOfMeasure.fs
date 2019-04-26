@@ -11,6 +11,9 @@ module UnitsOfMeasure =
     [<Measure>] type mm
     [<Measure>] type Us // Microseconds
 
+    /// Virtual focus unit, used to communicate focus position to ARIS.
+    [<Measure>] type vfu
+
     let private usPerS = 1000000.0
 
     let usToS (us: int<Us>): float<s> =
