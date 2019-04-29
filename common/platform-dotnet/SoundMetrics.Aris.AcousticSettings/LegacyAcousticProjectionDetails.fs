@@ -119,11 +119,14 @@ module internal LegacyAcousticProjectionDetails =
             match change with
             | RequestFrameRate frameRate -> applyFrameRate systemContext projection frameRate
 
-            //| RequestSampleCount sampleCount
-            //| RequestSampleStartDelay ssd
-            //| RequestDetail detail
-            //| RequestPulseWidth puseWidth
-            //| RequestPingMode pingMode
+            | RequestSampleCount sampleCount -> failwith "nyi"
+            | RequestSampleStartDelay ssd -> failwith "nyi"
+            | RequestDownrangeStart rangeStart -> failwith "nyi"
+            | RequestDownrangeEnd rangeEnd -> failwith "nyi"
+
+            | RequestDetail detail -> failwith "nyi"
+            | RequestPulseWidth puseWidth -> failwith "nyi"
+            | RequestPingMode pingMode -> failwith "nyi"
 
             | RequestTransmit transmit -> { projection with Transmit = transmit }
 
@@ -131,26 +134,22 @@ module internal LegacyAcousticProjectionDetails =
 
             | RequestReceiverGain gain -> { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
 
-            | RequestNewProjection newProjection -> projection
+            | RequestNewProjection newProjection -> newProjection
 
             // Higher-level actions
 
             | ResetDefaults -> failwith "nyi"
-            | RequestDownrangeStart rangeStart -> failwith "nyi"
-            | RequestDownrangeEnd rangeEnd -> failwith "nyi"
 
             /// Translates the window up- or down-range while maintaining window size.
             | RequestTranslateWindow downrangeStart -> failwith "nyi"
             | RequestAntialiasing antialiasing -> failwith "nyi"
-
-            | _ -> failwith "remove this expressions"
 
         newProjection
 
 
     let toSettings systemContext (projection: LegacyAcousticProjection) : AcousticSettings =
 
-        let _settingsFrequency =
+        let _rawFrequency =
             match projection.Frequency with
             | LowFrequency -> Frequency.Low
             | HighFrequency -> Frequency.High
