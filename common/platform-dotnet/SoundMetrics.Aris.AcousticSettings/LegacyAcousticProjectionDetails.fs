@@ -43,6 +43,23 @@ module internal LegacyAcousticProjectionDetails =
         requestedFrameRate |> Range.constrainTo maxDynamiceRange
 
 
+    let private deriveWindow _systemContext _projection : Range<float<m>> =
+
+        failwith "nyi"
+
+
+    let private deriveAutoFrequency systemContext
+                                    (projection : LegacyAcousticProjection)
+                                    : Frequency = // Return proper type for AcousticSettings frequency
+
+        let window = deriveWindow systemContext projection
+
+        if window.Max > SonarConfig.systemTypeRangeMap.[systemContext.SystemType].UsableRange.LFCrossoverRange then
+            Frequency.Low
+        else
+            Frequency.High
+
+
     // Applies the requested frame rate to the given projection, constraining it if appropriate.
     let applyFrameRate systemContext
                        (projection : LegacyAcousticProjection)
@@ -80,7 +97,13 @@ module internal LegacyAcousticProjectionDetails =
 
 
     let applyFrequency systemContext
-                       (projection : LegacyAcousticProjection) = failwith "nyi"
+                       (projection : LegacyAcousticProjection)
+                       frequency =
+
+        if not (Enum.IsDefined(typeof<LegacyFrequency>, frequency)) then
+            raise (invalidArg "frequency" "Unexpected frequency value")
+
+        { projection with Frequency = frequency }
 
 
     //-------------------------------------------------------------------------
@@ -92,36 +115,45 @@ module internal LegacyAcousticProjectionDetails =
 
     let applyChange systemContext projection change : LegacyAcousticProjection =
 
-        match change with
-        | RequestFrameRate frameRate -> applyFrameRate systemContext projection frameRate
+        let newProjection =
+            match change with
+            | RequestFrameRate frameRate -> applyFrameRate systemContext projection frameRate
 
-        //| RequestSampleCount sampleCount
-        //| RequestSampleStartDelay ssd
-        //| RequestDetail detail
-        //| RequestPulseWidth puseWidth
-        //| RequestPingMode pingMode
+            //| RequestSampleCount sampleCount
+            //| RequestSampleStartDelay ssd
+            //| RequestDetail detail
+            //| RequestPulseWidth puseWidth
+            //| RequestPingMode pingMode
 
-        | RequestTransmit transmit -> { projection with Transmit = transmit }
+            | RequestTransmit transmit -> { projection with Transmit = transmit }
 
-        //| RequestFrequency frequency
+            | RequestFrequency frequency -> applyFrequency systemContext projection frequency
 
-        | RequestReceiverGain gain -> { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
+            | RequestReceiverGain gain -> { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
 
-        | RequestNewProjection newProjection -> projection
+            | RequestNewProjection newProjection -> projection
 
-        // Higher-level actions
+            // Higher-level actions
 
-        | ResetDefaults -> failwith "nyi"
-        | RequestDownrangeStart rangeStart -> failwith "nyi"
-        | RequestDownrangeEnd rangeEnd -> failwith "nyi"
+            | ResetDefaults -> failwith "nyi"
+            | RequestDownrangeStart rangeStart -> failwith "nyi"
+            | RequestDownrangeEnd rangeEnd -> failwith "nyi"
 
-        /// Translates the window up- or down-range while maintaining window size.
-        | RequestTranslateWindow downrangeStart -> failwith "nyi"
-        | RequestAntialiasing antialiasing -> failwith "nyi"
+            /// Translates the window up- or down-range while maintaining window size.
+            | RequestTranslateWindow downrangeStart -> failwith "nyi"
+            | RequestAntialiasing antialiasing -> failwith "nyi"
 
-        | _ -> failwith "remove this expressions"
+            | _ -> failwith "remove this expressions"
+
+        newProjection
 
 
     let toSettings systemContext (projection: LegacyAcousticProjection) : AcousticSettings =
+
+        let _settingsFrequency =
+            match projection.Frequency with
+            | LowFrequency -> Frequency.Low
+            | HighFrequency -> Frequency.High
+            | AutoFrequency -> deriveAutoFrequency systemContext projection
 
         failwith "nyi"

@@ -58,6 +58,16 @@ module SonarConfig =
     let CyclePeriodMargin = 360<Us>
     let MinAntialiasing =   0<Us>
 
+    type ExpectedMinAndMaxRange = {
+        MinExpectedRange:   float<m>
+        MaxUsableRange:     float<m>
+    }
+
+    type UsableRange = {
+        ExpectedMinAndMaxRange: Map<Frequency,ExpectedMinAndMaxRange>
+        LFCrossoverRange:       float<m>
+    }
+
     type SystemTypeRanges = {
         SystemType:             ArisSystemType
         PulseWidthRange:        Range<int<Us>>
@@ -66,6 +76,7 @@ module SonarConfig =
         CyclePeriodRange:       Range<int<Us>>
         WindowStartRange:       Range<float<m>>
         WindowEndRange:         Range<float<m>>
+        UsableRange:            UsableRange
     }
     with
         member this.MaxRange = this.WindowEndRange.Max
@@ -79,6 +90,14 @@ module SonarConfig =
             CyclePeriodRange =      constrainRangeMax CyclePeriodRange      80000<Us>
             WindowStartRange =      constrainRangeMax WindowStartRange       25.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange         50.0<m>
+            UsableRange = {
+                ExpectedMinAndMaxRange =
+                    [
+                        Frequency.High, { MinExpectedRange =  5.0<m>; MaxUsableRange = 20.<m> }
+                        Frequency.Low,  { MinExpectedRange = 20.0<m>; MaxUsableRange = 50.<m> }
+                    ] |> Map.ofList
+                LFCrossoverRange = 15.0<m>
+            }
           }
           { SystemType =            ArisSystemType.Aris3000
             PulseWidthRange =       constrainRangeMax PulseWidthRange          24<Us>
@@ -87,6 +106,14 @@ module SonarConfig =
             CyclePeriodRange =      constrainRangeMax CyclePeriodRange      40000<Us>
             WindowStartRange =      constrainRangeMax WindowStartRange       12.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange         20.0<m>
+            UsableRange = {
+                ExpectedMinAndMaxRange =
+                    [
+                        Frequency.High, { MinExpectedRange = 1.0<m>; MaxUsableRange =  8.<m> }
+                        Frequency.Low,  { MinExpectedRange = 8.0<m>; MaxUsableRange = 20.<m> }
+                    ] |> Map.ofList
+                LFCrossoverRange = 5.0<m>
+            }
           }
           { SystemType =            ArisSystemType.Aris1200
             PulseWidthRange =       constrainRangeMax PulseWidthRange          80<Us>
@@ -95,6 +122,14 @@ module SonarConfig =
             CyclePeriodRange =      constrainRangeMax CyclePeriodRange     150000<Us>
             WindowStartRange =      constrainRangeMax WindowStartRange       40.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange        100.0<m>
+            UsableRange = {
+                ExpectedMinAndMaxRange =
+                    [
+                        Frequency.High, { MinExpectedRange = 10.0<m>; MaxUsableRange =  30.<m> }
+                        Frequency.Low,  { MinExpectedRange = 30.0<m>; MaxUsableRange = 100.<m> }
+                    ] |> Map.ofList
+                LFCrossoverRange = 25.0<m>
+            }
           } ]
         |> List.map (fun elem -> elem.SystemType, elem)
         |> Map.ofList
