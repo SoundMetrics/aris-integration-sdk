@@ -12,43 +12,51 @@ module internal LegacyAcousticProjectionDetails =
     open SoundMetrics.Data
     open SoundMetrics.Data.Range
 
-    let deriveSamplePeriod projection = failwith "nyi"
+    let deriveAutoSamplePeriod projection = failwith "nyi"
 
 
-    let constrainRequestedFrameRate systemContext
-                                    projection
-                                    (requestedFrameRate : FrameRate)
-                                    : FrameRate =
+    // Constrains the requested frame rate to fit the proposted projection.
+    // Min frame rate is a constant, max is dynamic based on a number of factors
+    // in the projection and other context.
+    let private constrainRequestedFrameRate systemContext
+                                            projection
+                                            (requestedFrameRate : FrameRate)
+                                            : FrameRate =
 
-            let maxDynamiceRange =
+        let maxDynamiceRange =
 
-                let maxDynamicFrameRate =
-                    let samplePeriod =
-                        match projection.Detail with
-                        | CustomSamplePeriod samplePeriod -> samplePeriod
-                        | AutoSamplePeriod -> deriveSamplePeriod projection
+            let maxDynamicFrameRate =
+                let samplePeriod =
+                    match projection.Detail with
+                    | CustomSamplePeriod samplePeriod -> samplePeriod
+                    | AutoSamplePeriod -> deriveAutoSamplePeriod projection
 
-                    calculateMaximumFrameRate systemContext.SystemType
-                                              projection.PingMode
-                                              projection.SampleStartDelay
-                                              projection.SampleCount.SampleCount
-                                              samplePeriod
-                                              systemContext.AntialiasingPeriod
-                range SonarConfig.FrameRateRange.Min maxDynamicFrameRate
+                calculateMaximumFrameRate systemContext.SystemType
+                                          projection.PingMode
+                                          projection.SampleStartDelay
+                                          projection.SampleCount.SampleCount
+                                          samplePeriod
+                                          projection.AntialiasingPeriod
 
-            requestedFrameRate |> Range.constrainTo maxDynamiceRange
+            range SonarConfig.FrameRateRange.Min maxDynamicFrameRate
+
+        requestedFrameRate |> Range.constrainTo maxDynamiceRange
 
 
+    // Applies the requested frame rate to the given projection, constraining it if appropriate.
     let applyFrameRate systemContext
                        (projection : LegacyAcousticProjection)
                        (requestedFrameRate : LegacyFrameRate)
                        : LegacyAcousticProjection =
 
-        match requestedFrameRate with
-        | MaximumFrameRate -> { projection with FrameRate = MaximumFrameRate }
-        | CustomFrameRate rate ->
-            let constrainedRate = constrainRequestedFrameRate systemContext projection rate
-            { projection with FrameRate = CustomFrameRate constrainedRate }
+        let newFrameRate =
+            match requestedFrameRate with
+            | MaximumFrameRate -> MaximumFrameRate
+            | CustomFrameRate rate ->
+                let constrainedRate = constrainRequestedFrameRate systemContext projection rate
+                CustomFrameRate constrainedRate
+
+        { projection with FrameRate = newFrameRate }
 
 
     let applySampleCount systemContext
@@ -85,21 +93,34 @@ module internal LegacyAcousticProjectionDetails =
     let applyChange systemContext projection change : LegacyAcousticProjection =
 
         match change with
-        | FrameRate frameRate -> applyFrameRate systemContext projection frameRate
+        | RequestFrameRate frameRate -> applyFrameRate systemContext projection frameRate
 
-        //| SampleCount sampleCount
-        //| SampleStartDelay ssd
-        //| Detail detail
-        //| PulseWidth puseWidth
-        //| PingMode pingMode
+        //| RequestSampleCount sampleCount
+        //| RequestSampleStartDelay ssd
+        //| RequestDetail detail
+        //| RequestPulseWidth puseWidth
+        //| RequestPingMode pingMode
 
-        | Transmit transmit -> { projection with Transmit = transmit }
+        | RequestTransmit transmit -> { projection with Transmit = transmit }
 
-        //| Frequency frequency
+        //| RequestFrequency frequency
 
-        | ReceiverGain gain -> { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
+        | RequestReceiverGain gain -> { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
 
-        | All newProjection -> projection
+        | RequestNewProjection newProjection -> projection
+
+        // Higher-level actions
+
+        | ResetDefaults -> failwith "nyi"
+        | RequestDownrangeStart rangeStart -> failwith "nyi"
+        | RequestDownrangeEnd rangeEnd -> failwith "nyi"
+
+        /// Translates the window up- or down-range while maintaining window size.
+        | RequestTranslateWindow downrangeStart -> failwith "nyi"
+        | RequestAntialiasing antialiasing -> failwith "nyi"
+
+        | _ -> failwith "remove this expressions"
+
 
     let toSettings systemContext (projection: LegacyAcousticProjection) : AcousticSettings =
 

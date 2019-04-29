@@ -35,15 +35,16 @@ type LegacyPulseWidth =
 /// it is still a necessary and type-safe part of the new Projection-to-Settings
 /// scheme. (This type is closer to the "view model" than the "model.")
 type LegacyAcousticProjection = {
-    FrameRate : LegacyFrameRate
-    SampleCount : LegacySampleCount
-    SampleStartDelay : int<Us>
-    Detail : LegacyDetail // SamplePeriod
-    PulseWidth : LegacyPulseWidth
-    PingMode : PingMode
-    Transmit : LegacyTransmit
-    Frequency : LegacyFrequency
-    ReceiverGain : int
+    FrameRate :             LegacyFrameRate
+    SampleCount :           LegacySampleCount
+    SampleStartDelay :      int<Us>
+    Detail :                LegacyDetail // SamplePeriod
+    PulseWidth :            LegacyPulseWidth
+    PingMode :              PingMode
+    Transmit :              LegacyTransmit
+    Frequency :             LegacyFrequency
+    ReceiverGain :          int
+    AntialiasingPeriod :    int<Us>
 }
 with
     override s.ToString () = sprintf "%A" s
@@ -57,27 +58,28 @@ with
         PingMode = PingMode.InvalidPingMode 0
         Transmit = Off
         Frequency = LowFrequency
-        ReceiverGain = 0
+        ReceiverGain = -1
+        AntialiasingPeriod = -1<Us>
     }
 
 type LegacyAcousticProjectionChange =
-    | FrameRate of          LegacyFrameRate
-    | SampleCount of        LegacySampleCount
-    | SampleStartDelay of   int<Us>
-    | Detail of             LegacyDetail // SamplePeriod
-    | PulseWidth of         LegacyPulseWidth
-    | PingMode of           PingMode
-    | Transmit of           LegacyTransmit
-    | Frequency of          LegacyFrequency
-    | ReceiverGain of       int
-    | All of                LegacyAcousticProjection
+    | RequestFrameRate of           LegacyFrameRate
+    | RequestSampleCount of         LegacySampleCount
+    | RequestSampleStartDelay of    int<Us>
+    | RequestDetail of              LegacyDetail // SamplePeriod
+    | RequestPulseWidth of          LegacyPulseWidth
+    | RequestPingMode of            PingMode
+    | RequestTransmit of            LegacyTransmit
+    | RequestFrequency of           LegacyFrequency
+    | RequestReceiverGain of        int
+    | RequestNewProjection of       LegacyAcousticProjection
 
     // Higher-level actions
 
     | ResetDefaults
-    | ChangeDownrangeStart of   float<m>
-    | ChangeDownrangeEnd of     float<m>
+    | RequestDownrangeStart of  float<m>
+    | RequestDownrangeEnd of    float<m>
 
     /// Translates the window up- or down-range while maintaining window size.
-    | TranslateWindow of        downrangeStart: float<m>
-    | Antialiasing of           int<Us>
+    | RequestTranslateWindow of downrangeStart: float<m>
+    | RequestAntialiasing of    int<Us>

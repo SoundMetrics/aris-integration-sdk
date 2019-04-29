@@ -17,7 +17,6 @@ type ProjectionChangeTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
         let action = Action(fun () ->

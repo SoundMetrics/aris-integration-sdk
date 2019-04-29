@@ -19,17 +19,18 @@ type FrameRate = SoundMetrics.Aris.AcousticSettings.FrameRate
 /// These are the settings we send to the sonar to instruct it to form images.
 /// TShis F# record has structural equality and comparison built-in.
 type AcousticSettings = {
-    FrameRate: FrameRate
-    SampleCount: int
-    SampleStartDelay: int<Us>
-    CyclePeriod: int<Us>
-    SamplePeriod: int<Us>
-    PulseWidth: int<Us>
-    PingMode: PingMode
-    EnableTransmit: bool
-    Frequency: Frequency
-    Enable150Volts: bool
-    ReceiverGain: int }
+    FrameRate :         FrameRate
+    SampleCount :       int
+    SampleStartDelay :  int<Us>
+    CyclePeriod :       int<Us>
+    SamplePeriod :      int<Us>
+    PulseWidth :        int<Us>
+    PingMode :          PingMode
+    EnableTransmit :    bool
+    Frequency :         Frequency
+    Enable150Volts :    bool
+    ReceiverGain :      int
+    AntialiasingPeriod: int<Us>}
 with
     override s.ToString () = sprintf "%A" s
 
@@ -51,7 +52,8 @@ with
         EnableTransmit = false
         Frequency = Frequency.Low
         Enable150Volts = false
-        ReceiverGain = 0
+        ReceiverGain = -1
+        AntialiasingPeriod = -1<Us>
     }
 
     static member diff left right =
@@ -96,7 +98,6 @@ type SystemContext = {
     Salinity:   Salinity
     Depth:      float<m>
     AuxLens:    AuxLensType
-    AntialiasingPeriod: int<Us>
 }
 
 /// Functions related in their effort to affect change, constraint, and conversion
@@ -141,7 +142,7 @@ module internal AcquisitionSettingsNormalization =
                                       settings.SampleStartDelay
                                       settings.SampleCount
                                       settings.SamplePeriod
-                                      systemContext.AntialiasingPeriod
+                                      settings.AntialiasingPeriod
         let adjustedFrameRate = min settings.FrameRate maximumFrameRate
 
         let isConstrained = settings.FrameRate <> adjustedFrameRate
@@ -154,27 +155,27 @@ module SettingsProjection =
 
     let private getComputedValues (systemContext: SystemContext)
                                   constrainedAS
-                                  (acquisitionSettings: AcousticSettings)
+                                  (settings: AcousticSettings)
                                   : ComputedValues =
 
         let sspd = calculateSpeedOfSound systemContext.WaterTemp
                                          systemContext.Depth
                                          systemContext.Salinity
-        let window = calculateWindowAtSspd acquisitionSettings.SampleStartDelay
-                                           acquisitionSettings.SamplePeriod
-                                           acquisitionSettings.SampleCount
+        let window = calculateWindowAtSspd settings.SampleStartDelay
+                                           settings.SamplePeriod
+                                           settings.SampleCount
                                            sspd
         {
-            Resolution = mToMm (window.Length / float acquisitionSettings.SampleCount)
+            Resolution = mToMm (window.Length / float settings.SampleCount)
             AutoFocusRange = window.MidPoint
             SoundSpeed = sspd
             MaxFrameRate =
                 calculateMaximumFrameRate systemContext.SystemType
-                                          acquisitionSettings.PingMode
-                                          acquisitionSettings.SampleStartDelay
-                                          acquisitionSettings.SampleCount
-                                          acquisitionSettings.SamplePeriod
-                                          systemContext.AntialiasingPeriod
+                                          settings.PingMode
+                                          settings.SampleStartDelay
+                                          settings.SampleCount
+                                          settings.SamplePeriod
+                                          settings.AntialiasingPeriod
 
             ActualDownrangeWindow = window
             ConstrainedAcquisitionSettings = constrainedAS

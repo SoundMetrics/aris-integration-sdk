@@ -20,7 +20,6 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
         let constrained = bunnyHillMapping.ConstrainProjection ctx bh
@@ -41,7 +40,6 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
         let changed = bunnyHillMapping.ApplyChange systemContext bh change
@@ -64,7 +62,6 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
         let changed = bunnyHillMapping.ApplyChange systemContext bh change
@@ -83,7 +80,6 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
         let actual = bunnyHillMapping.ToAcquisitionSettings systemContext bh
