@@ -3,6 +3,7 @@
 namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
+open Serilog
 open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
 open System
 
@@ -11,6 +12,7 @@ module internal LegacyAcousticProjectionDetails =
     open SoundMetrics.Aris.AcousticSettings.AcousticMath
     open SoundMetrics.Data
     open SoundMetrics.Data.Range
+    open SoundMetrics.Aris.AcousticSettings
 
     let deriveAutoSamplePeriod projection = failwith "nyi"
 
@@ -50,11 +52,13 @@ module internal LegacyAcousticProjectionDetails =
 
     let private deriveAutoFrequency systemContext
                                     (projection : LegacyAcousticProjection)
-                                    : Frequency = // Return proper type for AcousticSettings frequency
+                                    : Frequency = // Return proper type for AcousticSettings raw frequency
 
         let window = deriveWindow systemContext projection
+        let crossover =
+            SonarConfig.systemTypeRangeMap.[systemContext.SystemType].UsableRange.LFCrossoverRange
 
-        if window.Max > SonarConfig.systemTypeRangeMap.[systemContext.SystemType].UsableRange.LFCrossoverRange then
+        if crossover < window.Max then
             Frequency.Low
         else
             Frequency.High
@@ -106,12 +110,70 @@ module internal LegacyAcousticProjectionDetails =
         { projection with Frequency = frequency }
 
 
+    /// Local version of Range.constrainTo that logs when a value is constrained.
+    let constrainWithLog<'T when 'T : equality and 'T : comparison>
+                    (range : Range<'T>)
+                    name
+                    (originalValue : 'T) : 'T =
+
+        let constrainedValue = originalValue |> Range.constrainTo range
+        if constrainedValue <> originalValue then
+            Log.Information(
+                "LegacyAcousticProjection: constrained {name}; was {originalValue}; now {constrainedValue}",
+                name, originalValue, constrainedValue)
+
+        constrainedValue
+
+
     //-------------------------------------------------------------------------
     // Top-level implementation of the functions necessary for mapping the project.
 
     let constrainProjection (systemContext: SystemContext) (projection: LegacyAcousticProjection) =
 
-        failwith "nyi"
+        let frameRate =
+            match projection.FrameRate with
+            | MaximumFrameRate -> projection.FrameRate
+            | CustomFrameRate fps ->
+                CustomFrameRate (
+                    ("FrameRate", fps) ||> constrainWithLog SonarConfig.FrameRateRange)
+
+        let sampleCount =
+            { projection.SampleCount
+                with SampleCount = ("SampleCount", projection.SampleCount.SampleCount)
+                        ||> constrainWithLog SonarConfig.SampleCountRange }
+
+        let sampleStartDelay =
+            ("SampleStartDelay", projection.SampleStartDelay) ||> constrainWithLog SonarConfig.SampleStartDelayRange
+
+        let detail =
+            match projection.Detail with
+            | AutoSamplePeriod ->  projection.Detail
+            | CustomSamplePeriod sp ->
+                CustomSamplePeriod (
+                    ("SamplePeriod", sp) ||> constrainWithLog SonarConfig.SamplePeriodRange)
+
+        let pulseWidth =
+            match projection.PulseWidth with
+            | CustomPulseWidth pw ->
+                CustomPulseWidth (
+                    ("PulseWidth", pw) ||> constrainWithLog SonarConfig.PulseWidthRange)
+            | AutoPulseWidth
+            | Narrow
+            | Medium
+            | Wide -> projection.PulseWidth
+
+        let receiverGain =
+            ("ReceiverGain", projection.ReceiverGain) ||> constrainWithLog SonarConfig.ReceiverGainRange
+
+        {
+            projection with
+                FrameRate = frameRate
+                SampleCount = sampleCount
+                SampleStartDelay = sampleStartDelay
+                Detail = detail
+                PulseWidth = pulseWidth
+                ReceiverGain = receiverGain
+        }
 
     let applyChange systemContext projection change : LegacyAcousticProjection =
 
@@ -149,10 +211,16 @@ module internal LegacyAcousticProjectionDetails =
 
     let toSettings systemContext (projection: LegacyAcousticProjection) : AcousticSettings =
 
-        let _rawFrequency =
+        let frequency =
             match projection.Frequency with
             | LowFrequency -> Frequency.Low
             | HighFrequency -> Frequency.High
             | AutoFrequency -> deriveAutoFrequency systemContext projection
+
+        let struct (enableTransmit, enable150Volts) =
+            match projection.Transmit with
+            | Off ->        struct (false, false)
+            | LowPower ->   struct (true,  false)
+            | HighPower ->  struct (true,  true)
 
         failwith "nyi"
