@@ -128,7 +128,7 @@ module internal LegacyAcousticProjectionDetails =
     //-------------------------------------------------------------------------
     // Top-level implementation of the functions necessary for mapping the project.
 
-    let constrainProjection (systemContext: SystemContext) (projection: LegacyAcousticProjection) =
+    let constrainProjection (_systemContext: SystemContext) (projection: LegacyAcousticProjection) =
 
         let frameRate =
             match projection.FrameRate with
@@ -139,8 +139,8 @@ module internal LegacyAcousticProjectionDetails =
 
         let sampleCount =
             { projection.SampleCount
-                with SampleCount = ("SampleCount", projection.SampleCount.SampleCount)
-                        ||> constrainWithLog SonarConfig.SampleCountRange }
+                with SampleCount =
+                        ("SampleCount", projection.SampleCount.SampleCount) ||> constrainWithLog SonarConfig.SampleCountRange }
 
         let sampleStartDelay =
             ("SampleStartDelay", projection.SampleStartDelay) ||> constrainWithLog SonarConfig.SampleStartDelayRange
