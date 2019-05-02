@@ -12,9 +12,49 @@ module internal LegacyAcousticProjectionDetails =
     open SoundMetrics.Aris.AcousticSettings.AcousticMath
     open SoundMetrics.Data
     open SoundMetrics.Data.Range
-    open SoundMetrics.Aris.AcousticSettings
 
-    let deriveAutoSamplePeriod projection = failwith "nyi"
+
+    //let deriveWindowLength (systemContext : SystemContext) (projection : LegacyAcousticProjection) =
+
+    //    let t =
+
+    //    internal static Distance CalculateWindowLength(FineDuration samplePeriod,
+    //                                                   int samplesPerBeam,
+    //                                                   Velocity speedOfSound)
+    //    {
+    //        // Halve the sample period to get actual resolution.
+    //        FineDuration totalDuration = samplePeriod * samplesPerBeam;
+    //        return (speedOfSound * totalDuration) / 2;
+    //    }
+
+
+    //let private deriveWindow systemContext projection : Range<float<m>> =
+
+    //    failwith "nyi"
+
+
+    let deriveMaxSamplePeriod (projection : LegacyAcousticProjection) =
+
+        let asMicroseconds (f : float) = int f * 1<Us>
+
+        let maxCP = SonarConfig.CyclePeriodRange.Max
+
+        (float  (maxCP - projection.SampleStartDelay
+                    - projection.AntialiasingPeriod - SonarConfig.CyclePeriodMargin)
+            / float projection.SampleCount.SampleCount)
+        |> Math.Floor //.Floor()
+        |> asMicroseconds
+        |> Range.constrainTo SonarConfig.SamplePeriodRange
+
+
+    let deriveAutoSamplePeriod (projection : LegacyAcousticProjection) = failwith "nyi"
+
+        //internal /* static */ FineDuration CalculateBestSamplePeriodForWindow(FineDuration currentSamplePeriod, Distance windowLength, int samplesPerBeam)
+        //{
+        //    FineDuration bestSamplePeriod = (windowLength / samplesPerBeam) / (SpeedOfSound / 2);
+        //    return _acousticSettingsRanges.SamplePeriodRange.ConstrainValue(bestSamplePeriod);
+        //}
+
 
 
     // Constrains the requested frame rate to fit the proposted projection.
@@ -45,23 +85,19 @@ module internal LegacyAcousticProjectionDetails =
         requestedFrameRate |> Range.constrainTo maxDynamiceRange
 
 
-    let private deriveWindow _systemContext _projection : Range<float<m>> =
-
-        failwith "nyi"
-
-
     let private deriveAutoFrequency systemContext
                                     (projection : LegacyAcousticProjection)
                                     : Frequency = // Return proper type for AcousticSettings raw frequency
 
-        let window = deriveWindow systemContext projection
-        let crossover =
-            SonarConfig.systemTypeRangeMap.[systemContext.SystemType].UsableRange.LFCrossoverRange
+        failwith "nyi"
+        //let window = deriveWindow systemContext projection
+        //let crossover =
+        //    SonarConfig.systemTypeRangeMap.[systemContext.SystemType].UsableRange.LFCrossoverRange
 
-        if crossover < window.Max then
-            Frequency.Low
-        else
-            Frequency.High
+        //if crossover < window.Max then
+        //    Frequency.Low
+        //else
+        //    Frequency.High
 
 
     // Applies the requested frame rate to the given projection, constraining it if appropriate.
@@ -93,8 +129,10 @@ module internal LegacyAcousticProjectionDetails =
 
 
     let applyPulseWidth systemContext
-                        (projection : LegacyAcousticProjection) = failwith "nyi"
+                        (projection : LegacyAcousticProjection)
+                        pulseWidth =
 
+        failwith "nyi"
 
     let applyPingMode systemContext
                       (projection : LegacyAcousticProjection) = failwith "nyi"
@@ -187,7 +225,7 @@ module internal LegacyAcousticProjectionDetails =
             | RequestDownrangeEnd rangeEnd -> failwith "nyi"
 
             | RequestDetail detail -> failwith "nyi"
-            | RequestPulseWidth puseWidth -> failwith "nyi"
+            | RequestPulseWidth pulseWidth -> applyPulseWidth systemContext projection pulseWidth
             | RequestPingMode pingMode -> failwith "nyi"
 
             | RequestTransmit transmit -> { projection with Transmit = transmit }
@@ -223,4 +261,32 @@ module internal LegacyAcousticProjectionDetails =
             | LowPower ->   struct (true,  false)
             | HighPower ->  struct (true,  true)
 
-        failwith "nyi"
+        let samplePeriod =
+            match projection.Detail with
+            | CustomSamplePeriod sp -> sp
+            | AutoSamplePeriod -> failwith "nyi"
+
+        let cyclePeriod = failwith "nyi"
+        let pulseWidth = failwith "nyi"
+
+        let frameRate =
+            let requested =
+                match projection.FrameRate with
+                | CustomFrameRate fr -> fr
+                | MaximumFrameRate -> SonarConfig.FrameRateRange.Max
+            constrainRequestedFrameRate systemContext projection requested
+
+        {
+            FrameRate           = frameRate
+            SampleCount         = projection.SampleCount.SampleCount
+            SampleStartDelay    = projection.SampleStartDelay
+            CyclePeriod         = cyclePeriod
+            SamplePeriod        = samplePeriod
+            PulseWidth          = pulseWidth
+            PingMode            = projection.PingMode
+            EnableTransmit      = enableTransmit
+            Frequency           = frequency
+            Enable150Volts      = enable150Volts
+            ReceiverGain        = projection.ReceiverGain
+            AntialiasingPeriod  = projection.AntialiasingPeriod
+        }

@@ -93,11 +93,12 @@ type AuxLensType = None | Telephoto
 
 /// The context in which the system is operating.
 type SystemContext = {
-    SystemType: ArisSystemType
-    WaterTemp:  float<degC>
-    Salinity:   Salinity
-    Depth:      float<m>
-    AuxLens:    AuxLensType
+    SystemType:     ArisSystemType
+    WaterTemp:      float<degC>
+    Salinity:       Salinity
+    Depth:          float<m>
+    AuxLens:        AuxLensType
+    LockSampleCount: bool
 }
 
 /// Functions related in their effort to affect change, constraint, and conversion

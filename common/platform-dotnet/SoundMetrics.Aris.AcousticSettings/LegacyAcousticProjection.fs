@@ -4,7 +4,6 @@ namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
-open System
 
 type LegacyFrameRate =
     | MaximumFrameRate
