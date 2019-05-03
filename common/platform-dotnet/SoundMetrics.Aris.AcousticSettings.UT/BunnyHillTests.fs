@@ -11,23 +11,6 @@ open BunnyHill
 type BunnyHillTests () =
 
     [<TestMethod>]
-    member __.``Show constraint from float32 MIN/MAX`` () =
-        let bh = {
-            DownrangeWindow = { Start = 3.0<m>; End = Double.MaxValue * 1.0<m> } }
-        let ctx = {
-            SystemType = ArisSystemType.Aris3000
-            WaterTemp = 20.0<degC>
-            Salinity = Salinity.Seawater
-            Depth = 10.0<m>
-            AuxLens = AuxLensType.None
-            LockSampleCount = false
-        }
-
-        let constrained = bunnyHillMapping.ConstrainProjection ctx bh
-
-        Assert.AreNotEqual<BunnyHillProjection>(bh, constrained, "Must show *some* constraint!")
-
-    [<TestMethod>]
     member __.``Change window start`` () =
 
         let initialStart, initialEnd = 3.0<m>, 5.0<m>
@@ -44,9 +27,9 @@ type BunnyHillTests () =
             LockSampleCount = false
         }
 
-        let changed = bunnyHillMapping.ApplyChange systemContext bh change
+        let struct (newProjection, _acousticSettings) = applyBunnyHillChange systemContext bh change
 
-        let actualWindow = changed.DownrangeWindow
+        let actualWindow = newProjection.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
 
     [<TestMethod>]
@@ -67,25 +50,7 @@ type BunnyHillTests () =
             LockSampleCount = false
         }
 
-        let changed = bunnyHillMapping.ApplyChange systemContext bh change
+        let struct (newProjection, _acousticSettings) = applyBunnyHillChange systemContext bh change
 
-        let actualWindow = changed.DownrangeWindow
+        let actualWindow = newProjection.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
-
-    [<TestMethod>]
-    member __.``To settings`` () =
-
-        let bh = { DownrangeWindow = { Start = 1.0<m>; End = 10.0<m> } }
-
-        let systemContext = {
-            SystemType = ArisSystemType.Aris3000
-            WaterTemp = 20.0<degC>
-            Salinity = Salinity.Seawater
-            Depth = 10.0<m>
-            AuxLens = AuxLensType.None
-            LockSampleCount = false
-        }
-
-        let actual = bunnyHillMapping.ToAcquisitionSettings systemContext bh
-
-        Assert.IsNotNull(actual)

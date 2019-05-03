@@ -213,7 +213,7 @@ module internal LegacyAcousticProjectionDetails =
                 ReceiverGain = receiverGain
         }
 
-    let applyChange systemContext projection change : LegacyAcousticProjection =
+    let applyChange systemContext projection change : struct (LegacyAcousticProjection * AcousticSettings) =
 
         let newProjection =
             match change with
@@ -244,7 +244,8 @@ module internal LegacyAcousticProjectionDetails =
             | RequestTranslateWindow downrangeStart -> failwith "nyi"
             | RequestAntialiasing antialiasing -> failwith "nyi"
 
-        newProjection
+
+        struct (newProjection, failwith "nyi")
 
 
     let toSettings systemContext (projection: LegacyAcousticProjection) : AcousticSettings =

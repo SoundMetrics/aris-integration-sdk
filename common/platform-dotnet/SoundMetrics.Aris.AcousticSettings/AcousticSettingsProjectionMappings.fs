@@ -2,22 +2,22 @@
 
 namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
-module AcousticSettingsMappings =
+//module AcousticSettingsMappings =
 
-    open LegacyAcousticProjectionDetails
+//    open LegacyAcousticProjectionDetails
 
-    [<CompiledName("LegacyAcousticProjectionMapping")>]
-    let legacyAcousticProjectionMapping =
+//    [<CompiledName("LegacyAcousticProjectionMapping")>]
+//    let legacyAcousticProjectionMapping =
 
-        {
-            new IProjectionMap<LegacyAcousticProjection,LegacyAcousticProjectionChange> with
+//        {
+//            new IProjectionMap<LegacyAcousticProjection,LegacyAcousticProjectionChange> with
 
-                member __.ConstrainProjection systemContext projection =
-                    constrainProjection systemContext projection
+//                member __.ConstrainProjection systemContext projection =
+//                    constrainProjection systemContext projection
 
-                member __.ApplyChange systemContext projection changeRequest =
-                    applyChange systemContext projection changeRequest
+//                member __.ApplyChange systemContext projection changeRequest =
+//                    applyChange systemContext projection changeRequest
 
-                member __.ToAcquisitionSettings systemContext projection =
-                    toSettings systemContext projection
-        }
+//                member __.ToAcquisitionSettings systemContext projection =
+//                    toSettings systemContext projection
+//        }
