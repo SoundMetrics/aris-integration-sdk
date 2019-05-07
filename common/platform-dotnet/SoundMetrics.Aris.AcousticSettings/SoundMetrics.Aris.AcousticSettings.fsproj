@@ -39,7 +39,6 @@
     <Compile Include="BunnyHillProjection.fs" />
     <Compile Include="LegacyAcousticProjection.fs" />
     <Compile Include="LegacyAcousticProjectionDetails.fs" />
-    <Compile Include="AcousticSettingsProjectionMappings.fs" />
   </ItemGroup>
 
   <ItemGroup>
