@@ -22,8 +22,8 @@ type ProjectionChangeTests () =
 
         let action = Action(fun () ->
             SettingsProjection.mapProjectionToSettings
-                ctx
                 BunnyHill.applyBunnyHillChange
+                ctx
                 bh
                 (ChangeWindowStart 1.0<m>)
             |> ignore

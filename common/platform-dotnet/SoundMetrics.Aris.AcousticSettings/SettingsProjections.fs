@@ -101,22 +101,12 @@ type SystemContext = {
     LockSampleCount: bool
 }
 
-///// Functions related in their effort to affect change, constraint, and conversion
-///// to device settings for a particular projection. 'P is the projection type,
-///// 'C is the change type.
-//type IProjectionMap<'P,'C> =
-//    /// Changes a projection instance; 'C is applied to 'P,
-//    /// producing a new 'P.
-//    abstract member ApplyChange : SystemContext -> 'P -> 'C -> struct ('P * AcousticSettings)
-
-//    /// Constrains settings projection 'P in ways that are specific to 'P.
-//    //abstract member ConstrainProjection : SystemContext -> 'P -> 'P
-
-//    /// Transforms from a projection of settings to actual device settings.
-//    //abstract member ToAcquisitionSettings : SystemContext -> 'P -> AcousticSettings
-
-
+/// Applies a change to a settings projection; the output is a new projection (they're
+/// immutable), and acoustic settings. Implementing a function of this type is the
+/// primary part of implementing a settings projection.
 type ApplyProjectionChangeFn<'P,'C> = SystemContext -> 'P -> 'C -> struct ('P * AcousticSettings)
+
+type ApplyProjectionChangeFunc<'P,'C> = Func<SystemContext,'P,'C,struct ('P * AcousticSettings)>
 
 
 //-----------------------------------------------------------------------------
@@ -190,9 +180,8 @@ module SettingsProjection =
     /// Intent: to provide useful projections of settings that users can
     /// more easily interact with, while also determining necessary device
     /// settings to produce appropriate images.
-    [<CompiledName("MapProjectionToSettings")>]
-    let mapProjectionToSettings<'P,'C> (systemContext: SystemContext)
-                                       (applyChange: ApplyProjectionChangeFn<'P,'C>)
+    let mapProjectionToSettings<'P,'C> (applyChange: ApplyProjectionChangeFn<'P,'C>)
+                                       (systemContext: SystemContext)
                                        (projection: 'P)
                                        (aChange: 'C)
                                        : struct ('P * AcousticSettings * ComputedValues) =
@@ -203,15 +192,20 @@ module SettingsProjection =
 
         struct (newProjection, settings, computedValues)
 
-        //let constrainedProjection =
-        //    pmap.ApplyChange systemContext projection aChange
-        //        |> pmap.ConstrainProjection systemContext
 
-        //let struct (acquisitionSettings, constrainedAS) =
-        //    pmap.ToAcquisitionSettings systemContext constrainedProjection
-        //        |> normalize systemContext
+    /// Applies changes to a settings projection; produces a new projection,
+    /// device settings, and computed values.
+    /// Intent: to provide useful projections of settings that users can
+    /// more easily interact with, while also determining necessary device
+    /// settings to produce appropriate images. This is the C#-friendly projection
+    /// of mapProjectionToSettings<'P,'C>.
+    [<CompiledName("MapProjectionToSettings")>]
+    let mapProjectionToSettingsCSharp<'P,'C> (applyChange: ApplyProjectionChangeFunc<'P,'C>)
+                                             (systemContext: SystemContext)
+                                             (projection: 'P)
+                                             (aChange: 'C)
+                                             : struct ('P * AcousticSettings * ComputedValues) =
 
-        //let computedValues = acquisitionSettings
-        //                        |> getComputedValues systemContext constrainedAS
-
-        //struct (constrainedProjection, acquisitionSettings, computedValues)
+        let applyChange' = fun systemContext projection aChange ->
+                                applyChange.Invoke(systemContext, projection, aChange)
+        mapProjectionToSettings applyChange' systemContext projection aChange
