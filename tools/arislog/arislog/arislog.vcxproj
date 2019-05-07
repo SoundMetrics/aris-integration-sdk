@@ -101,7 +101,15 @@
       <AdditionalLibraryDirectories>../../../submodules/vcpkg/installed/x86-windows-static/debug/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>call .\generate-protobuf-files.cmd</Command>
+      <Command>$(SolutionDir)..\..\submodules\build-tools\binaries\BuildInfo.exe ^
+  --version-file "$(SolutionDir)ver.arislog.txt" ^
+  --output-type ResourceCompiler ^
+  --output-path $(ProjectDir)BuildInfo.h ^
+  --build-number "%BUILD_NUMBER%" ^
+  --thumbprint "%BUILD_VCS_NUMBER%"
+
+call .\generate-protobuf-files.cmd
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,7 +130,15 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PreBuildEvent>
-      <Command>call .\generate-protobuf-files.cmd</Command>
+      <Command>$(SolutionDir)..\..\submodules\build-tools\binaries\BuildInfo.exe ^
+  --version-file "$(SolutionDir)ver.arislog.txt" ^
+  --output-type ResourceCompiler ^
+  --output-path $(ProjectDir)BuildInfo.h ^
+  --build-number "%BUILD_NUMBER%" ^
+  --thumbprint "%BUILD_VCS_NUMBER%"
+
+call .\generate-protobuf-files.cmd
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +162,15 @@
       <AdditionalLibraryDirectories>../../../submodules/vcpkg/installed/x86-windows-static/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>call .\generate-protobuf-files.cmd</Command>
+      <Command>$(SolutionDir)..\..\submodules\build-tools\binaries\BuildInfo.exe ^
+  --version-file "$(SolutionDir)ver.arislog.txt" ^
+  --output-type ResourceCompiler ^
+  --output-path $(ProjectDir)BuildInfo.h ^
+  --build-number "%BUILD_NUMBER%" ^
+  --thumbprint "%BUILD_VCS_NUMBER%"
+
+call .\generate-protobuf-files.cmd
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -171,12 +195,21 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PreBuildEvent>
-      <Command>call .\generate-protobuf-files.cmd</Command>
+      <Command>$(SolutionDir)..\..\submodules\build-tools\binaries\BuildInfo.exe ^
+  --version-file "$(SolutionDir)ver.arislog.txt" ^
+  --output-type ResourceCompiler ^
+  --output-path $(ProjectDir)BuildInfo.h ^
+  --build-number "%BUILD_NUMBER%" ^
+  --thumbprint "%BUILD_VCS_NUMBER%"
+
+call .\generate-protobuf-files.cmd
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AvailabilityListener.h" />
     <ClInclude Include="AvailableSonars.h" />
+    <ClInclude Include="BuildInfo.h" />
     <ClInclude Include="generated\availability.pb.h" />
     <ClInclude Include="generated\commands.pb.h" />
     <ClInclude Include="generated\frame_stream.pb.h" />
