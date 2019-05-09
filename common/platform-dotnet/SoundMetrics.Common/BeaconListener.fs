@@ -301,7 +301,7 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
     /// An observable collection of ARIS Defender beacons.
     member __.ArisDefenderBeacons = arisDefenderCollection
 
-    member internal __.ArisCommandModuleBeacons = arisCommandModuleCollection
+    member __.ArisCommandModuleBeacons = arisCommandModuleCollection
 
     /// Factory function to create a beacon listener that sees only ARIS Explorer
     /// and ARIS Voyager beacons.
