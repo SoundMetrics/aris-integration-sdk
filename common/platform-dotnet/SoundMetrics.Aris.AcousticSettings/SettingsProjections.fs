@@ -98,7 +98,6 @@ type SystemContext = {
     Salinity:       Salinity
     Depth:          float<m>
     AuxLens:        AuxLensType
-    LockSampleCount: bool
 }
 
 /// Applies a change to a settings projection; the output is a new projection (they're

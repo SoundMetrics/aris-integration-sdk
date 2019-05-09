@@ -24,7 +24,6 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            LockSampleCount = false
         }
 
         let struct (newProjection, _acousticSettings) = applyBunnyHillChange systemContext bh change
@@ -47,7 +46,6 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            LockSampleCount = false
         }
 
         let struct (newProjection, _acousticSettings) = applyBunnyHillChange systemContext bh change

@@ -17,7 +17,6 @@ type ProjectionChangeTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            LockSampleCount = false
         }
 
         let action = Action(fun () ->

@@ -13,10 +13,14 @@ type LegacyDetail =
     | AutoSamplePeriod
     | CustomSamplePeriod of int<Us>
 
-type LegacySampleCount = {
-    SampleCount : int
-    IsFixed : bool
-}
+type LegacySampleCount =
+    | SampleCount of int
+    | FixedSampleCount of int
+    with
+        member this.Count =
+            match this with
+            | SampleCount count -> count
+            | FixedSampleCount count -> count
 
 type LegacyTransmit = Off | LowPower | HighPower
 
@@ -49,15 +53,15 @@ with
     override s.ToString () = sprintf "%A" s
 
     static member Invalid = {
-        FrameRate = CustomFrameRate 0.0</s>
-        SampleCount = { SampleCount = 0; IsFixed = true }
-        SampleStartDelay = 0<Us>
-        Detail = CustomSamplePeriod 0<Us>
-        PulseWidth = CustomPulseWidth 0<Us>
-        PingMode = PingMode.InvalidPingMode 0
-        Transmit = Off
-        Frequency = LowFrequency
-        ReceiverGain = -1
+        FrameRate =         CustomFrameRate 0.0</s>
+        SampleCount =       FixedSampleCount 0
+        SampleStartDelay =  0<Us>
+        Detail =            CustomSamplePeriod 0<Us>
+        PulseWidth =        CustomPulseWidth 0<Us>
+        PingMode =          PingMode.InvalidPingMode 0
+        Transmit =          Off
+        Frequency =         LowFrequency
+        ReceiverGain =      -1
         AntialiasingPeriod = -1<Us>
     }
 
@@ -81,4 +85,5 @@ type LegacyAcousticProjectionChange =
 
     /// Translates the window up- or down-range while maintaining window size.
     | RequestTranslateWindow of downrangeStart: float<m>
+
     | RequestAntialiasing of    int<Us>

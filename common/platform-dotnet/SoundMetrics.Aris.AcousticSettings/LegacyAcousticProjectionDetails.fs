@@ -41,8 +41,8 @@ module internal LegacyAcousticProjectionDetails =
 
         (float  (maxCP - projection.SampleStartDelay
                     - projection.AntialiasingPeriod - SonarConfig.CyclePeriodMargin)
-            / float projection.SampleCount.SampleCount)
-        |> Math.Floor //.Floor()
+            / float projection.SampleCount.Count)
+        |> Math.Floor
         |> asMicroseconds
         |> Range.constrainTo SonarConfig.SamplePeriodRange
 
@@ -76,7 +76,7 @@ module internal LegacyAcousticProjectionDetails =
                 calculateMaximumFrameRate systemContext.SystemType
                                           projection.PingMode
                                           projection.SampleStartDelay
-                                          projection.SampleCount.SampleCount
+                                          projection.SampleCount.Count
                                           samplePeriod
                                           projection.AntialiasingPeriod
 
@@ -104,7 +104,7 @@ module internal LegacyAcousticProjectionDetails =
     let applyFrameRate systemContext
                        (projection : LegacyAcousticProjection)
                        (requestedFrameRate : LegacyFrameRate)
-                       : LegacyAcousticProjection =
+                       : struct (LegacyAcousticProjection * AcousticSettings) =
 
         let newFrameRate =
             match requestedFrameRate with
@@ -113,7 +113,8 @@ module internal LegacyAcousticProjectionDetails =
                 let constrainedRate = constrainRequestedFrameRate systemContext projection rate
                 CustomFrameRate constrainedRate
 
-        { projection with FrameRate = newFrameRate }
+        failwith "nyi"
+        //{ projection with FrameRate = newFrameRate }
 
 
     let applySampleCount systemContext
@@ -176,9 +177,11 @@ module internal LegacyAcousticProjectionDetails =
                     ("FrameRate", fps) ||> constrainWithLog SonarConfig.FrameRateRange)
 
         let sampleCount =
-            { projection.SampleCount
-                with SampleCount =
-                        ("SampleCount", projection.SampleCount.SampleCount) ||> constrainWithLog SonarConfig.SampleCountRange }
+            let constrained = ("SampleCount", projection.SampleCount.Count)
+                                ||> constrainWithLog SonarConfig.SampleCountRange
+            match projection.SampleCount with
+            | SampleCount _ -> SampleCount constrained
+            | FixedSampleCount _ -> FixedSampleCount constrained
 
         let sampleStartDelay =
             ("SampleStartDelay", projection.SampleStartDelay) ||> constrainWithLog SonarConfig.SampleStartDelayRange
@@ -213,18 +216,42 @@ module internal LegacyAcousticProjectionDetails =
                 ReceiverGain = receiverGain
         }
 
+    let adjustSampleCountDetail systemContext
+                                { Detail = currentDetail; SampleCount = currentSampleCount }
+                                change
+                                : struct (LegacyAcousticProjection * AcousticSettings) =
+
+        match change with
+        | RequestSampleCount request ->
+            match (request, currentDetail) with
+            | FixedSampleCount sc,  CustomSamplePeriod p -> failwith "nyi"
+            | FixedSampleCount sc,  AutoSamplePeriod ->     failwith "nyi"
+            | SampleCount sc,       CustomSamplePeriod p -> failwith "nyi"
+            | SampleCount sc,       AutoSamplePeriod ->     failwith "nyi"
+
+        | RequestDetail request ->
+            match (request, currentSampleCount) with
+            | CustomSamplePeriod sp,    FixedSampleCount sc ->  failwith "nyi"
+            | CustomSamplePeriod sp,    SampleCount sc ->       failwith "nyi"
+            | AutoSamplePeriod,         FixedSampleCount sc ->  failwith "nyi"
+            | AutoSamplePeriod,         SampleCount sc ->       failwith "nyi"
+
+        | _ -> failwith (sprintf "Unexpected change type: '%s'" (change.GetType().Name))
+
+
     let applyChange systemContext projection change : struct (LegacyAcousticProjection * AcousticSettings) =
 
-        let newProjection =
+        let newProjectionAndSettings =
             match change with
             | RequestFrameRate frameRate -> applyFrameRate systemContext projection frameRate
 
-            | RequestSampleCount sampleCount -> failwith "nyi"
+            | RequestSampleCount _ ->   adjustSampleCountDetail systemContext projection change
+            | RequestDetail _ ->        adjustSampleCountDetail systemContext projection change
+
             | RequestSampleStartDelay ssd -> failwith "nyi"
             | RequestDownrangeStart rangeStart -> failwith "nyi"
             | RequestDownrangeEnd rangeEnd -> failwith "nyi"
 
-            | RequestDetail detail -> failwith "nyi"
             | RequestPulseWidth pulseWidth -> applyPulseWidth systemContext projection pulseWidth
             | RequestPingMode pingMode -> failwith "nyi"
 
@@ -245,7 +272,7 @@ module internal LegacyAcousticProjectionDetails =
             | RequestAntialiasing antialiasing -> failwith "nyi"
 
 
-        struct (newProjection, failwith "nyi")
+        newProjectionAndSettings
 
 
     let toSettings systemContext (projection: LegacyAcousticProjection) : AcousticSettings =
@@ -279,7 +306,7 @@ module internal LegacyAcousticProjectionDetails =
 
         {
             FrameRate           = frameRate
-            SampleCount         = projection.SampleCount.SampleCount
+            SampleCount         = projection.SampleCount.Count
             SampleStartDelay    = projection.SampleStartDelay
             CyclePeriod         = cyclePeriod
             SamplePeriod        = samplePeriod
