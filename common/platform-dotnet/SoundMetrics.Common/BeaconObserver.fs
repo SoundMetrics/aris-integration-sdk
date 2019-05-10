@@ -9,7 +9,7 @@ open System
 open System.Net
 open System.Reactive.Subjects
 
-module internal BeaconObserver =
+module internal BeaconObserverDetails =
 
     let private mkBeaconObserver<'B> (port : int)
                                      (mapPktToBeacon : UdpReceived -> 'B option)
@@ -52,7 +52,7 @@ module internal BeaconObserver =
             NetworkConstants.ArisAvailabilityListenerPortV2
             BeaconListener.toArisCommandModuleBeacon
 
-type BeaconObserver<'B> private (disposer : IDisposable, subject : ISubject<'B>) =
+type BeaconObserver<'B> internal (disposer : IDisposable, subject : ISubject<'B>) =
 
     let mutable disposed = false
 
@@ -67,12 +67,14 @@ type BeaconObserver<'B> private (disposer : IDisposable, subject : ISubject<'B>)
 
     member __.Beacons = subject :> IObservable<'B>
 
+module BeaconObserver =
+
     [<CompiledName("CreateExplorerBeaconObserver")>]
-    static member mkExplorerBeaconObserver () =
+    let mkExplorerBeaconObserver () =
         new BeaconObserver<ArisBeacon>(
-            BeaconObserver.mkExplorerBeaconObserver())
+            BeaconObserverDetails.mkExplorerBeaconObserver())
 
     [<CompiledName("CreateCommandModuleBeaconObserver")>]
-    static member mkCommandModuleBeaconObserver () =
+    let mkCommandModuleBeaconObserver () =
         new BeaconObserver<ArisCommandModuleBeacon>(
-            BeaconObserver.mkCommandModuleBeaconObserver())
+            BeaconObserverDetails.mkCommandModuleBeaconObserver())
