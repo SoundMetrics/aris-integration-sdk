@@ -32,6 +32,7 @@
     <Compile Include="Devices.fs" />
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="BeaconListener.fs" />
+    <Compile Include="BeaconObserver.fs" />
     <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
 

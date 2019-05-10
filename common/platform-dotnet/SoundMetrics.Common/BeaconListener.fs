@@ -1,4 +1,4 @@
-﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
 namespace SoundMetrics.Common
 
@@ -322,6 +322,14 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
                              | Defender _ -> true
                              | _ -> false
             | _ -> false
+        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+
+    static member CreateForCommandModules (expirationPeriod : TimeSpan) =
+
+        let predicate = function
+            | ArisCommandModule beacon -> true
+            | _ -> false
+
         new BeaconListener(expirationPeriod, Func<_,_>(predicate))
 
 
