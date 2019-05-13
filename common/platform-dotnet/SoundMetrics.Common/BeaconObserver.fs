@@ -2,8 +2,6 @@
 
 namespace SoundMetrics.Common
 
-open ArisBeaconDetails
-open ArisCommandModuleDetails
 open SoundMetrics.Network
 open System
 open System.Net
