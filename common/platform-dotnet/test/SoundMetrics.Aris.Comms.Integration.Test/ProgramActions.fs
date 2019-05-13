@@ -8,8 +8,6 @@ open Serilog
 open TestInputs
 open TestList
 
-open SoundMetrics.Common.ArisBeaconDetails
-
 type ProgramActionResult = Skipped | Performed
 type ProgramAction = ParseResults<ProgramArgs> -> ProgramActionResult
 

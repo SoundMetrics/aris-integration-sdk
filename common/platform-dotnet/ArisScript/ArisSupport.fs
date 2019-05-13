@@ -1,7 +1,6 @@
 ﻿module ArisSupport
 
 open SoundMetrics.Common
-open SoundMetrics.Common.ArisBeaconDetails
 open System
 open System.Threading
 open System.Windows.Threading
