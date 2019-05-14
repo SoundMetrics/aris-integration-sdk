@@ -8,6 +8,8 @@ open System
 
 module internal BeaconListener =
     open System.Collections.ObjectModel
+    open Serilog
+    open Serilog.Events
 
     type SonarAvailability  = Aris.Availability
     type DefenderAvailability = Defender.Availability
@@ -90,8 +92,9 @@ module internal BeaconListener =
                     Revision =      cms.Revision
                     Timestamp =     pkt.Timestamp
                 }
-            Diagnostics.Trace.WriteLine(sprintf "### cm beacon=%A" beacon);
 
+            if Log.IsEnabled(LogEventLevel.Verbose) then
+                Log.Verbose("{cmBeacon}", sprintf "%A" beacon)
             Some beacon
         with
             _ -> None
