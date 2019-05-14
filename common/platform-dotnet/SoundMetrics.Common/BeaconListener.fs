@@ -94,7 +94,7 @@ module internal BeaconListener =
                 }
 
             if Log.IsEnabled(LogEventLevel.Verbose) then
-                Log.Verbose("{cmBeacon}", sprintf "%A" beacon)
+                Log.Verbose("CM Beacon: {cmBeacon}", sprintf "%A" beacon)
             Some beacon
         with
             _ -> None
