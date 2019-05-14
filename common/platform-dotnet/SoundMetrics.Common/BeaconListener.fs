@@ -80,15 +80,19 @@ module internal BeaconListener =
 
         try
             let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(pkt.UdpResult.Buffer)
-            Some {
-                IPAddress = pkt.UdpResult.RemoteEndPoint.Address
-                ArisCurrent =   cms.ArisCurrent
-                ArisPower =     cms.ArisPower
-                ArisVoltage =   cms.ArisVoltage
-                CpuTemp =       cms.CpuTemp
-                Revision =      cms.Revision
-                Timestamp =     pkt.Timestamp
-            }
+            let beacon =
+                {
+                    IPAddress = pkt.UdpResult.RemoteEndPoint.Address
+                    ArisCurrent =   cms.ArisCurrent
+                    ArisPower =     cms.ArisPower
+                    ArisVoltage =   cms.ArisVoltage
+                    CpuTemp =       cms.CpuTemp
+                    Revision =      cms.Revision
+                    Timestamp =     pkt.Timestamp
+                }
+            Diagnostics.Trace.WriteLine(sprintf "### cm beacon=%A" beacon);
+
+            Some beacon
         with
             _ -> None
 
