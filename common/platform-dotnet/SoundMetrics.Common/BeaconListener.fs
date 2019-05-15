@@ -96,13 +96,6 @@ module internal BeaconListener =
             if Log.IsEnabled(LogEventLevel.Verbose) then
                 Log.Verbose("CM Beacon, length of {length}: {cmBeacon}",
                     pkt.UdpResult.Buffer.Length, sprintf "%A" beacon)
-                let bytes =
-                    let ss =
-                        pkt.UdpResult.Buffer
-                        |> Seq.map (fun b -> sprintf "0x%X" b)
-                    String.Join(", ", ss)
-
-                Log.Verbose("bytes: {bytes}", bytes)
             Some beacon
         with
             _ -> None
