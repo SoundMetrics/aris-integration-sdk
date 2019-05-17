@@ -47,7 +47,7 @@ module internal BeaconObserverDetails =
     let mkCommandModuleBeaconObserver () : IDisposable * ISubject<ArisCommandModuleBeacon> =
 
         mkBeaconObserver<ArisCommandModuleBeacon>
-            NetworkConstants.ArisAvailabilityListenerPortV2
+            NetworkConstants.ArisCommandModuleBeaconPort
             BeaconListener.toArisCommandModuleBeacon
 
 type BeaconObserver<'B> internal (disposer : IDisposable, subject : ISubject<'B>) =
