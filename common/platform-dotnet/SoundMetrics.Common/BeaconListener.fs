@@ -85,6 +85,7 @@ module internal BeaconListener =
             let beacon =
                 {
                     IPAddress = pkt.UdpResult.RemoteEndPoint.Address
+                    SonarSerialNumber = cms.SonarSerialNumber |> Seq.toArray
                     ArisCurrent =   cms.ArisCurrent
                     ArisPower =     cms.ArisPower
                     ArisVoltage =   cms.ArisVoltage
