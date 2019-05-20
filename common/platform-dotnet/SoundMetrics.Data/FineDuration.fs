@@ -47,7 +47,18 @@ type FineDuration private (microseconds : float) =
     // op_LessThanOrEqual for interop with other CLI languages.
     static member op_LessThanOrEqual(a : FineDuration, b : FineDuration) = a <= b
 
+    /// Returns the minimum of two values. C# implements Math.Min/Max as overloads
+    /// rather than a comparable generic (dates to .NET 1.1, so before generics).
+    /// F# implements min/max as comparable generics.
+    /// (Extension methods have instance-method semantics, so aren't viable for
+    /// extending Math.Min/Max.
     static member Min(a : FineDuration, b : FineDuration) =
         if a < b then a else b
+
+    /// Returns the maximum of two values. C# implements Math.Min/Max as overloads
+    /// rather than a comparable generic (dates to .NET 1.1, so before generics).
+    /// F# implements min/max as comparable generics.
+    /// (Extension methods have instance-method semantics, so aren't viable for
+    /// extending Math.Min/Max.
     static member Max(a : FineDuration, b : FineDuration) =
         if a > b then a else b

@@ -17,15 +17,14 @@ type ProjectionChangeTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
         let action = Action(fun () ->
             SettingsProjection.mapProjectionToSettings
-                BunnyHill.bunnyHillProjection
-                bh
-                [ ChangeWindowStart 1.0<m>]
+                BunnyHill.applyBunnyHillChange
                 ctx
+                bh
+                (ChangeWindowStart 1.0<m>)
             |> ignore
         )
         let ex = Assert.ThrowsException<ArgumentException>(action)

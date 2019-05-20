@@ -42,20 +42,31 @@ module SonarConfig =
 
     // Min/max values per ARIS Engineering Test Command List
 
-    let SampleCountRange =      range "SampleCount"          128          4096
-    let FocusPositionRange =    range "FocusPosition"          0          1000
-    let ReceiverGainRange =     range "ReceiverGain"           0            24
-    let FrameRateRange =        range "FrameRate"            1.0</s>      15.0</s>
+    let SampleCountRange =      range  200          4000
+    let FocusPositionRange =    range    0<vfu>     1000<vfu>
+    let ReceiverGainRange =     range    0            24
+    let FrameRateRange =        range  1.0</s>      15.0</s>
 
-    let SampleStartDelayRange = range "SampleStartDelay"     930<Us>     60000<Us>
-    let CyclePeriodRange =      range "CyclePeriod"         1802<Us>    150000<Us>
-    let SamplePeriodRange =     range "SamplePeriod"           4<Us>       100<Us>
-    let PulseWidthRange =       range "PulseWidth"             4<Us>        80<Us>
+    let SampleStartDelayRange = range  930<Us>     60000<Us>
+    let CyclePeriodRange =      range 1802<Us>    150000<Us>
+    let SamplePeriodRange =     range    4<Us>       100<Us>
+    let PulseWidthRange =       range    4<Us>        80<Us>
 
-    let WindowStartRange =      range "WindowStart"          0.7<m>       40.0<m>
-    let WindowEndRange =        range "WindowEnd"            1.3<m>      100.0<m>
+    let WindowStartRange =      range  0.7<m>       40.0<m>
+    let WindowEndRange =        range  1.3<m>      100.0<m>
 
     let CyclePeriodMargin = 360<Us>
+    let MinAntialiasing =   0<Us>
+
+    type ExpectedMinAndMaxRange = {
+        MinExpectedRange:   float<m>
+        MaxUsableRange:     float<m>
+    }
+
+    type UsableRange = {
+        ExpectedMinAndMaxRange: Map<Frequency,ExpectedMinAndMaxRange>
+        LFCrossoverRange:       float<m>
+    }
 
     type SystemTypeRanges = {
         SystemType:             ArisSystemType
@@ -65,7 +76,10 @@ module SonarConfig =
         CyclePeriodRange:       Range<int<Us>>
         WindowStartRange:       Range<float<m>>
         WindowEndRange:         Range<float<m>>
+        UsableRange:            UsableRange
     }
+    with
+        member this.MaxRange = this.WindowEndRange.Max
 
     [<CompiledName("SystemTypeRangeMap")>]
     let systemTypeRangeMap =
@@ -76,6 +90,14 @@ module SonarConfig =
             CyclePeriodRange =      constrainRangeMax CyclePeriodRange      80000<Us>
             WindowStartRange =      constrainRangeMax WindowStartRange       25.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange         50.0<m>
+            UsableRange = {
+                ExpectedMinAndMaxRange =
+                    [
+                        Frequency.High, { MinExpectedRange =  5.0<m>; MaxUsableRange = 20.<m> }
+                        Frequency.Low,  { MinExpectedRange = 20.0<m>; MaxUsableRange = 50.<m> }
+                    ] |> Map.ofList
+                LFCrossoverRange = 15.0<m>
+            }
           }
           { SystemType =            ArisSystemType.Aris3000
             PulseWidthRange =       constrainRangeMax PulseWidthRange          24<Us>
@@ -84,6 +106,14 @@ module SonarConfig =
             CyclePeriodRange =      constrainRangeMax CyclePeriodRange      40000<Us>
             WindowStartRange =      constrainRangeMax WindowStartRange       12.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange         20.0<m>
+            UsableRange = {
+                ExpectedMinAndMaxRange =
+                    [
+                        Frequency.High, { MinExpectedRange = 1.0<m>; MaxUsableRange =  8.<m> }
+                        Frequency.Low,  { MinExpectedRange = 8.0<m>; MaxUsableRange = 20.<m> }
+                    ] |> Map.ofList
+                LFCrossoverRange = 5.0<m>
+            }
           }
           { SystemType =            ArisSystemType.Aris1200
             PulseWidthRange =       constrainRangeMax PulseWidthRange          80<Us>
@@ -92,6 +122,14 @@ module SonarConfig =
             CyclePeriodRange =      constrainRangeMax CyclePeriodRange     150000<Us>
             WindowStartRange =      constrainRangeMax WindowStartRange       40.0<m>
             WindowEndRange =        constrainRangeMax WindowEndRange        100.0<m>
+            UsableRange = {
+                ExpectedMinAndMaxRange =
+                    [
+                        Frequency.High, { MinExpectedRange = 10.0<m>; MaxUsableRange =  30.<m> }
+                        Frequency.Low,  { MinExpectedRange = 30.0<m>; MaxUsableRange = 100.<m> }
+                    ] |> Map.ofList
+                LFCrossoverRange = 25.0<m>
+            }
           } ]
         |> List.map (fun elem -> elem.SystemType, elem)
         |> Map.ofList

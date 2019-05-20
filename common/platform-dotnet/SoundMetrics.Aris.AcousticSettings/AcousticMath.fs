@@ -5,7 +5,9 @@ namespace SoundMetrics.Aris.AcousticSettings
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open Serilog
 open SonarConfig
+open SoundMetrics.Data
 open SoundMetrics.Data.Range
+open System
 
 type AcousticSettingsRaw = {
     FrameRate:          FrameRate
@@ -202,6 +204,99 @@ module AcousticMath =
         let cycleTimeUsec = (1.0<Us> * (float cyclePeriod) + cyclePeriodFactor) * float pingsPerFrame
         let rate = min (SonarConfig.FrameRateRange.Max) ((1000000.0<Us> / cycleTimeUsec) * 1.0</s>)
         rate
+
+
+    [<CompiledName("CalculateSampleStartDelayRange")>]
+    let calculateSampleStartDelayRange systemType
+                                  (sampleCount : int)
+                                  (samplePeriod : int<Us>)
+                                  (antialiasing : int<Us>)
+                                  : Range<int<Us>> =
+
+        let ranges = SonarConfig.systemTypeRangeMap.[systemType]
+
+        let minSSD = ranges.SampleStartDelayRange.Min
+        let maxSSD =
+            let maxCP = ranges.CyclePeriodRange.Max
+            maxCP - (sampleCount * samplePeriod + antialiasing + SonarConfig.CyclePeriodMargin)
+                |> constrainTo ranges.SampleStartDelayRange
+
+        range minSSD maxSSD
+
+    [<CompiledName("CalculateSamplePeriodRange")>]
+    let calculateSamplePeriodRange systemType
+                                   (sampleCount : int)
+                                   (sampleStartDelay : int<Us>)
+                                   (antialiasing : int<Us>)
+                                   : Range<int<Us>> =
+
+        let ranges = SonarConfig.systemTypeRangeMap.[systemType]
+
+        let minSP = ranges.SamplePeriodRange.Min
+        let maxSP =
+            let maxCP = ranges.CyclePeriodRange.Max
+
+            let x =
+                (float (maxCP - sampleStartDelay - antialiasing - SonarConfig.CyclePeriodMargin) / float sampleCount)
+            (int (x |> Math.Floor)) * 1<Us>
+                |> Range.constrainTo ranges.SamplePeriodRange
+
+        range minSP maxSP
+
+    [<CompiledName("CalculateSampleCountRange")>]
+    let calculateSampleCountRange systemType
+                                  (samplePeriod : int<Us>)
+                                  (sampleStartDelay : int<Us>)
+                                  (antialiasing : int<Us>)
+                                  : Range<int> =
+
+        let ranges = SonarConfig.systemTypeRangeMap.[systemType]
+
+        let minSC = SonarConfig.SampleCountRange.Min
+        let maxSC =
+            let maxCP = ranges.CyclePeriodRange.Max
+            (float (maxCP - sampleStartDelay - antialiasing - SonarConfig.CyclePeriodMargin) / float samplePeriod)
+                |> Math.Floor |> int
+
+        range minSC maxSC
+
+    [<CompiledName("CalculateAntialiasingRange")>]
+    let calculateAntialiasingRange systemType
+                                   (sampleCount : int)
+                                   (samplePeriod : int<Us>)
+                                   (sampleStartDelay : int<Us>)
+                                   : Range<int<Us>> =
+
+        let ranges = SonarConfig.systemTypeRangeMap.[systemType]
+
+        let minAA = SonarConfig.MinAntialiasing
+        let maxAA =
+            let maxCP = ranges.CyclePeriodRange.Max
+
+            let cyclePeriodWithoutAntialiasing =
+                calculateCyclePeriod systemType
+                                     sampleStartDelay
+                                     sampleCount
+                                     samplePeriod
+                                     SonarConfig.MinAntialiasing
+            maxCP - cyclePeriodWithoutAntialiasing
+                |> Range.constrainTo ranges.CyclePeriodRange
+
+        range minAA maxAA
+
+    [<CompiledName("FindAntialiasing")>]
+    let FindAntialiasing (sampleCount : int)
+                         (cyclePeriod : int<Us>)
+                         (sampleStartDelay : int<Us>)
+                         (samplePeriod : int<Us>)
+                         : int<Us> =
+
+        let value =
+            (cyclePeriod
+                - (sampleStartDelay
+                    + (sampleCount * samplePeriod)
+                    + SonarConfig.CyclePeriodMargin))
+        max value SonarConfig.MinAntialiasing
 
     [<CompiledName("ConstrainAcousticSettings")>]
     let constrainAcousticSettings systemType

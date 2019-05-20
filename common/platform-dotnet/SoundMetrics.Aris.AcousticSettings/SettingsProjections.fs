@@ -19,17 +19,18 @@ type FrameRate = SoundMetrics.Aris.AcousticSettings.FrameRate
 /// These are the settings we send to the sonar to instruct it to form images.
 /// TShis F# record has structural equality and comparison built-in.
 type AcousticSettings = {
-    FrameRate: FrameRate
-    SampleCount: int
-    SampleStartDelay: int<Us>
-    CyclePeriod: int<Us>
-    SamplePeriod: int<Us>
-    PulseWidth: int<Us>
-    PingMode: PingMode
-    EnableTransmit: bool
-    Frequency: Frequency
-    Enable150Volts: bool
-    ReceiverGain: int }
+    FrameRate :         FrameRate
+    SampleCount :       int
+    SampleStartDelay :  int<Us>
+    CyclePeriod :       int<Us>
+    SamplePeriod :      int<Us>
+    PulseWidth :        int<Us>
+    PingMode :          PingMode
+    EnableTransmit :    bool
+    Frequency :         Frequency
+    Enable150Volts :    bool
+    ReceiverGain :      int
+    AntialiasingPeriod: int<Us>}
 with
     override s.ToString () = sprintf "%A" s
 
@@ -51,7 +52,8 @@ with
         EnableTransmit = false
         Frequency = Frequency.Low
         Enable150Volts = false
-        ReceiverGain = 0
+        ReceiverGain = -1
+        AntialiasingPeriod = -1<Us>
     }
 
     static member diff left right =
@@ -80,40 +82,30 @@ with
             |> List.rev
 
         match differences with
-        | [] -> ValueNone
-        | ds -> ValueSome (System.String.Join("; ", ds))
+        | [] -> None
+        | ds -> Some (System.String.Join("; ", ds))
 
     static member Diff(left, right) =
-        match AcousticSettings.diff left right with
-        | ValueSome s -> s
-        | ValueNone -> ""
+        AcousticSettings.diff left right |> Option.defaultValue ""
 
 /// Supported lens types.
 type AuxLensType = None | Telephoto
 
 /// The context in which the system is operating.
 type SystemContext = {
-    SystemType: ArisSystemType
-    WaterTemp:  float<degC>
-    Salinity:   Salinity
-    Depth:      float<m>
-    AuxLens:    AuxLensType
-    AntialiasingPeriod: int<Us>
+    SystemType:     ArisSystemType
+    WaterTemp:      float<degC>
+    Salinity:       Salinity
+    Depth:          float<m>
+    AuxLens:        AuxLensType
 }
 
-/// Functions related in their effort to affect change, constraint, and conversion
-/// to device settings for a particular projection. 'P is the projection type,
-/// 'C is the change type.
-type IProjectionMap<'P,'C> =
-    /// Changes a projection instance; 'C is applied to 'P,
-    /// producing a new 'P.
-    abstract member Change : 'P -> SystemContext -> 'C -> 'P
+/// Applies a change to a settings projection; the output is a new projection (they're
+/// immutable), and acoustic settings. Implementing a function of this type is the
+/// primary part of implementing a settings projection.
+type ApplyProjectionChangeFn<'P,'C> = SystemContext -> 'P -> 'C -> struct ('P * AcousticSettings)
 
-    /// Constrains settings projection 'P in ways that are specific to 'P.
-    abstract member Constrain : 'P -> SystemContext -> 'P
-
-    /// Transforms from a projection of settings to actual device settings.
-    abstract member ToAcquisitionSettings : 'P -> SystemContext -> AcousticSettings
+type ApplyProjectionChangeFunc<'P,'C> = Func<SystemContext,'P,'C,struct ('P * AcousticSettings)>
 
 
 //-----------------------------------------------------------------------------
@@ -133,18 +125,17 @@ module internal AcquisitionSettingsNormalization =
 
     /// Transforms to device settings that conform to guidelines for safely
     /// and successfully producing images.
-    let normalize systemType
-                  antialiasingPeriod
+    let normalize systemContext
                   (settings: AcousticSettings)
                   : struct (AcousticSettings * bool) =
 
         let maximumFrameRate =
-            calculateMaximumFrameRate systemType
+            calculateMaximumFrameRate systemContext.SystemType
                                       settings.PingMode
                                       settings.SampleStartDelay
                                       settings.SampleCount
                                       settings.SamplePeriod
-                                      antialiasingPeriod
+                                      settings.AntialiasingPeriod
         let adjustedFrameRate = min settings.FrameRate maximumFrameRate
 
         let isConstrained = settings.FrameRate <> adjustedFrameRate
@@ -157,27 +148,27 @@ module SettingsProjection =
 
     let private getComputedValues (systemContext: SystemContext)
                                   constrainedAS
-                                  (acquisitionSettings: AcousticSettings)
+                                  (settings: AcousticSettings)
                                   : ComputedValues =
 
         let sspd = calculateSpeedOfSound systemContext.WaterTemp
                                          systemContext.Depth
                                          systemContext.Salinity
-        let window = calculateWindowAtSspd acquisitionSettings.SampleStartDelay
-                                           acquisitionSettings.SamplePeriod
-                                           acquisitionSettings.SampleCount
+        let window = calculateWindowAtSspd settings.SampleStartDelay
+                                           settings.SamplePeriod
+                                           settings.SampleCount
                                            sspd
         {
-            Resolution = mToMm (window.Length / float acquisitionSettings.SampleCount)
+            Resolution = mToMm (window.Length / float settings.SampleCount)
             AutoFocusRange = window.MidPoint
             SoundSpeed = sspd
             MaxFrameRate =
                 calculateMaximumFrameRate systemContext.SystemType
-                                          acquisitionSettings.PingMode
-                                          acquisitionSettings.SampleStartDelay
-                                          acquisitionSettings.SampleCount
-                                          acquisitionSettings.SamplePeriod
-                                          systemContext.AntialiasingPeriod
+                                          settings.PingMode
+                                          settings.SampleStartDelay
+                                          settings.SampleCount
+                                          settings.SamplePeriod
+                                          settings.AntialiasingPeriod
 
             ActualDownrangeWindow = window
             ConstrainedAcquisitionSettings = constrainedAS
@@ -188,27 +179,32 @@ module SettingsProjection =
     /// Intent: to provide useful projections of settings that users can
     /// more easily interact with, while also determining necessary device
     /// settings to produce appropriate images.
-    [<CompiledName("MapProjectionToSettings")>]
-    let mapProjectionToSettings<'P,'C> (pmap: IProjectionMap<'P,'C>)
-                                       (projection: 'P)
-                                       (changes: 'C seq)
+    let mapProjectionToSettings<'P,'C> (applyChange: ApplyProjectionChangeFn<'P,'C>)
                                        (systemContext: SystemContext)
+                                       (projection: 'P)
+                                       (aChange: 'C)
                                        : struct ('P * AcousticSettings * ComputedValues) =
 
-        // Unwrap the Funcs so we can fold, etc. (Func<> is used for ease of interop with C#.)
-        let change projection change =
-            pmap.Change projection systemContext change
-        let constrain systemContext projection =
-            pmap.Constrain projection systemContext
-        let toAcquisitionSettings projection ctx : AcousticSettings =
-            pmap.ToAcquisitionSettings projection ctx
+        let struct (newProjection, acousticSettings) = applyChange systemContext projection aChange
+        let struct (settings, constrainedAS) = acousticSettings |> normalize systemContext
+        let computedValues = acousticSettings |> getComputedValues systemContext constrainedAS
 
-        let constrainedProjection =
-            let projectionWithChanges = changes |> Seq.fold change projection
-            projectionWithChanges |> constrain systemContext
-        let struct (acquisitionSettings, constrainedAS) =
-            toAcquisitionSettings constrainedProjection systemContext
-                |> normalize systemContext.SystemType systemContext.AntialiasingPeriod
-        let computedValues = acquisitionSettings
-                                |> getComputedValues systemContext constrainedAS
-        struct (constrainedProjection, acquisitionSettings, computedValues)
+        struct (newProjection, settings, computedValues)
+
+
+    /// Applies changes to a settings projection; produces a new projection,
+    /// device settings, and computed values.
+    /// Intent: to provide useful projections of settings that users can
+    /// more easily interact with, while also determining necessary device
+    /// settings to produce appropriate images. This is the C#-friendly projection
+    /// of mapProjectionToSettings<'P,'C>.
+    [<CompiledName("MapProjectionToSettings")>]
+    let mapProjectionToSettingsCSharp<'P,'C> (applyChange: ApplyProjectionChangeFunc<'P,'C>)
+                                             (systemContext: SystemContext)
+                                             (projection: 'P)
+                                             (aChange: 'C)
+                                             : struct ('P * AcousticSettings * ComputedValues) =
+
+        let applyChange' = fun systemContext projection aChange ->
+                                applyChange.Invoke(systemContext, projection, aChange)
+        mapProjectionToSettings applyChange' systemContext projection aChange

@@ -11,23 +11,6 @@ open BunnyHill
 type BunnyHillTests () =
 
     [<TestMethod>]
-    member __.``Show constraint from float32 MIN/MAX`` () =
-        let bh = {
-            DownrangeWindow = { Start = 3.0<m>; End = Double.MaxValue * 1.0<m> } }
-        let ctx = {
-            SystemType = ArisSystemType.Aris3000
-            WaterTemp = 20.0<degC>
-            Salinity = Salinity.Seawater
-            Depth = 10.0<m>
-            AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
-        }
-
-        let constrained = bunnyHillProjection.Constrain bh ctx
-
-        Assert.AreNotEqual<BunnyHillSettings>(bh, constrained, "Must show *some* constraint!")
-
-    [<TestMethod>]
     member __.``Change window start`` () =
 
         let initialStart, initialEnd = 3.0<m>, 5.0<m>
@@ -41,12 +24,11 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
-        let changed = bunnyHillProjection.Change bh systemContext change
+        let struct (newProjection, _acousticSettings) = applyBunnyHillChange systemContext bh change
 
-        let actualWindow = changed.DownrangeWindow
+        let actualWindow = newProjection.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
 
     [<TestMethod>]
@@ -64,28 +46,9 @@ type BunnyHillTests () =
             Salinity = Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
         }
 
-        let changed = bunnyHillProjection.Change bh systemContext change
+        let struct (newProjection, _acousticSettings) = applyBunnyHillChange systemContext bh change
 
-        let actualWindow = changed.DownrangeWindow
+        let actualWindow = newProjection.DownrangeWindow
         Assert.AreEqual<DownrangeWindow>(expectedWindow, actualWindow)
-
-    [<TestMethod>]
-    member __.``To settings`` () =
-
-        let bh = { DownrangeWindow = { Start = 1.0<m>; End = 10.0<m> } }
-
-        let systemContext = {
-            SystemType = ArisSystemType.Aris3000
-            WaterTemp = 20.0<degC>
-            Salinity = Salinity.Seawater
-            Depth = 10.0<m>
-            AuxLens = AuxLensType.None
-            AntialiasingPeriod = 0<Us>
-        }
-
-        let actual = bunnyHillProjection.ToAcquisitionSettings bh systemContext
-
-        Assert.IsNotNull(actual)

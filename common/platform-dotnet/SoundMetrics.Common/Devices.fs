@@ -71,8 +71,6 @@ type ArisBeacon = {
 
 type ArisCommandModuleBeacon = {
     IPAddress :     IPAddress
-
-    SonarSerialNumber : uint32 array
     ArisCurrent :   float32
     ArisPower :     float32
     ArisVoltage :   float32
