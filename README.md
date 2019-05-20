@@ -87,4 +87,4 @@ Whether it's a big or small bug, please read the
 Please read the [Contributions Guideline](CONTRIBUTING.md) for help on requesting a feature.
 
 ### Version Numbers
-The stated version number of this SDK does not track with Sound Metrics' other software applications' minor version numbers.
+The stated version number of this SDK does not track with Sound Metrics' other software applications' version numbers.
