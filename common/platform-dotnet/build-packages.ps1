@@ -34,7 +34,15 @@ $version_with_build_number = $split_version + "." + $build_number
 
 $output_directory = ".\built-nuget-packages"
 '$output_directory=' + $output_directory
-[System.IO.Directory]::CreateDirectory($output_directory)
+if (-not (Test-Path $output_directory)) { mkdir $output_directory }
+
+$symbol_directory = $output_directory + "\symbols"
+'$symbol_directory=' + $symbol_directory
+if (-not (Test-Path $symbol_directory)) { mkdir $symbol_directory }
+
+rm $output_directory\*.nupkg
+rm $output_directory\*.snupkg
+rm $output_directory\symbols\*.pdb
 
 $dotnetStandardAssemblies = @(
     "SoundMetrics.Aris.AcousticSettings"
@@ -50,7 +58,7 @@ $dotnetStandardAssemblies = @(
     "SoundMetrics.Scripting"
 )
 
-'$assemblies: ' + $assemblies
+'$dotnetStandardAssemblies: ' + $dotnetStandardAssemblies
 
 Foreach ($el in $dotnetStandardAssemblies) {
     ''
@@ -84,6 +92,16 @@ Foreach ($el in $dotnetStandardAssemblies) {
                 /p:Version=$split_version `
                 /p:PackageVersion=$package_version `
                 $el
+
+    # Ship off the symbols with the package
+    $pdb_name = $el + ".pdb"
+    $pdb_src = $el + "\bin\Release\netstandard2.0\" + $pdb_name
+    $pdb_dest = $symbol_directory + "\" + $pdb_name
+
+    '$pdb_src: ' + $pdb_src
+    '$pdb_dest: ' + $pdb_dest
+
+    cp $pdb_src $pdb_dest
 }
 
 # .NET Desktop assemblies
@@ -101,5 +119,8 @@ Foreach ($el in $dotnetStandardAssemblies) {
                         -OutputDirectory $output_directory `
                         .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
 
+cp .\SoundMetrics.Scripting.Desktop\bin\Release\SoundMetrics.Scripting.Desktop.pdb $symbol_directory\SoundMetrics.Scripting.Desktop.pdb
+
 cp push-packages.cmd $output_directory
 ls $output_directory
+ls $symbol_directory

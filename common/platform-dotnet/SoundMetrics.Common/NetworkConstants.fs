@@ -10,8 +10,6 @@ module internal NetworkConstants =
     [<Literal>]
     let ArisAvailabilityListenerPortV2 = 56124 // version 2 software
     [<Literal>]
-    let ArisCommandModuleCommandPort = 56125
-    [<Literal>]
     let ArisCommandModuleBeaconPort = 56126
     [<Literal>]
     let ArisDefenderBeaconPort = 56127

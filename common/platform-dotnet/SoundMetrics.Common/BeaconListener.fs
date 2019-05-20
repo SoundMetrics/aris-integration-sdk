@@ -1,14 +1,15 @@
-﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
 namespace SoundMetrics.Common
 
 open ArisBeaconDetails
-open ArisCommandModuleDetails
 open SoundMetrics.Network
 open System
 
 module internal BeaconListener =
     open System.Collections.ObjectModel
+    open Serilog
+    open Serilog.Events
 
     type SonarAvailability  = Aris.Availability
     type DefenderAvailability = Defender.Availability
@@ -81,15 +82,22 @@ module internal BeaconListener =
 
         try
             let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(pkt.UdpResult.Buffer)
-            Some {
-                IPAddress = pkt.UdpResult.RemoteEndPoint.Address
-                ArisCurrent =   cms.ArisCurrent
-                ArisPower =     cms.ArisPower
-                ArisVoltage =   cms.ArisVoltage
-                CpuTemp =       cms.CpuTemp
-                Revision =      cms.Revision
-                Timestamp =     pkt.Timestamp
-            }
+            let beacon =
+                {
+                    IPAddress = pkt.UdpResult.RemoteEndPoint.Address
+                    SonarSerialNumber = cms.SonarSerialNumber |> Seq.toArray
+                    ArisCurrent =   cms.ArisCurrent
+                    ArisPower =     cms.ArisPower
+                    ArisVoltage =   cms.ArisVoltage
+                    CpuTemp =       cms.CpuTemp
+                    Revision =      cms.Revision
+                    Timestamp =     pkt.Timestamp
+                }
+
+            if Log.IsEnabled(LogEventLevel.Verbose) then
+                Log.Verbose("CM Beacon, length of {length}: {cmBeacon}",
+                    pkt.UdpResult.Buffer.Length, sprintf "%A" beacon)
+            Some beacon
         with
             _ -> None
 
@@ -301,7 +309,7 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
     /// An observable collection of ARIS Defender beacons.
     member __.ArisDefenderBeacons = arisDefenderCollection
 
-    member internal __.ArisCommandModuleBeacons = arisCommandModuleCollection
+    member __.ArisCommandModuleBeacons = arisCommandModuleCollection
 
     /// Factory function to create a beacon listener that sees only ARIS Explorer
     /// and ARIS Voyager beacons.
@@ -322,6 +330,14 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
                              | Defender _ -> true
                              | _ -> false
             | _ -> false
+        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+
+    static member CreateForCommandModules (expirationPeriod : TimeSpan) =
+
+        let predicate = function
+            | ArisCommandModule beacon -> true
+            | _ -> false
+
         new BeaconListener(expirationPeriod, Func<_,_>(predicate))
 
 
