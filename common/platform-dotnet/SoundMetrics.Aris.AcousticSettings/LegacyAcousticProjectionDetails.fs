@@ -255,13 +255,13 @@ module internal LegacyAcousticProjectionDetails =
             | RequestPulseWidth pulseWidth -> applyPulseWidth systemContext projection pulseWidth
             | RequestPingMode pingMode -> failwith "nyi"
 
-            | RequestTransmit transmit -> { projection with Transmit = transmit }
+            | RequestTransmit transmit -> failwith "nyi" // { projection with Transmit = transmit }
 
-            | RequestFrequency frequency -> applyFrequency systemContext projection frequency
+            | RequestFrequency frequency -> failwith "nyi" // applyFrequency systemContext projection frequency
 
-            | RequestReceiverGain gain -> { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
+            | RequestReceiverGain gain -> failwith "nyi" // { projection with ReceiverGain = gain |> Range.constrainTo SonarConfig.ReceiverGainRange }
 
-            | RequestNewProjection newProjection -> newProjection
+            | RequestNewProjection newProjection -> failwith "nyi" // newProjection
 
             // Higher-level actions
 

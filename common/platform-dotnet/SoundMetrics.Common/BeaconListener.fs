@@ -82,6 +82,8 @@ module internal BeaconListener =
 
         try
             let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(pkt.UdpResult.Buffer)
+            Log.Information("### cms.SonarSerialNumber={sn}",
+                String.Join(", ", cms.SonarSerialNumber))
             let beacon =
                 {
                     IPAddress = pkt.UdpResult.RemoteEndPoint.Address
