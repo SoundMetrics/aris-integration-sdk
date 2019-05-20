@@ -5,7 +5,6 @@ open Serilog
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.Comms.Internal
 open SoundMetrics.Common
-open SoundMetrics.Common.ArisBeaconDetails
 open SoundMetrics.Scripting
 open System
 open System.Threading
