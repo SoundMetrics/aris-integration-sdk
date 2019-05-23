@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <Compile Include="BuildInfo.fs" />
+    <Compile Include="ReachabilityTracker.fs" />
     <Compile Include="AssemblyAttributes.fs" />
     <Compile Include="AsyncTaskTracker.fs" />
     <Compile Include="LanguageUtils.Internal.fs" />

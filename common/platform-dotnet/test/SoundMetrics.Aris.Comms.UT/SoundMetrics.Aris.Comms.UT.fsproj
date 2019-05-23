@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ReachabilityTrackerTests.fs" />
     <Compile Include="FocusMapTypesTest.fs" />
     <Compile Include="FocusMapTest.fs" />
   </ItemGroup>

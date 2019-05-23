@@ -35,8 +35,6 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.FrameHead
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{41D1886B-1540-4597-A6AA-6D9CFC1EE247}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT", "test\SoundMetrics.Aris.Comms.UT\SoundMetrics.Aris.Comms.UT.fsproj", "{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}"
-EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.Integration.Test", "test\SoundMetrics.Aris.Comms.Integration.Test\SoundMetrics.Aris.Comms.Integration.Test.fsproj", "{0515F65D-AE6A-4943-9B75-84C41A6C65EF}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.NativeMemory", "SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj", "{178917D9-6103-4A65-85A3-E7C1048775FF}"
@@ -117,7 +115,9 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.AcousticS
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.AcousticSettings.UT", "SoundMetrics.Aris.AcousticSettings.UT\SoundMetrics.Aris.AcousticSettings.UT.fsproj", "{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Data.UT", "SoundMetrics.Data.UT\SoundMetrics.Data.UT.csproj", "{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Data.UT", "SoundMetrics.Data.UT\SoundMetrics.Data.UT.csproj", "{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT", "test\SoundMetrics.Aris.Comms.UT\SoundMetrics.Aris.Comms.UT.fsproj", "{D9B8E961-479E-4EEF-B363-985FA904CEB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,10 +141,6 @@ Global
 		{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3E9EFC1-D13E-4BD9-A7B7-9C558FAA0F13}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -237,13 +233,16 @@ Global
 		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0778F7D2-E5F5-4BA4-9D90-9894F91C37EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9B8E961-479E-4EEF-B363-985FA904CEB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9B8E961-479E-4EEF-B363-985FA904CEB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9B8E961-479E-4EEF-B363-985FA904CEB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9B8E961-479E-4EEF-B363-985FA904CEB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C257A627-5838-45B9-8A1B-1D1532F30ADE} = {942EC4E4-BC89-4D0B-A6E7-E6BA0308C22B}
-		{0962340F-9FA9-4D4A-A0B3-6C2B8B46257B} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{0515F65D-AE6A-4943-9B75-84C41A6C65EF} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{BE7E1388-706E-44D7-96F6-D5CEBF2317F6} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
 		{3F22DCB6-D360-43E2-8380-4968C896B13C} = {1FC131F9-3E77-4EB6-BB30-5E576B1D45C2}
@@ -257,6 +256,7 @@ Global
 		{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{004BAF15-08FE-4E12-BCF2-845F76DFFA1A} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
+		{D9B8E961-479E-4EEF-B363-985FA904CEB2} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}
