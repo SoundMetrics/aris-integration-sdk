@@ -40,22 +40,19 @@ module internal BeaconObserver2Details =
 
         let rec queueReceive () =
 
-            let ar = socket.BeginReceiveMessageFrom(
-                        buffer,
-                        0,
-                        buffer.Length,
-                        SocketFlags.None,
-                        remoteEP,
-                        AsyncCallback handleResult,
-                        ())
-            System.Diagnostics.Trace.TraceInformation("### queueReceive: ar={0}", ar.GetHashCode())
-            if ar.CompletedSynchronously then
-                handleResult(ar)
+            socket.BeginReceiveMessageFrom(
+                buffer,
+                0,
+                buffer.Length,
+                SocketFlags.None,
+                remoteEP,
+                AsyncCallback handleResult,
+                ()) |> ignore
+
 
         and handleResult (ar : IAsyncResult) =
 
             let timestamp = DateTime.Now
-            System.Diagnostics.Trace.TraceInformation("### handleResult: ar={0}", ar.GetHashCode())
 
             try
                 let cb =
