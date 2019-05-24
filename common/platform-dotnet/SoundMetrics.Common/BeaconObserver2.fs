@@ -48,13 +48,14 @@ module internal BeaconObserver2Details =
                         remoteEP,
                         AsyncCallback handleResult,
                         ())
-
+            System.Diagnostics.Trace.TraceInformation("### queueReceive: ar={0}", ar.GetHashCode())
             if ar.CompletedSynchronously then
                 handleResult(ar)
 
         and handleResult (ar : IAsyncResult) =
 
             let timestamp = DateTime.Now
+            System.Diagnostics.Trace.TraceInformation("### handleResult: ar={0}", ar.GetHashCode())
 
             try
                 let cb =
