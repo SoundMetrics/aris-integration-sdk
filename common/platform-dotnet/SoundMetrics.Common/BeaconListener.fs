@@ -52,6 +52,43 @@ module internal BeaconListener =
         with
             _ -> None
 
+    let toArisExplorerOrVoyagerBeacon2 (buffer : ArraySegment<byte>)
+                                       timestamp
+                                       remoteAddress
+                                       ifcName
+                                       ifcAddress
+                                       : ArisBeacon2 option =
+        try
+            let av = SonarAvailability.Parser.ParseFrom(buffer.Array, buffer.Offset, buffer.Count)
+            let beacon =
+                let model =
+                    defaultArg
+                        (av.SystemVariants // possibly null
+                            |> Option.ofObj
+                            |> Option.map (fun variants ->
+                                if variants.Enabled |> Seq.contains VoyagerVariant then
+                                    Voyager
+                                else
+                                    Explorer
+                            ))
+                        Explorer
+
+                {
+                    Model =             model
+                    SystemType =        enum (int av.SystemType)
+                    SerialNumber =      av.SerialNumber
+                    SoftwareVersion =   toSoftwareVersion av.SoftwareVersion
+                    Timestamp =         timestamp
+                    IPAddress =         remoteAddress
+                    ConnectionState =   enum (int av.ConnectionState)
+                    CpuTemp =           av.CpuTemp
+                    IfcName =           ifcName
+                    IfcAddress =        ifcAddress
+                }
+            Some beacon
+        with
+            _ -> None
+
     let toArisDefenderBeacon (pkt : UdpReceived) : ArisBeacon option =
         try
             let av = DefenderAvailability.Parser.ParseFrom(pkt.UdpResult.Buffer)
@@ -97,6 +134,32 @@ module internal BeaconListener =
             if Log.IsEnabled(LogEventLevel.Verbose) then
                 Log.Verbose("CM Beacon, length of {length}: {cmBeacon}",
                     pkt.UdpResult.Buffer.Length, sprintf "%A" beacon)
+            Some beacon
+        with
+            _ -> None
+
+    let toArisCommandModuleBeacon2 (buffer : ArraySegment<byte>)
+                                   timestamp
+                                   remoteAddress
+                                   ifcName
+                                   ifcAddress
+                                   : ArisCommandModuleBeacon2 option =
+
+        try
+            let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(buffer.Array, buffer.Offset, buffer.Count)
+            let beacon =
+                {
+                    IPAddress =     remoteAddress
+                    // SonarSerialNumber is not well-implemented.
+                    ArisCurrent =   cms.ArisCurrent
+                    ArisPower =     cms.ArisPower
+                    ArisVoltage =   cms.ArisVoltage
+                    CpuTemp =       cms.CpuTemp
+                    Revision =      cms.Revision
+                    Timestamp =     timestamp
+                    IfcName =       ifcName
+                    IfcAddress =    ifcAddress
+                }
             Some beacon
         with
             _ -> None

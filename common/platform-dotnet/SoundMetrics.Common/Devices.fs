@@ -69,6 +69,25 @@ type ArisBeacon = {
     CpuTemp :           float32
 }
 
+/// A beacon is sent to indicate the presence of an ARIS. ARIS Explorer and
+/// ARIS Voyager send one beacon with the Model field indicating the type.
+/// An ARIS Defender sends two beacons: one of model Explorer, and one of model
+/// Defender. In a Defender's case, the beacon of model Explorer is always busy--
+/// you cannot control the Defender directly.
+type ArisBeacon2 = {
+    Model :             ArisModel
+    SystemType :        ArisSystemType
+    SerialNumber :      ArisSerialNumber
+    SoftwareVersion :   ArisSoftwareVersion
+    Timestamp :         DateTime
+    IPAddress :         IPAddress
+    ConnectionState :   ArisAvailabilityState
+    CpuTemp :           float32
+
+    IfcName :           string
+    IfcAddress :        IPAddress
+}
+
 type ArisCommandModuleBeacon = {
     IPAddress :     IPAddress
     ArisCurrent :   float32
@@ -77,6 +96,19 @@ type ArisCommandModuleBeacon = {
     CpuTemp :       float32
     Revision :      uint32
     Timestamp :     DateTime
+}
+
+type ArisCommandModuleBeacon2 = {
+    IPAddress :     IPAddress
+    ArisCurrent :   float32
+    ArisPower :     float32
+    ArisVoltage :   float32
+    CpuTemp :       float32
+    Revision :      uint32
+    Timestamp :     DateTime
+
+    IfcName :           string
+    IfcAddress :        IPAddress
 }
 
 

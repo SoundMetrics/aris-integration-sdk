@@ -33,6 +33,7 @@
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="BeaconListener.fs" />
     <Compile Include="BeaconObserver.fs" />
+    <Compile Include="BeaconObserver2.fs" />
     <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
 
