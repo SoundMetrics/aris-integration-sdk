@@ -9,11 +9,10 @@ open System.Reactive.Subjects
 
 [<Struct>]
 type UdpRecieved2 = {
-    Timestamp       : DateTime
-    Buffer          : ArraySegment<byte>
-    RemoteAddress   : IPAddress
-    IfcName         : string
-    IfcAddress      : IPAddress
+    Timestamp:      DateTime
+    Buffer:         ArraySegment<byte>
+    RemoteAddress:  IPAddress
+    InterfaceInfo:  NetworkInterfaceInfo
 }
 
 module internal BeaconObserver2Details =
@@ -61,28 +60,27 @@ module internal BeaconObserver2Details =
                         socketFlagsOut,
                         remoteEP,
                         packetInfo)
-                let ifcIndex = (!packetInfo).Interface
+                let receiverIfcIndex = (!packetInfo).Interface
                 let interfaces = NetworkInterface.GetAllNetworkInterfaces();
 
                 // Thanks, https://github.com/dotnet/corefx/issues/24312
-                let struct (ifcName, ifcAddress) =
+                let ifcInfo =
                     interfaces
                     |> Seq.filter (fun ifc ->
-                        ifcIndex = ifc.GetIPProperties().GetIPv4Properties().Index)
+                        receiverIfcIndex = ifc.GetIPProperties().GetIPv4Properties().Index)
                     |> Seq.map (fun ifc ->
                         let ipv4 = ifc.GetIPProperties().UnicastAddresses
                                    |> Seq.filter (fun info ->
                                         info.Address.AddressFamily = AddressFamily.InterNetwork)
                                    |> Seq.exactlyOne
-                        struct (ifc.Name, ipv4)
+                        NetworkInterfaceInfo.FromNetworkInterface ifc
                     )
                     |> Seq.exactlyOne
 
                 handlePacket {  Timestamp = timestamp
                                 Buffer = ArraySegment(buffer, 0, cb)
                                 RemoteAddress = ((!remoteEP) :?> IPEndPoint).Address
-                                IfcName = ifcName
-                                IfcAddress = ifcAddress.Address }
+                                InterfaceInfo = ifcInfo }
                 queueReceive()
             with
                 :? ObjectDisposedException ->
@@ -103,7 +101,7 @@ module internal BeaconObserver2Details =
     let private mkBeaconObserver<'B> (port : int)
                                      (mapPktToBeacon :
                                         ArraySegment<byte> -> DateTime -> IPAddress
-                                            -> string -> IPAddress
+                                            -> NetworkInterfaceInfo
                                             -> 'B option)
                                      : IDisposable * ISubject<'B> =
 
@@ -112,10 +110,9 @@ module internal BeaconObserver2Details =
         let handlePacket {  Timestamp = timestamp
                             Buffer = buffer
                             RemoteAddress = remoteAddress
-                            IfcName = ifcName
-                            IfcAddress = ifcAddress } =
+                            InterfaceInfo = ifcInfo } =
 
-            match mapPktToBeacon buffer timestamp remoteAddress ifcName ifcAddress with
+            match mapPktToBeacon buffer timestamp remoteAddress ifcInfo with
             | Some beacon -> subject.OnNext(beacon)
             | None -> ()
 

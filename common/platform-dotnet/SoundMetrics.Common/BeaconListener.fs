@@ -55,8 +55,7 @@ module internal BeaconListener =
     let toArisExplorerOrVoyagerBeacon2 (buffer : ArraySegment<byte>)
                                        timestamp
                                        remoteAddress
-                                       ifcName
-                                       ifcAddress
+                                       ifcInfo
                                        : ArisBeacon2 option =
         try
             let av = SonarAvailability.Parser.ParseFrom(buffer.Array, buffer.Offset, buffer.Count)
@@ -79,11 +78,10 @@ module internal BeaconListener =
                     SerialNumber =      av.SerialNumber
                     SoftwareVersion =   toSoftwareVersion av.SoftwareVersion
                     Timestamp =         timestamp
-                    IPAddress =         remoteAddress
+                    SenderAddress =         remoteAddress
                     ConnectionState =   enum (int av.ConnectionState)
                     CpuTemp =           av.CpuTemp
-                    IfcName =           ifcName
-                    IfcAddress =        ifcAddress
+                    InterfaceInfo =     ifcInfo
                 }
             Some beacon
         with
@@ -141,15 +139,14 @@ module internal BeaconListener =
     let toArisCommandModuleBeacon2 (buffer : ArraySegment<byte>)
                                    timestamp
                                    remoteAddress
-                                   ifcName
-                                   ifcAddress
+                                   ifcInfo
                                    : ArisCommandModuleBeacon2 option =
 
         try
             let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(buffer.Array, buffer.Offset, buffer.Count)
             let beacon =
                 {
-                    IPAddress =     remoteAddress
+                    SenderAddress =     remoteAddress
                     // SonarSerialNumber is not well-implemented.
                     ArisCurrent =   cms.ArisCurrent
                     ArisPower =     cms.ArisPower
@@ -157,8 +154,7 @@ module internal BeaconListener =
                     CpuTemp =       cms.CpuTemp
                     Revision =      cms.Revision
                     Timestamp =     timestamp
-                    IfcName =       ifcName
-                    IfcAddress =    ifcAddress
+                    InterfaceInfo = ifcInfo
                 }
             Some beacon
         with
