@@ -4,6 +4,7 @@ namespace SoundMetrics.Common
 
 open System.Net
 open System.Net.NetworkInformation
+open System.Net.Sockets
 
 [<AutoOpen>]
 module private NetworkInterfaceInfoDetails =
@@ -45,3 +46,42 @@ with
 
         { Index = index; Name = name; Properties = props }
 
+    static member internal Mask(a: byte array, mask: byte array) =
+
+                if a.Length <> mask.Length then
+                    invalidArg "c" "Mismatched arguments"
+
+                let output = Array.zeroCreate<byte> a.Length
+
+                for i = 0 to a.Length - 1 do
+                    output.[i] <- byte (a.[i] &&& mask.[i])
+
+                output
+
+    static member internal Mask(a: IPAddress, mask: IPAddress) =
+
+            if a.AddressFamily <> AddressFamily.InterNetwork then
+                invalidArg "a" "Only IPv4 is supported"
+
+            let xored = NetworkInterfaceInfo.Mask(a.GetAddressBytes(), mask.GetAddressBytes())
+            IPAddress(xored)
+
+    static member internal IsReachable(addr: IPAddress, subnetAddress: IPAddress, ipv4Mask: IPAddress) =
+            let a = NetworkInterfaceInfo.Mask(addr, ipv4Mask)
+            let b = NetworkInterfaceInfo.Mask(subnetAddress, ipv4Mask)
+            a = b
+
+    static member IsAddressReachable(addr: IPAddress,
+                                     ifc: NetworkInterface) =
+
+        if addr.AddressFamily = AddressFamily.InterNetwork then
+            let props = ifc.GetIPProperties()
+
+            let matchCount =
+                props.UnicastAddresses
+                |> Seq.filter (fun ua ->
+                    NetworkInterfaceInfo.IsReachable(addr, ua.Address, ua.IPv4Mask))
+                |> Seq.length
+            matchCount > 0
+        else
+            true
