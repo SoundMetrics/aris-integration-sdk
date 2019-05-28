@@ -27,7 +27,7 @@ type NetworkInterfaceInfo = {
     Index:      int
 
     Name:       string
-    Properties: IPInterfaceProperties
+    Interface:  NetworkInterface
 }
 with
     static member NoIndex = NoIndexFound
@@ -44,7 +44,7 @@ with
                 | ValueSome v6 -> v6.Index
                 | ValueNone -> NetworkInterfaceInfo.NoIndex
 
-        { Index = index; Name = name; Properties = props }
+        { Index = index; Name = name; Interface = ifc }
 
     static member internal Mask(a: byte array, mask: byte array) =
 
