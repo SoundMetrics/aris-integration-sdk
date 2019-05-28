@@ -61,7 +61,7 @@ with
     static member internal Mask(a: IPAddress, mask: IPAddress) =
 
             if a.AddressFamily <> AddressFamily.InterNetwork then
-                invalidArg "a" "Only IPv4 is supported"
+                invalidArg "a" (sprintf "Only IPv4 is supported: %A" a)
 
             let xored = NetworkInterfaceInfo.Mask(a.GetAddressBytes(), mask.GetAddressBytes())
             IPAddress(xored)
@@ -80,8 +80,11 @@ with
             let matchCount =
                 props.UnicastAddresses
                 |> Seq.filter (fun ua ->
-                    NetworkInterfaceInfo.IsReachable(addr, ua.Address, ua.IPv4Mask))
+                    ua.Address.AddressFamily = AddressFamily.InterNetwork
+                        &&  NetworkInterfaceInfo.IsReachable(addr, ua.Address, ua.IPv4Mask))
                 |> Seq.length
             matchCount > 0
-        else
+        elif addr.AddressFamily = AddressFamily.InterNetworkV6 then
             true
+        else
+            false
