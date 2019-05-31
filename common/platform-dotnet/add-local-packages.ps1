@@ -16,10 +16,10 @@ $local_nuget_source = '\\build\SMC-Nuget-Packages'
 Get-ChildItem $package_folder -Filter *.nupkg |
 Foreach-Object {
 
-    $file_name = $_.Name
-    $idx_terminator = $file_name.IndexOf($id_terminator)
-    $package_id = $file_name.Substring(0, $idx_terminator)
-    '$package_id=' + $package_id
+    # $file_name = $_.Name
+    # $idx_terminator = $file_name.IndexOf($id_terminator)
+    # $package_id = $file_name.Substring(0, $idx_terminator)
+    # '$package_id=' + $package_id
 
     .\.nuget\nuget delete $package_id "$package_version" -NonInteractive -Source $local_nuget_source
 
