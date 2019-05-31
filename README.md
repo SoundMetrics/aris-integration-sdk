@@ -2,7 +2,17 @@
 This SDK supports connecting to and commanding ARIS Explorer and ARIS Voyager sonars. (Connecting to an ARIS Defender is not supported).
 For information on ARIS frame formats, see [ARIS File SDK](https://github.com/SoundMetrics/aris-file-sdk).
 
+### Prerequisites
+The ARIS control and imaging protocols require the use of **Google Protocol Buffers**, and **TCP** & **UDP** communications. While the example code in this repo is largely targeted at Windows clients, one can write client code on any platform that supports the above technologies.
+
 > **Note:** if you are using Protocol Buffers version 3 to control an ARIS, you must use ARIS onboard software version 2.7._x_ or later. You can update the onboard software from within ARIScope.
+
+### Exclusions
+This SDK provides capabilities for controlling an ARIS Explorer. ARIS Defender cannot be controlled with this SDK, only the built-in supervisor functionality is available for ARIS Defender.
+
+This SDK, beginning with version 2.0, supersedes a previous ARIS 1.x SDK. The older SDK is not compatible with current ARIS production.
+
+This SDK does not support for the DIDSON sonar. Please contact support@soundmetrics.com for more information on DIDSON protocols.
 
 ## Contents
 
@@ -56,11 +66,6 @@ This repository makes use of **vcpkg** for building **arislog** and **vc-using-f
 
 ### Release History
 The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
-
-## Exclusions
-This SDK provides capabilities for controlling an ARIS Explorer. ARIS Defender cannot be controlled with this SDK, only the built-in supervisor functionality is available for ARIS Defender.
-
-This SDK, beginning with version 2.0, supersedes a previous ARIS 1.x SDK. The older SDK is not compatible with current ARIS production.
 
 ## Git-specific Issues
 This git repository includes the submodule `aris-file-sdk`. If you intend to clone this repo
