@@ -20,8 +20,8 @@ Foreach-Object {
     # $idx_terminator = $file_name.IndexOf($id_terminator)
     # $package_id = $file_name.Substring(0, $idx_terminator)
     # '$package_id=' + $package_id
-
-    .\.nuget\nuget delete $package_id "$package_version" -NonInteractive -Source $local_nuget_source
+    #
+    # .\.nuget\nuget delete $package_id "$package_version" -NonInteractive -Source $local_nuget_source
 
     $package_path = Join-Path -Path $package_folder -ChildPath $_
     '$package_path=' + $package_path
