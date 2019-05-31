@@ -3,6 +3,9 @@
 $package_version = Get-Content "ver.platform.txt"
 '$package_version=' + $package_version
 
+$id_terminator = "." + $package_version
+'$id_terminator=' + $id_terminator
+
 $package_folder = ".\built-nuget-packages"
 '$package_folder=' + $package_folder
 
@@ -13,9 +16,14 @@ $local_nuget_source = '\\build\SMC-Nuget-Packages'
 Get-ChildItem $package_folder -Filter *.nupkg |
 Foreach-Object {
 
+    $idx_terminator = $_.IndexOf($id_terminator)
+    $package_id = $_.Substring(0, $idx_terminator)
+    '$package_id=' + $package_id
+
+    .\.nuget\nuget delete $package_id "$package_version" -NonInteractive -Source $local_nuget_source
+
     $package_path = Join-Path -Path $package_folder -ChildPath $_
     '$package_path=' + $package_path
 
-    .\.nuget\nuget delete "$package_name" "$package_version" -NonInteractive -NoPrompt -Source $local_nuget_source
     .\.nuget\nuget add $package_path -Source $local_nuget_source -NonInteractive
 }
