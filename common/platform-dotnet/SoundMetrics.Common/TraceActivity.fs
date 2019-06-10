@@ -1,11 +1,10 @@
 ﻿namespace SoundMetrics.Common
 
-namespace TryEventTracking
-
 open System
-open System.Threading
 
 module internal TraceActivity =
+
+    open System.Threading
 
     let processId = System.Diagnostics.Process.GetCurrentProcess().Id
 
@@ -37,3 +36,47 @@ module internal TraceActivity =
                 id.Value <- Guid.Empty
 
 
+open TraceActivity
+open Serilog.Core
+open Serilog.Events
+
+[<AbstractClass;Sealed>]
+type TraceActivity =
+
+    static member CreateProcessEnricher(propertyName: string) : ILogEventEnricher =
+        { new ILogEventEnricher with
+            member __.Enrich(logEvent: LogEvent, propertyFactory: ILogEventPropertyFactory) =
+                logEvent.AddPropertyIfAbsent(
+                    propertyFactory.CreateProperty(propertyName, processId))
+        }
+
+    static member CreateActivityEnricher(propertyName: string) : ILogEventEnricher =
+        { new ILogEventEnricher with
+            member __.Enrich(logEvent: LogEvent, propertyFactory: ILogEventPropertyFactory) =
+                logEvent.AddOrUpdateProperty(
+                    propertyFactory.CreateProperty(propertyName, correlationId.Value.Value))
+        }
+
+    static member Correlate (f : Action) =
+
+        pushCorrelation()
+        try
+            f.Invoke()
+        finally
+            popCorrelation()
+
+    static member Correlate (f : Func<'T>) : 'T =
+
+        pushCorrelation()
+        try
+            f.Invoke()
+        finally
+            popCorrelation()
+
+    static member Correlate (f : unit -> 'T) : 'T =
+
+        pushCorrelation()
+        try
+            f()
+        finally
+            popCorrelation()
