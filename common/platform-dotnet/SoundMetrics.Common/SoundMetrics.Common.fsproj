@@ -27,6 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TraceActivity.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="QueuedSynchronizationContext.fs" />
     <Compile Include="NetworkInterfaceInfo.fs" />
