@@ -1,9 +1,11 @@
 ﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace SoundMetrics.HID
+namespace SoundMetrics.HID.Windows
 {
     using WORD = UInt16;
     using UINT = UInt32;
@@ -46,5 +48,31 @@ namespace SoundMetrics.HID
         public string szOEMVxD;
 
 #pragma warning restore IDE0044 // Add readonly modifier
+    }
+
+    public static class JoyCapsExtensions
+    {
+        internal static bool IsSet(uint value, uint mask) => (value & mask) != 0;
+        public static bool HasX(this JoyCaps _) => true;
+        public static bool HasY(this JoyCaps _) => true;
+        public static bool HasZ(this JoyCaps caps) => IsSet(caps.wCaps, Joystick.JOYCAPS_HASZ);
+        public static bool HasR(this JoyCaps caps) => IsSet(caps.wCaps, Joystick.JOYCAPS_HASR);
+        public static bool HasU(this JoyCaps caps) => IsSet(caps.wCaps, Joystick.JOYCAPS_HASU);
+        public static bool HasV(this JoyCaps caps) => IsSet(caps.wCaps, Joystick.JOYCAPS_HASV);
+
+        public static string[] GetAxesLetters(this JoyCaps caps)
+        {
+            IEnumerable<string> Iterate()
+            {
+                yield return "X";
+                yield return "Y";
+                if (caps.HasZ()) yield return "Z";
+                if (caps.HasR()) yield return "R";
+                if (caps.HasU()) yield return "U";
+                if (caps.HasV()) yield return "V";
+            }
+
+            return Iterate().ToArray();
+        }
     }
 }

@@ -64,5 +64,15 @@ namespace SoundMetrics.HID.Windows
             JOY_RETURNCENTERED = 0x00000400u,
             JOY_USEDEADZONE = 0x00000800u,
         }
+
+        // JOYCAPS presence flags
+
+        internal const uint JOYCAPS_HASZ = 1;
+        internal const uint JOYCAPS_HASR = 2;
+        internal const uint JOYCAPS_HASU = 4;
+        internal const uint JOYCAPS_HASV = 8;
+        internal const uint JOYCAPS_HASPOV = 16;
+        internal const uint JOYCAPS_POV4DIR = 32;
+        internal const uint JOYCAPS_POVCTS = 64;
     }
 }
