@@ -1,16 +1,15 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SoundMetrics.HID.Windows")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("HID support on Windows")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Sound Metrics Corporation")]
 [assembly: AssemblyProduct("SoundMetrics.HID.Windows")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright (c) 2014-2018 Sound Metrics Corporation")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
