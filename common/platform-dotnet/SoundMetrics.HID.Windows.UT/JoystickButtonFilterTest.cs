@@ -65,7 +65,7 @@ namespace SoundMetrics.HID.Windows.UT
                 .ForEach(i =>
                 {
                     var report = new JoystickPositionReport();
-                    report.JoystickInfo.dwButtons = i;
+                    report.JoyInfoEx.dwButtons = i;
                     eventsPassed += filter(report) ? 1 : 0;
                 });
 
@@ -87,7 +87,7 @@ namespace SoundMetrics.HID.Windows.UT
                 {
                     var (index, i) = input;
                     var report = new JoystickPositionReport();
-                    report.JoystickInfo.dwButtons = i;
+                    report.JoyInfoEx.dwButtons = i;
                     var included = filter(report);
 
                     // Skip verifying the first, it's squelched by the filter.

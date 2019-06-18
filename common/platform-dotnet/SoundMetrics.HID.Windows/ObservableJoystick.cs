@@ -12,7 +12,8 @@ namespace SoundMetrics.HID.Windows
     public struct JoystickPositionReport
     {
         public uint JoystickId;
-        public JoyInfoEx JoystickInfo;
+        public JoyInfoEx JoyInfoEx;
+        public Joystick.JoystickInfo JoystickInfo;
     }
 
     /// <summary>
@@ -140,11 +141,17 @@ namespace SoundMetrics.HID.Windows
     {
         private readonly uint joystickId;
         private readonly MillisecondTimer timer;
+        private readonly Joystick.JoystickInfo joystickInfo;
 
         private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
 
         public ObservableJoystick(uint joystickId, int pollingPeriodMs)
         {
+            if (!Joystick.GetJoystickInfo(joystickId, out joystickInfo))
+            {
+                throw new InvalidOperationException($"Couldnt find joystick id={joystickId}");
+            }
+
             this.joystickId = joystickId;
 
             var pollingPeriod = pollingPeriodMs;
@@ -166,14 +173,27 @@ namespace SoundMetrics.HID.Windows
         public static Func<JoystickPositionReport,bool>
             CreateButtonFilter(ButtonSelection buttons)
         {
-            var buttonFlags = buttons.ToFlags();
+            bool IncludeEvent(uint oldFlags, uint newFlags, uint interestingFlags)
+            {
+                if (oldFlags != newFlags)
+                {
+                    var alteredFlags = oldFlags ^ newFlags;
+                    return (alteredFlags & interestingFlags) != 0;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            var flagsOfInterest = buttons.ToFlags();
 
             var isFirstReading = true;
             uint previousFlags = 0;
 
             return report =>
             {
-                uint newButtonFlags = report.JoystickInfo.dwButtons;
+                uint newButtonFlags = report.JoyInfoEx.dwButtons;
 
                 if (isFirstReading)
                 {
@@ -184,21 +204,27 @@ namespace SoundMetrics.HID.Windows
                     return false;
                 }
 
-                var includeEvent =
-                    (previousFlags != newButtonFlags)
-                    && (buttonFlags & report.JoystickInfo.dwButtons) != 0;
+                var include = IncludeEvent(previousFlags, newButtonFlags, flagsOfInterest);
                 previousFlags = newButtonFlags;
-
-                return includeEvent;
+                return include;
             };
         }
 
         private void OnTimer()
         {
-            if (posSubject.HasObservers
-                && Joystick.GetJoystickPosition(joystickId, out JoystickPositionReport report))
+            if (posSubject.HasObservers)
             {
-                posSubject.OnNext(report);
+                if (Joystick.GetJoystickPosition(joystickId, out var posInfo))
+                {
+                    var (joystickId, joyInfoEx) = posInfo;
+                    var report = new JoystickPositionReport
+                    {
+                        JoystickId = joystickId,
+                        JoyInfoEx = joyInfoEx,
+                        JoystickInfo = joystickInfo,
+                    };
+                    posSubject.OnNext(report);
+                }
             }
         }
 
