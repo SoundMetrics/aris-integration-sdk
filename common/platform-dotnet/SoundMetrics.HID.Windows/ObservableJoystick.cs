@@ -204,7 +204,11 @@ namespace SoundMetrics.HID.Windows
                     return false;
                 }
 
-                var include = IncludeEvent(previousFlags, newButtonFlags, flagsOfInterest);
+                var include =
+                    IncludeEvent(
+                        previousFlags,
+                        newButtonFlags,
+                        flagsOfInterest);
                 previousFlags = newButtonFlags;
                 return include;
             };

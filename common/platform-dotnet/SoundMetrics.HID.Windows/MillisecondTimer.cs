@@ -21,7 +21,12 @@ namespace SoundMetrics.HID.Windows
         }
 
         public delegate void TimerEventHandler();
-        private delegate void TimerEventHandlerCore(UInt32 id, UInt32 msg, UIntPtr userCtx, UIntPtr rsv1, UIntPtr rsv2);
+        private delegate void TimerEventHandlerCore(
+            UInt32 id,
+            UInt32 msg,
+            UIntPtr userCtx,
+            UIntPtr rsv1,
+            UIntPtr rsv2);
 
         public MillisecondTimer(
             int msDelay,
@@ -29,22 +34,30 @@ namespace SoundMetrics.HID.Windows
             TimerEventHandler callback,
             TimerType timerType)
         {
-            _wrappedCallback = (id, msg, userCtx, rsv1, rsv2) => { if (!_killingTimer) callback(); };
+            _wrappedCallback = (id, msg, userCtx, rsv1, rsv2) =>
+                {
+                    if (!_killingTimer) { callback(); }
+                };
 
             // NOTE: We aren't using TIME_KILL_SYNCHRONOUS. Sometimes the callback wants to use BeginInvoke
             // to *send* rather than *post* to the same thread that kills the timer; TIME_KILL_SYNCHRONOUS
             // causes a deadlock in this case as timeKillEvent() waits on the timer to get killed while the
             // callback is blocked waiting for access to the same thread: deadlock. So we use _killingTimer
             // to ensure that no more timer ticks are serviced while we asynchronously kill the timer.
-            _timerId = NativeMethods.timeSetEvent((uint)msDelay,
-                                                  (uint)msResolution,
-                                                  _wrappedCallback,
-                                                  UIntPtr.Zero,
-                                                  TIME_CALLBACK_FUNCTION | (uint)timerType);
+            _timerId = NativeMethods.timeSetEvent(
+                (uint)msDelay,
+                (uint)msResolution,
+                _wrappedCallback,
+                UIntPtr.Zero,
+                TIME_CALLBACK_FUNCTION | (uint)timerType);
+
             if (_timerId == 0)
                 throw new InvalidOperationException(
-                    string.Format("Couldn't create timer; msDelay={0}; msResolution={1}; timerType={2}",
-                                  msDelay, msResolution, timerType));
+                    string.Format(
+                        "Couldn't create timer; msDelay={0}; msResolution={1}; timerType={2}",
+                        msDelay,
+                        msResolution,
+                        timerType));
         }
 
         ~MillisecondTimer()
@@ -78,11 +91,12 @@ namespace SoundMetrics.HID.Windows
         private static class NativeMethods
         {
             [DllImport("winmm.dll", SetLastError = true)]
-            internal static extern UInt32 timeSetEvent(UInt32 msDelay,
-                                                       UInt32 msResolution,
-                                                       TimerEventHandlerCore callback,
-                                                       UIntPtr userCtx,
-                                                       UInt32 eventType);
+            internal static extern UInt32 timeSetEvent(
+                UInt32 msDelay,
+                UInt32 msResolution,
+                TimerEventHandlerCore callback,
+                UIntPtr userCtx,
+                UInt32 eventType);
 
             [DllImport("Winmm.dll", CharSet = CharSet.Auto)]
             internal static extern uint timeKillEvent(uint uTimerID);
