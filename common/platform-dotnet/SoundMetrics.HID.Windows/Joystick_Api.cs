@@ -73,7 +73,7 @@ namespace SoundMetrics.HID.Windows
             return false;
         }
 
-        internal static bool GetJoystickInfo(uint id, out JoystickInfo joystickInfo)
+        public static bool GetJoystickInfo(uint id, out JoystickInfo joystickInfo)
         {
             var bufSize = Marshal.SizeOf(typeof(JoyCaps));
             var buf = new byte[bufSize];
