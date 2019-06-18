@@ -53,6 +53,46 @@ namespace SoundMetrics.HID.Windows
         public bool EnableButton31;
         public bool EnableButton32;
 
+        private static readonly Lazy<ButtonSelection> allButtons =
+            new Lazy<ButtonSelection>(() =>
+                new ButtonSelection
+                {
+                    EnableButton1 = true,
+                    EnableButton2 = true,
+                    EnableButton3 = true,
+                    EnableButton4 = true,
+                    EnableButton5 = true,
+                    EnableButton6 = true,
+                    EnableButton7 = true,
+                    EnableButton8 = true,
+                    EnableButton9 = true,
+                    EnableButton10 = true,
+                    EnableButton11 = true,
+                    EnableButton12 = true,
+                    EnableButton13 = true,
+                    EnableButton14 = true,
+                    EnableButton15 = true,
+                    EnableButton16 = true,
+                    EnableButton17 = true,
+                    EnableButton18 = true,
+                    EnableButton19 = true,
+                    EnableButton20 = true,
+                    EnableButton21 = true,
+                    EnableButton22 = true,
+                    EnableButton23 = true,
+                    EnableButton24 = true,
+                    EnableButton25 = true,
+                    EnableButton26 = true,
+                    EnableButton27 = true,
+                    EnableButton28 = true,
+                    EnableButton29 = true,
+                    EnableButton30 = true,
+                    EnableButton31 = true,
+                    EnableButton32 = true,
+                });
+
+        internal static ButtonSelection AllButtons = allButtons.Value;
+
         internal uint ToFlags()
         {
             return
@@ -101,13 +141,13 @@ namespace SoundMetrics.HID.Windows
         private readonly uint joystickId;
         private readonly MillisecondTimer timer;
 
-        private Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
+        private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
 
         public JoystickObservable(uint joystickId, int pollingPeriodMs)
         {
             this.joystickId = joystickId;
 
-            var pollingPeriod = 55;
+            var pollingPeriod = pollingPeriodMs;
             try
             {
                 timer = new MillisecondTimer(
@@ -127,6 +167,7 @@ namespace SoundMetrics.HID.Windows
             CreateButtonFilter(ButtonSelection buttons)
         {
             var buttonFlags = buttons.ToFlags();
+
             var isFirstReading = true;
             uint previousFlags = 0;
 
