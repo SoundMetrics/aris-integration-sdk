@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 namespace SoundMetrics.HID.Windows
 {
     using DWORD = UInt32;
-    using Ret = JoystickReturnMasks;
 
     // Docs for JOYINFOEX:
     // https://docs.microsoft.com/en-us/windows/desktop/api/joystickapi/ns-joystickapi-joyinfoex
@@ -27,13 +26,6 @@ namespace SoundMetrics.HID.Windows
         public DWORD dwPOV;
         public DWORD dwReserved1;
         public DWORD dwReserved2;
-
-        public bool HasX => (dwFlags & (uint)Ret.JOY_RETURNX) != 0;
-        public bool HasY => (dwFlags & (uint)Ret.JOY_RETURNY) != 0;
-        public bool HasZ => (dwFlags & (uint)Ret.JOY_RETURNZ) != 0;
-        public bool HasR => (dwFlags & (uint)Ret.JOY_RETURNR) != 0;
-        public bool HasU => (dwFlags & (uint)Ret.JOY_RETURNU) != 0;
-        public bool HasV => (dwFlags & (uint)Ret.JOY_RETURNV) != 0;
     }
 
     public static class JoyInfoExExtensions
