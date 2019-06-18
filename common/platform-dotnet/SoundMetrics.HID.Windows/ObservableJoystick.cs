@@ -1,6 +1,7 @@
 ﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
 using System;
+using System.Diagnostics;
 using System.Reactive.Subjects;
 
 namespace SoundMetrics.HID.Windows
@@ -140,12 +141,18 @@ namespace SoundMetrics.HID.Windows
     {
         private readonly uint joystickId;
         private readonly MillisecondTimer timer;
+        private readonly Joystick.JoystickInfo joystickInfo;
 
-        private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
+        private readonly Subject<(JoystickPositionReport, Joystick.JoystickInfo)>
+            posSubject = new Subject<(JoystickPositionReport, Joystick.JoystickInfo)>();
 
         public ObservableJoystick(uint joystickId, int pollingPeriodMs)
         {
             this.joystickId = joystickId;
+            if (!Joystick.GetJoystickInfo(joystickId, out this.joystickInfo))
+            {
+                throw new InvalidOperationException($"Joystic id={joystickId} not found");
+            }
 
             var pollingPeriod = pollingPeriodMs;
             try
@@ -198,7 +205,8 @@ namespace SoundMetrics.HID.Windows
             if (posSubject.HasObservers
                 && Joystick.GetJoystickPosition(joystickId, out JoystickPositionReport report))
             {
-                posSubject.OnNext(report);
+                Debug.Assert(joystickInfo != null);
+                posSubject.OnNext((report, joystickInfo));
             }
         }
 
@@ -226,6 +234,7 @@ namespace SoundMetrics.HID.Windows
             // Free up unmanaged resources
         }
 
-        public IObservable<JoystickPositionReport> JoystickPositionReports => posSubject;
+        public IObservable<(JoystickPositionReport,Joystick.JoystickInfo)>
+            JoystickPositionReports => posSubject;
     }
 }
