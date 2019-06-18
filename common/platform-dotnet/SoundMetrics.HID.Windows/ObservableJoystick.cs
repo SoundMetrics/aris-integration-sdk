@@ -136,14 +136,14 @@ namespace SoundMetrics.HID.Windows
     // Observable joystick events
     //-------------------------------------------------------------------------
 
-    public sealed class JoystickObservable : IDisposable
+    public sealed class ObservableJoystick : IDisposable
     {
         private readonly uint joystickId;
         private readonly MillisecondTimer timer;
 
         private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
 
-        public JoystickObservable(uint joystickId, int pollingPeriodMs)
+        public ObservableJoystick(uint joystickId, int pollingPeriodMs)
         {
             this.joystickId = joystickId;
 
@@ -202,7 +202,7 @@ namespace SoundMetrics.HID.Windows
             }
         }
 
-        ~JoystickObservable()
+        ~ObservableJoystick()
         {
             Dispose(false);
         }

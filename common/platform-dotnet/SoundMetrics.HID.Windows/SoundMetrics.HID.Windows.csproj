@@ -46,7 +46,7 @@
     <Compile Include="JoyAxis.cs" />
     <Compile Include="JoyCaps.cs" />
     <Compile Include="JoyInfoEx.cs" />
-    <Compile Include="JoystickObservable.cs" />
+    <Compile Include="ObservableJoystick.cs" />
     <Compile Include="Joystick_Api.cs" />
     <Compile Include="Joystick_Constants.cs" />
     <Compile Include="Joystick_Interop.cs" />

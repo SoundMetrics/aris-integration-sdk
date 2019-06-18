@@ -55,7 +55,7 @@ namespace SoundMetrics.HID.Windows.UT
         public void NoButtonsOfInterest()
         {
             var bs = new ButtonSelection();
-            var filter = JoystickObservable.CreateButtonFilter(bs);
+            var filter = ObservableJoystick.CreateButtonFilter(bs);
 
             var eventsPassed = 0;
             var expectedPassed = 0;
@@ -77,7 +77,7 @@ namespace SoundMetrics.HID.Windows.UT
         public void TestAllButtons()
         {
             var bs = ButtonSelection.AllButtons;
-            var filter = JoystickObservable.CreateButtonFilter(bs);
+            var filter = ObservableJoystick.CreateButtonFilter(bs);
 
             // Note: the first report is squelched, so duplicate it.
             AllBitsTestSequence(initialState: 0u)
