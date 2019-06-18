@@ -46,25 +46,6 @@ namespace SoundMetrics.HID.Windows
         internal const uint JOY_BUTTON31 = 0x40000000u;
         internal const uint JOY_BUTTON32 = 0x80000000u;
 
-        // Return flags
-
-        [Flags]
-        internal enum JoystickReturnMasks : uint
-        {
-            JOY_RETURNX = 0x00000001u,
-            JOY_RETURNY = 0x00000002u,
-            JOY_RETURNZ = 0x00000004u,
-            JOY_RETURNR = 0x00000008u,
-            JOY_RETURNU = 0x00000010u,     //* axis 5 */
-            JOY_RETURNV = 0x00000020u,     //* axis 6 */
-            JOY_RETURNPOV = 0x00000040u,
-            JOY_RETURNBUTTONS = 0x00000080u,
-            JOY_RETURNRAWDATA = 0x00000100u,
-            JOY_RETURNPOVCTS = 0x00000200u,
-            JOY_RETURNCENTERED = 0x00000400u,
-            JOY_USEDEADZONE = 0x00000800u,
-        }
-
         // JOYCAPS presence flags
 
         internal const uint JOYCAPS_HASZ = 1;
@@ -74,5 +55,22 @@ namespace SoundMetrics.HID.Windows
         internal const uint JOYCAPS_HASPOV = 16;
         internal const uint JOYCAPS_POV4DIR = 32;
         internal const uint JOYCAPS_POVCTS = 64;
+    }
+
+    [Flags]
+    internal enum JoystickReturnMasks : uint
+    {
+        JOY_RETURNX = 0x00000001u,
+        JOY_RETURNY = 0x00000002u,
+        JOY_RETURNZ = 0x00000004u,
+        JOY_RETURNR = 0x00000008u,
+        JOY_RETURNU = 0x00000010u,     //* axis 5 */
+        JOY_RETURNV = 0x00000020u,     //* axis 6 */
+        JOY_RETURNPOV = 0x00000040u,
+        JOY_RETURNBUTTONS = 0x00000080u,
+        JOY_RETURNRAWDATA = 0x00000100u,
+        JOY_RETURNPOVCTS = 0x00000200u,
+        JOY_RETURNCENTERED = 0x00000400u,
+        JOY_USEDEADZONE = 0x00000800u,
     }
 }
