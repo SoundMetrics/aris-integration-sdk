@@ -8,7 +8,7 @@ namespace SoundMetrics.HID.Windows
     using DWORD = UInt32;
 
     // Docs for JOYINFOEX:
-    // https://docs.microsoft.com/en-us/previous-versions/dd757112(v%3Dvs.85)
+    // https://docs.microsoft.com/en-us/windows/desktop/api/joystickapi/ns-joystickapi-joyinfoex
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct JoyInfoEx
     {
