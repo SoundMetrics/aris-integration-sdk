@@ -1,6 +1,5 @@
 ﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -9,15 +8,10 @@ namespace SoundMetrics.HID.Windows
 {
     public static partial class Joystick
     {
-        public class JoystickInfo
+        public struct JoystickInfo
         {
             public uint JoystickId;
             public JoyCaps Caps;
-
-            private static Lazy<JoystickInfo> empty =
-                new Lazy<JoystickInfo>(() => new JoystickInfo());
-
-            public static JoystickInfo Empty = empty.Value;
         }
 
         public static JoystickInfo[] EnumerateJoysticks()
@@ -33,69 +27,23 @@ namespace SoundMetrics.HID.Windows
 
                 for (uint i = 0; i < 16; ++i)
                 {
-                    if (GetJoystickInfo(i, pinned, bufSize, out JoystickInfo joystickInfo))
+                    var result = NativeMethods.JoyGetDevCaps(i, pinned, bufSize);
+                    if (result == 0)
                     {
-                        yield return joystickInfo;
+                        var id = i;
+                        var caps = (JoyCaps)Marshal.PtrToStructure(pinned, typeof(JoyCaps));
+                        yield return new JoystickInfo
+                        {
+                            JoystickId = id,
+                            Caps = caps,
+                        };
                     }
-
-                    //var result = NativeMethods.JoyGetDevCaps(i, pinned, bufSize);
-                    //if (result == 0)
-                    //{
-                    //    var id = i;
-                    //    var caps = (JoyCaps)Marshal.PtrToStructure(pinned, typeof(JoyCaps));
-                    //    yield return new JoystickInfo
-                    //    {
-                    //        JoystickId = id,
-                    //        Caps = caps,
-                    //    };
-                    //}
                 }
             }
 
             try
             {
                 return iterate().ToArray();
-            }
-            finally
-            {
-                h.Free();
-            }
-        }
-
-        private static bool GetJoystickInfo(
-            uint id,
-            IntPtr pinned,
-            int bufSize,
-            out JoystickInfo joystickInfo)
-        {
-            var result = NativeMethods.JoyGetDevCaps(id, pinned, bufSize);
-            if (result == 0)
-            {
-                var caps = (JoyCaps)Marshal.PtrToStructure(pinned, typeof(JoyCaps));
-                joystickInfo = new JoystickInfo
-                {
-                    JoystickId = id,
-                    Caps = caps,
-                };
-
-                return true;
-            }
-
-            joystickInfo = JoystickInfo.Empty;
-            return false;
-        }
-
-        internal static bool GetJoystickInfo(uint id, out JoystickInfo joystickInfo)
-        {
-            var bufSize = Marshal.SizeOf(typeof(JoyCaps));
-            var buf = new byte[bufSize];
-
-            var h = GCHandle.Alloc(buf, GCHandleType.Pinned);
-
-            try
-            {
-                var pinned = h.AddrOfPinnedObject();
-                return GetJoystickInfo(id, pinned, bufSize, out joystickInfo);
             }
             finally
             {
