@@ -137,6 +137,8 @@ namespace SoundMetrics.HID.Windows
     // Observable joystick events
     //-------------------------------------------------------------------------
 
+    public delegate bool ButtonFilter(JoystickPositionReport report);
+
     public sealed class ObservableJoystick : IDisposable
     {
         private readonly uint joystickId;
@@ -170,7 +172,7 @@ namespace SoundMetrics.HID.Windows
             }
         }
 
-        public static Func<JoystickPositionReport,bool>
+        public static ButtonFilter
             CreateButtonFilter(ButtonSelection buttons)
         {
             bool IncludeEvent(uint oldFlags, uint newFlags, uint interestingFlags)
