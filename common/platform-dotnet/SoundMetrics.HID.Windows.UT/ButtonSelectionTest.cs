@@ -1,112 +1,107 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoundMetrics.HID.Windows;
 
-namespace SoundMetrics.HID.Windows.UT
+namespace ButtonSelection_spec
 {
     using FlagReturnType = UInt32; // Avoid type mismatches in tests
 
     [TestClass]
-    public class ButtonSelectionTest
+    public class InvalidButtonSelectionsAreInvalid
     {
-        [TestMethod]
-        public void CorrectTestType()
+        [TestMethod] public void ZeroOrLess()
         {
-            // Because we're specifying specific types in the assertions.
-            // This prevents invalid comparisons.
-
-            var bs = new ButtonSelection();
-            var result = bs.ToFlags();
-            Type expected = typeof(FlagReturnType);
-
-            Assert.IsNotNull(result);
-
-            Type actual = result.GetType();
-            Assert.AreEqual<Type>(expected, actual);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(
+                () => new ButtonSelection(0));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(
+                () => new ButtonSelection(-1));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(
+                () => new ButtonSelection(int.MinValue));
         }
 
-        [TestMethod]
-        public void NoButtons()
+        [TestMethod] public void GreaterThanAllowed()
         {
-            var bs = new ButtonSelection();
-            var expected = 0u;
-            Assert.AreEqual<FlagReturnType>(expected, bs.ToFlags());
+            Assert.ThrowsException<ArgumentOutOfRangeException>(
+                () => new ButtonSelection(33));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(
+                () => new ButtonSelection(int.MaxValue));
         }
+    }
 
-        [TestMethod]
-        public void Button32()
+    [TestClass]
+    public class ValidButtonSelectionHasABit
+    {
+        [TestMethod] public void EveryButtonHasABit()
         {
-            var bs = new ButtonSelection() { EnableButton32 = true };
-            var expected = Joystick.JOY_BUTTON32;
-            Assert.AreEqual<FlagReturnType>(0b10000000000000000000000000000000, Joystick.JOY_BUTTON32);
-            Assert.AreEqual<FlagReturnType>(expected, bs.ToFlags());
-        }
-
-        [TestMethod]
-        public void EvenNumberedButtons()
-        {
-            // Note, the even-numbered buttons, because they're indexed
-            // from 1, are the odd-numbered bits. :/
-
-            var bs = new ButtonSelection()
+            for (int i = 1; i <=32; ++i)
             {
-                EnableButton2 = true,
-                EnableButton4 = true,
-                EnableButton6 = true,
-                EnableButton8 = true,
-                EnableButton10 = true,
-                EnableButton12 = true,
-                EnableButton14 = true,
-                EnableButton16 = true,
-                EnableButton18 = true,
-                EnableButton20 = true,
-                EnableButton22 = true,
-                EnableButton24 = true,
-                EnableButton26 = true,
-                EnableButton28 = true,
-                EnableButton30 = true,
-                EnableButton32 = true,
+                var bs = new ButtonSelection(i);
+                var flags = bs.Flags;
+                Assert.AreNotEqual(0u, flags, $"Failed on button {i}");
+            }
+        }
+
+        private static readonly ValueTuple<int, uint>[] PositionToValueMap =
+            new ValueTuple<int, uint>[]
+            {
+                (01, 0b1),
+                (02, 0b10),
+                (03, 0b100),
+                (04, 0b1000),
+                (05, 0b10000),
+                (06, 0b100000),
+                (07, 0b1000000),
+                (08, 0b10000000),
+                (09, 0b100000000),
+                (10, 0b1000000000),
+                (11, 0b10000000000),
+                (12, 0b100000000000),
+                (13, 0b1000000000000),
+                (14, 0b10000000000000),
+                (15, 0b100000000000000),
+                (16, 0b1000000000000000),
+                (17, 0b10000000000000000),
+                (18, 0b100000000000000000),
+                (19, 0b1000000000000000000),
+                (20, 0b10000000000000000000),
+                (21, 0b100000000000000000000),
+                (22, 0b1000000000000000000000),
+                (23, 0b10000000000000000000000),
+                (24, 0b100000000000000000000000),
+                (25, 0b1000000000000000000000000),
+                (26, 0b10000000000000000000000000),
+                (27, 0b100000000000000000000000000),
+                (28, 0b1000000000000000000000000000),
+                (29, 0b10000000000000000000000000000),
+                (30, 0b100000000000000000000000000000),
+                (31, 0b1000000000000000000000000000000),
+                (32, 0b10000000000000000000000000000000),
             };
 
-            var expected = 0b10101010101010101010101010101010;
-            Assert.AreEqual<FlagReturnType>(expected, bs.ToFlags());
-        }
+        private static uint LookUpPositionValue(int pos) => PositionToValueMap[pos - 1].Item2;
 
-        [TestMethod]
-        public void OddNumberedButtons()
+        [TestMethod] public void EveryButtonHasTheCorrectBit()
         {
-            // Note, the odd-numbered buttons, because they're indexed
-            // from 1, are the even-numbered bits. :/
-
-            var bs = new ButtonSelection()
+            foreach (var (btn, expected) in PositionToValueMap)
             {
-                EnableButton1 = true,
-                EnableButton3 = true,
-                EnableButton5 = true,
-                EnableButton7 = true,
-                EnableButton9 = true,
-                EnableButton11 = true,
-                EnableButton13 = true,
-                EnableButton15 = true,
-                EnableButton17 = true,
-                EnableButton19 = true,
-                EnableButton21 = true,
-                EnableButton23 = true,
-                EnableButton25 = true,
-                EnableButton27 = true,
-                EnableButton29 = true,
-                EnableButton31 = true,
-            };
-
-            var expected = 0b01010101010101010101010101010101u;
-            Assert.AreEqual<FlagReturnType>(expected, bs.ToFlags());
+                var bs = new ButtonSelection(btn);
+                Assert.AreEqual(expected, bs.Flags);
+            }
         }
 
-        [TestMethod]
-        public void AllButtons()
+        [TestMethod] public void NeighboringPairs()
         {
-            var bs = ButtonSelection.AllButtons;
-            var expected = 0b11111111111111111111111111111111;
-            Assert.AreEqual<FlagReturnType>(expected, bs.ToFlags());
+            for (int i = 1; i <= 31; ++i)
+            {
+                var btn1 = i;
+                var btn2 = i + 1;
+
+                var expected = LookUpPositionValue(btn1) | LookUpPositionValue(btn2);
+                var bs = new ButtonSelection(btn1, btn2);
+                var actual = bs.Flags;
+                var msg = $"pair({btn1},{btn2})";
+                Assert.AreEqual(expected, actual, msg);
+            }
         }
     }
 }
