@@ -45,6 +45,11 @@ namespace SoundMetrics.HID.Windows
             Flags = flags;
         }
 
+        public static ButtonSelection FromFlags(UInt32 flags)
+        {
+            return new ButtonSelection(true, flags);
+        }
+
         private static void ValidateButtonNumber(int btn)
         {
             if (btn < 1 || 32 < btn)
@@ -53,7 +58,7 @@ namespace SoundMetrics.HID.Windows
             }
         }
 
-        internal ButtonSelection(bool _, UInt32 flags)
+        private ButtonSelection(bool _, UInt32 flags)
         {
             Flags = flags;
         }
