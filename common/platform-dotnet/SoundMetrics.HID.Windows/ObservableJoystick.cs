@@ -45,8 +45,25 @@ namespace SoundMetrics.HID.Windows
             Flags = flags;
         }
 
-        public static ButtonSelection FromFlags(UInt32 flags)
+        public static ButtonSelection FromJoyCaps(JoyCaps caps)
         {
+            var buttonCount = caps.wNumButtons;
+            UInt32 flags;
+
+            if (buttonCount == 0)
+            {
+                flags = 0;
+            }
+            else if (buttonCount > 32)
+            {
+                throw new ArgumentOutOfRangeException(nameof(caps.wNumButtons));
+            }
+            else
+            {
+                flags = (uint)(
+                            (1UL << (int)buttonCount) - 1);
+            }
+
             return new ButtonSelection(true, flags);
         }
 

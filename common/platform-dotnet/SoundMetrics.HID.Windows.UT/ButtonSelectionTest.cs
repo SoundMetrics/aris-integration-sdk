@@ -33,7 +33,7 @@ namespace ButtonSelection_spec
     {
         [TestMethod] public void EveryButtonHasABit()
         {
-            for (int i = 1; i <=32; ++i)
+            for (int i = 1; i <= 32; ++i)
             {
                 var bs = new ButtonSelection(i);
                 var flags = bs.Flags;
@@ -104,4 +104,35 @@ namespace ButtonSelection_spec
             }
         }
     }
+
+    [TestClass]
+    public class InitializeButtonSelectionFromJoyCaps
+    {
+        [TestMethod] public void InitializesOkay()
+        {
+            var tests = new[]
+            {
+                (0u, 0u),
+                (1u, 0b1u),
+                (2u, 0b11u),
+                (3u, 0b111u),
+                (32u, 0xFFFFFFFFu)
+            };
+
+            foreach (var (buttonCount, expected) in tests)
+            {
+                var caps = new JoyCaps { wNumButtons = buttonCount };
+                var bs = ButtonSelection.FromJoyCaps(caps);
+                var actual = bs.Flags;
+                Assert.AreEqual(expected, actual);
+            }
+
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                {
+                    var caps = new JoyCaps { wNumButtons = 1000 };
+                    var bs = ButtonSelection.FromJoyCaps(caps);
+                });
+        }
+    }
 }
+
