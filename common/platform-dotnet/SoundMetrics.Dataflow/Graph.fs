@@ -3,6 +3,7 @@
 open System
 open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
+open System.Reactive.Subjects
 
 module Graph =
 
@@ -15,24 +16,74 @@ module Graph =
     let inline snd (_, item, _) = item
     let inline thd (_, _, item) = item
 
+    //-------------------------------------------------------------------------
+
     type RH<'T> = ITargetBlock<'T> * Task list * IDisposable list
 
     let dfbOptions = DataflowLinkOptions(PropagateCompletion = true)
 
-    let leaf<'T> (f : 'T -> unit) =
+    //-------------------------------------------------------------------------
+
+    let drain<'T> () : RH<'T> =
+        let block = ActionBlock<'T>(fun _ -> ())
+        block :> ITargetBlock<'T>, [block.Completion], []
+
+    //-------------------------------------------------------------------------
+
+    let sink<'T> (f: 'T -> unit) : RH<'T> =
         let block = ActionBlock<'T>(f)
         block :> ITargetBlock<'T>, [block.Completion], []
 
-    let buffer<'T> boundedCapacity (rh : ITargetBlock<'T>, leaves, disposables) =
+    //-------------------------------------------------------------------------
 
-        let buffer =  if boundedCapacity > 0 then
-                        let options = DataflowBlockOptions(BoundedCapacity = boundedCapacity)
-                        BufferBlock<'T>(options)
-                      else
-                        BufferBlock<'T>()
+    /// Sinks the input to the functions one at a time.
+    let serialsink<'T> (fs: ('T -> unit) list) : RH<'T> =
+        let block = ActionBlock<'T>(fun t ->
+            for f in fs do
+                f t)
+        block :> ITargetBlock<'T>, [block.Completion], []
 
-        let d = buffer.LinkTo(rh, dfbOptions)
+    //-------------------------------------------------------------------------
+
+    /// Escapes an item out of the graph.
+    let escapeTo (s: ISubject<'T>) : RH<'T> =
+        let block = ActionBlock<'T>(fun t -> s.OnNext(t))
+        block :> ITargetBlock<'T>, [block.Completion], []
+
+
+    //-------------------------------------------------------------------------
+
+    let private mkBufferBlock<'T> capacity =
+        if capacity > 0 then
+            let options = DataflowBlockOptions(BoundedCapacity = capacity)
+            BufferBlock<'T>(options)
+        else
+            BufferBlock<'T>()
+
+    //-------------------------------------------------------------------------
+
+    let buffer<'T> capacity (rh : RH<'T>) : RH<'T> =
+
+        let buffer = mkBufferBlock<'T> capacity
+        let (target, leaves, disposables) = rh
+        let d = buffer.LinkTo(target, dfbOptions)
         buffer :> ITargetBlock<'T>, leaves, d :: disposables
+
+    //-------------------------------------------------------------------------
+
+    let bufferObservable<'T>
+            capacity
+            (source: IObservable<'T>)
+            (rh : RH<'T>)
+            : RH<'T> =
+
+        let buffer = mkBufferBlock capacity
+        let (target, leaves, disposables) = rh
+        let d = buffer.LinkTo(target, dfbOptions)
+        let sub = source.Subscribe(fun t -> buffer.Post(t) |> ignore)
+        buffer :> ITargetBlock<'T>, leaves, [d; sub] @ disposables
+
+    //-------------------------------------------------------------------------
 
     let private completeTargets (template : Task) (targets : ITargetBlock<_> seq) =
 
@@ -48,7 +99,9 @@ module Graph =
 
         targets |> Seq.iter complete
 
-    let tee<'T> (rhs : Tuple<ITargetBlock<'T>, Task list, IDisposable list> list) =
+    //-------------------------------------------------------------------------
+
+    let tee<'T> (rhs : RH<'T> list) : RH<'T> =
 
         let cached = rhs |> Seq.cache
         let targets : ITargetBlock<'T> seq = cached |> Seq.map fst |> Seq.cache
@@ -64,14 +117,23 @@ module Graph =
 
         action :> ITargetBlock<'T>, allLeaves, allDisposables
 
-    let transform<'T,'U> (f : 'T -> 'U) (rhs : ITargetBlock<'U>, leaves, disposables) =
+    //-------------------------------------------------------------------------
+
+    let transform<'T,'U> (f : 'T -> 'U) (rh : RH<'U>) : RH<'T> =
 
         let tf = TransformBlock<'T,'U>(f)
-        let d = tf.LinkTo(rhs, dfbOptions)
+        let (target, leaves, disposables) = rh
+        let d = tf.LinkTo(target, dfbOptions)
         tf :> ITargetBlock<'T>, leaves, d :: disposables
 
-    let filter<'T> (predicate : 'T -> bool) (target : ITargetBlock<'T>, leaves, disposables) =
+    //-------------------------------------------------------------------------
 
+    let filter<'T>
+            (predicate : 'T -> bool)
+            (rh : RH<'T>)
+            : RH<'T> =
+
+        let (target, leaves, disposables) = rh
         let action = ActionBlock<'T>(fun t ->
                         if predicate t then
                             target.Post(t) |> ignore)
@@ -81,6 +143,8 @@ module Graph =
             ) |> ignore
 
         action :> ITargetBlock<'T>, leaves, disposables
+
+    //-------------------------------------------------------------------------
 
     open Serilog // No logging above this line, please.
     open System.Diagnostics
