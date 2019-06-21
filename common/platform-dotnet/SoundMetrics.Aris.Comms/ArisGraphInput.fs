@@ -1,29 +1,33 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
 open System
+open SoundMetrics.Aris.Comms
 
 type ArisGraphCommand =
     /// Start recording.
-    | StartRecording of Guid * (unit -> string)
+    | StartRecording of RecordingRequest
 
     /// End recording.
-    | EndRecording of Guid
+    | StopRecording of RecordingRequest
+
+    /// Stop and restart recording.
+    | StopStartRecording of stop: RecordingRequest * start: RecordingRequest
 
     /// Takes a snapshot--the most recent frame received.
     | TakeSnapshot
 
-type FinishedFrame = FinishedFrame
+type FinishedFrame = ReadyFrame
 
-type ArisFrame =
-    | RawFrame of int
+type ArisFrameType =
+    | RawFrame of Frame
     | OrderedFrame of int
     | FrameWithBgs of FinishedFrame
 
 type ArisGraphInput =
     /// This is a frame received from the sonar.
-    | ArisFrame of ArisFrame
+    | ArisFrame of ArisFrameType
 
     /// A command for the graph.
-    | Command of ArisGraphCommand
+    | GraphCommand of ArisGraphCommand
 
 

@@ -62,11 +62,15 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
     let keepAliveTimer = Observable.Interval(SonarConnectionDetails.keepAlivePingInterval)
 
     // Processing graph
-    let pGraph, pGraphLeaves, pGraphDisposables =
-        GraphBuilder.buildSimpleRecordingGraph perfSink
-                                               frameStreamListener.Frames
-                                               earlyFrameSubject
-                                               frameIndexMapper.ReportFrameMapping
+    //let pGraph, pGraphLeaves, pGraphDisposables =
+    //    GraphBuilder.buildSimpleRecordingGraph perfSink
+    //                                           frameStreamListener.Frames
+    //                                           earlyFrameSubject
+    //                                           frameIndexMapper.ReportFrameMapping
+    let graph = ArisGraph.build
+                    targetSonar
+                    frameStreamListener.Frames
+                    earlyFrameSubject
 
     let buildFrameStreamSubscription () =
         let rateTracker = RateTracker()
@@ -169,17 +173,18 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
     interface IDisposable with
         member __.Dispose() =
             disposingSignal.Set()
-            let disposables = List.concat [ queueLinks; inputGraphLinks; pGraphDisposables
-                                            [ earlyFrameSubject; frameStreamSubscription
+            let disposables = List.concat [ queueLinks; inputGraphLinks
+                                            [ earlyFrameSubject; frameStreamSubscription; graph
                                               frameStreamListener; snListener; cxnStateSubject; cts; cxnMgrDone ] ]
             Dispose.theseWith disposed
                 disposables
                 (fun () ->
-                        GraphBuilder.quitWaitClean (pGraph, pGraphLeaves, pGraphDisposables)
+                        earlyFrameSubject.OnCompleted()
+                        graph.CompleteAndWait(TimeSpan.FromSeconds(2.0)) |> ignore
+                        graph.Dispose()
 
                         quitCxnMgr()
                         cts.Cancel()
-                        earlyFrameSubject.OnCompleted()
                         //attemptedAcousticSettingsSubject.OnCompleted()
                         cxnEvQueue.Complete()
                         cxnEvQueue.Completion.Wait()
@@ -282,10 +287,12 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
 
     // Recording
 
-    member __.StartRecording request = pGraph.Post (WorkUnit.Command (StartRecording request))
+    member __.StartRecording request = graph.Post (GraphCommand (Experimental.StartRecording request))
+        // ### (WorkUnit.Command (StartRecording request))
     member __.StopRecording request =
         frameIndexMapper.RemoveMappingFor request
-        pGraph.Post (WorkUnit.Command (StopRecording request))
+        graph.Post (GraphCommand (Experimental.StopRecording request))
+            // ### (WorkUnit.Command (StopRecording request))
 
     /// Facilitates mapping the display frame index to the recorded frame index.
     /// Returns None if the mapping cannot be done. Mapping can be done only during

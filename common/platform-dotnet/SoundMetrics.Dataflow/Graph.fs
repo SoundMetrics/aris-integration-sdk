@@ -71,17 +71,18 @@ module Graph =
 
     //-------------------------------------------------------------------------
 
-    let bufferObservable<'T>
+    let bufferObservable<'T,'U>
             capacity
             (source: IObservable<'T>)
-            (rh : RH<'T>)
-            : RH<'T> =
+            (transform: 'T -> 'U)
+            (rh : RH<'U>)
+            : RH<'U> =
 
-        let buffer = mkBufferBlock capacity
+        let buffer = mkBufferBlock<'U> capacity
         let (target, leaves, disposables) = rh
         let d = buffer.LinkTo(target, dfbOptions)
-        let sub = source.Subscribe(fun t -> buffer.Post(t) |> ignore)
-        buffer :> ITargetBlock<'T>, leaves, [d; sub] @ disposables
+        let sub = source.Subscribe(fun t -> t |> transform |> buffer.Post |> ignore)
+        buffer :> ITargetBlock<'U>, leaves, [d; sub] @ disposables
 
     //-------------------------------------------------------------------------
 

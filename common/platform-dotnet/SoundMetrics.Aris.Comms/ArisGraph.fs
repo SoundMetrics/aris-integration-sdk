@@ -3,6 +3,7 @@
 open System
 open System.Reactive.Subjects
 open SoundMetrics.Dataflow.Graph
+open SoundMetrics.Aris.Comms
 
 module ArisGraph =
 
@@ -13,35 +14,35 @@ module ArisGraph =
             match input with
             | ArisFrame (RawFrame f) -> failwith "nyi"
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
-            | Command _ -> input // ignore it
+            | GraphCommand _ -> input // ignore it
 
         let subtractBackground input =
 
             match input with
             | ArisFrame (OrderedFrame f) -> failwith "nyi"
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
-            | Command _ -> input // ignore it
+            | GraphCommand _ -> input // ignore it
 
         let recordBgs input : unit =
 
             match input with
             | ArisFrame (FrameWithBgs f) -> failwith "nyi"
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
-            | Command _ -> () // ignore it
+            | GraphCommand _ -> () // ignore it
 
         let recordFile input : unit =
 
             match input with
             | ArisFrame (FrameWithBgs f) -> failwith "nyi"
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
-            | Command _ -> () // ignore it
+            | GraphCommand _ -> () // ignore it
 
         let toFinishedFrame input : FinishedFrame =
 
             match input with
             | ArisFrame (FrameWithBgs f) -> f
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
-            | Command _ -> failwith "Unexpected command"
+            | GraphCommand _ -> failwith "Unexpected command"
 
         let isFinishedFrame input =
 
@@ -54,23 +55,24 @@ module ArisGraph =
             match input with
             | ArisFrame (FrameWithBgs f) -> mostRecent := ValueSome f
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
-            | Command TakeSnapshot ->
+            | GraphCommand TakeSnapshot ->
                 match !mostRecent with
                 | ValueSome f -> failwith "nyi"
                 | ValueNone -> () // ignore; no frame to save
-            | Command _ -> () // ignore
+            | GraphCommand _ -> () // ignore
 
     open Details
 
     [<CompiledName("Build")>]
     let build
             (name: string)
-            (frameObservable: IObservable<ArisGraphInput>)
+            (frameObservable: IObservable<Frame>)
             (displaySubject: ISubject<FinishedFrame>)
             : GraphHandle<ArisGraphInput> =
 
         let graphRoot =
-            bufferObservable 100 frameObservable
+            let frameToInput frame = ArisFrame (RawFrame frame)
+            bufferObservable 100 frameObservable frameToInput
                 ^|> transform (reorderSamples >> subtractBackground)
                 ^|> tee
                     [
