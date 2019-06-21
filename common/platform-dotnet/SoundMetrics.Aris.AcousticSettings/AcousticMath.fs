@@ -32,6 +32,8 @@ with
             s.FrameRate, s.SampleCount, s.SampleStartDelay, s.CyclePeriod, s.SamplePeriod,
             s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
 
+    member s.UseMaximumFrameRate () = { s with FrameRate = 15.0</s> }
+
     static member Invalid = {
         FrameRate = 1.0</s>
         SampleCount = 0
