@@ -174,7 +174,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
         member __.Dispose() =
             disposingSignal.Set()
             let disposables = List.concat [ queueLinks; inputGraphLinks
-                                            [ earlyFrameSubject; frameStreamSubscription; graph
+                                            [ earlyFrameSubject; frameStreamSubscription
                                               frameStreamListener; snListener; cxnStateSubject; cts; cxnMgrDone ] ]
             Dispose.theseWith disposed
                 disposables
@@ -288,11 +288,10 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
     // Recording
 
     member __.StartRecording request = graph.Post (GraphCommand (Experimental.StartRecording request))
-        // ### (WorkUnit.Command (StartRecording request))
+
     member __.StopRecording request =
         frameIndexMapper.RemoveMappingFor request
         graph.Post (GraphCommand (Experimental.StopRecording request))
-            // ### (WorkUnit.Command (StopRecording request))
 
     /// Facilitates mapping the display frame index to the recorded frame index.
     /// Returns None if the mapping cannot be done. Mapping can be done only during
