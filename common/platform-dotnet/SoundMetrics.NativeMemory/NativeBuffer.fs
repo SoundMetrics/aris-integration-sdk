@@ -68,7 +68,7 @@ module private NativeBufferDetails =
 
     // Mutates `buffer`
     let copyByteArraysToBuffer (arrays : (int * byte array) seq) (buffer : NativeBufferHandle) =
-        
+
         // Here we can use `Marshal` to do the work.
         let buffer' = NativePtr.ofNativeInt<byte> buffer.IntPtr
         for (offset, source) in arrays do
@@ -126,7 +126,6 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
             // Clean up managed resources
             checkDisposed()
             disposed <- true
-            GC.SuppressFinalize(self)
 
         // Clean up native resources
         buffer.Dispose()
@@ -135,7 +134,10 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
     interface IDisposable with
         member s.Dispose() = dispose true
 
-    member __.Dispose() = dispose true
+    member __.Dispose() =
+        dispose true
+        GC.SuppressFinalize(self)
+
     override __.Finalize() = dispose false
 
     member __.Length = buffer.Length
@@ -167,16 +169,18 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 
         new NativeBuffer(byteArraysToNative fragments)
 
-module NativeBuffer = 
+module NativeBuffer =
 
     /// Transforms into a new copy; assumes the output is the same size as the source.
-    let transformFrame txf
-                       pingMode
-                       pingsPerFrame
-                       beamCount
-                       samplesPerBeam
-                       (source : NativeBuffer)
-                       : NativeBuffer =
+    let transform
+            txf
+            pingMode
+            pingsPerFrame
+            beamCount
+            samplesPerBeam
+            (source : NativeBuffer)
+            : NativeBuffer =
+
         source.TransformFrame(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
 
     let map<'Result> (f : (nativeptr<byte> * int) -> 'Result) (source : NativeBuffer) : 'Result =

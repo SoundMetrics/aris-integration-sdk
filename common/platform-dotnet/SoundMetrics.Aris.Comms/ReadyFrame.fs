@@ -8,7 +8,7 @@ open SoundMetrics.Aris.ReorderCS
 type RecordingState = NotRecording = 0 | Recording = 1
 
 type ReadyFrame = {
-    Frame :             Frame
+    Frame :             RawFrame
     Histogram :         FrameHistogram
     RecordingState :    RecordingState
 }

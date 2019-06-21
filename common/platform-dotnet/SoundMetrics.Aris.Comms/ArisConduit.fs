@@ -40,7 +40,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
     let available = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(15.0))
     let mutable serialNumber: Nullable<ArisSerialNumber> = Nullable<ArisSerialNumber>()
     let mutable snListener: IDisposable = null
-    let mutable setSalinity: (Frame -> unit) = fun _ -> ()
+    let mutable setSalinity: (RawFrame -> unit) = fun _ -> ()
     let systemType: ArisSystemType option ref = ref None
     let cts = new CancellationTokenSource()
     let cxnMgrDone = new ManualResetEventSlim()
@@ -69,7 +69,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
 
     let buildFrameStreamSubscription () =
         let rateTracker = RateTracker()
-        let trackFrameInfo (frame: Frame) =
+        let trackFrameInfo (frame: RawFrame) =
             match !systemType with
             | Some st -> if st <> (enum (int frame.Header.TheSystemType)) then
                             systemType := Some (enum (int frame.Header.TheSystemType))

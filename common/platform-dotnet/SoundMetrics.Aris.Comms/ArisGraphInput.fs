@@ -1,7 +1,12 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
-open System
-open SoundMetrics.Aris.Comms
+open Aris.FileTypes
+open SoundMetrics.NativeMemory
+open SoundMetrics.Aris.ReorderCS
+open SoundMetrics.Aris.AcousticSettings
+
+// avoiding confusion with SoundMetrics.Aris.Comms & Experimental
+type RecordingRequest = SoundMetrics.Aris.Comms.RecordingRequest
 
 type ArisGraphCommand =
     /// Start recording.
@@ -16,12 +21,43 @@ type ArisGraphCommand =
     /// Takes a snapshot--the most recent frame received.
     | TakeSnapshot
 
-type FinishedFrame = ReadyFrame
+type ArisRawFrame = SoundMetrics.Aris.Comms.RawFrame
+
+[<Struct>]
+type ArisFrameGeometry = {
+    PingMode: uint32
+    BeamCount: uint32
+    SampleCount: uint32
+    PingsPerFrame: uint32
+}
+with
+    static member FromFrame (f: ArisRawFrame) =
+        let cfg = SonarConfig.getPingModeConfig (PingMode.From f.Header.PingMode)
+        {
+            PingMode = f.Header.PingMode
+            BeamCount  = uint32 cfg.ChannelCount
+            SampleCount = f.Header.SamplesPerBeam
+            PingsPerFrame = uint32 cfg.PingsPerFrame
+        }
+
+type ArisOrderedFrame = {
+    Header: ArisFrameHeader ref
+    FrameGeometry: ArisFrameGeometry ref
+    SampleData: NativeBuffer
+    Histogram: FrameHistogram ref
+}
+
+type ArisFinishedFrame = {
+    Header: ArisFrameHeader ref
+    FrameGeometry: ArisFrameGeometry ref
+    SampleData: NativeBuffer
+    Histogram: FrameHistogram ref
+}
 
 type ArisFrameType =
-    | RawFrame of Frame
-    | OrderedFrame of int
-    | FrameWithBgs of FinishedFrame
+    | RawFrame of ArisRawFrame
+    | OrderedFrame of ArisOrderedFrame
+    | FrameWithBgs of ArisFinishedFrame
 
 type ArisGraphInput =
     /// This is a frame received from the sonar.

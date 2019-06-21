@@ -28,7 +28,7 @@ module internal ArisConduitHelpers =
         Telephoto: bool
         ObservedFocus: FU }
     with
-        static member FromFrame (fr : Frame) =
+        static member FromFrame (fr : RawFrame) =
             // Use 0 if depth is not available from the frame.
             let depth =
                 let fd = fr.Header.Depth

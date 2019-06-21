@@ -4,6 +4,8 @@ open System
 open System.Reactive.Subjects
 open SoundMetrics.Dataflow.Graph
 open SoundMetrics.Aris.Comms
+open SoundMetrics.Aris.ReorderCS
+open SoundMetrics.NativeMemory
 
 module ArisGraph =
 
@@ -12,52 +14,91 @@ module ArisGraph =
         let reorderSamples input =
 
             match input with
-            | ArisFrame (RawFrame f) -> failwith "nyi"
+            | ArisFrame (RawFrame f) ->
+
+                let buildHistogram (source : nativeptr<byte>, length) =
+                    FrameHistogram.Generate(source, length)
+
+                let histogram = ref (f.SampleData |> NativeBuffer.map buildHistogram)
+
+                let frameGeometry = ArisFrameGeometry.FromFrame(f)
+                let orderedData =
+                    let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
+                    NativeBuffer.transform
+                        reorder
+                        frameGeometry.PingMode
+                        frameGeometry.PingsPerFrame
+                        frameGeometry.BeamCount
+                        frameGeometry.SampleCount
+                        f.SampleData
+
+                let orderedFrame =
+                    {
+                        ArisOrderedFrame.Header = ref f.Header
+                        FrameGeometry = ref frameGeometry
+                        SampleData = orderedData
+                        Histogram = histogram
+                    }
+                (ArisFrame (OrderedFrame orderedFrame))
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
             | GraphCommand _ -> input // ignore it
 
         let subtractBackground input =
 
             match input with
-            | ArisFrame (OrderedFrame f) -> failwith "nyi"
+            | ArisFrame (OrderedFrame f) ->
+                // TODO BGS operations
+                let finishedFrame =
+                    {
+                        ArisFinishedFrame.Header = f.Header
+                        FrameGeometry = f.FrameGeometry
+                        SampleData = f.SampleData
+                        Histogram = f.Histogram
+                    }
+                ArisFrame (FrameWithBgs finishedFrame)
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
             | GraphCommand _ -> input // ignore it
 
         let recordBgs input : unit =
 
             match input with
-            | ArisFrame (FrameWithBgs f) -> failwith "nyi"
+            | ArisFrame (FrameWithBgs f) ->
+                // TODO BGS operations
+                ()
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
             | GraphCommand _ -> () // ignore it
 
         let recordFile input : unit =
 
             match input with
-            | ArisFrame (FrameWithBgs f) -> failwith "nyi"
+            | ArisFrame (FrameWithBgs f) ->
+                // TODO record file
+                ()
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
             | GraphCommand _ -> () // ignore it
 
-        let toFinishedFrame input : FinishedFrame =
+        let toFinishedFrame input : ArisFinishedFrame =
 
             match input with
             | ArisFrame (FrameWithBgs f) -> f
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
             | GraphCommand _ -> failwith "Unexpected command"
 
-        let isFinishedFrame input =
+        let isFinishedFrame = function
 
-            match input with
             | ArisFrame (FrameWithBgs f) -> true
             | _ -> false
 
-        let takeSnapshot (mostRecent: FinishedFrame voption ref) input : unit =
+        let takeSnapshot (mostRecent: ArisFinishedFrame voption ref) input : unit =
 
             match input with
             | ArisFrame (FrameWithBgs f) -> mostRecent := ValueSome f
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)
             | GraphCommand TakeSnapshot ->
                 match !mostRecent with
-                | ValueSome f -> failwith "nyi"
+                | ValueSome f ->
+                    // TODO take a snapshot
+                    ()
                 | ValueNone -> () // ignore; no frame to save
             | GraphCommand _ -> () // ignore
 
@@ -66,8 +107,8 @@ module ArisGraph =
     [<CompiledName("Build")>]
     let build
             (name: string)
-            (frameObservable: IObservable<Frame>)
-            (displaySubject: ISubject<FinishedFrame>)
+            (frameObservable: IObservable<RawFrame>)
+            (displaySubject: ISubject<ArisFinishedFrame>)
             : GraphHandle<ArisGraphInput> =
 
         let graphRoot =

@@ -3,7 +3,7 @@
 using System;
 using System.Windows;
 using System.Windows.Media;
-using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.Frame>;
+using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.RawFrame>;
 
 namespace SoundMetrics.DataVisualization
 {
@@ -47,7 +47,7 @@ namespace SoundMetrics.DataVisualization
 
         public static readonly DependencyProperty RangeLabelModeProperty =
             DependencyProperty.Register("RangeLabelMode", typeof(RangeLabelMode), typeof(SimpleVisualizationControl),
-                new UIPropertyMetadata(OnRangeLabelModeChanged), 
+                new UIPropertyMetadata(OnRangeLabelModeChanged),
                 value => ValidateEnumMember<RangeLabelMode>(value));
 
         public RangeLabelMode RangeLabelMode

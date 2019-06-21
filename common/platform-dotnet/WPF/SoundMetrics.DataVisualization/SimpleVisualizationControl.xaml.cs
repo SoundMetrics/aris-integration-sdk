@@ -3,7 +3,7 @@
 using SoundMetrics.Aris.PaletteShader;
 using System.Windows.Controls;
 using System.Windows.Media;
-using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.Frame>;
+using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.RawFrame>;
 
 namespace SoundMetrics.DataVisualization
 {

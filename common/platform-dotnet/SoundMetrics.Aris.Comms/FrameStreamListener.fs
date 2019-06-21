@@ -40,7 +40,7 @@ type internal FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabili
 
     let udpSender = new UdpClient(0) // any port
     let cts = new CancellationTokenSource()
-    let frameSubject = new Subject<Frame>()
+    let frameSubject = new Subject<RawFrame>()
     let completeSignal = new ManualResetEventSlim()
 
     let sendAck (frameIndex : FrameIndex) (dataOffset : uint32) =
@@ -69,7 +69,7 @@ type internal FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabili
                 let frameIndex = !nextFrameIndex
                 if frameSubject.HasObservers then
                     let frame = {
-                        Header = Frame.HeaderFrom(accum.HeaderBytes,
+                        Header = RawFrame.HeaderFrom(accum.HeaderBytes,
                                                   accum.FrameReceiptTimestamp,
                                                   (Some (uint32 frameIndex)))
                         SampleData = accum.SampleData
@@ -131,5 +131,5 @@ type internal FrameStreamListener (sinkAddress : IPAddress, frameStreamReliabili
     member __.Flush () = frameAssembler.Flush()
     member __.SetSinkAddress sinkAddress = updateSinkAddress sinkAddress
     member __.SinkEndpoint = udpClient.Client.LocalEndPoint :?> IPEndPoint
-    member __.Frames = frameSubject :> IObservable<Frame>
+    member __.Frames = frameSubject :> IObservable<RawFrame>
     member __.Metrics = frameAssembler.Metrics
