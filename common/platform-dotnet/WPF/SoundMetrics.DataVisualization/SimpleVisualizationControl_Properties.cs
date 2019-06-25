@@ -7,14 +7,14 @@ using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.RawFrame>;
 
 namespace SoundMetrics.DataVisualization
 {
-    public sealed partial class SimpleVisualizationControl
+    public sealed partial class ArisImageControl
     {
         private static bool ValidateEnumMember<E>(object value) => Enum.IsDefined(typeof(E), value);
 
         //-------------------------------------------------------------------------------
 
         public static readonly DependencyProperty FrameSourceProperty =
-            DependencyProperty.Register("FrameSource", typeof(ArisFrameSource), typeof(SimpleVisualizationControl),
+            DependencyProperty.Register("FrameSource", typeof(ArisFrameSource), typeof(ArisImageControl),
                                         new PropertyMetadata(OnFrameSourceChanged));
 
         public ArisFrameSource FrameSource
@@ -24,13 +24,13 @@ namespace SoundMetrics.DataVisualization
         }
 
         private static void OnFrameSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((SimpleVisualizationControl)d).OnFrameSourceChanged((ArisFrameSource)e.NewValue);
+            => ((ArisImageControl)d).OnFrameSourceChanged((ArisFrameSource)e.NewValue);
 
         //-------------------------------------------------------------------------------
 
         /// <summary>Defines the IsReversed dependency property.</summary>
         public static readonly DependencyProperty IsReversedProperty =
-            DependencyProperty.Register("Reverse", typeof(bool), typeof(SimpleVisualizationControl),
+            DependencyProperty.Register("Reverse", typeof(bool), typeof(ArisImageControl),
                 new UIPropertyMetadata(OnIsReversedChanged));
 
         /// <summary>Reverses the image left-for-right.</summary>
@@ -41,12 +41,12 @@ namespace SoundMetrics.DataVisualization
         }
 
         private static void OnIsReversedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((SimpleVisualizationControl)d).OnIsReversedChanged((bool)e.OldValue, (bool)e.NewValue);
+            => ((ArisImageControl)d).OnIsReversedChanged((bool)e.OldValue, (bool)e.NewValue);
 
         //-------------------------------------------------------------------------------
 
         public static readonly DependencyProperty RangeLabelModeProperty =
-            DependencyProperty.Register("RangeLabelMode", typeof(RangeLabelMode), typeof(SimpleVisualizationControl),
+            DependencyProperty.Register("RangeLabelMode", typeof(RangeLabelMode), typeof(ArisImageControl),
                 new UIPropertyMetadata(OnRangeLabelModeChanged),
                 value => ValidateEnumMember<RangeLabelMode>(value));
 
@@ -57,12 +57,12 @@ namespace SoundMetrics.DataVisualization
         }
 
         private static void OnRangeLabelModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((SimpleVisualizationControl)d).OnRangeLabelModeChanged((RangeLabelMode)e.OldValue, (RangeLabelMode)e.NewValue);
+            => ((ArisImageControl)d).OnRangeLabelModeChanged((RangeLabelMode)e.OldValue, (RangeLabelMode)e.NewValue);
 
         //-------------------------------------------------------------------------------
 
         public static readonly DependencyProperty PaletteTemplateProperty =
-            DependencyProperty.Register("PaletteTemplate", typeof(Brush), typeof(SimpleVisualizationControl),
+            DependencyProperty.Register("PaletteTemplate", typeof(Brush), typeof(ArisImageControl),
                 new UIPropertyMetadata(OnPaletteTemplateChanged));
 
         public Brush PaletteTemplate
@@ -72,12 +72,12 @@ namespace SoundMetrics.DataVisualization
         }
 
         private static void OnPaletteTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((SimpleVisualizationControl)d).OnPaletteTemplateChanged((Brush)e.NewValue);
+            => ((ArisImageControl)d).OnPaletteTemplateChanged((Brush)e.NewValue);
 
         //-------------------------------------------------------------------------------
 
         public static readonly DependencyProperty PaletteIndexProperty =
-            DependencyProperty.Register("PaletteIndex", typeof(int), typeof(SimpleVisualizationControl),
+            DependencyProperty.Register("PaletteIndex", typeof(int), typeof(ArisImageControl),
                 new UIPropertyMetadata(OnPaletteIndexChanged),
                 value => value is int index && index >= 0);
 
@@ -88,6 +88,6 @@ namespace SoundMetrics.DataVisualization
         }
 
         private static void OnPaletteIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((SimpleVisualizationControl)d).OnPaletteIndexChanged((int)e.OldValue, (int)e.NewValue);
+            => ((ArisImageControl)d).OnPaletteIndexChanged((int)e.OldValue, (int)e.NewValue);
     }
 }
