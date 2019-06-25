@@ -106,20 +106,43 @@ Foreach ($el in $dotnetStandardAssemblies) {
 
 # .NET Desktop assemblies
 
+$dotnetDesktopAssemblies = @(
+    "SoundMetrics.HID.Windows"
+    "SoundMetrics.Scripting.Desktop"
+)
+
+'$dotnetDesktopAssemblies: ' + $dotnetDesktopAssemblies
+
 # We're using -NoPackageAnalysis to avoid nuget warning NU5105 (legacy compat).
 #
 # # Again, wedged, as above. Removing the following:
 # #
 # #   -Symbols -SymbolPackageFormat snupkg
 # #
-.\.nuget\nuget.exe pack -Verbosity detailed `
-                        -NoPackageAnalysis `
-                        -Version $package_version `
-                        -Properties Configuration=Release `
-                        -OutputDirectory $output_directory `
-                        .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
+#.\.nuget\nuget.exe pack -Verbosity detailed `
+#                        -NoPackageAnalysis `
+#                        -Version $package_version `
+#                        -Properties Configuration=Release `
+#                        -OutputDirectory $output_directory `
+#                        .\SoundMetrics.Scripting.Desktop\SoundMetrics.Scripting.Desktop.fsproj
 
-cp .\SoundMetrics.Scripting.Desktop\bin\Release\SoundMetrics.Scripting.Desktop.pdb $symbol_directory\SoundMetrics.Scripting.Desktop.pdb
+#cp .\SoundMetrics.Scripting.Desktop\bin\Release\SoundMetrics.Scripting.Desktop.pdb $symbol_directory\SoundMetrics.Scripting.Desktop.pdb
+
+Foreach ($el in $dotnetDesktopAssemblies) {
+    ''
+    '---------------------------------------------------------------------'
+    "Packing $el"
+    '---------------------------------------------------------------------'
+
+    .\.nuget\nuget.exe pack -Verbosity detailed `
+                            -NoPackageAnalysis `
+                            -Version $package_version `
+                            -Properties Configuration=Release `
+                            -OutputDirectory $output_directory `
+                            .\$el
+
+    cp .\$el\bin\Release\$el.pdb $symbol_directory\$el.pdb
+}
 
 cp push-packages.cmd $output_directory
 ls $output_directory
