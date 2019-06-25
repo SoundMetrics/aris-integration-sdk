@@ -117,11 +117,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj">
+    <ProjectReference Include="..\SoundMetrics.Aris.Comms\SoundMetrics.Aris.Comms.fsproj">
       <Project>{74b8eb49-4248-43cb-9d69-af71b4d68e66}</Project>
       <Name>SoundMetrics.Aris.Comms</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\SoundMetrics.Aris.PaletteShader\SoundMetrics.Aris.PaletteShader.csproj">
+    <ProjectReference Include="..\SoundMetrics.Aris.PaletteShader\SoundMetrics.Aris.PaletteShader.csproj">
       <Project>{9bc3b74c-6bfa-43c3-8dbc-48dd988aa591}</Project>
       <Name>SoundMetrics.Aris.PaletteShader</Name>
     </ProjectReference>

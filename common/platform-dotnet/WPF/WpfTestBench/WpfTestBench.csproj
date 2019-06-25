@@ -106,7 +106,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj">
+    <ProjectReference Include="..\..\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj">
       <Project>{be7e1388-706e-44d7-96f6-d5cebf2317f6}</Project>
       <Name>SoundMetrics.DataVisualization</Name>
     </ProjectReference>

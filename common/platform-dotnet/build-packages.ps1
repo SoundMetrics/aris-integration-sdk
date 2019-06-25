@@ -107,6 +107,7 @@ Foreach ($el in $dotnetStandardAssemblies) {
 # .NET Desktop assemblies
 
 $dotnetDesktopAssemblies = @(
+    "SoundMetrics.DataVisualization"
     "SoundMetrics.HID.Windows"
     "SoundMetrics.Scripting.Desktop"
 )
