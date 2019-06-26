@@ -33,6 +33,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ArisFrameHeaderBindable.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="AssemblyAttributes.fs" />
     <Compile Include="AsyncTaskTracker.fs" />

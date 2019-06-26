@@ -40,14 +40,14 @@ with
         }
 
 type ArisOrderedFrame = {
-    Header: ArisFrameHeader
+    Header: ArisFrameHeaderBindable
     FrameGeometry: ArisFrameGeometry
     SampleData: NativeBuffer
     Histogram: FrameHistogram
 }
 
 type ArisFinishedFrame = {
-    Header: ArisFrameHeader
+    Header: ArisFrameHeaderBindable
     FrameGeometry: ArisFrameGeometry
     SampleData: NativeBuffer
     Histogram: FrameHistogram

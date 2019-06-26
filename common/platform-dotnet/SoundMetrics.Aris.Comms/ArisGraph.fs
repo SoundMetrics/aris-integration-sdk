@@ -32,7 +32,7 @@ module ArisGraph =
 
                 let orderedFrame =
                     {
-                        ArisOrderedFrame.Header = f.Header
+                        ArisOrderedFrame.Header = ArisFrameHeaderBindable f.Header
                         FrameGeometry = frameGeometry
                         SampleData = orderedData
                         Histogram = f.SampleData |> NativeBuffer.map buildHistogram
