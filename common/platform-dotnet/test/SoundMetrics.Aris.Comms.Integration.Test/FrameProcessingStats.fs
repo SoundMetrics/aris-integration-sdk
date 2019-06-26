@@ -20,7 +20,8 @@ let frameProcessingStats (inputs : TestInputs) =
     Threading.SynchronizationContext.SetSynchronizationContext(Threading.SynchronizationContext())
 
     use availability =
-            BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(30.0))
+            BeaconListener.CreateForArisExplorerAndVoyager(
+                SynchronizationContext.Current, TimeSpan.FromSeconds(30.0))
     let timeoutPeriod = TimeSpan.FromSeconds(10.0)
 
     match Async.RunSynchronously(availability.WaitForArisBySerialNumberAsync sn timeoutPeriod) with
@@ -35,9 +36,12 @@ let frameProcessingStats (inputs : TestInputs) =
         let skipFrames = 10
         let sampleCountWanted = 500
         let perfSink = SampledConduitPerfSink(sampleCountWanted, skipFrames)
-        use conduit = new ArisConduit(initialSettings, sn,
-                                      FrameStreamReliabilityPolicy.DropPartialFrames,
-                                      perfSink)
+        use conduit = new ArisConduit(
+                        SynchronizationContext.Current,
+                        initialSettings,
+                        sn,
+                        FrameStreamReliabilityPolicy.DropPartialFrames,
+                        perfSink)
 
         use readySignal = new ManualResetEvent(false)
 

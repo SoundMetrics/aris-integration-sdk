@@ -197,16 +197,17 @@ open BeaconListener
 /// See <see cref="CreateForArisExplorerAndVoyager"/> and
 /// <see cref="CreateForArisDefender"/> for simple construction.
 [<Sealed>]
-type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, bool>) as self =
+type BeaconListener (syncCtx : SynchronizationContext,
+                     expirationPeriod : TimeSpan,
+                     filter : Func<NetworkDevice, bool>) as self =
     // ctor(Func<_,_>) is the primary ctor as it helps on the C# side.
 
     let mutable disposed = false
 
     let shouldInclude device = filter.Invoke(device)
-    let syncContext =   let ctx = SynchronizationContext.Current
-                        if isNull ctx then
+    let syncContext =   if isNull syncCtx then
                             failwith "No SynchronizationContext is set"
-                        ctx
+                        syncCtx
 
     let arisExplorerCollection = ObservableCollection<ArisBeacon>()
     let arisDefenderCollection = ObservableCollection<ArisBeacon>()
@@ -313,32 +314,32 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
 
     /// Factory function to create a beacon listener that sees only ARIS Explorer
     /// and ARIS Voyager beacons.
-    static member CreateForArisExplorerAndVoyager (expirationPeriod : TimeSpan) =
+    static member CreateForArisExplorerAndVoyager (synchronizationContext, expirationPeriod : TimeSpan) =
 
         let predicate = function
             | Aris beacon -> match beacon.Model with
                              | Explorer | Voyager -> true
                              | _ -> false
             | _ -> false
-        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+        new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
     /// Factory function to create a beacon listener that sees only ARIS Defender beacons.
-    static member CreateForArisDefender (expirationPeriod : TimeSpan) =
+    static member CreateForArisDefender (synchronizationContext, expirationPeriod : TimeSpan) =
 
         let predicate = function
             | Aris beacon -> match beacon.Model with
                              | Defender _ -> true
                              | _ -> false
             | _ -> false
-        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+        new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
-    static member CreateForCommandModules (expirationPeriod : TimeSpan) =
+    static member CreateForCommandModules (synchronizationContext, expirationPeriod : TimeSpan) =
 
         let predicate = function
             | ArisCommandModule beacon -> true
             | _ -> false
 
-        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+        new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
 
     /// Blocking wait for the beacon you're interested in, for F# folk.

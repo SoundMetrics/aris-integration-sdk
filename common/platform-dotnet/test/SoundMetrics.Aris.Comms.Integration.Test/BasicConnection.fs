@@ -19,7 +19,8 @@ let testBasicConnection (inputs : TestInputs) =
     // Console doesn't have a sync context by default, we need one for the beacon listener.
     Threading.SynchronizationContext.SetSynchronizationContext(Threading.SynchronizationContext())
 
-    use availability = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(30.0))
+    use availability = BeaconListener.CreateForArisExplorerAndVoyager(
+                            SynchronizationContext.Current, TimeSpan.FromSeconds(30.0))
 
     let findTimeout = TimeSpan.FromSeconds(10.0)
 
@@ -33,9 +34,12 @@ let testBasicConnection (inputs : TestInputs) =
             { defaultSettings with FrameRate = 15.0</s> }
 
         let perfSink = SampledConduitPerfSink(1000, 10)
-        use conduit = new ArisConduit(initialSettings, sn,
-                                      FrameStreamReliabilityPolicy.DropPartialFrames,
-                                      perfSink)
+        use conduit = new ArisConduit(
+                        SynchronizationContext.Current,
+                        initialSettings,
+                        sn,
+                        FrameStreamReliabilityPolicy.DropPartialFrames,
+                        perfSink)
 
         use readySignal = new ManualResetEvent(false)
 
