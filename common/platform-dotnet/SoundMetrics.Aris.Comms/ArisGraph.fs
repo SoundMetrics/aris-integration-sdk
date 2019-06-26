@@ -19,8 +19,6 @@ module ArisGraph =
                 let buildHistogram (source : nativeptr<byte>, length) =
                     FrameHistogram.Generate(source, length)
 
-                let histogram = ref (f.SampleData |> NativeBuffer.map buildHistogram)
-
                 let frameGeometry = ArisFrameGeometry.FromFrame(f)
                 let orderedData =
                     let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
@@ -34,10 +32,10 @@ module ArisGraph =
 
                 let orderedFrame =
                     {
-                        ArisOrderedFrame.Header = ref f.Header
-                        FrameGeometry = ref frameGeometry
+                        ArisOrderedFrame.Header = f.Header
+                        FrameGeometry = frameGeometry
                         SampleData = orderedData
-                        Histogram = histogram
+                        Histogram = f.SampleData |> NativeBuffer.map buildHistogram
                     }
                 (ArisFrame (OrderedFrame orderedFrame))
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)

@@ -7,7 +7,7 @@ namespace SoundMetrics.Aris.ReorderCS
     /// <summary>
     /// A histogram of sample value counts.
     /// </summary>
-    public struct FrameHistogram
+    public class FrameHistogram
     {
         /// <summary>
         /// The counts.

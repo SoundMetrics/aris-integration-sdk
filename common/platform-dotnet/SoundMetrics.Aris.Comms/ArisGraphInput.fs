@@ -23,12 +23,11 @@ type ArisGraphCommand =
 
 type ArisRawFrame = SoundMetrics.Aris.Comms.RawFrame
 
-[<Struct>]
 type ArisFrameGeometry = {
-    PingMode: uint32
-    BeamCount: uint32
-    SampleCount: uint32
-    PingsPerFrame: uint32
+    PingMode:       uint32
+    BeamCount:      uint32
+    SampleCount:    uint32
+    PingsPerFrame:  uint32
 }
 with
     static member FromFrame (f: ArisRawFrame) =
@@ -41,17 +40,17 @@ with
         }
 
 type ArisOrderedFrame = {
-    Header: ArisFrameHeader ref
-    FrameGeometry: ArisFrameGeometry ref
+    Header: ArisFrameHeader
+    FrameGeometry: ArisFrameGeometry
     SampleData: NativeBuffer
-    Histogram: FrameHistogram ref
+    Histogram: FrameHistogram
 }
 
 type ArisFinishedFrame = {
-    Header: ArisFrameHeader ref
-    FrameGeometry: ArisFrameGeometry ref
+    Header: ArisFrameHeader
+    FrameGeometry: ArisFrameGeometry
     SampleData: NativeBuffer
-    Histogram: FrameHistogram ref
+    Histogram: FrameHistogram
 }
 
 type ArisFrameType =
