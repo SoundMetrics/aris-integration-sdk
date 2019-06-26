@@ -9,7 +9,7 @@
     d:DesignWidth="300">
 
     <Grid x:Name="viewContainer"
-          Background="#FF464646">
+          Background="Transparent">
         <!--
                 ** The Viewport3D below is copied directly from the SolidWorks model.
                 ** Code in MainWindow sets it up for 3D transforms.
