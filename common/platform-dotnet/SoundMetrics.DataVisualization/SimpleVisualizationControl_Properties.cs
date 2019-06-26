@@ -3,7 +3,9 @@
 using System;
 using System.Windows;
 using System.Windows.Media;
-using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.RawFrame>;
+
+using ArisFrameSource =
+    System.IObservable<SoundMetrics.Aris.Comms.Experimental.ArisFinishedFrame>;
 
 namespace SoundMetrics.DataVisualization
 {
