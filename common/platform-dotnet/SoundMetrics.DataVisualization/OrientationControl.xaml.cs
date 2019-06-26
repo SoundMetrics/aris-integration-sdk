@@ -54,18 +54,27 @@ namespace SoundMetrics.DataVisualization
                 typeof(OrientationControl),
                 new PropertyMetadata(0.0, OnAxisChanged));
 
+        /// <summary>
+        /// Generally bound to header.CompassPitch.
+        /// </summary>
         public double XRotation
         {
             get { return (double)GetValue(XRotationProperty); }
             set { ValidateAndSet(XRotationProperty, value); }
         }
 
+        /// <summary>
+        /// Generally bound to header.CompassHeading.
+        /// </summary>
         public double YRotation
         {
             get { return (double)GetValue(YRotationProperty); }
             set { ValidateAndSet(YRotationProperty, value); }
         }
 
+        /// <summary>
+        /// Generally bound to header.CompassRoll.
+        /// </summary>
         public double ZRotation
         {
             get { return (double)GetValue(ZRotationProperty); }
