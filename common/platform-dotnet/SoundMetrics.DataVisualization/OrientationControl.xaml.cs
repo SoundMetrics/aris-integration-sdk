@@ -1,5 +1,7 @@
 ﻿// Copyright (c) 2017-2019 Sound Metrics. All Rights Reserved.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
@@ -29,30 +31,48 @@ namespace SoundMetrics.DataVisualization
 
             void ForceValueUpdates()
             {
-                _xRotation.Rotation = BuildNewRotation(_xRotation, XRotation);
-                _yRotation.Rotation = BuildNewRotation(_yRotation, YRotation);
-                _zRotation.Rotation = BuildNewRotation(_zRotation, ZRotation);
+                RebuildTransform(XRotationProperty);
+                RebuildTransform(YRotationProperty);
+                RebuildTransform(ZRotationProperty);
             }
         }
 
         public static readonly DependencyProperty XRotationProperty =
             DependencyProperty.Register(
-                "XRotation",
+                nameof(XRotation),
                 typeof(double),
                 typeof(OrientationControl),
                 new PropertyMetadata(0.0, OnAxisChanged));
+        public static readonly DependencyProperty XInvertProperty =
+            DependencyProperty.Register(
+                nameof(XInvert),
+                typeof(bool),
+                typeof(OrientationControl),
+                new PropertyMetadata(false, OnInvertChanged));
         public static readonly DependencyProperty YRotationProperty =
             DependencyProperty.Register(
-                "YRotation",
+                nameof(YRotation),
                 typeof(double),
                 typeof(OrientationControl),
                 new PropertyMetadata(0.0, OnAxisChanged));
+        public static readonly DependencyProperty YInvertProperty =
+            DependencyProperty.Register(
+                nameof(YInvert),
+                typeof(bool),
+                typeof(OrientationControl),
+                new PropertyMetadata(false, OnInvertChanged));
         public static readonly DependencyProperty ZRotationProperty =
             DependencyProperty.Register(
-                "ZRotation",
+                nameof(ZRotation),
                 typeof(double),
                 typeof(OrientationControl),
                 new PropertyMetadata(0.0, OnAxisChanged));
+        public static readonly DependencyProperty ZInvertProperty =
+            DependencyProperty.Register(
+                nameof(ZInvert),
+                typeof(bool),
+                typeof(OrientationControl),
+                new PropertyMetadata(false, OnInvertChanged));
 
         /// <summary>
         /// Generally bound to header.CompassPitch.
@@ -61,6 +81,15 @@ namespace SoundMetrics.DataVisualization
         {
             get { return (double)GetValue(XRotationProperty); }
             set { ValidateAndSet(XRotationProperty, value); }
+        }
+
+        /// <summary>
+        /// Inverts the sign of the X axis.
+        /// </summary>
+        public bool XInvert
+        {
+            get => (bool)GetValue(XInvertProperty);
+            set { SetValue(XInvertProperty, value); }
         }
 
         /// <summary>
@@ -73,6 +102,15 @@ namespace SoundMetrics.DataVisualization
         }
 
         /// <summary>
+        /// Inverts the sign of the Y axis.
+        /// </summary>
+        public bool YInvert
+        {
+            get => (bool)GetValue(YInvertProperty);
+            set { SetValue(YInvertProperty, value); }
+        }
+
+        /// <summary>
         /// Generally bound to header.CompassRoll.
         /// </summary>
         public double ZRotation
@@ -81,35 +119,58 @@ namespace SoundMetrics.DataVisualization
             set { ValidateAndSet(ZRotationProperty, value); }
         }
 
-        private static void OnAxisChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        /// <summary>
+        /// Inverts the sign of the Z axis.
+        /// </summary>
+        public bool ZInvert
+        {
+            get => (bool)GetValue(ZInvertProperty);
+            set { SetValue(ZInvertProperty, value); }
+        }
+
+        private static void OnAxisChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e)
         {
             var ctl = (OrientationControl)d;
+            ctl.RebuildTransform(e.Property);
+        }
 
-            if (e.Property == XRotationProperty)
+        private void RebuildTransform(DependencyProperty axisProperty)
+        {
+            ValueTuple<RotateTransform3D, double, bool> inputs;
+
+            if (axisProperty == XRotationProperty)
             {
-                if (ctl._xRotation != null)
-                {
-                    ctl._xRotation.Rotation = BuildNewRotation(ctl._xRotation, ctl.XRotation);
-                }
+                inputs = (_xRotation, XRotation, XInvert);
             }
-            else if (e.Property == YRotationProperty)
+            else if (axisProperty == YRotationProperty)
             {
-                if (ctl._yRotation != null)
-                {
-                    ctl._yRotation.Rotation = BuildNewRotation(ctl._yRotation, ctl.YRotation);
-                }
+                inputs = (_yRotation, YRotation, YInvert);
             }
-            else if (e.Property == ZRotationProperty)
+            else if (axisProperty == ZRotationProperty)
             {
-                if (ctl._zRotation != null)
-                {
-                    ctl._zRotation.Rotation = BuildNewRotation(ctl._zRotation, ctl.ZRotation);
-                }
+                inputs = (_zRotation, ZRotation, ZInvert);
             }
             else
             {
-                Debug.Assert(false, "Unhandled dependency property");
+                Debug.Assert(false, "OrientationControl.RebuildTransform: Unhandled dependency property");
+                return;
             }
+
+            var (rotation, value, invert) = inputs;
+            if (rotation != null)
+            {
+                rotation.Rotation = BuildNewRotation(rotation, value, invert);
+            }
+        }
+
+        private static void OnInvertChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e)
+        {
+            var ctl = (OrientationControl)d;
+            ctl.RebuildTransform(e.Property);
         }
 
         private void Initialize3DView()
@@ -220,11 +281,15 @@ namespace SoundMetrics.DataVisualization
                 model.Transform = xfmGroup;
             }
 
-            public static AxisAngleRotation3D BuildNewRotation(RotateTransform3D txfm, double angle)
+            public static AxisAngleRotation3D BuildNewRotation(
+                RotateTransform3D txfm,
+                double angle,
+                bool invert)
             {
                 Debug.Assert(txfm.Rotation.GetType() == typeof(AxisAngleRotation3D));
                 var rot = (AxisAngleRotation3D)txfm.Rotation;
-                return new AxisAngleRotation3D(rot.Axis, angle);
+                var nInvert = invert ? -1 : 1;
+                return new AxisAngleRotation3D(rot.Axis, nInvert * angle);
             }
         }
     }
