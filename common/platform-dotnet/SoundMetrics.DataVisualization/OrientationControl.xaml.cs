@@ -37,6 +37,15 @@ namespace SoundMetrics.DataVisualization
             }
         }
 
+        // The default inverts are set up to work correctly with
+        // compass values.
+        //      X axis <- CompassPitch
+        //      Y axis <- CompassHeading
+        //      Z axis <- CompassRolls
+        private const bool DefaultXInvert = false;
+        private const bool DefaultYInvert = true;
+        private const bool DefaultZInvert = true;
+
         public static readonly DependencyProperty XRotationProperty =
             DependencyProperty.Register(
                 nameof(XRotation),
@@ -48,7 +57,7 @@ namespace SoundMetrics.DataVisualization
                 nameof(XInvert),
                 typeof(bool),
                 typeof(OrientationControl),
-                new PropertyMetadata(false, OnInvertChanged));
+                new PropertyMetadata(DefaultXInvert, OnInvertChanged));
         public static readonly DependencyProperty YRotationProperty =
             DependencyProperty.Register(
                 nameof(YRotation),
@@ -60,7 +69,7 @@ namespace SoundMetrics.DataVisualization
                 nameof(YInvert),
                 typeof(bool),
                 typeof(OrientationControl),
-                new PropertyMetadata(false, OnInvertChanged));
+                new PropertyMetadata(DefaultYInvert, OnInvertChanged));
         public static readonly DependencyProperty ZRotationProperty =
             DependencyProperty.Register(
                 nameof(ZRotation),
@@ -72,7 +81,7 @@ namespace SoundMetrics.DataVisualization
                 nameof(ZInvert),
                 typeof(bool),
                 typeof(OrientationControl),
-                new PropertyMetadata(false, OnInvertChanged));
+                new PropertyMetadata(DefaultZInvert, OnInvertChanged));
 
         /// <summary>
         /// Generally bound to header.CompassPitch.
@@ -85,6 +94,8 @@ namespace SoundMetrics.DataVisualization
 
         /// <summary>
         /// Inverts the sign of the X axis.
+        /// Default is False, which is appropriate for working with
+        /// header.CompassPitch.
         /// </summary>
         public bool XInvert
         {
@@ -103,6 +114,8 @@ namespace SoundMetrics.DataVisualization
 
         /// <summary>
         /// Inverts the sign of the Y axis.
+        /// Default is True, which is appropriate for working with
+        /// header.CompassHeading.
         /// </summary>
         public bool YInvert
         {
@@ -112,6 +125,8 @@ namespace SoundMetrics.DataVisualization
 
         /// <summary>
         /// Generally bound to header.CompassRoll.
+        /// Default is True, which is appropriate for working with
+        /// header.CompassRoll.
         /// </summary>
         public double ZRotation
         {
