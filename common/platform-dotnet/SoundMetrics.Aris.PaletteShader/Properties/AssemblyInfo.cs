@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SoundMetrics.Aris.PaletteShader")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("SoundMetrics.Aris.PaletteShader")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Sound Metrics Corporation")]
 [assembly: AssemblyProduct("SoundMetrics.Aris.PaletteShader")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCopyright("Copyright (c) 2014-2018 Sound Metrics Corporation")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

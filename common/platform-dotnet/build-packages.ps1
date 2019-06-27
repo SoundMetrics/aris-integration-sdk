@@ -110,6 +110,7 @@ $dotnetDesktopAssemblies = @(
     "SoundMetrics.DataVisualization"
     "SoundMetrics.HID.Windows"
     "SoundMetrics.Scripting.Desktop"
+    "SoundMetrics.Aris.PaletteShader"
 )
 
 '$dotnetDesktopAssemblies: ' + $dotnetDesktopAssemblies
