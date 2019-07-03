@@ -98,12 +98,12 @@ module AcousticMath =
     [<CompiledName("CalculateSpeedOfSound")>]
     let calculateSpeedOfSound (temperature: float<degC>)
                               (depth: float<m>)
-                              (salinity: Salinity)
+                              (salinity: float)
                               : SoundSpeed =
 
         AcousticMathDetails.validateDouble (float temperature)  "temperature"
         AcousticMathDetails.validateDouble (float depth)        "depth"
-        AcousticMathDetails.validateDouble (float salinity)     "salinity"
+        AcousticMathDetails.validateDouble salinity             "salinity"
 
         1.0<m/s> * AcousticMathDetails.calculateSpeedOfSound(temperature, depth, salinity)
 
@@ -135,7 +135,7 @@ module AcousticMath =
                         (sampleCount: int)
                         (temperature: float<degC>)
                         (depth: float<m>)
-                        (salinity: Salinity)
+                        (salinity: float)
                         : DownrangeWindow =
         let sspd = calculateSpeedOfSound temperature depth salinity
         calculateWindowAtSspd sampleStartDelay
@@ -147,7 +147,7 @@ module AcousticMath =
     let calculateSampleStartDelay (windowStart: float<m>)
                                   (temperature: float<degC>)
                                   (depth: float<m>)
-                                  (salinity: Salinity)
+                                  (salinity: float)
                                   : int<Us> =
         let sspd = calculateSpeedOfSound temperature depth salinity
         let ssd = 2.0 * windowStart / sspd

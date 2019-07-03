@@ -95,7 +95,7 @@ type AuxLensType = None | Telephoto
 type SystemContext = {
     SystemType:     ArisSystemType
     WaterTemp:      float<degC>
-    Salinity:       Salinity
+    Salinity:       float
     Depth:          float<m>
     AuxLens:        AuxLensType
 }

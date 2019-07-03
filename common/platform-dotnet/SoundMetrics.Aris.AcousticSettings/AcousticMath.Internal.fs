@@ -29,11 +29,11 @@ module internal AcousticMathDetails =
 
         let calculateSpeedOfSound(temperatureC : float<degC>,
                                   depthM : float<m>,
-                                  salinity : Salinity) : Double =
+                                  salinity : float) : Double =
 
             let T = float temperatureC;
             let Z = float depthM;
-            let S = float salinity;
+            let S = salinity;
 
             1402.5 + (5.0 * T) - (5.44e-2 * T*T) + (2.1e-4 * T*T*T) + 1.33*S - (1.23e-2 * S * T) + (8.7e-5 * S * T*T) // first order for small depths
                 + (1.56e-2 * Z) + (2.55e-7 * Z*Z) - (7.3e-12 * Z*Z*Z) // first order depth correction, max +4.70 m/s @ 300 m
