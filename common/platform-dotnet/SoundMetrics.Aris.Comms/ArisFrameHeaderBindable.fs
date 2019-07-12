@@ -1,12 +1,17 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
 open Aris.FileTypes
+open SoundMetrics.Aris.AcousticSettings
 
 [<Sealed>]
 type ArisFrameHeaderBindable internal (header: ArisFrameHeader) =
 
     /// Gets the entire ArisFrameHeader.
     member public __.EntireHeader = header
+
+    member public __.BeamCount =
+        (SonarConfig.getPingModeConfig (PingMode.From(header.PingMode)))
+            .ChannelCount
 
     /// Frame number in file
     member public __.FrameIndex = header.FrameIndex
