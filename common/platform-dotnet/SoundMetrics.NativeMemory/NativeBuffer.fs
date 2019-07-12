@@ -33,9 +33,10 @@ module private NativeBufferDetails =
         static member private EmptyBuffer = lazy (new NativeBufferHandle(Marshal.AllocHGlobal(0), 0))
         static member Empty = NativeBufferHandle.EmptyBuffer.Value
 
-    let copyMemory(destination : nativeptr<byte>,
-                   source : nativeptr<byte>,
-                   length : int) : unit =
+    let copyMemory (destination : nativeptr<byte>)
+                   (source : nativeptr<byte>)
+                   (length : int)
+                   : unit =
         // Class `Marshal` does not provide a native-to-native Copy function, so
         // for the moment do the copy manually. The intent here is to provide a
         // portable "copy memory" function that does not require writing C or C++
@@ -152,6 +153,33 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
         let source = buffer
         txf.Invoke(pingMode, pingsPerFrame, beamCount, samplesPerBeam, source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
+
+    member __.Upscale(txf : TransformFunction,
+                      pingMode : uint32,
+                      pingsPerFrame : uint32,
+                      beamCount : uint32,
+                      samplesPerBeam : uint32,
+                      scale : int)
+                      : NativeBuffer =
+        let newBufferSize = buffer.Length * scale
+        let destination = NativeBufferHandle.Create newBufferSize
+        let source = buffer
+        txf.Invoke(
+            pingMode,
+            pingsPerFrame,
+            beamCount,
+            samplesPerBeam,
+            source.IntPtr,
+            destination.IntPtr)
+        new NativeBuffer(destination)
+
+    member __.CopyTo(destination : nativeint, length : int) =
+        if length <> buffer.Length then
+            invalidArg "length" "Invalid length specified"
+
+        let destination' = NativePtr.ofNativeInt<byte> destination
+        let source = buffer.NativePtr
+        copyMemory destination' source length
 
     member __.Map<'Result>(f : (nativeptr<byte> * int) -> 'Result) : 'Result = f(buffer.NativePtr, buffer.Length)
 
