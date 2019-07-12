@@ -7,6 +7,11 @@ type Radians (value: float) =
 
     member __.Value = value
 
+    member __.Cos = System.Math.Cos(value)
+    member __.Cosh = System.Math.Cosh(value)
+    member __.Sin = System.Math.Sin(value)
+    member __.Sinh = System.Math.Sinh(value)
+
     static member op_Explicit (value: float) = Radians(value)
     static member op_Explicit (d: Degrees) = Radians(degreesToRadians d.Value)
 
