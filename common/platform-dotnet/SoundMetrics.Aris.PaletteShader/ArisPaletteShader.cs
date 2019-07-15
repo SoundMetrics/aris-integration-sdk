@@ -23,11 +23,11 @@ namespace SoundMetrics.Aris.PaletteShader
             shader.Freeze();
             PixelShader = shader;
 
-            // Texture samplers 
+            // Texture samplers
             UpdateShaderValue(InputProperty);
             UpdateShaderValue(PalletteProperty);
 
-            // Shader constants 
+            // Shader constants
             UpdateShaderValue(LoThresholdProperty);
             UpdateShaderValue(HiThresholdProperty);
             UpdateShaderValue(PalletteIndexProperty);
@@ -35,6 +35,23 @@ namespace SoundMetrics.Aris.PaletteShader
             UpdateShaderValue(FlipImageProperty);
             UpdateShaderValue(ShaderIndexProperty);
             UpdateShaderValue(ImageSizeProperty);
+        }
+
+        public string DebugMsg
+        {
+            get
+            {
+                string ps;
+
+                if (PixelShader != null) { ps = PixelShader.ToString(); }
+                else { ps = "(null)"; }
+                return typeof(ArisPaletteShader).Name + $"; shader={ps}";
+            }
+        }
+
+        public override string ToString()
+        {
+            return DebugMsg;
         }
 
         /// <summary>
@@ -50,7 +67,7 @@ namespace SoundMetrics.Aris.PaletteShader
             ShaderEffect.RegisterPixelShaderSamplerProperty("Input", typeof(ArisPaletteShader), 0);
 
         /// <summary>
-        /// The pallette lookup texture: Sampler #1 
+        /// The pallette lookup texture: Sampler #1
         /// </summary>
         public Brush Palette
         {
@@ -62,7 +79,7 @@ namespace SoundMetrics.Aris.PaletteShader
             ShaderEffect.RegisterPixelShaderSamplerProperty("Pallette", typeof(ArisPaletteShader), 1);
 
         /// <summary>
-        /// The low (cut-off) threshold 
+        /// The low (cut-off) threshold
         /// </summary>
         public float LoThreshold
         {
@@ -75,7 +92,7 @@ namespace SoundMetrics.Aris.PaletteShader
                 "LoThreshold", typeof(float), typeof(ArisPaletteShader), new UIPropertyMetadata(0.0f, PixelShaderConstantCallback(0)));
 
         /// <summary>
-        /// The high (saturation) threshold 
+        /// The high (saturation) threshold
         /// </summary>
         public float HiThreshold
         {
@@ -88,7 +105,7 @@ namespace SoundMetrics.Aris.PaletteShader
                 "HiThreshold", typeof(float), typeof(ArisPaletteShader), new UIPropertyMetadata(0.9f, PixelShaderConstantCallback(1)));
 
         /// <summary>
-        /// The pallette index 
+        /// The pallette index
         /// </summary>
         public float PalletteIndex
         {
@@ -114,8 +131,8 @@ namespace SoundMetrics.Aris.PaletteShader
             "InvertPallette", typeof(float), typeof(ArisPaletteShader), new UIPropertyMetadata(0.0f, PixelShaderConstantCallback(3)));
 
         /// <summary>
-        /// The Flip Image flag. 
-        /// Defaults to true ( == 1.0f ) 
+        /// The Flip Image flag.
+        /// Defaults to true ( == 1.0f )
         /// </summary>
         public float FlipImage
         {
@@ -128,8 +145,8 @@ namespace SoundMetrics.Aris.PaletteShader
             "FlipImage", typeof(float), typeof(ArisPaletteShader), new UIPropertyMetadata(0.0f, PixelShaderConstantCallback(4)));
 
         /// <summary>
-        /// The Shader index. 
-        /// Defaults to standard ( == 0.0f ) 
+        /// The Shader index.
+        /// Defaults to standard ( == 0.0f )
         /// </summary>
         public float ShaderIndex
         {
@@ -143,7 +160,7 @@ namespace SoundMetrics.Aris.PaletteShader
 
         /// <summary>
         /// The Image Size (reciprocal). at #6
-        /// Defaults to 96 / 512  
+        /// Defaults to 96 / 512
         /// </summary>
         public Vector ImageSize
         {
