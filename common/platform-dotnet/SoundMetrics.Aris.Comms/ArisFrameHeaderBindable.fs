@@ -4,7 +4,7 @@ open Aris.FileTypes
 open SoundMetrics.Aris.AcousticSettings
 
 [<Sealed>]
-type ArisFrameHeaderBindable internal (header: ArisFrameHeader) =
+type ArisFrameHeaderBindable public (header: ArisFrameHeader) =
 
     /// Gets the entire ArisFrameHeader.
     member public __.EntireHeader = header

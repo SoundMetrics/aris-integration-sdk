@@ -19,7 +19,7 @@ namespace SoundMetrics.Aris.ReorderCS
         /// </summary>
         /// <param name="samples">Samples to be read.</param>
         /// <param name="sampleCount">Number of samples to be read.</param>
-        /// <returns></returns>
+        /// <returns>A histogram.</returns>
         public static unsafe FrameHistogram Generate(byte* samples, int sampleCount)
         {
             var counts = new int[256];
@@ -27,6 +27,24 @@ namespace SoundMetrics.Aris.ReorderCS
             for (int i = 0; i < sampleCount; ++i, ++p)
             {
                 counts[*p] += 1;
+            }
+
+            return new FrameHistogram(counts);
+        }
+
+        /// <summary>
+        /// Generates an initialized instance of the type.
+        /// </summary>
+        /// <param name="samples">Samples to be read.</param>
+        /// <returns>A histogram.</returns>
+        public static FrameHistogram Generate(byte[] samples)
+        {
+            var sampleCount = samples.Length;
+            var counts = new int[256];
+
+            for (int i = 0; i < sampleCount; ++i)
+            {
+                counts[samples[i]] += 1;
             }
 
             return new FrameHistogram(counts);
