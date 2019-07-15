@@ -146,12 +146,16 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
         txf.Invoke(source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
-    member __.UpscaleTransform(txf : Action<nativeint,nativeint>, scale : int) : NativeBuffer =
+    member __.UpscaleTransformToBuffer(txf : Action<nativeint,nativeint>,
+                                       destination : nativeint) : unit =
+
+        txf.Invoke(buffer.IntPtr, destination)
+
+    member me.UpscaleTransform(txf : Action<nativeint,nativeint>, scale : int) : NativeBuffer =
 
         let newBufferSize = buffer.Length * scale
         let destination = NativeBufferHandle.Create newBufferSize
-        let source = buffer
-        txf.Invoke(source.IntPtr, destination.IntPtr)
+        me.UpscaleTransformToBuffer(txf, destination.IntPtr)
         new NativeBuffer(destination)
 
     member __.CopyTo(destination : nativeint, length : int) =
