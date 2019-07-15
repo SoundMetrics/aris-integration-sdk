@@ -105,10 +105,6 @@ module private NativeBufferDetails =
         arr
 
 
-type TransformFunction =
-    // PrimitivePingMode * PingsPerFrame * BeamCount * SamplesPerBeam * nativeint * nativeint
-    delegate of (uint32 * uint32 * uint32 * uint32 * nativeint * nativeint) -> unit
-
 open NativeBufferDetails
 
 /// Immutable buffer, backed by native memory in order to avoid the LOH.
@@ -143,34 +139,19 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 
     member __.Length = buffer.Length
 
-    member __.TransformFrame(txf : TransformFunction,
-                             pingMode : uint32,
-                             pingsPerFrame : uint32,
-                             beamCount : uint32,
-                             samplesPerBeam : uint32) : NativeBuffer =
+    member __.Transform(txf : Action<nativeint,nativeint>) : NativeBuffer =
 
         let destination = NativeBufferHandle.Create buffer.Length
         let source = buffer
-        txf.Invoke(pingMode, pingsPerFrame, beamCount, samplesPerBeam, source.IntPtr, destination.IntPtr)
+        txf.Invoke(source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
-    member __.Upscale(txf : TransformFunction,
-                      pingMode : uint32,
-                      pingsPerFrame : uint32,
-                      beamCount : uint32,
-                      samplesPerBeam : uint32,
-                      scale : int)
-                      : NativeBuffer =
+    member __.UpscaleTransform(txf : Action<nativeint,nativeint>, scale : int) : NativeBuffer =
+
         let newBufferSize = buffer.Length * scale
         let destination = NativeBufferHandle.Create newBufferSize
         let source = buffer
-        txf.Invoke(
-            pingMode,
-            pingsPerFrame,
-            beamCount,
-            samplesPerBeam,
-            source.IntPtr,
-            destination.IntPtr)
+        txf.Invoke(source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
     member __.CopyTo(destination : nativeint, length : int) =
@@ -181,7 +162,9 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
         let source = buffer.NativePtr
         copyMemory destination' source length
 
-    member __.Map<'Result>(f : (nativeptr<byte> * int) -> 'Result) : 'Result = f(buffer.NativePtr, buffer.Length)
+    member __.Map<'Result>(f : Func<nativeptr<byte>,int,'Result>) : 'Result =
+
+        f.Invoke(buffer.NativePtr, buffer.Length)
 
     member __.ToArray() = bufferToByteArray buffer
 
@@ -200,16 +183,12 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 module NativeBuffer =
 
     /// Transforms into a new copy; assumes the output is the same size as the source.
-    let transform
-            txf
-            pingMode
-            pingsPerFrame
-            beamCount
-            samplesPerBeam
-            (source : NativeBuffer)
-            : NativeBuffer =
+    let transform (txf : nativeint -> nativeint -> unit) (source : NativeBuffer)
+        : NativeBuffer =
 
-        source.TransformFrame(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
+        let txf' = Action<nativeint,nativeint>(txf)
+        source.Transform(txf')
 
-    let map<'Result> (f : (nativeptr<byte> * int) -> 'Result) (source : NativeBuffer) : 'Result =
-            source.Map(f)
+    let map<'Result> (f : (nativeptr<byte> -> int -> 'Result)) (source : NativeBuffer) : 'Result =
+            let f' = Func<nativeptr<byte>,int,'Result>(f)
+            source.Map(f')

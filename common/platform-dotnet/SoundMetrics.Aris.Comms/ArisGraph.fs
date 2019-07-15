@@ -16,19 +16,21 @@ module ArisGraph =
             match input with
             | ArisFrame (RawFrame f) ->
 
-                let buildHistogram (source : nativeptr<byte>, length) =
+                let buildHistogram source length =
                     FrameHistogram.Generate(source, length)
 
                 let frameGeometry = ArisFrameGeometry.FromFrame(f)
                 let orderedData =
-                    let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
-                    NativeBuffer.transform
-                        reorder
-                        frameGeometry.PingMode
-                        frameGeometry.PingsPerFrame
-                        frameGeometry.BeamCount
-                        frameGeometry.SampleCount
-                        f.SampleData
+                    let reorder = fun src dest ->
+                        Reorder.ReorderFrame(
+                            frameGeometry.PingMode,
+                            frameGeometry.PingsPerFrame,
+                            frameGeometry.BeamCount,
+                            frameGeometry.SampleCount,
+                            src,
+                            dest
+                        )
+                    NativeBuffer.transform reorder f.SampleData
 
                 let orderedFrame =
                     {

@@ -90,14 +90,16 @@ module internal FrameProcessing =
 
             let struct (struct (reordered, method), sw) = timeThis (fun _sw ->
                 let reorderedSampleData =
-                    let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
-                    NativeBuffer.transform
-                        reorder
-                        fb.PingMode
-                        fb.PingsPerFrame
-                        fb.BeamCount
-                        fb.SampleCount
-                        fb.SampleData
+                    let reorder = fun src dest ->
+                        Reorder.ReorderFrame(
+                            fb.PingMode,
+                            fb.PingsPerFrame,
+                            fb.BeamCount,
+                            fb.SampleCount,
+                            src,
+                            dest
+                        )
+                    NativeBuffer.transform reorder fb.SampleData
 
                 struct (reorderedSampleData, "ReorderCS")
             )
@@ -109,7 +111,7 @@ module internal FrameProcessing =
 
             let struct (histogram, sw) = timeThis (fun _sw ->
 
-                let buildHistogram (source : nativeptr<byte>, length) =
+                let buildHistogram source length =
                     FrameHistogram.Generate(source, length)
 
                 fb.SampleData |> NativeBuffer.map buildHistogram
