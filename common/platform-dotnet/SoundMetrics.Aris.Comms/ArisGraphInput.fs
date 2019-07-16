@@ -1,6 +1,5 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
-open Aris.FileTypes
 open SoundMetrics.NativeMemory
 open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.Aris.AcousticSettings
@@ -24,19 +23,19 @@ type ArisGraphCommand =
 type ArisRawFrame = SoundMetrics.Aris.Comms.RawFrame
 
 type ArisFrameGeometry = {
-    PingMode:       uint32
-    BeamCount:      uint32
-    SampleCount:    uint32
-    PingsPerFrame:  uint32
+    PingMode:       int32
+    BeamCount:      int32
+    SampleCount:    int32
+    PingsPerFrame:  int32
 }
 with
     static member FromFrame (f: ArisRawFrame) =
         let cfg = SonarConfig.getPingModeConfig (PingMode.From f.Header.PingMode)
         {
-            PingMode = f.Header.PingMode
-            BeamCount  = uint32 cfg.ChannelCount
-            SampleCount = f.Header.SamplesPerBeam
-            PingsPerFrame = uint32 cfg.PingsPerFrame
+            PingMode = int f.Header.PingMode
+            BeamCount  = cfg.ChannelCount
+            SampleCount = int f.Header.SamplesPerBeam
+            PingsPerFrame = cfg.PingsPerFrame
         }
 
 type ArisOrderedFrame = {

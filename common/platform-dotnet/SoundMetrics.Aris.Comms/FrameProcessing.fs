@@ -92,10 +92,10 @@ module internal FrameProcessing =
                 let reorderedSampleData =
                     let reorder = fun src dest ->
                         Reorder.ReorderFrame(
-                            fb.PingMode,
-                            fb.PingsPerFrame,
-                            fb.BeamCount,
-                            fb.SampleCount,
+                            int fb.PingMode,
+                            int fb.PingsPerFrame,
+                            int fb.BeamCount,
+                            int fb.SampleCount,
                             src,
                             dest
                         )
