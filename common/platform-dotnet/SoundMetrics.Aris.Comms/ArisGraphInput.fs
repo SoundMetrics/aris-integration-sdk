@@ -1,5 +1,6 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
+open Aris.FileTypes
 open SoundMetrics.NativeMemory
 open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.Aris.AcousticSettings
@@ -29,12 +30,12 @@ type ArisFrameGeometry = {
     PingsPerFrame:  int32
 }
 with
-    static member FromFrame (f: ArisRawFrame) =
-        let cfg = SonarConfig.getPingModeConfig (PingMode.From f.Header.PingMode)
+    static member FromFrame (header: ArisFrameHeader inref) =
+        let cfg = SonarConfig.getPingModeConfig (PingMode.From header.PingMode)
         {
-            PingMode = int f.Header.PingMode
+            PingMode = int header.PingMode
             BeamCount  = cfg.ChannelCount
-            SampleCount = int f.Header.SamplesPerBeam
+            SampleCount = int header.SamplesPerBeam
             PingsPerFrame = cfg.PingsPerFrame
         }
 

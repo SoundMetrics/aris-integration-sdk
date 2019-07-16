@@ -19,7 +19,7 @@ module ArisGraph =
                 let buildHistogram source length =
                     FrameHistogram.Generate(source, length)
 
-                let frameGeometry = ArisFrameGeometry.FromFrame(f)
+                let frameGeometry = ArisFrameGeometry.FromFrame(&f.Header)
                 let orderedData =
                     let reorder = fun src dest ->
                         Reorder.ReorderFrame(
