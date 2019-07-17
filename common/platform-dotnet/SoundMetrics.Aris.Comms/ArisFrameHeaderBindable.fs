@@ -3,6 +3,7 @@
 open Aris.FileTypes
 open SoundMetrics.Aris.AcousticSettings
 
+/// Provides bindable properties for ArisFrameHeader.
 [<Sealed>]
 type ArisFrameHeaderBindable public (header: ArisFrameHeader) =
 
