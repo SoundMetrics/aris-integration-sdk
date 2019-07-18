@@ -37,23 +37,6 @@ namespace SoundMetrics.Aris.PaletteShader
             UpdateShaderValue(ImageSizeProperty);
         }
 
-        public string DebugMsg
-        {
-            get
-            {
-                string ps;
-
-                if (PixelShader != null) { ps = PixelShader.ToString(); }
-                else { ps = "(null)"; }
-                return typeof(ArisPaletteShader).Name + $"; shader={ps}";
-            }
-        }
-
-        public override string ToString()
-        {
-            return DebugMsg;
-        }
-
         /// <summary>
         /// The input texture: : Sampler #0
         /// </summary>
