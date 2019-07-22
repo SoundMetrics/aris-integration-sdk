@@ -1,4 +1,4 @@
-﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
 namespace SoundMetrics.Aris.Comms.Experimental
 

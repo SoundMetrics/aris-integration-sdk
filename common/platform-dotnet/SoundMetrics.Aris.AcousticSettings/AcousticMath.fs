@@ -1,4 +1,4 @@
-﻿// Copyright 2014-2018 Sound Metrics Corp. All Rights Reserved.
+﻿// Copyright 2014-2019 Sound Metrics Corp. All Rights Reserved.
 
 namespace SoundMetrics.Aris.AcousticSettings
 
@@ -33,6 +33,10 @@ with
             s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
 
     member s.UseMaximumFrameRate () = { s with FrameRate = 15.0</s> }
+
+    /// Return a new instance with updated frame rate;
+    /// largely for ease of use with C#.
+    member s.WithFrameRate (frameRate: FrameRate) = { s with FrameRate = frameRate }
 
     static member Invalid = {
         FrameRate = 1.0</s>
