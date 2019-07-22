@@ -4,8 +4,8 @@ namespace SoundMetrics.Aris.AcousticSettings.Experimental
 
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
-open SoundMetrics.Aris.AcousticSettings.AcousticMath
 open SoundMetrics.Aris.AcousticSettings.UnitsOfMeasure
+open SoundMetrics.Aris.AcousticSettings
 
 // Temporary aliases needed to use existing types without opening the
 // entire namespace into this experimental namespace.
@@ -130,12 +130,13 @@ module internal AcquisitionSettingsNormalization =
                   : struct (AcousticSettings * bool) =
 
         let maximumFrameRate =
-            calculateMaximumFrameRate systemContext.SystemType
-                                      settings.PingMode
-                                      settings.SampleStartDelay
-                                      settings.SampleCount
-                                      settings.SamplePeriod
-                                      settings.AntialiasingPeriod
+            AcousticMath.CalculateMaximumFrameRate(
+                systemContext.SystemType,
+                settings.PingMode,
+                settings.SampleStartDelay,
+                settings.SampleCount,
+                settings.SamplePeriod,
+                settings.AntialiasingPeriod)
         let adjustedFrameRate = min settings.FrameRate maximumFrameRate
 
         let isConstrained = settings.FrameRate <> adjustedFrameRate
@@ -151,24 +152,27 @@ module SettingsProjection =
                                   (settings: AcousticSettings)
                                   : ComputedValues =
 
-        let sspd = calculateSpeedOfSound systemContext.WaterTemp
-                                         systemContext.Depth
-                                         systemContext.Salinity
-        let window = calculateWindowAtSspd settings.SampleStartDelay
-                                           settings.SamplePeriod
-                                           settings.SampleCount
-                                           sspd
+        let sspd = AcousticMath.CalculateSpeedOfSound(
+                    systemContext.WaterTemp,
+                    systemContext.Depth,
+                    systemContext.Salinity)
+        let window = AcousticMath.CalculateWindowAtSspd(
+                        settings.SampleStartDelay,
+                        settings.SamplePeriod,
+                        settings.SampleCount,
+                        sspd)
         {
             Resolution = mToMm (window.Length / float settings.SampleCount)
             AutoFocusRange = window.MidPoint
             SoundSpeed = sspd
             MaxFrameRate =
-                calculateMaximumFrameRate systemContext.SystemType
-                                          settings.PingMode
-                                          settings.SampleStartDelay
-                                          settings.SampleCount
-                                          settings.SamplePeriod
-                                          settings.AntialiasingPeriod
+                AcousticMath.CalculateMaximumFrameRate(
+                    systemContext.SystemType,
+                    settings.PingMode,
+                    settings.SampleStartDelay,
+                    settings.SampleCount,
+                    settings.SamplePeriod,
+                    settings.AntialiasingPeriod)
 
             ActualDownrangeWindow = window
             ConstrainedAcquisitionSettings = constrainedAS

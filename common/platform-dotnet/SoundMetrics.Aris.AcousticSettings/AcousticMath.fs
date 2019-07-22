@@ -81,15 +81,25 @@ with
         | [] -> ValueNone
         | ds -> ValueSome (System.String.Join("; ", ds))
 
-module AcousticMath =
+type DownrangeWindow = {
+    Start:  float<m>
+    End:    float<m>
+}
+with
+    member x.Length = x.End - x.Start
+    member x.MidPoint = x.Start + (x.Length / 2.0)
+    override x.ToString() = sprintf "{windowStart=%f; windowEnd=%f}" (float x.Start) (float x.End)
 
-    [<CompiledName("CalculateCyclePeriod")>]
-    let calculateCyclePeriod systemType
-                             (sampleStartDelay: int<Us>)
-                             (sampleCount : int)
-                             (samplePeriod: int<Us>)
-                             (antiAliasing: int<Us>)
-            : int<Us> =
+// Using a static class here to allow over
+[<AbstractClass>]
+type AcousticMath =
+
+    static member CalculateCyclePeriod(systemType,
+                                       sampleStartDelay: int<Us>,
+                                       sampleCount : int,
+                                       samplePeriod: int<Us>,
+                                       antiAliasing: int<Us>)
+                                       : int<Us> =
         let ranges = SonarConfig.systemTypeRangeMap.[systemType]
         let maxAllowedCyclePeriod = ranges.CyclePeriodRange.Max
         let unboundedCyclePeriod = sampleStartDelay
@@ -98,12 +108,22 @@ module AcousticMath =
                                     + SonarConfig.CyclePeriodMargin
         min maxAllowedCyclePeriod unboundedCyclePeriod
 
+    static member CalculateCyclePeriod(systemType,
+                                       settings: AcousticSettingsRaw,
+                                       antiAliasing) =
 
-    [<CompiledName("CalculateSpeedOfSound")>]
-    let calculateSpeedOfSound (temperature: float<degC>)
-                              (depth: float<m>)
-                              (salinity: float)
-                              : SoundSpeed =
+        AcousticMath.CalculateCyclePeriod(
+            systemType,
+            settings.SampleStartDelay,
+            settings.SampleCount,
+            settings.SamplePeriod,
+            antiAliasing)
+
+
+    static member CalculateSpeedOfSound(temperature: float<degC>,
+                                        depth: float<m>,
+                                        salinity: float)
+                                        : SoundSpeed =
 
         AcousticMathDetails.validateDouble (float temperature)  "temperature"
         AcousticMathDetails.validateDouble (float depth)        "depth"
@@ -111,61 +131,44 @@ module AcousticMath =
 
         1.0<m/s> * AcousticMathDetails.calculateSpeedOfSound(temperature, depth, salinity)
 
-
-    type DownrangeWindow = {
-        Start:  float<m>
-        End:    float<m>
-    }
-    with
-        member x.Length = x.End - x.Start
-        member x.MidPoint = x.Start + (x.Length / 2.0)
-        override x.ToString() = sprintf "{windowStart=%f; windowEnd=%f}" (float x.Start) (float x.End)
-
-    [<CompiledName("CalculateWindowAtSspd")>]
-    let calculateWindowAtSspd (sampleStartDelay: int<Us>)
-                              (samplePeriod: int<Us>)
-                              (sampleCount: int)
-                              (sspd : SoundSpeed)
-                              : DownrangeWindow =
+    static member CalculateWindowAtSspd(sampleStartDelay: int<Us>,
+                                        samplePeriod: int<Us>,
+                                        sampleCount: int,
+                                        sspd : SoundSpeed)
+                                        : DownrangeWindow =
         let sampleStartDelay = usToS sampleStartDelay
         let samplePeriod = usToS samplePeriod
         let windowStart = sampleStartDelay * sspd / 2.0
         let windowLength = float sampleCount * samplePeriod * sspd / 2.0
         { Start = windowStart; End = windowStart + windowLength }
 
-    [<CompiledName("CalculateWindow")>]
-    let calculateWindow (sampleStartDelay: int<Us>)
-                        (samplePeriod: int<Us>)
-                        (sampleCount: int)
-                        (temperature: float<degC>)
-                        (depth: float<m>)
-                        (salinity: float)
-                        : DownrangeWindow =
-        let sspd = calculateSpeedOfSound temperature depth salinity
-        calculateWindowAtSspd sampleStartDelay
-                              samplePeriod
-                              sampleCount
-                              sspd
+    static member CalculateWindow(sampleStartDelay: int<Us>,
+                                  samplePeriod: int<Us>,
+                                  sampleCount: int,
+                                  temperature: float<degC>,
+                                  depth: float<m>,
+                                  salinity: float)
+                                  : DownrangeWindow =
+        let sspd = AcousticMath.CalculateSpeedOfSound(temperature, depth, salinity)
+        AcousticMath.CalculateWindowAtSspd(sampleStartDelay, samplePeriod, sampleCount, sspd)
 
-    [<CompiledName("CalculateSampleStartDelay")>]
-    let calculateSampleStartDelay (windowStart: float<m>)
-                                  (temperature: float<degC>)
-                                  (depth: float<m>)
-                                  (salinity: float)
-                                  : int<Us> =
-        let sspd = calculateSpeedOfSound temperature depth salinity
+    static member CalculateSampleStartDelay(windowStart: float<m>,
+                                            temperature: float<degC>,
+                                            depth: float<m>,
+                                            salinity: float)
+                                            : int<Us> =
+        let sspd = AcousticMath.CalculateSpeedOfSound(temperature, depth, salinity)
         let ssd = 2.0 * windowStart / sspd
         sToUs ssd
 
 
-    [<CompiledName("CalculateMaximumFrameRate")>]
-    let calculateMaximumFrameRate systemType
-                                  pingMode
-                                  sampleStartDelay
-                                  sampleCount
-                                  samplePeriod
-                                  antiAliasing
-                                    : float</s> =
+    static member CalculateMaximumFrameRate(systemType,
+                                            pingMode,
+                                            sampleStartDelay,
+                                            sampleCount,
+                                            samplePeriod,
+                                            antiAliasing)
+                                            : float</s> =
 
         // The cyclePeriodFactor is an empirical value based on measured maximum frame rates as a function of
         // SamplePeriod and SamplesPerBeam.
@@ -205,19 +208,33 @@ module AcousticMath =
                                     else
                                         0.0<Us>
 
-        let cyclePeriod = calculateCyclePeriod systemType sampleStartDelay sampleCount samplePeriod antiAliasing
+        let cyclePeriod = AcousticMath.CalculateCyclePeriod(
+                            systemType,
+                            sampleStartDelay,
+                            sampleCount,
+                            samplePeriod,
+                            antiAliasing)
         let pingsPerFrame = SonarConfig.pingModeConfigurations.[pingMode].PingsPerFrame
         let cycleTimeUsec = (1.0<Us> * (float cyclePeriod) + cyclePeriodFactor) * float pingsPerFrame
         let rate = min (SonarConfig.FrameRateRange.Max) ((1000000.0<Us> / cycleTimeUsec) * 1.0</s>)
         rate
 
+    static member CalculateMaximumFrameRate(systemType,
+                                            settings: AcousticSettingsRaw,
+                                            antiAliasing) =
+        AcousticMath.CalculateMaximumFrameRate(
+            systemType,
+            settings.PingMode,
+            settings.SampleStartDelay,
+            settings.SampleCount,
+            settings.SamplePeriod,
+            antiAliasing)
 
-    [<CompiledName("CalculateSampleStartDelayRange")>]
-    let calculateSampleStartDelayRange systemType
-                                  (sampleCount : int)
-                                  (samplePeriod : int<Us>)
-                                  (antialiasing : int<Us>)
-                                  : Range<int<Us>> =
+    static member CalculateSampleStartDelayRange(systemType,
+                                                 sampleCount : int,
+                                                 samplePeriod : int<Us>,
+                                                 antialiasing : int<Us>)
+                                                 : Range<int<Us>> =
 
         let ranges = SonarConfig.systemTypeRangeMap.[systemType]
 
@@ -229,12 +246,11 @@ module AcousticMath =
 
         range minSSD maxSSD
 
-    [<CompiledName("CalculateSamplePeriodRange")>]
-    let calculateSamplePeriodRange systemType
-                                   (sampleCount : int)
-                                   (sampleStartDelay : int<Us>)
-                                   (antialiasing : int<Us>)
-                                   : Range<int<Us>> =
+    static member CalculateSamplePeriodRange(systemType,
+                                             sampleCount : int,
+                                             sampleStartDelay : int<Us>,
+                                             antialiasing : int<Us>)
+                                             : Range<int<Us>> =
 
         let ranges = SonarConfig.systemTypeRangeMap.[systemType]
 
@@ -249,12 +265,11 @@ module AcousticMath =
 
         range minSP maxSP
 
-    [<CompiledName("CalculateSampleCountRange")>]
-    let calculateSampleCountRange systemType
-                                  (samplePeriod : int<Us>)
-                                  (sampleStartDelay : int<Us>)
-                                  (antialiasing : int<Us>)
-                                  : Range<int> =
+    static member CalculateSampleCountRange(systemType,
+                                            samplePeriod : int<Us>,
+                                            sampleStartDelay : int<Us>,
+                                            antialiasing : int<Us>)
+                                            : Range<int> =
 
         let ranges = SonarConfig.systemTypeRangeMap.[systemType]
 
@@ -266,12 +281,11 @@ module AcousticMath =
 
         range minSC maxSC
 
-    [<CompiledName("CalculateAntialiasingRange")>]
-    let calculateAntialiasingRange systemType
-                                   (sampleCount : int)
-                                   (samplePeriod : int<Us>)
-                                   (sampleStartDelay : int<Us>)
-                                   : Range<int<Us>> =
+    static member CalculateAntialiasingRange(systemType,
+                                             sampleCount : int,
+                                             samplePeriod : int<Us>,
+                                             sampleStartDelay : int<Us>)
+                                             : Range<int<Us>> =
 
         let ranges = SonarConfig.systemTypeRangeMap.[systemType]
 
@@ -280,23 +294,22 @@ module AcousticMath =
             let maxCP = ranges.CyclePeriodRange.Max
 
             let cyclePeriodWithoutAntialiasing =
-                calculateCyclePeriod systemType
-                                     sampleStartDelay
-                                     sampleCount
-                                     samplePeriod
-                                     SonarConfig.MinAntialiasing
+                AcousticMath.CalculateCyclePeriod(
+                    systemType,
+                    sampleStartDelay,
+                    sampleCount,
+                    samplePeriod,
+                    SonarConfig.MinAntialiasing)
             maxCP - cyclePeriodWithoutAntialiasing
                 |> Range.constrainTo ranges.CyclePeriodRange
 
         range minAA maxAA
 
-    [<CompiledName("FindAntialiasing")>]
-    let FindAntialiasing (sampleCount : int)
-                         (cyclePeriod : int<Us>)
-                         (sampleStartDelay : int<Us>)
-                         (samplePeriod : int<Us>)
-                         : int<Us> =
-
+    static member FindAntialiasing(sampleCount : int,
+                                   cyclePeriod : int<Us>,
+                                   sampleStartDelay : int<Us>,
+                                   samplePeriod : int<Us>)
+                                   : int<Us> =
         let value =
             (cyclePeriod
                 - (sampleStartDelay
@@ -304,13 +317,12 @@ module AcousticMath =
                     + SonarConfig.CyclePeriodMargin))
         max value SonarConfig.MinAntialiasing
 
-    [<CompiledName("ConstrainAcousticSettings")>]
-    let constrainAcousticSettings systemType
-                                  (s: AcousticSettingsRaw)
-                                  antiAliasing
-                                  : struct (AcousticSettingsRaw * bool) =
+    static member ConstrainAcousticSettings(systemType,
+                                            s: AcousticSettingsRaw,
+                                            antiAliasing)
+                                            : struct (AcousticSettingsRaw * bool) =
         let maximumFrameRate =
-            calculateMaximumFrameRate  systemType s.PingMode s.SampleStartDelay s.SampleCount s.SamplePeriod antiAliasing
+            AcousticMath.CalculateMaximumFrameRate(systemType, s, antiAliasing)
         let adjustedFrameRate = min s.FrameRate maximumFrameRate
 
         let isConstrained = s.FrameRate <> adjustedFrameRate

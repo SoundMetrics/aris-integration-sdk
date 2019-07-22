@@ -139,6 +139,11 @@
       <Project>{533d46e8-6d43-4389-9028-b2fde4fc791b}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\SoundMetrics.Data\SoundMetrics.Data.fsproj">
+      <Name>SoundMetrics.Data</Name>
+      <Project>{54581c26-13c4-4edf-b080-3d4f7009bd0d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\SoundMetrics.NativeMemory\SoundMetrics.NativeMemory.fsproj">
       <Name>SoundMetrics.NativeMemory</Name>
       <Project>{178917d9-6103-4a65-85a3-e7c1048775ff}</Project>

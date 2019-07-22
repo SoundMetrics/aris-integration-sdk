@@ -143,7 +143,11 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 // don't constrain. System type is gleaned in ArisConduit.buildFrameStreamSubscription.
                 let struct (constrainedSettings, constrained) =
                     match !systemType with
-                    | Some systemType -> AcousticMath.constrainAcousticSettings systemType settings antiAliasing
+                    | Some systemType ->
+                        AcousticMath.ConstrainAcousticSettings(
+                            systemType,
+                            settings,
+                            antiAliasing)
                     | None -> struct (settings, false)
 
                 let settings = if constrained then constrainedSettings else settings
