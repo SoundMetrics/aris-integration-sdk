@@ -8,6 +8,7 @@ open SonarConfig
 open SoundMetrics.Data
 open SoundMetrics.Data.Range
 open System
+open System.ComponentModel
 
 type AcousticSettingsRaw = {
     FrameRate:          FrameRate
@@ -31,6 +32,30 @@ with
             "fr={0}; sc={1}; ssd={2}; cp={3}; sp={4}; pw={5}; pm={6}; tx={7}; freq={8}; 150v={9}; rcvgn={10}",
             s.FrameRate, s.SampleCount, s.SampleStartDelay, s.CyclePeriod, s.SamplePeriod,
             s.PulseWidth, s.PingMode, s.EnableTransmit, s.Frequency, s.Enable150Volts, s.ReceiverGain)
+
+    [<Browsable(false)>]
+    member s.Deconstruct(frameRate: FrameRate outref,
+                         sampleCount: int outref,
+                         sampleStartDelay: int<Us> outref,
+                         cyclePeriod: int<Us> outref,
+                         samplePeriod: int<Us> outref,
+                         pulseWidth: int<Us> outref,
+                         pingMode: PingMode outref,
+                         enableTransmit: bool outref,
+                         frequency: Frequency outref,
+                         enable150Volts: bool outref,
+                         receiverGain: int outref) : unit =
+        frameRate <- s.FrameRate
+        sampleCount <- s.SampleCount
+        sampleStartDelay <- s.SampleStartDelay
+        cyclePeriod <- s.CyclePeriod
+        samplePeriod <- s.SamplePeriod
+        pulseWidth <- s.PulseWidth
+        pingMode <- s.PingMode
+        enableTransmit <- s.EnableTransmit
+        frequency <- s.Frequency
+        enable150Volts <- s.Enable150Volts
+        receiverGain <- s.ReceiverGain
 
     member s.UseMaximumFrameRate () = { s with FrameRate = 15.0</s> }
 
