@@ -7,6 +7,7 @@ open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 /// Defines the system types for ARIS: 1200, 1800, and 3000.
 type ArisSystemType = Aris1800 = 0 | Aris3000 = 1 | Aris1200 = 2
 
+[<Struct>]
 type PingMode = PingMode1 | PingMode3 | PingMode6 | PingMode9 | InvalidPingMode of int
 with
     member pm.IsSupported =
