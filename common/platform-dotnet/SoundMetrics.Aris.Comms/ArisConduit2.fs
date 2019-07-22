@@ -32,7 +32,13 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                           targetSonar : string,
                           matchBeacon : ArisBeacon -> bool,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
-                          perfSink : ConduitPerfSink) as self =
+                          _perfSink : ConduitPerfSink) as self =
+
+    let _logCtor =
+        Log.Information(
+            "[{targetSonar}] Constructing ArisConduit; initial settings={initialSettings}",
+            targetSonar,
+            initialAcousticSettings)
 
     let disposed = ref false
     let disposingSignal = new ManualResetEventSlim()
@@ -90,7 +96,9 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
             setSalinity frame
 
-        let onError (ex: Exception) = Log.Error("SonarConnection frame error: {exMsg}", ex.Message)
+        let onError (ex: Exception) =
+            Log.Error("[{targetSonar}] SonarConnection frame error: {exMsg}",
+                targetSonar, ex.Message)
         frameStreamListener.Frames.Subscribe (trackFrameInfo, onError)
 
     let frameStreamSubscription = buildFrameStreamSubscription()
@@ -102,21 +110,25 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
     let quitCxnMgr () = cxnEvQueue.Post(mkEventNoCallback CxnEventType.Quit) |> ignore
     let queueCmd (cmd : Aris.Command) =
-        if Serilog.Log.IsEnabled(Serilog.Events.LogEventLevel.Verbose) then
+        if Log.IsEnabled(Serilog.Events.LogEventLevel.Verbose) then
             let commandType = cmd.Type.ToString()
-            Serilog.Log.Verbose("Queuing command type {commandType}", commandType)
+            Log.Verbose(
+                "[{targetSonar}] Queuing command type {commandType}",
+                targetSonar,
+                commandType)
 
         cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
 
     let requestAcousticSettings (settings: AcousticSettingsRaw): RequestedSettings =
 
         Log.Information(
-            "ArisConduit({target}): requesting acoustic settings {settings}",
+            "[{targetSonar}] requesting acoustic settings {settings}",
             targetSonar, settings.ToShortString())
 
         match SettingsHelpers.validateSettings settings with
-        | ValidationError msg -> Log.Error("ArisConduit({target}): invalid settings: {msg}", targetSonar, msg)
-                                 SettingsDeclined ("Validation error: " + msg)
+        | ValidationError msg ->
+            Log.Error("[{targetSonar}] invalid settings: {msg}", targetSonar, msg)
+            SettingsDeclined ("Validation error: " + msg)
         | Valid settings ->
             lock acousticSettingsRequestGuard (fun () ->
                 let antiAliasing = 0<Us> // REVIEW
@@ -213,7 +225,8 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
     interface ISonarConnectionCallbacks with
         member __.OnCxnStateChanged cxnState =
-            Log.Information("ArisConduit({target}): connection state changed to {state}", targetSonar, cxnState)
+            Log.Information(
+                "[{targetSonar}] connection state changed to {state}", targetSonar, cxnState)
             match cxnState with
             | ConnectionState.Connected _ -> ()
             | _ -> frameStreamListener.Flush() // Resets frame index tracker
@@ -221,9 +234,12 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
             cxnStateSubject.OnNext(cxnState)
 
         member __.OnInitializeConnection frameSinkAddress =
-            Log.Information("ArisConduit[{target}]: initializing connection", targetSonar)
+            Log.Information("[{targetSonar}] initializing connection", targetSonar)
             let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
-            Log.Information("Setting sonar clock to {dateTime}", setTimeCmd.DateTime.DateTime)
+            Log.Information(
+                "[{targetSonar}] Setting sonar clock to {dateTime}",
+                targetSonar,
+                setTimeCmd.DateTime.DateTime)
             queueCmd setTimeCmd |> ignore
             let sink = frameStreamListener.SetSinkAddress frameSinkAddress
             queueCmd (makeFramestreamReceiverCmd sink) |> ignore
@@ -231,11 +247,18 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
             let settings =
                 let requested = !lastRequestedAcoustingSettings
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
-                if hasExistingSettings
-                    then Log.Information("sending existing settings: {setings}", requested.Settings.ToString())
-                         requested.Settings
-                    else Log.Information("sending initial settings: {settings}", initialAcousticSettings.ToString())
-                         initialAcousticSettings
+                if hasExistingSettings then
+                    Log.Information(
+                        "[{targetSonar}] sending existing settings: {setings}",
+                        targetSonar,
+                        requested.Settings.ToString())
+                    requested.Settings
+                else
+                    Log.Information(
+                        "[{targetSonar}] sending initial settings: {settings}",
+                        targetSonar,
+                        initialAcousticSettings.ToString())
+                    initialAcousticSettings
             let requestResult = requestAcousticSettings settings
             match requestResult with
             | SettingsDeclined msg ->
