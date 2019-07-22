@@ -10,6 +10,22 @@ open SoundMetrics.Data.Range
 open System
 open System.ComponentModel
 
+[<AutoOpen>]
+module private AcousticSettingsRawDetails =
+
+    // Like defaultArg, but for Nullable<'T>.
+    let defaultNullable<'T when 'T: (new: unit -> 'T)
+                        and 'T: struct
+                        and 'T :> ValueType >
+            (newValue: Nullable<'T>)
+            (current: 'T)
+            : 'T =
+
+        if newValue.HasValue then
+            newValue.Value
+        else
+            current
+
 type AcousticSettingsRaw = {
     FrameRate:          FrameRate
     SampleCount:        int
@@ -45,23 +61,46 @@ with
                          frequency: Frequency outref,
                          enable150Volts: bool outref,
                          receiverGain: int outref) : unit =
-        frameRate <- s.FrameRate
-        sampleCount <- s.SampleCount
+        frameRate <-        s.FrameRate
+        sampleCount <-      s.SampleCount
         sampleStartDelay <- s.SampleStartDelay
-        cyclePeriod <- s.CyclePeriod
-        samplePeriod <- s.SamplePeriod
-        pulseWidth <- s.PulseWidth
-        pingMode <- s.PingMode
-        enableTransmit <- s.EnableTransmit
-        frequency <- s.Frequency
-        enable150Volts <- s.Enable150Volts
-        receiverGain <- s.ReceiverGain
+        cyclePeriod <-      s.CyclePeriod
+        samplePeriod <-     s.SamplePeriod
+        pulseWidth <-       s.PulseWidth
+        pingMode <-         s.PingMode
+        enableTransmit <-   s.EnableTransmit
+        frequency <-        s.Frequency
+        enable150Volts <-   s.Enable150Volts
+        receiverGain <-     s.ReceiverGain
 
-    member s.UseMaximumFrameRate () = { s with FrameRate = 15.0</s> }
+    /// Modify only the specified non-null values; helper function for C#.
+    /// A new instance of the object is returned.
+    /// F# clients should use F# record "with" syntax.
+    member s.Modify(frameRate: Nullable<FrameRate>,
+                    sampleCount: Nullable<int>,
+                    sampleStartDelay: Nullable<int<Us>>,
+                    cyclePeriod: Nullable<int<Us>>,
+                    samplePeriod: Nullable<int<Us>>,
+                    pulseWidth: Nullable<int<Us>>,
+                    pingMode: Nullable<PingMode>,
+                    enableTransmit: Nullable<bool>,
+                    frequency: Nullable<Frequency>,
+                    enable150Volts: Nullable<bool>,
+                    receiverGain: Nullable<int>) =
 
-    /// Return a new instance with updated frame rate;
-    /// largely for ease of use with C#.
-    member s.WithFrameRate (frameRate: FrameRate) = { s with FrameRate = frameRate }
+        {
+            FrameRate =         defaultNullable frameRate           s.FrameRate
+            SampleCount =       defaultNullable sampleCount         s.SampleCount
+            SampleStartDelay =  defaultNullable sampleStartDelay    s.SampleStartDelay
+            CyclePeriod =       defaultNullable cyclePeriod         s.CyclePeriod
+            SamplePeriod =      defaultNullable samplePeriod        s.SamplePeriod
+            PulseWidth =        defaultNullable pulseWidth          s.PulseWidth
+            PingMode =          defaultNullable pingMode            s.PingMode
+            EnableTransmit =    defaultNullable enableTransmit      s.EnableTransmit
+            Frequency =         defaultNullable frequency           s.Frequency
+            Enable150Volts =    defaultNullable enable150Volts      s.Enable150Volts
+            ReceiverGain =      defaultNullable receiverGain        s.ReceiverGain
+        }
 
     static member Invalid = {
         FrameRate = 1.0</s>
