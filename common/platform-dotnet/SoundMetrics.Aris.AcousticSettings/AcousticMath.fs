@@ -9,6 +9,7 @@ open SoundMetrics.Data
 open SoundMetrics.Data.Range
 open System
 open System.ComponentModel
+open System.Runtime.InteropServices
 
 [<AutoOpen>]
 module private AcousticSettingsRawDetails =
@@ -76,16 +77,37 @@ with
     /// Modify only the specified non-null values; helper function for C#.
     /// A new instance of the object is returned.
     /// F# clients should use F# record "with" syntax.
-    member s.Modify(frameRate: Nullable<FrameRate>,
+    member s.Modify([<Optional;DefaultParameterValue(Nullable<FrameRate>())>]
+                    frameRate: Nullable<FrameRate>,
+
+                    [<Optional;DefaultParameterValue(Nullable<int>())>]
                     sampleCount: Nullable<int>,
+
+                    [<Optional;DefaultParameterValue(Nullable<int<Us>>())>]
                     sampleStartDelay: Nullable<int<Us>>,
+
+                    [<Optional;DefaultParameterValue(Nullable<int<Us>>())>]
                     cyclePeriod: Nullable<int<Us>>,
+
+                    [<Optional;DefaultParameterValue(Nullable<int<Us>>())>]
                     samplePeriod: Nullable<int<Us>>,
+
+                    [<Optional;DefaultParameterValue(Nullable<int<Us>>())>]
                     pulseWidth: Nullable<int<Us>>,
+
+                    [<Optional;DefaultParameterValue(Nullable<PingMode>())>]
                     pingMode: Nullable<PingMode>,
+
+                    [<Optional;DefaultParameterValue(Nullable<bool>())>]
                     enableTransmit: Nullable<bool>,
+
+                    [<Optional;DefaultParameterValue(Nullable<Frequency>())>]
                     frequency: Nullable<Frequency>,
+
+                    [<Optional;DefaultParameterValue(Nullable<bool>())>]
                     enable150Volts: Nullable<bool>,
+
+                    [<Optional;DefaultParameterValue(Nullable<int>())>]
                     receiverGain: Nullable<int>) =
 
         {
