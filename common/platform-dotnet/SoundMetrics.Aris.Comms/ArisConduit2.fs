@@ -37,11 +37,14 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
     [<Literal>]
     let LogPrefix = "ArisConduit"
 
-    let _logCtor =
+    let _earlyCtor =
         Log.Information(
             LogPrefix + "[{targetSonar}] Constructing ArisConduit; initial settings={initialSettings}",
             targetSonar,
             initialAcousticSettings.ToShortString())
+        match SettingsHelpers.validateSettings initialAcousticSettings with
+        | ValidationError msg -> invalidArg "initialAcousticSettings" msg
+        | _ -> ()
 
     let disposed = ref false
     let disposingSignal = new ManualResetEventSlim()
