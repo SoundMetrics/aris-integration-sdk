@@ -32,8 +32,20 @@ module internal NetworkSupport =
 
     let findLocalIPAddress remoteIPAddress fallbackAddress =
 
+        let isADesirableInterface (nic: NetworkInterface) =
+
+            let isNpcapLoopback (nic: NetworkInterface) =
+                // npcap is not identifying as a loopback, and can
+                // live in the same subnet as a link-local interface.
+                let up = nic.Name.ToUpper()
+                up.Contains("NPCAP") && up.Contains("LOOPBACK")
+
+            nic.NetworkInterfaceType = NetworkInterfaceType.Ethernet
+                && not (isNpcapLoopback nic)
+
         let addrs = seq {
-            for nic in NetworkInterface.GetAllNetworkInterfaces() do
+            for nic in NetworkInterface.GetAllNetworkInterfaces()
+                            |> Seq.filter isADesirableInterface do
                 if nic.OperationalStatus = OperationalStatus.Up then
                     let ipProps = nic.GetIPProperties()
                     for uni in ipProps.UnicastAddresses do
