@@ -1,8 +1,9 @@
 ﻿namespace SoundMetrics.Data
 
+open System.Diagnostics
 open Trigonometry
 
-[<Struct>]
+[<Struct; DebuggerDisplay("{Value} radians")>]
 type Radians (value: float) =
 
     member __.Value = value
@@ -61,7 +62,8 @@ type Radians (value: float) =
     static member op_GreaterThan (l: Radians, r: Radians) =         l.Value > r.Value
     static member op_GreaterThanOrEqual (l: Radians, r: Radians) =  l.Value >= r.Value
 
-and [<Struct>] Degrees (value: float) =
+and [<Struct; DebuggerDisplay("{Value} degrees")>]
+    Degrees (value: float) =
 
     member __.Value = value
 
