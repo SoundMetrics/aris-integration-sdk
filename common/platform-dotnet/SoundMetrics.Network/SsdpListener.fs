@@ -28,11 +28,16 @@ module internal SsdpNetworkInterfaces =
     /// Fetches the NICs of interest for SSDP.
     let private getSsdpNics () =
 
+        let isNpcapLoobback (nic: NetworkInterface) =
+            let up = nic.Name.ToUpper()
+            up.Contains("NPCAP") && up.Contains("LOOPBACK")
+
         NetworkInterface.GetAllNetworkInterfaces()
             |> Seq.filter (fun nic ->
                     nic.OperationalStatus = OperationalStatus.Up
                     && nic.Supports(NetworkInterfaceComponent.IPv4)
-                    && nic.NetworkInterfaceType <> NetworkInterfaceType.Loopback)
+                    && nic.NetworkInterfaceType <> NetworkInterfaceType.Loopback
+                    && not (isNpcapLoobback nic))
             |> Seq.toArray
 
     let private allowedAddressFamilies =
