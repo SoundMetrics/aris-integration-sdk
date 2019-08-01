@@ -75,12 +75,18 @@ module internal BeaconObserver2Details =
                                    |> Seq.exactlyOne
                         NetworkInterfaceInfo.FromNetworkInterface ifc
                     )
-                    |> Seq.exactlyOne
 
-                handlePacket {  Timestamp = timestamp
-                                Buffer = ArraySegment(buffer, 0, cb)
-                                RemoteAddress = ((!remoteEP) :?> IPEndPoint).Address
-                                InterfaceInfo = ifcInfo }
+                match ifcInfo |> Seq.tryExactlyOne with
+                | Some ifcInfo ->
+                    handlePacket {  Timestamp = timestamp
+                                    Buffer = ArraySegment(buffer, 0, cb)
+                                    RemoteAddress = ((!remoteEP) :?> IPEndPoint).Address
+                                    InterfaceInfo = ifcInfo }
+                | None -> () // Couldn't find an interface; possibly a stale beacon that's
+                             // pulled from the network stack just as the network interface
+                             // went away. So be friendly if there's no interface found.
+                             // https://github.com/SoundMetrics/aris-integration-sdk/issues/129
+
                 queueReceive()
             with
                 :? ObjectDisposedException ->
