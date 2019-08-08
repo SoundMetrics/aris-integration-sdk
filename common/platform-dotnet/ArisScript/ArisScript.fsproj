@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Argu">
-      <HintPath>..\packages\Argu.5.1.0\lib\net45\Argu.dll</HintPath>
+      <HintPath>..\packages\Argu.5.4.0\lib\net45\Argu.dll</HintPath>
     </Reference>
     <Reference Include="fracas.standard">
       <HintPath>..\packages\fracas.1.0.2-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
@@ -94,13 +94,14 @@
       <HintPath>..\packages\SoundMetrics.Aris.Headers.1.0.1-beta\lib\netstandard2.0\SoundMetrics.Aris.Headers.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Reactive">
       <HintPath>..\packages\System.Reactive.4.1.5\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Linq">
-      <HintPath>..\packages\System.Reactive.Linq.4.1.2\lib\net46\System.Reactive.Linq.dll</HintPath>
+      <HintPath>..\packages\System.Reactive.Linq.4.1.5\lib\net46\System.Reactive.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>

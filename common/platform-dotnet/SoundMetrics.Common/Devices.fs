@@ -44,11 +44,11 @@ module Defender =
         | OnTetherPower = 4
 
 type DefenderState = {
-    RecordState :   Defender.OnBoardRecordState
-    StorageState :  Defender.OnBoardStorageState
-    StorageLevel :  float32
-    BatteryState :  Defender.OnBoardBatteryState
-    BatteryLevel :  float32
+    RecordState:    Defender.OnBoardRecordState
+    StorageState:   Defender.OnBoardStorageState
+    StorageLevel:   float32
+    BatteryState:   Defender.OnBoardBatteryState
+    BatteryLevel:   float32
 }
 
 type ArisModel = Explorer | Defender of DefenderState | Voyager
@@ -59,24 +59,54 @@ type ArisModel = Explorer | Defender of DefenderState | Voyager
 /// Defender. In a Defender's case, the beacon of model Explorer is always busy--
 /// you cannot control the Defender directly.
 type ArisBeacon = {
-    Model :             ArisModel
-    SystemType :        ArisSystemType
-    SerialNumber :      ArisSerialNumber
-    SoftwareVersion :   ArisSoftwareVersion
-    Timestamp :         DateTime
-    IPAddress :         IPAddress
-    ConnectionState :   ArisAvailabilityState
-    CpuTemp :           float32
+    Model:              ArisModel
+    SystemType:         ArisSystemType
+    SerialNumber:       ArisSerialNumber
+    SoftwareVersion:    ArisSoftwareVersion
+    Timestamp:          DateTime
+    IPAddress:          IPAddress
+    ConnectionState:    ArisAvailabilityState
+    CpuTemp:            float32
+}
+
+/// A beacon is sent to indicate the presence of an ARIS. ARIS Explorer and
+/// ARIS Voyager send one beacon with the Model field indicating the type.
+/// An ARIS Defender sends two beacons: one of model Explorer, and one of model
+/// Defender. In a Defender's case, the beacon of model Explorer is always busy--
+/// you cannot control the Defender directly.
+type ArisBeacon2 = {
+    Model:              ArisModel
+    SystemType:         ArisSystemType
+    SerialNumber:       ArisSerialNumber
+    SoftwareVersion:    ArisSoftwareVersion
+    Timestamp:          DateTime
+    SenderAddress:      IPAddress
+    ConnectionState:    ArisAvailabilityState
+    CpuTemp:            float32
+
+    InterfaceInfo:      NetworkInterfaceInfo
 }
 
 type ArisCommandModuleBeacon = {
-    IPAddress :     IPAddress
-    ArisCurrent :   float32
-    ArisPower :     float32
-    ArisVoltage :   float32
-    CpuTemp :       float32
-    Revision :      uint32
-    Timestamp :     DateTime
+    IPAddress:      IPAddress
+    ArisCurrent:    float32
+    ArisPower:      float32
+    ArisVoltage:    float32
+    CpuTemp:        float32
+    Revision:       uint32
+    Timestamp:      DateTime
+}
+
+type ArisCommandModuleBeacon2 = {
+    SenderAddress:  IPAddress
+    ArisCurrent:    float32
+    ArisPower:      float32
+    ArisVoltage:    float32
+    CpuTemp:        float32
+    Revision:       uint32
+    Timestamp:      DateTime
+
+    InterfaceInfo:  NetworkInterfaceInfo
 }
 
 

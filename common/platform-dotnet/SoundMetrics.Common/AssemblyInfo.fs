@@ -13,4 +13,6 @@ open System.Runtime.CompilerServices
 [<assembly: System.Reflection.AssemblyProductAttribute("Common Communications (managed)")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("SoundMetrics.Common")>]
 
+[<assembly: InternalsVisibleTo("SoundMetrics.Common.UT")>]
+
 do()

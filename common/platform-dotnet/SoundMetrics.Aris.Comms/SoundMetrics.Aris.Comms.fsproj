@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <FSharpCoreImplicitPackageVersion>4.5.*</FSharpCoreImplicitPackageVersion>
     <Version>1.0.9-alpha</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -35,6 +34,7 @@
   <ItemGroup>
     <Compile Include="ArisFrameHeaderBindable.fs" />
     <Compile Include="BuildInfo.fs" />
+    <Compile Include="ReachabilityTracker.fs" />
     <Compile Include="AssemblyAttributes.fs" />
     <Compile Include="AsyncTaskTracker.fs" />
     <Compile Include="LanguageUtils.Internal.fs" />

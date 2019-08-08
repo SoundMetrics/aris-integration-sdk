@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
 
     <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="DeviceReachabilityTest.fs" />
+    <Compile Include="NetworkInterfaceInfoDetailsTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -18,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Network\SoundMetrics.Network.fsproj" />
+    <ProjectReference Include="..\..\SoundMetrics.Common\SoundMetrics.Common.fsproj" />
   </ItemGroup>
 
 </Project>
