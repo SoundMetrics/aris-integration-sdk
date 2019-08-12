@@ -4,17 +4,14 @@ using System;
 
 namespace SoundMetrics.HID.Windows
 {
-    public static partial class Joystick
+    public struct JoystickInfo
     {
-        public struct JoystickInfo
-        {
-            public uint JoystickId;
-            public JoyCaps Caps;
+        public uint JoystickId;
+        public JoyCaps Caps;
 
-            private static Lazy<JoystickInfo> empty =
-                new Lazy<JoystickInfo>(() => new JoystickInfo());
+        private static Lazy<JoystickInfo> empty =
+            new Lazy<JoystickInfo>(() => new JoystickInfo());
 
-            public static JoystickInfo Empty = empty.Value;
-        }
+        public static JoystickInfo Empty = empty.Value;
     }
 }

@@ -13,7 +13,7 @@ namespace SoundMetrics.HID.Windows
     {
         public uint JoystickId;
         public JoyInfoEx JoyInfoEx;
-        public Joystick.JoystickInfo JoystickInfo;
+        public JoystickInfo JoystickInfo;
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ namespace SoundMetrics.HID.Windows
     {
         private readonly uint joystickId;
         private readonly MillisecondTimer timer;
-        private readonly Joystick.JoystickInfo joystickInfo;
+        private readonly JoystickInfo joystickInfo;
 
         private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
 
