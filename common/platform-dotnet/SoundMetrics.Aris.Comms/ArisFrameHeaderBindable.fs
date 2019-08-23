@@ -1,7 +1,9 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
 open Aris.FileTypes
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.Aris.AcousticSettings
+open System
 
 /// Provides bindable properties for ArisFrameHeader.
 [<Sealed>]
@@ -13,6 +15,30 @@ type ArisFrameHeaderBindable public (header: ArisFrameHeader) =
     member public __.BeamCount =
         (SonarConfig.getPingModeConfig (PingMode.From(header.PingMode)))
             .ChannelCount
+
+    member public __.FocusRange : float<m> =
+        let window =
+            let floatToOption x =
+                if Double.IsNaN(x) then
+                    None
+                else
+                    Some x
+
+            let waterTemp =
+                let wt = floatToOption (float header.WaterTemp)
+                defaultArg wt 15.0
+            let depth =
+                let d = floatToOption (float header.WaterTemp)
+                defaultArg d 0.0
+
+            AcousticMath.CalculateWindow(
+                int header.SampleStartDelay * 1<Us>,
+                int header.SamplePeriod * 1<Us>,
+                int header.SamplesPerBeam,
+                waterTemp * 1.0<degC>,
+                depth * 1.0<m>,
+                float header.Salinity)
+        window.MidPoint
 
     /// Frame number in file
     member public __.FrameIndex = header.FrameIndex
