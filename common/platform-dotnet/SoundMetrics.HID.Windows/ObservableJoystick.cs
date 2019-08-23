@@ -104,7 +104,7 @@ namespace SoundMetrics.HID.Windows
         {
             if (!Joystick.GetJoystickInfo(joystickId, out joystickInfo))
             {
-                throw new InvalidOperationException($"Couldnt find joystick id={joystickId}");
+                throw new InvalidOperationException($"Couldn't find joystick id={joystickId}");
             }
 
             this.joystickId = joystickId;
