@@ -9,9 +9,6 @@ namespace SoundMetrics.HID.Windows
         public uint JoystickId;
         public JoyCaps Caps;
 
-        private static Lazy<JoystickInfo> empty =
-            new Lazy<JoystickInfo>(() => new JoystickInfo());
-
-        public static JoystickInfo Empty = empty.Value;
+        public static readonly JoystickInfo Empty = new JoystickInfo();
     }
 }
