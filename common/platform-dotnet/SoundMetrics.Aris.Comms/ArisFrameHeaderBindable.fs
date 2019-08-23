@@ -16,7 +16,7 @@ type ArisFrameHeaderBindable public (header: ArisFrameHeader) =
         (SonarConfig.getPingModeConfig (PingMode.From(header.PingMode)))
             .ChannelCount
 
-    member public __.FocusRange : float<m> =
+    member public __.Window : DownrangeWindow =
         let window =
             let floatToOption x =
                 if Double.IsNaN(x) then
@@ -38,7 +38,9 @@ type ArisFrameHeaderBindable public (header: ArisFrameHeader) =
                 waterTemp * 1.0<degC>,
                 depth * 1.0<m>,
                 float header.Salinity)
-        window.MidPoint
+        window
+
+    member public hdr.FocusRange : float<m> = hdr.Window.MidPoint
 
     /// Frame number in file
     member public __.FrameIndex = header.FrameIndex
