@@ -26,11 +26,14 @@ type RequestedSettings =
     | SettingsApplied of versioned : AcousticSettingsRaw * constrained : bool
     | SettingsDeclined of string
 
+type FocusPolicy = AutoFocusAtMidfield | ManualFocus
+
 
 type ArisConduit private (synchronizationContext : SynchronizationContext,
                           initialAcousticSettings : AcousticSettingsRaw,
                           targetSonar : string,
                           matchBeacon : ArisBeacon -> bool,
+                          focusPolicy : FocusPolicy,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
                           _perfSink : ConduitPerfSink) as self =
 
@@ -53,6 +56,8 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
     let mutable serialNumber: Nullable<ArisSerialNumber> = Nullable<ArisSerialNumber>()
     let mutable snListener: IDisposable = null
     let mutable setSalinity: (RawFrame -> unit) = fun _ -> ()
+    let mutable environment = ArisEnvironment.Default
+    let mutable focusPolicy = focusPolicy
     let systemType: ArisSystemType option ref = ref None
     let cts = new CancellationTokenSource()
     let cxnMgrDone = new ManualResetEventSlim()
@@ -71,13 +76,10 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
     let cxnStateSubject = new Subject<ConnectionState>()
 
     let keepAliveTimer = Observable.Interval(SonarConnectionDetails.keepAlivePingInterval)
+    let environmentWatcherSub =
+        earlyFrameSubject.Subscribe(fun frame -> environment <- frame.Environment)
 
     // Processing graph
-    //let pGraph, pGraphLeaves, pGraphDisposables =
-    //    GraphBuilder.buildSimpleRecordingGraph perfSink
-    //                                           frameStreamListener.Frames
-    //                                           earlyFrameSubject
-    //                                           frameIndexMapper.ReportFrameMapping
     let graph = ArisGraph.build
                     targetSonar
                     frameStreamListener.Frames
@@ -127,6 +129,41 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
         cxnEvQueue.Post(mkEventNoCallback (CxnEventType.Command cmd)) |> ignore
 
+    let focusSamplingSubject = new Subject<float<m>>()
+    let focusSamplingSubscription =
+        let samplePeriod = TimeSpan.FromSeconds(0.3)
+        focusSamplingSubject
+            .Sample(samplePeriod)
+            .DistinctUntilChanged()
+            .Subscribe(fun range ->
+                let range' = float32 range * 1.0f<m>
+                queueCmd (makeFocusCmd range')
+                )
+
+    let queueFocusRange range = focusSamplingSubject.OnNext(range)
+
+    let queueAcousticSettings (sv: AcousticSettingsVersioned) : unit =
+        queueCmd (makeAcousticSettingsCmd sv)
+        logSentAcousticSettings sv
+
+        match focusPolicy with
+        | ManualFocus -> ()
+        | AutoFocusAtMidfield ->
+            let midfieldRange =
+                let window = 
+                    let env = environment
+                    let settings = sv.Settings
+                    AcousticMath.CalculateWindow(
+                        settings.SampleStartDelay,
+                        settings.SamplePeriod,
+                        settings.SampleCount,
+                        environment.Temperature,
+                        environment.Depth,
+                        float environment.Salinity)
+                window.MidPoint
+
+            queueFocusRange midfieldRange
+
     let requestAcousticSettings (settings: AcousticSettingsRaw): RequestedSettings =
 
         Log.Information(
@@ -153,12 +190,13 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                             antiAliasing)
                     | None -> struct (settings, false)
 
-                let settings = if constrained then constrainedSettings else settings
-                let versionedSettings = cookieTracker.ApplyNewCookie settings
+                let versionedSettings =
+                    let settings' =
+                        if constrained then constrainedSettings else settings
+                    cookieTracker.ApplyNewCookie settings'
 
                 lastRequestedAcoustingSettings := versionedSettings
-                queueCmd (makeAcousticSettingsCmd versionedSettings)
-                logSentAcousticSettings versionedSettings
+                queueAcousticSettings versionedSettings
                 SettingsApplied (versionedSettings.Settings, constrained))
 
     do
@@ -176,12 +214,14 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
         synchronizationContext,
         initialAcousticSettings,
         sn,
+        focusPolicy,
         frameStreamReliabilityPolicy) =
             new ArisConduit(
                 synchronizationContext,
                 initialAcousticSettings,
                 sn.ToString(),
                 (fun beacon -> beacon.SerialNumber = sn),
+                focusPolicy,
                 frameStreamReliabilityPolicy,
                 ConduitPerfSink.None)
 
@@ -190,12 +230,14 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
         synchronizationContext,
         initialAcousticSettings,
         ipAddress,
+        focusPolicy,
         frameStreamReliabilityPolicy) =
             new ArisConduit(
                 synchronizationContext,
                 initialAcousticSettings,
                 ipAddress.ToString(),
                 (fun beacon -> beacon.IPAddress = ipAddress),
+                focusPolicy,
                 frameStreamReliabilityPolicy,
                 ConduitPerfSink.None)
 
@@ -203,6 +245,7 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 synchronizationContext,
                 initialAcousticSettings,
                 sn,
+                focusPolicy,
                 frameStreamReliabilityPolicy,
                 perfSink) =
             new ArisConduit(
@@ -210,18 +253,31 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 initialAcousticSettings,
                 sn.ToString(),
                 (fun beacon -> beacon.SerialNumber = sn),
+                focusPolicy,
                 frameStreamReliabilityPolicy,
                 perfSink)
 
     interface IDisposable with
         member __.Dispose() =
             disposingSignal.Set()
-            let disposables = List.concat [ queueLinks; inputGraphLinks
-                                            [ earlyFrameSubject; frameStreamSubscription
-                                              frameStreamListener; snListener; cxnStateSubject; cts; cxnMgrDone ] ]
+            let disposables =
+                List.concat [
+                    queueLinks
+                    inputGraphLinks
+                    [ environmentWatcherSub
+                      focusSamplingSubscription
+                      focusSamplingSubject
+                      earlyFrameSubject
+                      frameStreamSubscription
+                      frameStreamListener
+                      snListener
+                      cxnStateSubject
+                      cts
+                      cxnMgrDone ] ]
             Dispose.theseWith disposed
                 disposables
                 (fun () ->
+                        focusSamplingSubject.OnCompleted()
                         earlyFrameSubject.OnCompleted()
                         graph.CompleteAndWait(TimeSpan.FromSeconds(2.0)) |> ignore
                         graph.Dispose()
@@ -327,14 +383,18 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                                     else
                                         setSalinity <- fun _ -> ()
 
+    member __.FocusPolicy
+        with get () = focusPolicy
+        and set policy = focusPolicy <- policy
+
     /// Requests the supplied settings; returns a copy with the cookie attached to the request.
     member __.RequestAcousticSettings settings : RequestedSettings = requestAcousticSettings settings
 
-    member __.RequestFocusDistance (range: float32<m>) =
+    member __.RequestFocusDistance (range: float<m>) =
 
-        if range < 0.0f<m> then
+        if range < 0.0<m> then
             invalidArg "range" "Range must be greater than zero"
-        queueCmd (makeFocusCmd range)
+        queueFocusRange range
 
     // Frames
 

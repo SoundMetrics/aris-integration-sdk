@@ -1,11 +1,13 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
 open System.Reactive.Subjects
 open SoundMetrics.Dataflow.Graph
 open SoundMetrics.Aris.Comms
 open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.NativeMemory
+open SoundMetrics.Aris.AcousticSettings
 
 module ArisGraph =
 
@@ -49,11 +51,31 @@ module ArisGraph =
             | ArisFrame (OrderedFrame f) ->
                 // TODO BGS operations
                 let finishedFrame =
+                    let normalizedEnvironment =
+                        let defaults = ArisEnvironment.Default
+                        let temperature =
+                            if Single.IsNaN(f.Header.WaterTemp) then
+                                defaults.Temperature
+                            else
+                                float f.Header.WaterTemp * 1.0<degC>
+                        let depth =
+                            if Single.IsNaN(f.Header.Depth) then
+                                defaults.Depth
+                            else
+                                float f.Header.Depth * 1.0<m>
+                                
+                        {
+                            Temperature = temperature
+                            Depth = depth
+                            Salinity = enum (int f.Header.Salinity)
+                        }
+
                     {
                         ArisFinishedFrame.Header = f.Header
                         FrameGeometry = f.FrameGeometry
                         SampleData = f.SampleData
                         Histogram = f.Histogram
+                        Environment = normalizedEnvironment
                     }
                 ArisFrame (FrameWithBgs finishedFrame)
             | ArisFrame f -> failwithf "Unexpected frame type: %s" (f.GetType().Name)

@@ -1,12 +1,14 @@
 ﻿namespace SoundMetrics.Aris.Comms.Experimental
 
 open Aris.FileTypes
+open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open SoundMetrics.NativeMemory
 open SoundMetrics.Aris.ReorderCS
 open SoundMetrics.Aris.AcousticSettings
 
 // avoiding confusion with SoundMetrics.Aris.Comms & Experimental
 type RecordingRequest = SoundMetrics.Aris.Comms.RecordingRequest
+type Salinity = SoundMetrics.Aris.AcousticSettings.Salinity
 
 type ArisGraphCommand =
     /// Start recording.
@@ -22,6 +24,18 @@ type ArisGraphCommand =
     | TakeSnapshot
 
 type ArisRawFrame = SoundMetrics.Aris.Comms.RawFrame
+
+type ArisEnvironment = {
+    Temperature:    float<degC>
+    Depth:          float<m>
+    Salinity:       Salinity
+}
+with
+    static member Default = {
+        Temperature = 15.0<degC>
+        Depth = 0.0<m>
+        Salinity = Salinity.Brackish
+    }
 
 type ArisFrameGeometry = {
     PingMode:       int32
@@ -51,6 +65,7 @@ type ArisFinishedFrame = {
     FrameGeometry: ArisFrameGeometry
     SampleData: NativeBuffer
     Histogram: FrameHistogram
+    Environment: ArisEnvironment
 }
 
 type ArisFrameType =
