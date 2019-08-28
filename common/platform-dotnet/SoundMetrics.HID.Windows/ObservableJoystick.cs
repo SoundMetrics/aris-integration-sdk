@@ -100,6 +100,40 @@ namespace SoundMetrics.HID.Windows
 
         private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
 
+        /// <summary>
+        /// Tries to create an ObservableJoystick for the specified joystick.
+        /// Does not throw.
+        /// </summary>
+        /// <param name="joystickId"></param>
+        /// <param name="pollingPeriodMs"></param>
+        /// <returns></returns>
+        public static (bool success, ObservableJoystick joystick)
+            TryGet(uint joystickId, int pollingPeriodMs)
+        {
+            // We try to avoid an exception.
+            if (!Joystick.GetJoystickInfo(joystickId, out var joystickInfo))
+            {
+                return (false, null);
+            }
+
+            try
+            {
+                return (true, new ObservableJoystick(joystickId, pollingPeriodMs));
+            }
+            catch
+            {
+                // We can't protect against a race condition, so at least live up
+                // to the API design.
+                return (false, null);
+            }
+        }
+
+        /// <summary>
+        /// Constructs an instance with the specified joystick.
+        /// Throws if the joystick is not found.
+        /// </summary>
+        /// <param name="joystickId">Identifies the joystick.</param>
+        /// <param name="pollingPeriodMs">The polling period in milliseconds.</param>
         public ObservableJoystick(uint joystickId, int pollingPeriodMs)
         {
             if (!Joystick.GetJoystickInfo(joystickId, out joystickInfo))
