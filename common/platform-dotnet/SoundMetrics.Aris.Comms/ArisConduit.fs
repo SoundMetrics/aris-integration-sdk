@@ -230,9 +230,9 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 let requested = !lastRequestedAcoustingSettings
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings
-                    then Log.Information("sending existing settings: {setings}", requested.Settings.ToString())
+                    then Log.Information("sending existing settings: {settings}", requested.Settings.ToShortString())
                          requested.Settings
-                    else Log.Information("sending initial settings: {settings}", initialAcousticSettings.ToString())
+                    else Log.Information("sending initial settings: {settings}", initialAcousticSettings.ToShortString())
                          initialAcousticSettings
             let requestResult = requestAcousticSettings settings
             match requestResult with

@@ -129,9 +129,6 @@ module internal BeaconListener =
                     Timestamp =     pkt.Timestamp
                 }
 
-            if Log.IsEnabled(LogEventLevel.Verbose) then
-                Log.Verbose("CM Beacon, length of {length}: {cmBeacon}",
-                    pkt.UdpResult.Buffer.Length, sprintf "%A" beacon)
             Some beacon
         with
             _ -> None

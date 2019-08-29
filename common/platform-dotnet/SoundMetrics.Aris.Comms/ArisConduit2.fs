@@ -150,7 +150,7 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
         | ManualFocus -> ()
         | AutoFocusAtMidfield ->
             let midfieldRange =
-                let window = 
+                let window =
                     let env = environment
                     let settings = sv.Settings
                     AcousticMath.CalculateWindow(
@@ -320,15 +320,15 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings then
                     Log.Information(
-                        LogPrefix + "[{targetSonar}] sending existing settings: {setings}",
+                        LogPrefix + "[{targetSonar}] sending existing settings: {settings}",
                         targetSonar,
-                        requested.Settings.ToString())
+                        requested.Settings.ToShortString())
                     requested.Settings
                 else
                     Log.Information(
                         LogPrefix + "[{targetSonar}] sending initial settings: {settings}",
                         targetSonar,
-                        initialAcousticSettings.ToString())
+                        initialAcousticSettings.ToShortString())
                     initialAcousticSettings
             let requestResult = requestAcousticSettings settings
             match requestResult with
