@@ -9,7 +9,7 @@ namespace SoundMetrics.HID.Windows
     // Helper types
     //-------------------------------------------------------------------------
 
-    public struct JoystickPositionReport
+    public struct JoystickReport
     {
         public uint JoystickId;
         public JoyInfoEx JoyInfoEx;
@@ -90,7 +90,7 @@ namespace SoundMetrics.HID.Windows
     // Observable joystick events
     //-------------------------------------------------------------------------
 
-    public delegate bool ButtonFilter(JoystickPositionReport report);
+    public delegate bool ButtonFilter(JoystickReport report);
 
     public sealed class ObservableJoystick : IDisposable
     {
@@ -98,7 +98,7 @@ namespace SoundMetrics.HID.Windows
         private readonly MillisecondTimer timer;
         private readonly JoystickInfo joystickInfo;
 
-        private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
+        private readonly Subject<JoystickReport> posSubject = new Subject<JoystickReport>();
 
         /// <summary>
         /// Tries to create an ObservableJoystick for the specified joystick.
@@ -209,7 +209,7 @@ namespace SoundMetrics.HID.Windows
                 if (Joystick.GetJoystickPosition(joystickId, out var posInfo))
                 {
                     var (joystickId, joyInfoEx) = posInfo;
-                    var report = new JoystickPositionReport
+                    var report = new JoystickReport
                     {
                         JoystickId = joystickId,
                         JoyInfoEx = joyInfoEx,
@@ -244,6 +244,6 @@ namespace SoundMetrics.HID.Windows
             // Free up unmanaged resources
         }
 
-        public IObservable<JoystickPositionReport> JoystickPositionReports => posSubject;
+        public IObservable<JoystickReport> JoystickReports => posSubject;
     }
 }

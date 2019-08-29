@@ -64,7 +64,7 @@ namespace SoundMetrics.HID.Windows.UT
                 .ToList()
                 .ForEach(i =>
                 {
-                    var report = new JoystickPositionReport();
+                    var report = new JoystickReport();
                     report.JoyInfoEx.dwButtons = i;
                     eventsPassed += filter(report) ? 1 : 0;
                 });
@@ -86,7 +86,7 @@ namespace SoundMetrics.HID.Windows.UT
                 .ForEach(input =>
                 {
                     var (index, i) = input;
-                    var report = new JoystickPositionReport();
+                    var report = new JoystickReport();
                     report.JoyInfoEx.dwButtons = i;
                     var included = filter(report);
 
