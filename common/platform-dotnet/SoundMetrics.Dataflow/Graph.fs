@@ -182,12 +182,12 @@ module Graph =
                 // Clean up managed resources
                 disposables |> List.iter (fun d -> d.Dispose())
 
-                Log.Verbose("Disposing GraphHandle '{name}' duration: {duration}", sw.Elapsed)
+                Log.Verbose("Disposing GraphHandle '{name}' duration: {duration}", name, sw.Elapsed)
 
             // Clean up unmanaged resources
             ()
 
-        do Log.Verbose("Constructed GraphHandle '{name}'")
+        do Log.Verbose("Constructed GraphHandle '{name}'", name)
 
         interface IDisposable with
             member me.Dispose() = dispose true
