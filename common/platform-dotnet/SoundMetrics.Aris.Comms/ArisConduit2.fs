@@ -39,7 +39,6 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                           _perfSink : ConduitPerfSink) as self =
 
     let _earlyCtor =
-        use _ctx = self.PushModuleName("_earlyCtor")
         Log.Information(
             "[{targetSonar}] Constructing ArisConduit; initial settings={initialSettings}",
             targetSonar,
