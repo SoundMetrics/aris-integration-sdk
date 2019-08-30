@@ -12,6 +12,7 @@ open System.Net
 open System.Reactive.Linq
 open System.Reactive.Subjects
 open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open System.Threading
 open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
@@ -21,8 +22,6 @@ open SonarConnectionMachineState
 open ArisCommands
 open ArisConduitDetails
 open SoundMetrics.Aris.Comms
-open System.Runtime.InteropServices
-open Serilog.Context
 
 
 type RequestedSettings =
@@ -39,12 +38,10 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
                           _perfSink : ConduitPerfSink) as self =
 
-    [<Literal>]
-    let LogPrefix = "ArisConduit"
-
     let _earlyCtor =
+        use _ctx = self.PushModuleName("_earlyCtor")
         Log.Information(
-            LogPrefix + "[{targetSonar}] Constructing ArisConduit; initial settings={initialSettings}",
+            "[{targetSonar}] Constructing ArisConduit; initial settings={initialSettings}",
             targetSonar,
             initialAcousticSettings.ToShortString())
         match SettingsHelpers.validateSettings initialAcousticSettings with
@@ -107,8 +104,9 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
             setSalinity frame
 
         let onError (ex: Exception) =
+            use _ctx = self.PushModuleName()
             Log.Error(
-                LogPrefix + "[{targetSonar}] SonarConnection frame error: {exMsg}",
+                "[{targetSonar}] SonarConnection frame error: {exMsg}",
                 targetSonar,
                 ex.Message)
         frameStreamListener.Frames.Subscribe (trackFrameInfo, onError)
@@ -123,9 +121,10 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
     let quitCxnMgr () = cxnEvQueue.Post(mkEventNoCallback CxnEventType.Quit) |> ignore
     let queueCmd (cmd : Aris.Command) =
         if Log.IsEnabled(Serilog.Events.LogEventLevel.Verbose) then
+            use _ctx = self.PushModuleName()
             let commandType = cmd.Type.ToString()
             Log.Verbose(
-                LogPrefix + "[{targetSonar}] Queuing command type {commandType}",
+                "[{targetSonar}] Queuing command type {commandType}",
                 targetSonar,
                 commandType)
 
@@ -168,14 +167,15 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
     let requestAcousticSettings (settings: AcousticSettingsRaw): RequestedSettings =
 
+        use _ctx = self.PushModuleName()
         Log.Information(
-            LogPrefix + "[{targetSonar}] requesting acoustic settings {settings}",
+            "[{targetSonar}] requesting acoustic settings {settings}",
             targetSonar,
             settings.ToShortString())
 
         match SettingsHelpers.validateSettings settings with
         | ValidationError msg ->
-            Log.Error(LogPrefix + "[{targetSonar}] invalid settings: {msg}", targetSonar, msg)
+            Log.Error("[{targetSonar}] invalid settings: {msg}", targetSonar, msg)
             SettingsDeclined ("Validation error: " + msg)
         | Valid settings ->
             lock acousticSettingsRequestGuard (fun () ->
@@ -296,8 +296,9 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
     interface ISonarConnectionCallbacks with
         member __.OnCxnStateChanged cxnState =
+            use _ctx = self.PushModuleName()
             Log.Information(
-                LogPrefix + "[{targetSonar}] connection state changed to {state}",
+                "[{targetSonar}] connection state changed to {state}",
                 targetSonar,
                 cxnState)
             match cxnState with
@@ -306,13 +307,13 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
             cxnStateSubject.OnNext(cxnState)
 
-        member me.OnInitializeConnection frameSinkAddress =
-            use _ctx = me.PushModuleName()
+        member __.OnInitializeConnection frameSinkAddress =
+            use _ctx = self.PushModuleName()
 
-            Log.Information(LogPrefix + "[{targetSonar}] initializing connection", targetSonar)
+            Log.Information("[{targetSonar}] initializing connection", targetSonar)
             let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
             Log.Information(
-                LogPrefix + "[{targetSonar}] Setting sonar clock to {dateTime}",
+                "[{targetSonar}] Setting sonar clock to {dateTime}",
                 targetSonar,
                 setTimeCmd.DateTime.DateTime)
             queueCmd setTimeCmd |> ignore
@@ -324,13 +325,13 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings then
                     Log.Information(
-                        LogPrefix + "[{targetSonar}] sending existing settings: {settings}",
+                        "[{targetSonar}] sending existing settings: {settings}",
                         targetSonar,
                         requested.Settings.ToShortString())
                     requested.Settings
                 else
                     Log.Information(
-                        LogPrefix + "[{targetSonar}] sending initial settings: {settings}",
+                        "[{targetSonar}] sending initial settings: {settings}",
                         targetSonar,
                         initialAcousticSettings.ToShortString())
                     initialAcousticSettings
@@ -344,7 +345,8 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
     member private __.PushModuleName
             ([<CallerMemberName; Optional; DefaultParameterValue("")>]
                 memberName : string) =
-        LogContext.PushProperty("Module", "ArisConduit." + memberName)
+        let logPrefix = "ArisConduit."
+        Logging.pushModuleName logPrefix memberName
 
     member __.SerialNumber
         with get () = serialNumber

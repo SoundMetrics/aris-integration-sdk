@@ -8,8 +8,6 @@ open System
 
 module internal BeaconListener =
     open System.Collections.ObjectModel
-    open Serilog
-    open Serilog.Events
 
     type SonarAvailability  = Aris.Availability
     type DefenderAvailability = Defender.Availability
@@ -245,6 +243,8 @@ open System.Net
 open System.Reactive
 open System.Reactive.Linq
 open System.Reactive.Subjects
+open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open System.Threading
 open System.Threading.Tasks
 open BeaconListener
@@ -397,19 +397,26 @@ type BeaconListener (syncCtx : SynchronizationContext,
 
         new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
+    member private __.PushModuleName
+            ([<CallerMemberName; Optional; DefaultParameterValue("")>]
+                memberName : string) =
+        let logPrefix = "BeaconListener."
+        Logging.pushModuleName logPrefix memberName
 
     /// Blocking wait for the beacon you're interested in, for F# folk.
     /// Cancellation does not throw.
     [<CompiledName("WaitForBeaconFSharpAsync")>]
     member s.WaitForBeaconAsync (predicate : NetworkDevice -> bool) (timeout : TimeSpan) : Async<NetworkDevice option> = async {
-        Log.Debug("BeaconSource.WaitForBeaconAsync: entering...")
+        use _ctx = s.PushModuleName()
+
+        Log.Debug("Entering...")
         try
             let mutable beacon = None
             use ev = new ManualResetEventSlim(false)
 
             use observer = new AnonymousObserver<NetworkDevice>(
                                 onNext = (fun b ->
-                                            Log.Debug("BeaconSource.WaitForBeaconAsync: Received a beacon")
+                                            Log.Verbose("Received a beacon")
                                             if beacon.IsNone then
                                                 beacon <- Some b
                                             ev.Set () |> ignore),
@@ -420,7 +427,7 @@ type BeaconListener (syncCtx : SynchronizationContext,
                                                     ev.Set() |> ignore)
             let! ct = Async.CancellationToken
 
-            Log.Debug("BeaconSource.WaitForBeaconAsync: Set up subscription")
+            Log.Debug("Set up subscription")
             use _sub =
                 s.AllBeacons.Where(predicate)
                             .Timeout(timeout)
@@ -428,17 +435,17 @@ type BeaconListener (syncCtx : SynchronizationContext,
                             .SubscribeSafe(observer)
 
             try
-                Log.Debug("BeaconSource.WaitForBeaconAsync: waiting...")
+                Log.Debug("Waiting...")
                 if not (ev.Wait(-1, ct)) then
                     Log.Information("Timed out waiting for beacon")
                 if ct.IsCancellationRequested then
                     Log.Information("Cancellation requested while waiting for beacon")
-                Log.Debug("BeaconSource.WaitForBeaconAsync: wait complete.")
+                Log.Debug("...wait complete.")
                 return beacon
             with
                 :? OperationCanceledException -> return None
         finally
-            Log.Debug("BeaconSource.WaitForBeaconAsync: leaving.")
+            Log.Debug("Exiting.")
     }
 
     /// Blocking wait for the beacon you're interested in, for C# folk.

@@ -2,7 +2,6 @@
 
 namespace SoundMetrics.Common
 
-open SoundMetrics.Network
 open System
 open System.Net
 open System.Reactive.Subjects

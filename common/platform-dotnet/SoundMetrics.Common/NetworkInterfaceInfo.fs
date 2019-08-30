@@ -9,7 +9,6 @@ open System.Net.Sockets
 [<AutoOpen>]
 module private NetworkInterfaceInfoDetails =
 
-    let NoAddress = lazy ( IPAddress 0L )
     let NoIndexFound = -1
 
     // Acknowledge that the IP properties may be null

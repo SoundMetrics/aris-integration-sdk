@@ -149,8 +149,10 @@ module Graph =
 
     open Serilog // No logging above this line, please.
     open System.Diagnostics
+    open System.Runtime.CompilerServices
+    open System.Runtime.InteropServices
 
-    type GraphHandle<'T> (name : string, root : RH<'T>) =
+    type GraphHandle<'T> (name : string, root : RH<'T>) as self =
 
         let mutable disposed = false
         let mutable completing = false
@@ -162,6 +164,7 @@ module Graph =
             Task.WaitAll(leaves |> Seq.toArray, timeout)
 
         let dispose disposing =
+            use _ctx = self.PushModuleName()
 
             let sw = Stopwatch.StartNew()
 
@@ -187,7 +190,9 @@ module Graph =
             // Clean up unmanaged resources
             ()
 
-        do Log.Verbose("Constructed GraphHandle '{name}'", name)
+        do
+            use _ctx = self.PushModuleName("do-block")
+            Log.Verbose("Constructed GraphHandle '{name}'", name)
 
         interface IDisposable with
             member me.Dispose() = dispose true
@@ -196,8 +201,15 @@ module Graph =
         member me.Dispose() = (me :> IDisposable).Dispose()
         override __.Finalize() = dispose false
 
+        member private __.PushModuleName
+                ([<CallerMemberName; Optional; DefaultParameterValue("")>]
+                    memberName : string) =
+            let logPrefix = "ArisConduit."
+            Logging.pushModuleName logPrefix memberName
+
         member __.Post(t : 'T) : bool =
 
+            use _ctx = self.PushModuleName()
             if disposed then
                 let msg = sprintf "An attempt was made to Post to an already-disposed GraphHandle '%s'"
                                   name

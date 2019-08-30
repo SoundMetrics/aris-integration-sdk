@@ -32,6 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Logging.fs" />
     <Compile Include="ArisFrameHeaderBindable.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="ReachabilityTracker.fs" />
