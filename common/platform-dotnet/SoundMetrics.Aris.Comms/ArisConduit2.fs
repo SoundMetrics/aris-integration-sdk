@@ -11,6 +11,7 @@ open System
 open System.Net
 open System.Reactive.Linq
 open System.Reactive.Subjects
+open System.Runtime.CompilerServices
 open System.Threading
 open System.Threading.Tasks
 open System.Threading.Tasks.Dataflow
@@ -20,6 +21,8 @@ open SonarConnectionMachineState
 open ArisCommands
 open ArisConduitDetails
 open SoundMetrics.Aris.Comms
+open System.Runtime.InteropServices
+open Serilog.Context
 
 
 type RequestedSettings =
@@ -27,7 +30,6 @@ type RequestedSettings =
     | SettingsDeclined of string
 
 type FocusPolicy = AutoFocusAtMidfield | ManualFocus
-
 
 type ArisConduit private (synchronizationContext : SynchronizationContext,
                           initialAcousticSettings : AcousticSettingsRaw,
@@ -304,7 +306,9 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
 
             cxnStateSubject.OnNext(cxnState)
 
-        member __.OnInitializeConnection frameSinkAddress =
+        member me.OnInitializeConnection frameSinkAddress =
+            use _ctx = me.PushModuleName()
+
             Log.Information(LogPrefix + "[{targetSonar}] initializing connection", targetSonar)
             let setTimeCmd = makeSetDatetimeCmd DateTimeOffset.Now
             Log.Information(
@@ -336,6 +340,11 @@ type ArisConduit private (synchronizationContext : SynchronizationContext,
                 assert false // unexpected & quite bad to have invalid initial settings
                 invalidArg "initialSettings" ("bad initial acoustic settings: " + msg)
             | SettingsApplied _ -> true
+
+    member private __.PushModuleName
+            ([<CallerMemberName; Optional; DefaultParameterValue("")>]
+                memberName : string) =
+        LogContext.PushProperty("Module", "ArisConduit." + memberName)
 
     member __.SerialNumber
         with get () = serialNumber
