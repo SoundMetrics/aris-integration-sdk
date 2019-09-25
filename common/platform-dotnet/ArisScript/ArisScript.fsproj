@@ -71,7 +71,7 @@
       <HintPath>..\packages\Argu.5.4.0\lib\net45\Argu.dll</HintPath>
     </Reference>
     <Reference Include="fracas.standard">
-      <HintPath>..\packages\fracas.1.0.2-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
+      <HintPath>..\packages\fracas.1.0.4-beta\lib\netstandard2.0\fracas.standard.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.7.0\lib\net45\FSharp.Core.dll</HintPath>
