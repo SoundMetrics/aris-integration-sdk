@@ -41,17 +41,22 @@ popd
 REM ---------------------------------------------------------------------------
 REM Build the programs
 
+ECHO "### AAA ###"
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore tools\arislog\arislog.sln
 
 pushd tools\arislog\arislog
+cd
+ECHO "### B ###"
 msbuild ..\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 popd
 
+ECHO "### C ###"
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
+ECHO "### D ###"
 .\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore sample-code\vc-using-framestream\vc-using-framestream.sln
 
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
