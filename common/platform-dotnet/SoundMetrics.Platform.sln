@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		add-local-packages.ps1 = add-local-packages.ps1
 		build-packages.ps1 = build-packages.ps1
+		..\..\build-vc-programs.cmd = ..\..\build-vc-programs.cmd
 		generate-build-info.cmd = generate-build-info.cmd
 		push-packages.cmd = push-packages.cmd
 		README.md = README.md
@@ -117,9 +118,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.HID.Windows.UT", "SoundMetrics.HID.Windows.UT\SoundMetrics.HID.Windows.UT.csproj", "{21FED0F7-2832-473E-A8DA-2BA9872F39DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.DataVisualization", "SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj", "{BE7E1388-706E-44D7-96F6-D5CEBF2317F6}"
+EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT", "test\SoundMetrics.Aris.Comms.UT\SoundMetrics.Aris.Comms.UT.fsproj", "{D9B8E961-479E-4EEF-B363-985FA904CEB2}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SoundMetrics.Common.UT", "test\SoundMetrics.Common.UT\SoundMetrics.Common.UT.fsproj", "{1819F258-E884-4351-AA92-EC0E8486E461}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Common.UT", "test\SoundMetrics.Common.UT\SoundMetrics.Common.UT.fsproj", "{1819F258-E884-4351-AA92-EC0E8486E461}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
