@@ -88,7 +88,7 @@ Foreach ($el in $dotnetStandardAssemblies) {
     # #   --no-build --include-source -p:SymbolPackageFormat=snupkg
     # #
     dotnet pack -c Release `
-                --output ../$output_directory `
+                --output $output_directory `
                 /p:Version=$split_version `
                 /p:PackageVersion=$package_version `
                 $el
