@@ -8,6 +8,7 @@ $id_terminator = "." + $package_version
 
 $package_folder = ".\built-nuget-packages"
 '$package_folder=' + $package_folder
+dir $package_folder
 
 # Add the build output nuget packages to our local package source.
 
@@ -15,6 +16,8 @@ $local_nuget_source = '\\build\SMC-Nuget-Packages'
 
 Get-ChildItem $package_folder -Filter *.nupkg |
 Foreach-Object {
+
+    '----'
 
     # $file_name = $_.Name
     # $idx_terminator = $file_name.IndexOf($id_terminator)
