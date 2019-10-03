@@ -108,7 +108,9 @@
   --build-number "%BUILD_NUMBER%" ^
   --thumbprint "%BUILD_VCS_NUMBER%"
 
+echo ### A ###
 call .\generate-protobuf-files.cmd
+echo ### B ###
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -137,7 +139,9 @@ call .\generate-protobuf-files.cmd
   --build-number "%BUILD_NUMBER%" ^
   --thumbprint "%BUILD_VCS_NUMBER%"
 
+echo ### A ###
 call .\generate-protobuf-files.cmd
+echo ### B ###
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -169,7 +173,9 @@ call .\generate-protobuf-files.cmd
   --build-number "%BUILD_NUMBER%" ^
   --thumbprint "%BUILD_VCS_NUMBER%"
 
+echo ### A ###
 call .\generate-protobuf-files.cmd
+echo ### B ###
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -202,7 +208,9 @@ call .\generate-protobuf-files.cmd
   --build-number "%BUILD_NUMBER%" ^
   --thumbprint "%BUILD_VCS_NUMBER%"
 
+echo ### A ###
 call .\generate-protobuf-files.cmd
+echo ### B ###
 </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>

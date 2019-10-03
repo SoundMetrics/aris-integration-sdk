@@ -1,4 +1,3 @@
-REM @ECHO OFF
 cd
 
 ECHO Generating protobuf source files...
@@ -9,6 +8,7 @@ set PROTO_FILES_DIR=..\..\..\common\protobuf
 set PROTOC_DIR=..\..\..\submodules\vcpkg\installed\x86-windows-static\tools\protobuf
 
 cd
+echo "PROTOC_DIR:"
 dir %PROTOC_DIR%
 
 REM wildcard doesn't seem to work any more, so loop through the files.
