@@ -71,15 +71,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)../../../../;$(SolutionDir)../../../../../aris-file-sdk/;$(SolutionDir)../../../../submodules/Catch2/single_include;$(IncludePath)</IncludePath>
+    <ExecutablePath>../../../../submodules/aris-file-sdk;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)../../../../;$(SolutionDir)../../../../../aris-file-sdk/;$(SolutionDir)../../../../submodules/Catch2/single_include;$(IncludePath)</IncludePath>
+    <ExecutablePath>../../../../submodules/aris-file-sdk;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)../../../../;$(SolutionDir)../../../../../aris-file-sdk/;$(SolutionDir)../../../../submodules/Catch2/single_include;$(IncludePath)</IncludePath>
+    <ExecutablePath>../../../../submodules/aris-file-sdk;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)../../../../;$(SolutionDir)../../../../../aris-file-sdk/;$(SolutionDir)../../../../submodules/Catch2/single_include;$(IncludePath)</IncludePath>
+    <ExecutablePath>../../../../submodules/aris-file-sdk;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

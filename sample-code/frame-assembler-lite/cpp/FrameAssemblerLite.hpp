@@ -64,11 +64,11 @@ private:
   {
     auto me = reinterpret_cast<FrameAssemblerLite*>(cookie);
     me->onFrameComplete(
-      std::move(std::unique_ptr<void, decltype(&std::free)>(
-        static_cast<void*>(pHeader), &std::free)),
+      std::unique_ptr<void, decltype(&std::free)>(
+        static_cast<void*>(pHeader), &std::free),
       headerSize,
-      std::move(std::unique_ptr<uint8_t, decltype(&std::free)>(
-        static_cast<uint8_t*>(pSamples), &std::free)),
+      std::unique_ptr<uint8_t, decltype(&std::free)>(
+        static_cast<uint8_t*>(pSamples), &std::free),
       samplesSize);
   }
 };
