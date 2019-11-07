@@ -14,6 +14,7 @@ struct SmcFrameAssembler {
   SmcFrameComplete onFrameComplete;
   void* cookie;
   SmcAssemblerState state;
+  unsigned nextFrameNumber;
   unsigned nextExpectedPartNumber;
   size_t samplesExpected;
   struct ArisFrameHeader* pHeader;
@@ -145,12 +146,15 @@ int SmcFrameAssembler_HandleStart(
   const SmcFramePartInfo* framePartInfo
 )
 {
-  if (framePartInfo->framePartNumber == 0) {
+  if (framePartInfo->framePartNumber == 0
+    && framePartInfo->size == sizeof(struct ArisFrameHeader)) {
+
     struct ArisFrameHeader* pHeader =
       frameAssembler->allocateMemory(
         sizeof(struct ArisFrameHeader), frameAssembler->cookie);
     memset(pHeader, 0, sizeof(*pHeader));
     memcpy(pHeader, framePartInfo->data, framePartInfo->size);
+    frameAssembler->pHeader = pHeader;
 
     frameAssembler->samplesExpected =
       SmcGetTotalSampleCount(pHeader->PingMode, pHeader->SamplesPerBeam);
@@ -160,13 +164,13 @@ int SmcFrameAssembler_HandleStart(
     frameAssembler->pSampleInsert = frameAssembler->pSamples;
 
     frameAssembler->state = FrameAssembler_Assembling;
-    frameAssembler->nextExpectedPartNumber = 0;
+    frameAssembler->nextExpectedPartNumber = 1;
   }
   else {
     /* Ignore the frame part */
   }
 
-  return 1; /* done */
+  return 1; /* success */
 }
 
 int SmcFrameAssembler_HandleAssembling(
@@ -174,7 +178,7 @@ int SmcFrameAssembler_HandleAssembling(
   const SmcFramePartInfo* framePartInfo
 )
 {
-  int done;
+  int success;
 
   if (framePartInfo->data == NULL || framePartInfo->size == 0) {
     return 1;
@@ -188,6 +192,7 @@ int SmcFrameAssembler_HandleAssembling(
     if ((size_t)(frameAssembler->pSampleInsert - frameAssembler->pSamples)
       >= frameAssembler->samplesExpected)
     {
+      frameAssembler->pHeader->FrameIndex = frameAssembler->nextFrameNumber++;
       frameAssembler->onFrameComplete(
         frameAssembler->pHeader,
         sizeof(*frameAssembler->pHeader),
@@ -203,18 +208,21 @@ int SmcFrameAssembler_HandleAssembling(
 
       SmcFrameAssembler_Reset(frameAssembler);
     }
+    else {
+      ++frameAssembler->nextExpectedPartNumber;
+    }
 
-    done = 1;
+    success = 1;
   }
   else if (framePartInfo->framePartNumber == 0) {
     /* Unexpected restart; normal part 0 is handled in the block above */
     SmcFrameAssembler_Reset(frameAssembler);
-    done = 0;
+    success = 0;
   }
   else {
     /* ignore unexpected part */
-    done = 1;
+    success = 1;
   }
 
-  return done;
+  return success;
 }
