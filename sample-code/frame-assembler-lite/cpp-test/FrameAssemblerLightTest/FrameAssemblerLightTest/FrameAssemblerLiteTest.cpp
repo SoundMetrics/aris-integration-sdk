@@ -42,7 +42,7 @@ SCENARIO("Add frame part") {
 
     bool completedFrame = false;
     unsigned headerSize = 0;
-    unsigned samplesCount = 0;
+    size_t samplesCount = 0;
     void* pHeader;
     uint8_t* pSamples;
     ArisFrameHeader hdrReceived;
@@ -104,7 +104,7 @@ SCENARIO("Add frame part") {
 
     bool completedFrame = false;
     unsigned headerSize = 0;
-    unsigned samplesCount = 0;
+    size_t samplesCount = 0;
     void* pHeader;
     uint8_t* pSamples;
     ArisFrameHeader hdrReceived;
