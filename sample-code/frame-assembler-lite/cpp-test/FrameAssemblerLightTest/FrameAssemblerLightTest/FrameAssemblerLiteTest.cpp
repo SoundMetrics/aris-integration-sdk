@@ -3,6 +3,10 @@
 
 #include "type-definitions/C/FrameHeader.h"
 
+extern "C" {
+#include "common-code/FrameFuncs.c" // Attempting to placate the build server, so sorry.
+}
+
 #include <array>
 #include <numeric>
 #include <vector>

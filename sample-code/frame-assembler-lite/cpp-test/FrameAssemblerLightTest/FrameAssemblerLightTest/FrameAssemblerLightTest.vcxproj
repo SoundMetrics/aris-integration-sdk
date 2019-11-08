@@ -138,13 +138,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\aris-file-sdk\common-code\FrameFuncs.c" />
     <ClCompile Include="..\..\..\c\FrmAsmLt.c" />
     <ClCompile Include="FrameAssemblerLiteTest.cpp" />
     <ClCompile Include="main_test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\aris-file-sdk\common-code\FrameFuncs.h" />
     <ClInclude Include="..\..\..\cpp\FrameAssemblerLite.hpp" />
     <ClInclude Include="..\..\..\c\FrmAsmLt.h" />
   </ItemGroup>

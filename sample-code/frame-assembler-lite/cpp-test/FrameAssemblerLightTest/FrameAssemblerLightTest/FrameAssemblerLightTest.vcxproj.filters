@@ -24,18 +24,12 @@
     <ClCompile Include="FrameAssemblerLiteTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\aris-file-sdk\common-code\FrameFuncs.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\c\FrmAsmLt.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\cpp\FrameAssemblerLite.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\aris-file-sdk\common-code\FrameFuncs.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
