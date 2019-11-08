@@ -1,5 +1,4 @@
 #include "FrmAsmLt.h"
-#include "type-definitions/c/FrameHeader.h"
 #include "common-code/FrameFuncs.h"
 #include <string.h>
 
@@ -9,6 +8,7 @@ typedef enum SmcFrameAssemblerState {
 } SmcFrameAssemblerState;
 
 struct SmcFrameAssembler {
+  struct ArisFrameHeader frameHeader;
   SmcAllocateMemory allocateMemory;
   SmcFreeMemory freeMemory;
   SmcFrameComplete onFrameComplete;
@@ -17,7 +17,6 @@ struct SmcFrameAssembler {
   unsigned nextFrameNumber;
   unsigned nextExpectedPartNumber;
   size_t samplesExpected;
-  struct ArisFrameHeader* pHeader;
   uint8_t* pSamples;
   uint8_t* pSampleInsert; /* This never owns memory */
 };
@@ -74,7 +73,6 @@ void SmcFreeFrameAssembler(
 {
   SmcFreeMemory freeMemory = frameAssembler->freeMemory;
 
-  SmcFree(freeMemory, frameAssembler->pHeader, frameAssembler->cookie);
   SmcFree(freeMemory, frameAssembler->pSamples, frameAssembler->cookie);
   SmcFree(freeMemory, frameAssembler, frameAssembler->cookie);
 }
@@ -128,14 +126,8 @@ static void SmcFrameAssembler_Reset(SmcFrameAssembler* frameAssembler)
 
   SmcFree(
     frameAssembler->freeMemory,
-    frameAssembler->pHeader,
-    frameAssembler->cookie);
-  SmcFree(
-    frameAssembler->freeMemory,
     frameAssembler->pSamples,
     frameAssembler->cookie);
-
-  frameAssembler->pHeader = NULL;
   frameAssembler->pSamples = NULL;
 
   frameAssembler->pSampleInsert = NULL; /* This never owns memory */
@@ -156,12 +148,9 @@ static int SmcFrameAssembler_HandleStart(
   if (framePartInfo->framePartNumber == 0
     && framePartInfo->size == sizeof(struct ArisFrameHeader)) {
 
-    struct ArisFrameHeader* pHeader =
-      frameAssembler->allocateMemory(
-        sizeof(struct ArisFrameHeader), frameAssembler->cookie);
+    struct ArisFrameHeader* pHeader = &frameAssembler->frameHeader;
     memset(pHeader, 0, sizeof(*pHeader));
     memcpy(pHeader, framePartInfo->data, framePartInfo->size);
-    frameAssembler->pHeader = pHeader;
 
     frameAssembler->samplesExpected =
       SmcGetTotalSampleCount(pHeader->PingMode, pHeader->SamplesPerBeam);
@@ -200,17 +189,15 @@ static int SmcFrameAssembler_HandleAssembling(
       >= frameAssembler->samplesExpected)
     {
       /* Complete! */
-      frameAssembler->pHeader->FrameIndex = frameAssembler->nextFrameNumber++;
+      frameAssembler->frameHeader.FrameIndex = frameAssembler->nextFrameNumber++;
       frameAssembler->onFrameComplete(
-        frameAssembler->pHeader,
-        sizeof(*frameAssembler->pHeader),
+        &frameAssembler->frameHeader,
         frameAssembler->pSamples,
         frameAssembler->samplesExpected,
         frameAssembler->cookie
       );
 
       /* we release ownership of the allocations to the client */
-      frameAssembler->pHeader = NULL;
       frameAssembler->pSamples = NULL;
       frameAssembler->pSampleInsert = NULL; /* This never owns memory */
 

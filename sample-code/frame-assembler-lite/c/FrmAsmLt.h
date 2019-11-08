@@ -34,6 +34,11 @@
   will function without losing packets.)
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "type-definitions/c/FrameHeader.h"
 #include <stddef.h>
 
 /*
@@ -74,9 +79,8 @@ typedef void (*SmcFreeMemory)(void* allocation, void* cookie);
   type SmcAllocateMemory.
 */
 typedef void (*SmcFrameComplete)(
-  void* header, /* recipient owns this memory */
-  size_t headerSize,
-  void* samples, /* recipient owns this memory */
+  const struct ArisFrameHeader* header,
+  uint8_t* samples, /* recipient owns this memory */
   size_t samplesSize,
   void* cookie
 );
@@ -122,5 +126,9 @@ void SmcAddFramePart(
   SmcFrameAssembler*,
   const SmcFramePartInfo*
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* FRAME_ASSEMBLER_LITE_H */

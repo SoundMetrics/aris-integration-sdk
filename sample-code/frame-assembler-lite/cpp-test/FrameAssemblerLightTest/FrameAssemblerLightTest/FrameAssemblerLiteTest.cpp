@@ -11,8 +11,7 @@ extern "C" {
 #include <numeric>
 #include <vector>
 
-using Buffer = FrameAssemblerLite::Buffer;
-using Samples = FrameAssemblerLite::Samples;
+using SampleBuffer = FrameAssemblerLite::SampleBuffer;
 
 SCENARIO("Bad ctor inputs") {
   GIVEN("an empty frame completion function") {
@@ -25,9 +24,8 @@ SCENARIO("Bad ctor inputs") {
   GIVEN("A proper frame completion function doesn't throw") {
 
     REQUIRE_NOTHROW(
-      FrameAssemblerLite{
-      [](Buffer&&, size_t, Samples&&, size_t) {}
-    });
+      FrameAssemblerLite{ [](const auto&, SampleBuffer&&) {} }
+    );
   }
 }
 
@@ -47,23 +45,21 @@ SCENARIO("Add frame part") {
     bool completedFrame = false;
     unsigned headerSize = 0;
     size_t samplesCount = 0;
-    void* pHeader;
     uint8_t* pSamples;
     ArisFrameHeader hdrReceived;
     std::vector<uint8_t> samplesReceived;
 
     FrameAssemblerLite fa{
-      [&](Buffer&& h, size_t headerSize, Samples&& s, size_t samplesSize) {
-        auto hdr = std::move(h);
+      [&](const auto& h, SampleBuffer&& s) {
+
         auto samples = std::move(s);
         completedFrame = true;
-        samplesCount = samplesSize;
+        samplesCount = s.size;
 
-        // These are invalid on return, but can be used for REQUIRE testing.
-        pHeader = hdr.get();
-        pSamples = samples.get();
+        // This is invalid on return, but can be used for REQUIRE testing.
+        pSamples = samples.samples.get();
 
-        hdrReceived = *reinterpret_cast<ArisFrameHeader*>(pHeader);
+        hdrReceived = h;
         samplesReceived =
           std::move(std::vector<uint8_t>(pSamples, pSamples + samplesCount));
       }
@@ -84,7 +80,6 @@ SCENARIO("Add frame part") {
 
     REQUIRE(completedFrame == true);
     REQUIRE(samplesCount == 96);
-    REQUIRE(pHeader != nullptr); // No longer a valid pointer, just check for non-null
     REQUIRE(pSamples != nullptr); // No longer a valid pointer, just check for non-null
 
     REQUIRE(hdrReceived.FrameIndex == 0);
@@ -109,23 +104,21 @@ SCENARIO("Add frame part") {
     bool completedFrame = false;
     unsigned headerSize = 0;
     size_t samplesCount = 0;
-    void* pHeader;
     uint8_t* pSamples;
     ArisFrameHeader hdrReceived;
     std::vector<uint8_t> samplesReceived;
 
     FrameAssemblerLite fa{
-      [&](Buffer&& h, size_t headerSize, Samples&& s, size_t samplesSize) {
-        auto hdr = std::move(h);
+      [&](const auto& h, SampleBuffer&& s)
+      {
         auto samples = std::move(s);
         completedFrame = true;
-        samplesCount = samplesSize;
+        samplesCount = s.size;
 
-        // These are invalid on return, but can be used for REQUIRE testing.
-        pHeader = hdr.get();
-        pSamples = samples.get();
+        // This is invalid on return, but can be used for REQUIRE testing.
+        pSamples = samples.samples.get();
 
-        hdrReceived = *reinterpret_cast<ArisFrameHeader*>(pHeader);
+        hdrReceived = h;
         samplesReceived =
           std::move(std::vector<uint8_t>(pSamples, pSamples + samplesCount));
       }
@@ -149,7 +142,6 @@ SCENARIO("Add frame part") {
 
       REQUIRE(completedFrame == true);
       REQUIRE(samplesCount == 96);
-      REQUIRE(pHeader != nullptr); // No longer a valid pointer, just check for non-null
       REQUIRE(pSamples != nullptr); // No longer a valid pointer, just check for non-null
 
       REQUIRE(hdrReceived.FrameIndex == frameIndex);

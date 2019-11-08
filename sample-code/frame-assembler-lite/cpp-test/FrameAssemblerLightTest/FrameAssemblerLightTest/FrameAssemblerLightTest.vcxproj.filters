@@ -18,18 +18,18 @@
     <ClCompile Include="main_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\c\FrmAsmLt.c">
+    <ClCompile Include="FrameAssemblerLiteTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FrameAssemblerLiteTest.cpp">
+    <ClCompile Include="..\..\..\c\FrmAsmLt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\c\FrmAsmLt.h">
+    <ClInclude Include="..\..\..\cpp\FrameAssemblerLite.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\cpp\FrameAssemblerLite.hpp">
+    <ClInclude Include="..\..\..\c\FrmAsmLt.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
