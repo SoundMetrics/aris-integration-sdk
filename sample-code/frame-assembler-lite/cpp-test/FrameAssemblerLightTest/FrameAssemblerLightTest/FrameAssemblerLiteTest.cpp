@@ -133,7 +133,7 @@ SCENARIO("Add frame part") {
 
     for (unsigned frameIndex = 0; frameIndex < 2; ++frameIndex) {
 
-      unsigned partNumber = 1;
+      unsigned partNumber = 2; // Temp. test for positive UT failure
       hdrReceived.FrameIndex = ~0;
 
       auto addPart = [&](const auto& buffer) {
