@@ -1,4 +1,4 @@
-#include "sample-code/frame-assembler-lite/cpp/FrameAssemblerLite.hpp"
+#include "../../../cpp/FrameAssemblerLite.hpp"
 #include "catch2/catch.hpp"
 
 #include "type-definitions/C/FrameHeader.h"
