@@ -5,7 +5,7 @@ REM This script does the following:
 REM     1) Bootstraps (builds) the VCPKG submodule; VCPKG is used to be the
 REM        sample and tools programs that rely on Google Protocol Buffers.
 REM     2) builds the Visual C++ samples and tools contained in this repository.
-REM 
+REM
 REM PRECONDITIONS
 REM -------------
 REM     - You have recursively cloned this repo; if not, submodules/vcpkg will be empty.
@@ -13,7 +13,7 @@ REM     - You have installed Visual Studio 2017 C++ tools. 2015 may also work.
 REM     - PowerShell is available on your computer.
 REM     - You must run this script from within a Visual Studio Developer Command prompt.
 REM     - You must have internet access.
-REM 
+REM
 REM POSTCONDITIONS
 REM --------------
 REM On successful execution of this script the vcpkg tools will be built and
@@ -42,18 +42,20 @@ popd
 REM ---------------------------------------------------------------------------
 REM Build the programs
 
-.\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore tools\arislog\arislog.sln
-
-pushd tools\arislog\arislog
-msbuild ..\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
-IF %ERRORLEVEL% NEQ 0 EXIT /B 1
+pushd tools\arislog
+msbuild -t:restore
 popd
+
+msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
+IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
-.\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore sample-code\vc-using-framestream\vc-using-framestream.sln
+pushd sample-code\vc-using-framestream
+msbuild -t:restore
+popd
 
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
