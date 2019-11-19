@@ -1,4 +1,3 @@
-@ECHO OFF
 REM build-vc-programs.cmd
 
 REM This script does the following:
@@ -42,8 +41,9 @@ popd
 REM ---------------------------------------------------------------------------
 REM Build the programs
 
-pushd tools\arislog
-msbuild -t:restore
+pushd tools\arislog\arislog
+msbuild /t:restore /p:Configuration="Release" /p:Platform="x86"
+msbuild /t:restore /p:Configuration="Release" /p:Platform="x64"
 popd
 
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
@@ -54,7 +54,8 @@ IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
 pushd sample-code\vc-using-framestream
-msbuild -t:restore
+msbuild /t:restore /p:Configuration="Release" /p:Platform="x86"
+msbuild /t:restore /p:Configuration="Release" /p:Platform="x64"
 popd
 
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
