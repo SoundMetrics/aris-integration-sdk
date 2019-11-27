@@ -23,6 +23,7 @@ bld/
 [Oo]bj/
 generated/
 *.exe
+BuildInfo.h
 BuildInfo.cs
 BuildInfo.fs
 BuildInfo.h

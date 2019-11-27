@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "arislog", "arislog\arislog.vcxproj", "{CB9DA771-9393-443B-86A6-E59C8C60458A}"
 EndProject
@@ -31,7 +31,6 @@ Global
 		{4E123E51-A8E9-45B8-9D61-5730DAF2267F}.Debug|x86.Build.0 = Debug|x86
 		{4E123E51-A8E9-45B8-9D61-5730DAF2267F}.Release|x64.ActiveCfg = Release|x86
 		{4E123E51-A8E9-45B8-9D61-5730DAF2267F}.Release|x86.ActiveCfg = Release|x86
-		{4E123E51-A8E9-45B8-9D61-5730DAF2267F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

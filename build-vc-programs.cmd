@@ -41,18 +41,33 @@ popd
 REM ---------------------------------------------------------------------------
 REM Build the programs
 
-.\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore tools\arislog\arislog.sln
+REM Per https://github.com/NuGet/Home/issues/7386, /t:restore does not support
+REM packages.config, and nuget.exe is therefore necessary. However, nuget 3.5.0,
+REM as available in vcpkg\downloads, attempts to use the v14 build tools
+REM ("Failed to load msbuild Toolset... Microsoft.Build, Version=14.0.0.0").
+REM Don't use the old nuget.
 
-pushd tools\arislog\arislog
-msbuild ..\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
+SET NUGET_EXE=.\submodules\vcpkg\downloads\tools\nuget-4.6.2-windows\nuget.exe
+
+%NUGET_EXE% restore tools\arislog\arislog.sln
+
+REM pushd tools\arislog\arislog
+REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x86"
+REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x64"
+REM popd
+
+msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
-popd
 
 msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
-.\submodules\vcpkg\downloads\nuget-3.5.0\nuget.exe restore sample-code\vc-using-framestream\vc-using-framestream.sln
+%NUGET_EXE% restore sample-code\vc-using-framestream\vc-using-framestream.sln
+REM pushd sample-code\vc-using-framestream
+REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x86"
+REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x64"
+REM popd
 
 msbuild sample-code\vc-using-framestream\vc-using-framestream.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
 IF %ERRORLEVEL% NEQ 0 EXIT /B 1

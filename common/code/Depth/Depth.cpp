@@ -44,7 +44,7 @@ namespace Aris {
 
       inline int temperatureToIndex(const std::array<float, 7> & cfs, double temp) {
 
-        const int maxIdx = cfs.size() - 1;
+        const int maxIdx = static_cast<int>(cfs.size() - 1);
 
         // The temperature is the index into cfs. There are 5-degree ranges for each, so
         // idx = lround(temp / 5).
