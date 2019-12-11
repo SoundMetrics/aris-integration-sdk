@@ -121,20 +121,65 @@ namespace Aris {
       return command;
     }
 
+    static const char* const shortmonth_enUS[] = {
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    };
+
+    /*
+        ARIS expects the datetime message it receives to be formatted like this:
+        "2019-Apr-01 13:24:35". ARIS expects the month to be the short month as
+        defined within the en_US locale. Unfortunately, use of strftime() may
+        break some integration partners, especially those who may install their
+        client software on a non-en_US PC.
+
+        Using setlocale() is not thread-safe, so we avoid switching locale to en_US
+        and back. This function illustrates constructing the datetime string with
+        en_US month names.
+    */
+    static void format_invariant_datetime(char* const buf, const size_t bufSize) {
+
+      struct tm now;
+      const time_t rawtime = time(NULL);
+
+#ifdef _MSC_VER
+      localtime_s(&now, &rawtime);
+#else
+      localtime_r(&rawtime, &now);
+#endif
+
+      sprintf_s(
+        buf,
+        bufSize,
+        "%d-%s-%d %02d:%02d:%02d",
+        now.tm_year + 1900,
+        shortmonth_enUS[now.tm_mon],
+        now.tm_mday,
+        now.tm_hour,
+        now.tm_min,
+        now.tm_sec
+      );
+    }
+
     aris::Command CommandBuilder::SetTime()
     {
       Command command;
       command.set_type(Command::SET_DATETIME);
 
       auto pDateTime = command.mutable_datetime();
-
-      struct tm now;
       char now_str[64];
-      const time_t rawtime = time(NULL);
-      localtime_s(&now, &rawtime);
 
-      constexpr auto fmt = "%Y-%b-%d %T"; // 2017-Apr-01 13:24:35
-      strftime(now_str, sizeof(now_str), fmt, &now);
+      format_invariant_datetime(now_str, sizeof(now_str) / sizeof(now_str[0]));
       pDateTime->set_datetime(now_str);
 
       return command;
