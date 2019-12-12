@@ -76,6 +76,7 @@ Datagrams forming a very small frame could look those below, where there are 128
 The first datagram contains the frame header in `payload` followed by 460 of the 1280 sample bytes. (Total sample count is `beams` &times; `samples_per_beam`.)
 
 **Datagram 0** &mdash; 1500 bytes
+
 | Offset | Field | Value |
 |-|-|-|
 | 0 | `part_header_size` | 16 |
@@ -85,6 +86,7 @@ The first datagram contains the frame header in `payload` followed by 460 of the
 | 16 | `payload` | &lsaquo;1024 bytes of frame header followed by 460 sample bytes&rsaquo; |
 
 **Datagram 1** &mdash; 836 bytes
+
 | Offset | Field | Value |
 |-|-|-|
 | 0 | `part_header_size` | 16 |
