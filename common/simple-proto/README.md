@@ -13,7 +13,7 @@ However, in this case the commands are text-based, and protocol buffer isn't nec
 For illustration, we're showing new lines as `\n` here:
 
 ```
-  light\n
+  lightbulb\n
   enable=true\n
   rgb=255,0,0\n
   \n
@@ -63,11 +63,34 @@ In the simplified protocol, ARIS image data will be sent via UDP. One frame is b
 
 This table describes the header that starts the payload on each datagram. (All integral types are little-endian.)
 
-| Field | Type | Description |
-|-|-|-|
-| Part header size | uint32_t | The size of this header. Payload data follows the header immediately. |
-| Frame size | uint32_t | This is the size of the ARIS frame header (1024 bytes) plus the size of the frame's sample data. In other words, after you've reassembled the frame parts, this is the size of the header + samples. |
-| Sequence number | uint32_t | Represents the location of this part's payload in the reassembled frame. The first datagram's sequence number is zero. If the frame's first datagram carried only the frame header (1024 bytes), the second datagram's sequence number would be 1024. |
-| Frame index | int32_t | Identifies this frame. If frame index changes before the complete frame is received, the previous frame is incomplete. |
-| Payload | uint8_t[] |  Payload bytes. The size of this field is the datagram size less the part header size. |
+| Field | Type | Offset | Description |
+|-|-|-|-|
+| `part_ header_ size` | `uint32_t` | 0 | The size of this header, up to but not including `payload`. `payload`  follows the header immediately. |
+| `frame_ size` | `uint32_t` | 4 | This is the size of the ARIS frame header (1024 bytes) + the size of the frame's sample data. In other words, after you've reassembled the frame parts, this is 1024 + &lsaquo;total samples&rsaquo;. |
+| `sequence_ number` | `uint32_t` | 8 | Represents the location of this part's `payload` in the reassembled frame. The first datagram's sequence number is 0. If the frame's first datagram carried only the frame header (which is 1024 bytes), the second datagram's sequence number would be 1024. |
+| `frame_ index` | `int32_t` | 12 | Identifies this frame. There are generally multiple datagrams per frame. If `frame_index` changes before the complete frame is received, the previous frame is incomplete. |
+| `payload` | `uint8_t[]` | `part_ header_ size` |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
 
+Datagrams forming a very small frame could look those below, where there are 128 beams in the frame and 10 samples per beam.
+
+The first datagram contains the frame header in `payload` followed by 460 of the 1280 sample bytes. (Total sample count is `beams` &times; `samples_per_beam`.)
+
+**Datagram 0** &mdash; 1500 bytes
+| Offset | Field | Value |
+|-|-|-|
+| 0 | `part_header_size` | 16 |
+| 4 | `frame_size` | 2304 *(1024 + [128 &times; 10])* |
+| 8 | `sequence_number` | 0 |
+| 12 | `frame_index` | 0 |
+| 16 | `payload` | &lsaquo;1024 bytes of frame header followed by 460 sample bytes&rsaquo; |
+
+**Datagram 1** &mdash; 836 bytes
+| Offset | Field | Value |
+|-|-|-|
+| 0 | `part_header_size` | 16 |
+| 4 | `frame_size` | 2304 *(1024 + [128 &times; 10])* |
+| 8 | `sequence_number` | 1484 *(the previous datagram contained 1024 bytes of frame header and 460 bytes of sample data)* |
+| 12 | `frame_index` | 0 |
+| 16 | `payload` | &lsaquo;820 sample bytes&rsaquo;
+
+> Note: frame indexes in ARIS and ARIS (`.aris`) recordings are numbered from 0, but are presented to users as if numbered from 1.
