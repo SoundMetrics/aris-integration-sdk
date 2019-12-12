@@ -8,9 +8,9 @@ This folder proposes a simplified protocol for commanding an ARIS. Until this re
 
 This protocol uses a TCP stream to control an ARIS, which is also done with the protocol buffer-based protocol described in the related SDK documentation.
 
-However, in this case the commands are text-based, and protocol buffer isn't necessary. A command consists of command name followed by 0 or more lines of key-value pairs. The command is terminated by a blank line.
+However, in this case the commands are text-based, and protocol buffer isn't necessary. A command consists of a command name followed by 0 or more lines of key-value pairs. The command is terminated by an empty line.
 
-For illustration, we're showing new lines as `\n` here:
+For illustration purposes only, we're showing new lines as `\n` here:
 
 ```
   lightbulb\n
@@ -19,9 +19,9 @@ For illustration, we're showing new lines as `\n` here:
   \n
 ```
 
-The command name is alone on the first line. All command names and key-value keys are lower case.
+The command name is alone on the first line. All command names and argument names are lower case.
 
-Command parameters are passed as key-value pairs. In the case of duplicates, the last value stated is used.
+Command parameters are passed as key-value pairs, where the key is the argument name. In the case of duplicates, the last value stated is used.
 
 The value of a key-value pair is everything to the right of the `'='` character, until the end of the line. The newline character (`'\n'`) is required; carriage return (`'\r'`) is ignored.
 
@@ -49,13 +49,13 @@ The ARIS expects the datetime parameter to be in the form
 
 The ARIS also expects the month abbreviation to be from the en_US locale. If your client uses `strftime()` but runs on a computer with a different locale, it could fail to set the ARIS' time properly.
 
-We provide example code that formats the datetime value in a locale-invariant fashion is found in function `format_invariant_datetime()` in
+We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` in
 
 ```
   common\code\CommandBuilder\CommandBuilder.cpp
 ```
 
-### (more commands to come)
+### *(more commands to come)*
 
 ## Frame Format
 
