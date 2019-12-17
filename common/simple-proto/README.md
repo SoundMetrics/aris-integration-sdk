@@ -50,11 +50,7 @@ The ARIS expects the datetime parameter to be in the form
 
 The ARIS also expects the month abbreviation to be from the en_US locale. If your client software uses `strftime()` but runs on a computer with a different locale, it could fail to set the ARIS' time properly.
 
-We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` in
-
-```
-  common\code\CommandBuilder\CommandBuilder.cpp
-```
+We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` [here](https://github.com/SoundMetrics/aris-integration-sdk/blob/94f2a5b1fd5c6c77089619aca9b6a890ee957531/common/code/CommandBuilder/CommandBuilder.cpp#L150).
 
 ### *(more commands to come)*
 
