@@ -94,6 +94,4 @@ The first datagram contains the frame header in `payload` followed by 460 of the
 
 > Note: frame indexes in ARIS and ARIS (`.aris`) recordings are numbered from 0, but are presented to users as if numbered from 1.
 
-The ARIS frame header is defined here:
-
-https://github.com/SoundMetrics/aris-file-sdk/blob/546a0fe948fa358eeab70b3238f1802552c3a6f8/type-definitions/C/FrameHeader.h#L16
+The ARIS frame header is defined [here](https://github.com/SoundMetrics/aris-file-sdk/blob/546a0fe948fa358eeab70b3238f1802552c3a6f8/type-definitions/C/FrameHeader.h#L16).
