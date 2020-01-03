@@ -58,6 +58,9 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="BuildInfo.fs">
+      <Link>BuildInfo.fs</Link>
+    </Compile>
     <Compile Include="ArisSupport.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="ScriptBehavior.fs" />
@@ -145,6 +148,16 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>$(ProjectDir)..\generate-build-info.cmd ^
+  $(ProjectDir)..\ ^
+  $(ConfigurationName) ^
+  FSharp ^
+  SoundMetrics.Aris.Comms ^
+  $(ProjectDir)BuildInfo.fs ^
+  %BUILD_NUMBER% ^
+  %BUILD_VCS_NUMBER%</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
