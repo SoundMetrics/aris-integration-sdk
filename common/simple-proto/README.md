@@ -37,8 +37,8 @@ The value of a key-value pair is everything to the right of the `'='` character,
 | `salinity` | Required. There are three valid values: `fresh`, `brackish`, and `saltwater`. Salinity affects the speed of sound in water, and affects calculations involving time and distance. |
 | `feedback` | Optional, false by default. Valid values are `true` and `false`. This controls whether the ARIS responds to commands with descriptive feedback text, which may be useful during integration. This parameter may have little value after your integration is complete. If `false`, the ARIS sends nothing to the integrator's over the TCP stream. <br/>*Note that you can use WireShark or other network tools to watch the command & response from the ARIS while `feedback` is `true.`* |
 | `datetime` | Setting the date and time should be considered mandatory by all integrators. If the RTC were to fail, times would not be consistent across power cycles. The required format is `2017-Apr-01 13:24:35`; US English is assumed for the month abbreviation. See below for more on formatting this parameter. |
-| `rcvrport` | Required. This is the port number on which you will receive frames. You should open your receive socket before connecting to the ARIS. |
-| `rcvrip` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will send frames to the host that opened the command connection. |
+| `rcvr_port` | Required. This is the port number on which you will receive frames. You should open your receive socket before connecting to the ARIS. |
+| `rcvr_ip` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will send frames to the host that opened the command connection. |
 
 #### Formatting the `datetime` parameter
 
@@ -55,6 +55,41 @@ We provide example code that formats the datetime value in a locale-invariant fa
 ```
   common\code\CommandBuilder\CommandBuilder.cpp
 ```
+
+### `acquire`
+
+`acquire` sets the ARIS imaging parameters such that image data will be assembled into frames and delivered to the client software.
+
+| Parameter | Description |
+|-|-|
+| `cookie` | Optional. This value is reflected in frame headers when these settings are applied. If used, this should be a monotonically increasing value. If not provided, the ARIS will generate a value. |
+| `start_range` | asdfasdfasdf |
+| `end_range` | asdfasdfasdf |
+| `frame_rate` | Optional. If not provided, the ARIS will use the fastest frame rate possible, up to 15 frames per second. Valid range is 1.0 &ndash; 15.0. The ARIS will constrain this value as needed if required by the laws of physics. |
+| `beams` | Optional. Allowed values are `full` and `half`. `full` denotes a higher cross-range resolution. If not provided, the ARIS will use `full` beams. |
+| `samples_per_beam` | Optional, default is 1000. Valid range is 200 &ndash; 4000. |
+
+Ranges...
+
+More about beams & tradeoffs...
+
+| Model | Full beams | Half beams |
+|-|-|-|
+| ARIS 1200 | 48  | n/a |
+| ARIS 1800 | 96  | 48  |
+| ARIS 3000 | 128 | 64  |
+
+Gain
+
+Frequency
+
+### `stop-acquire`
+
+`stop-acquire` stops frame acquisition. The client connection to the ARIS is still intact.
+
+### `noise-check`
+
+`noise-check`
 
 ### *(more commands to come)*
 
