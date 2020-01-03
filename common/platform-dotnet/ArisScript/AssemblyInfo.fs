@@ -6,7 +6,7 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("ArisScript")>]
+[<assembly: AssemblyTitle("ArisScript (SMC 015329)")>]
 [<assembly: AssemblyDescription("Scripting for ARIS")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Sound Metrics Corporation")>]
