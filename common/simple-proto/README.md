@@ -50,11 +50,7 @@ The ARIS expects the datetime parameter to be in the form
 
 The ARIS also expects the month abbreviation to be from the en_US locale. If your client software uses `strftime()` but runs on a computer with a different locale, it could fail to set the ARIS' time properly.
 
-We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` in
-
-```
-  common\code\CommandBuilder\CommandBuilder.cpp
-```
+We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` [here](https://github.com/SoundMetrics/aris-integration-sdk/blob/94f2a5b1fd5c6c77089619aca9b6a890ee957531/common/code/CommandBuilder/CommandBuilder.cpp#L150).
 
 ### `acquire`
 
@@ -132,3 +128,5 @@ The first datagram contains the frame header in `payload` followed by 460 of the
 | 16 | `payload` | &lsaquo;820 sample bytes&rsaquo;
 
 > Note: frame indexes in ARIS and ARIS (`.aris`) recordings are numbered from 0, but are presented to users as if numbered from 1.
+
+The ARIS frame header is defined [here](https://github.com/SoundMetrics/aris-file-sdk/blob/546a0fe948fa358eeab70b3238f1802552c3a6f8/type-definitions/C/FrameHeader.h#L16).
