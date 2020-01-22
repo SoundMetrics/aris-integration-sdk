@@ -1,0 +1,9 @@
+﻿namespace SimplifiedProtocolTest.Behaviors
+{
+    public enum NavigationViewHeaderMode
+    {
+        Always,
+        Never,
+        Minimal
+    }
+}
