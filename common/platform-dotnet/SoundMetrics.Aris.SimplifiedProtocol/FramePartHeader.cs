@@ -10,34 +10,37 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         /// <summary>
         /// Should be 0x53495241.
         /// </summary>
-        public UInt32 Signature;
+        public uint Signature;
 
         /// <summary>
         /// The size of this header.
         /// </summary>
-        public UInt32 HeaderSize;
+        public uint HeaderSize;
 
         /// <summary>
         /// The count of the frame's sample bytes.
         /// </summary>
-        public UInt32 FrameSize;
+        public uint FrameSize;
 
         /// <summary>
         /// This frame's index.
         /// </summary>
-        public UInt32 FrameIndex;
+        public uint FrameIndex;
 
         /// <summary>
         /// Zero-based index of this part for this frame.
         /// </summary>
-        public UInt32 PartNumber;
+        public uint PartNumber;
+    }
 
-        public bool FromBytes(ArraySegment<byte> bytes, out FramePartHeader header)
+    public static class FramePartHeaderExtensions
+    {
+        public static bool FromBytes(byte[] bytes, out FramePartHeader header)
         {
             var headerSize = Marshal.SizeOf<FramePartHeader>();
             Debug.Assert(headerSize == 20);
 
-            if (bytes.Count < headerSize)
+            if (bytes.Length < headerSize)
             {
                 header = new FramePartHeader();
                 return false;
@@ -46,14 +49,32 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
             try
             {
-                header =
-                    (FramePartHeader)
+                FramePartHeader newHeader = (FramePartHeader)
                     Marshal.PtrToStructure<FramePartHeader>(handle.AddrOfPinnedObject());
-                return true;
+
+                if (Validate(newHeader))
+                {
+                    header = newHeader;
+                    return true;
+                }
+                else
+                {
+                    header = new FramePartHeader();
+                    return false;
+                }
             }
             finally
             {
                 handle.Free();
+            }
+
+            bool Validate(in FramePartHeader headerToValidate)
+            {
+                var success =
+                    headerToValidate.Signature == 0x53495241 // "ARIS"
+                    && headerToValidate.HeaderSize >= headerSize
+                    ;
+                return success;
             }
         }
     }
