@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace SoundMetrics.Aris.SimplifiedProtocol
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    public struct FramePartHeader
+    public struct FramePacketHeader
     {
         /// <summary>
         /// Should be 0x53495241.
@@ -35,22 +35,22 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
     public static class FramePartHeaderExtensions
     {
-        public static bool FromBytes(byte[] bytes, out FramePartHeader header)
+        public static bool FromBytes(byte[] bytes, out FramePacketHeader header)
         {
-            var headerSize = Marshal.SizeOf<FramePartHeader>();
+            var headerSize = Marshal.SizeOf<FramePacketHeader>();
             Debug.Assert(headerSize == 20);
 
             if (bytes.Length < headerSize)
             {
-                header = new FramePartHeader();
+                header = new FramePacketHeader();
                 return false;
             }
 
             GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
             try
             {
-                FramePartHeader newHeader = (FramePartHeader)
-                    Marshal.PtrToStructure<FramePartHeader>(handle.AddrOfPinnedObject());
+                FramePacketHeader newHeader = (FramePacketHeader)
+                    Marshal.PtrToStructure<FramePacketHeader>(handle.AddrOfPinnedObject());
 
                 if (Validate(newHeader))
                 {
@@ -59,7 +59,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 }
                 else
                 {
-                    header = new FramePartHeader();
+                    header = new FramePacketHeader();
                     return false;
                 }
             }
@@ -68,7 +68,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 handle.Free();
             }
 
-            bool Validate(in FramePartHeader headerToValidate)
+            bool Validate(in FramePacketHeader headerToValidate)
             {
                 var success =
                     headerToValidate.Signature == 0x53495241 // "ARIS"

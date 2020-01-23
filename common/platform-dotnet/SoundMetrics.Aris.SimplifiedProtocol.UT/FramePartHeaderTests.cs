@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
     [TestClass]
     public class FramePartHeaderTests
     {
-        private static readonly int headerSize = Marshal.SizeOf<FramePartHeader>();
+        private static readonly int headerSize = Marshal.SizeOf<FramePacketHeader>();
 
         [TestMethod]
         public void FromEmptyArray()
@@ -22,7 +22,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
         [TestMethod]
         public void RequireValidSignature()
         {
-            var buf = new byte[Marshal.SizeOf<FramePartHeader>()];
+            var buf = new byte[Marshal.SizeOf<FramePacketHeader>()];
             var success = FramePartHeaderExtensions.FromBytes(buf, out var _);
             Assert.IsFalse(success);
         }
@@ -45,7 +45,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
             var remainder = new byte[headerSize - 5];
             var bytes = signature.Concat(size).Concat(remainder).ToArray();
 
-            FramePartHeader header;
+            FramePacketHeader header;
             var success = FramePartHeaderExtensions.FromBytes(bytes, out header);
 
             Assert.IsTrue(success);
