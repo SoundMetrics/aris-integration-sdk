@@ -16,13 +16,33 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         }
 
         public NativeBufferHandle(int bufferLength)
-            : this(Marshal.AllocHGlobal(bufferLength), bufferLength)
+            : this(Marshal.AllocHGlobal(ValidateLength(bufferLength)), bufferLength)
         {
+        }
+
+        private static int ValidateLength(int length)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
+            }
+
+            return length;
         }
 
         public NativeBufferHandle(ArraySegment<byte> contents)
             : this(contents.Count)
         {
+            if (contents.Array == null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+
+            if (contents.Count == 0)
+            {
+                throw new ArgumentException("Empty contents");
+            }
+
             Initialize(contents);
         }
 
@@ -34,18 +54,35 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         private NativeBufferHandle(ArraySegment<byte>[] contents)
             : this(TotalSize(contents))
         {
+            if (this.Length == 0 || contents.Sum(c => c.Count) == 0)
+            {
+                throw new ArgumentException("Empty contents");
+            }
+
             Initialize(contents);
         }
 
-        private static int TotalSize(ArraySegment<byte>[] cs)
+        private static int TotalSize(ArraySegment<byte>[] contents)
         {
-            return cs.Sum(c => c.Count);
+            if (contents == null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+
+            return contents.Sum(c => c.Count);
         }
 
         private static ArraySegment<byte>[] CacheToArray(
             IEnumerable<ArraySegment<byte>> contents
         )
-            => (contents is ArraySegment<byte>[] array) ? array : contents.ToArray();
+        {
+            if (contents == null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+
+            return (contents is ArraySegment<byte>[] array) ? array : contents.ToArray();
+        }
 
         private void Initialize(ArraySegment<byte> contents)
         {

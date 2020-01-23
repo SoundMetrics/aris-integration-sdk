@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.SimplifiedProtocol
 {
@@ -10,11 +11,21 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
     {
         public NativeBuffer(ArraySegment<byte> contents)
         {
+            if (contents.Array == null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+
             hNativeBuffer = new NativeBufferHandle(contents);
         }
 
         public NativeBuffer(IEnumerable<ArraySegment<byte>> contents)
         {
+            if (contents == null)
+            {
+                throw new ArgumentNullException(nameof(contents));
+            }
+
             hNativeBuffer = new NativeBufferHandle(contents);
         }
 
@@ -24,6 +35,13 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         }
 
         public int Length { get => hNativeBuffer.Length; }
+
+        public byte[] ToManagedArray()
+        {
+            var result = new byte[hNativeBuffer.Length];
+            Marshal.Copy(hNativeBuffer.Handle, result, 0, result.Length);
+            return result;
+        }
 
         #region IDisposable Support
 
