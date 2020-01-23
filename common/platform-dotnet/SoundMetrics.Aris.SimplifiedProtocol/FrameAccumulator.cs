@@ -39,8 +39,15 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 var newFrameHeader = StructFromBytes<ArisFrameHeader>(payload);
                 if (newFrameHeader.HasValue)
                 {
-                    Reset(packetHeader.FrameIndex, packetHeader.FrameSize);
-                    frameHeader = newFrameHeader.Value;
+                    if (ValidateFrameHeader(newFrameHeader.Value))
+                    {
+                        Reset(packetHeader.FrameIndex, packetHeader.FrameSize);
+                        frameHeader = newFrameHeader.Value;
+                    }
+                    else
+                    {
+                        // Ignore someone's packet
+                    }
                 }
                 else
                 {
@@ -55,9 +62,14 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             }
             else if (packetHeader.PartNumber == wip.GetNextPartNumber())
             {
-                wip.AddSamples(packetHeader.PartNumber, payload);
-                //AccumulateSamples(packetHeader, wip);
+                if (wip.AddSamples(packetHeader.PartNumber, payload)
+                        == FrameCompletion.CompleteFrame)
+                {
+                    var frame = PackageFrame();
+                    frameSubject.OnNext(frame);
 
+                    Reset();
+                }
             }
         }
 
@@ -76,14 +88,33 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             };
         }
 
-        public IObservable<object> Frames { get { return frameSubject; } }
+        private Frame PackageFrame()
+        {
+            return new Frame
+            {
+                Header = frameHeader,
+                Samples = new NativeBuffer(wip.Samples),
+            };
+        }
+
+        private static bool ValidateFrameHeader(in ArisFrameHeader header)
+        {
+            return header.Version == ArisFrameHeader.ArisFrameSignature
+                && ValidPingModes.Contains(header.PingMode)
+                && header.SamplesPerBeam <= 4000;
+        }
+
+        private static readonly HashSet<uint> ValidPingModes = new HashSet<uint>();
+
+        public IObservable<Frame> Frames { get { return frameSubject; } }
 
         private static readonly int PacketHeaderSize = Marshal.SizeOf<FramePacketHeader>();
-        private static readonly int FrameHeaderSize = Marshal.SizeOf<ArisFrameHeader>();
-        private readonly Subject<object> frameSubject = new Subject<object>();
+        private readonly Subject<Frame> frameSubject = new Subject<Frame>();
 
         private WorkInProgress wip = new WorkInProgress();
         private ArisFrameHeader frameHeader;
+
+        private enum FrameCompletion { IncompleteFrame, CompleteFrame };
 
         private struct WorkInProgress
         {
@@ -97,7 +128,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 CurrentPartNumber.HasValue ? CurrentPartNumber.Value + 1 : 0;
 
 
-            public void AddSamples(uint partNumber, ArraySegment<byte> samples)
+            public FrameCompletion AddSamples(uint partNumber, ArraySegment<byte> samples)
             {
                 if (samples.Count == 0)
                 {
@@ -108,7 +139,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
                 if (partNumber != GetNextPartNumber())
                 {
-                    return;
+                    return FrameCompletion.IncompleteFrame;
                 }
 
                 if (Samples == null)
@@ -119,17 +150,11 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 Samples.Add(samples);
                 SamplesReceived += samples.Count;
                 CurrentPartNumber = GetNextPartNumber();
-            }
 
-            private bool IsFrameComplete()
-            {
-                if (ExpectedSampleCount == 0)
-                {
-                    throw new InvalidOperationException(
-                        "Cannot check for complete frame before the frame header is received");
-                }
-
-                return SamplesReceived == ExpectedSampleCount;
+                return
+                    SamplesReceived == ExpectedSampleCount
+                    ? FrameCompletion.CompleteFrame
+                    : FrameCompletion.IncompleteFrame;
             }
         }
     }
