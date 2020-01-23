@@ -27,10 +27,25 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         }
 
         public NativeBufferHandle(IEnumerable<ArraySegment<byte>> contents)
-            : this(contents.Sum(c => c.Count))
+            : this(CacheToArray(contents))
+        {
+        }
+
+        private NativeBufferHandle(ArraySegment<byte>[] contents)
+            : this(TotalSize(contents))
         {
             Initialize(contents);
         }
+
+        private static int TotalSize(ArraySegment<byte>[] cs)
+        {
+            return cs.Sum(c => c.Count);
+        }
+
+        private static ArraySegment<byte>[] CacheToArray(
+            IEnumerable<ArraySegment<byte>> contents
+        )
+            => (contents is ArraySegment<byte>[] array) ? array : contents.ToArray();
 
         private void Initialize(ArraySegment<byte> contents)
         {

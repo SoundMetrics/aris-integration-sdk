@@ -1,6 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SoundMetrics.Aris.SimplifiedProtocol;
-using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,16 +13,16 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
         [TestMethod]
         public void FromEmptyArray()
         {
-            var success = FramePartHeaderExtensions.FromBytes(new byte[0], out var _);
-            Assert.IsFalse(success);
+            var packetHeader = FramePacketHeaderExtensions.FromBytes(new byte[0]);
+            Assert.IsFalse(packetHeader.HasValue);
         }
 
         [TestMethod]
         public void RequireValidSignature()
         {
             var buf = new byte[Marshal.SizeOf<FramePacketHeader>()];
-            var success = FramePartHeaderExtensions.FromBytes(buf, out var _);
-            Assert.IsFalse(success);
+            var packetHeader = FramePacketHeaderExtensions.FromBytes(buf);
+            Assert.IsFalse(packetHeader.HasValue);
         }
 
         [TestMethod]
@@ -33,8 +31,8 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
             var signature = Encoding.ASCII.GetBytes("ARIS");
             var remainder = new byte[headerSize - 4];
             var bytes = signature.Concat(remainder).ToArray();
-            var success = FramePartHeaderExtensions.FromBytes(bytes, out var _);
-            Assert.IsFalse(success);
+            var packetHeader = FramePacketHeaderExtensions.FromBytes(bytes);
+            Assert.IsFalse(packetHeader.HasValue);
         }
 
         [TestMethod]
@@ -45,11 +43,10 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
             var remainder = new byte[headerSize - 5];
             var bytes = signature.Concat(size).Concat(remainder).ToArray();
 
-            FramePacketHeader header;
-            var success = FramePartHeaderExtensions.FromBytes(bytes, out header);
+            var packetHeader = FramePacketHeaderExtensions.FromBytes(bytes);
 
-            Assert.IsTrue(success);
-            Assert.AreEqual<uint>((uint)headerSize, header.HeaderSize);
+            Assert.IsTrue(packetHeader.HasValue);
+            Assert.AreEqual<uint>((uint)headerSize, packetHeader.Value.HeaderSize);
         }
     }
 }

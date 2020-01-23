@@ -5,7 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\..\submodules\aris-file-sdk\type-definitions\CSharp\FrameHeader.cs" Link="externals\FrameHeader.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Reactive" Version="4.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="externals\" />
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,10 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.SimplifiedProtocol
 {
+    using static SerializationHelpers;
+
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
     public struct FramePacketHeader
     {
@@ -33,40 +34,23 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         public uint PartNumber;
     }
 
-    public static class FramePartHeaderExtensions
+    public static class FramePacketHeaderExtensions
     {
-        public static bool FromBytes(byte[] bytes, out FramePacketHeader header)
+        public static FramePacketHeader? FromBytes(byte[] bytes)
         {
             var headerSize = Marshal.SizeOf<FramePacketHeader>();
             Debug.Assert(headerSize == 20);
 
-            if (bytes.Length < headerSize)
+            var newHeader = StructFromBytes<FramePacketHeader>(bytes);
+            if (newHeader.HasValue)
             {
-                header = new FramePacketHeader();
-                return false;
-            }
-
-            GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-            try
-            {
-                FramePacketHeader newHeader = (FramePacketHeader)
-                    Marshal.PtrToStructure<FramePacketHeader>(handle.AddrOfPinnedObject());
-
-                if (Validate(newHeader))
+                if (Validate(newHeader.Value))
                 {
-                    header = newHeader;
-                    return true;
-                }
-                else
-                {
-                    header = new FramePacketHeader();
-                    return false;
+                    return newHeader;
                 }
             }
-            finally
-            {
-                handle.Free();
-            }
+
+            return null;
 
             bool Validate(in FramePacketHeader headerToValidate)
             {
