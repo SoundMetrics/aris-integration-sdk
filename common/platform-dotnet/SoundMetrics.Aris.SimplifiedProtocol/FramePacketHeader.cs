@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.SimplifiedProtocol
@@ -8,6 +9,8 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
     public struct FramePacketHeader
     {
+        public static readonly uint ExpectedSignature = 0x53495241;
+
         /// <summary>
         /// Should be 0x53495241.
         /// </summary>
@@ -37,6 +40,11 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
     public static class FramePacketHeaderExtensions
     {
         public static FramePacketHeader? FromBytes(byte[] bytes)
+        {
+            return FromBytes(new ArraySegment<byte>(bytes));
+        }
+
+        public static FramePacketHeader? FromBytes(ArraySegment<byte> bytes)
         {
             var headerSize = Marshal.SizeOf<FramePacketHeader>();
             Debug.Assert(headerSize == 20);

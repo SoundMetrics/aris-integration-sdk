@@ -12,14 +12,19 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
     {
         public void ReceivePacket(byte[] packet)
         {
+            ReceivePacket(new ArraySegment<byte>(packet));
+        }
+
+        public void ReceivePacket(ArraySegment<byte> packet)
+        {
             var packetHeader = FramePacketHeaderExtensions.FromBytes(packet);
             if (packetHeader.HasValue)
             {
                 var payload =
                     new ArraySegment<byte>(
-                        packet,
+                        packet.Array,
                         PacketHeaderSize,
-                        packet.Length - PacketHeaderSize);
+                        packet.Count - PacketHeaderSize);
 
                 ReceivePacket(packetHeader.Value, payload);
             }
@@ -39,7 +44,8 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 var newFrameHeader = StructFromBytes<ArisFrameHeader>(payload);
                 if (newFrameHeader.HasValue)
                 {
-                    if (ValidateFrameHeader(newFrameHeader.Value))
+                    var isValid = ValidateFrameHeader(newFrameHeader.Value);
+                    if (isValid)
                     {
                         Reset(packetHeader.FrameIndex, packetHeader.FrameSize);
                         frameHeader = newFrameHeader.Value;
@@ -104,7 +110,8 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                 && header.SamplesPerBeam <= 4000;
         }
 
-        private static readonly HashSet<uint> ValidPingModes = new HashSet<uint>();
+        private static readonly HashSet<uint> ValidPingModes =
+            new HashSet<uint>(new[] { 1u, 3u, 6u, 9u });
 
         public IObservable<Frame> Frames { get { return frameSubject; } }
 

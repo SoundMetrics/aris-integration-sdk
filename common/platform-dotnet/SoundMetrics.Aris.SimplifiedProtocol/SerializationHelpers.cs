@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         {
             var sizeOfT = Marshal.SizeOf<T>();
 
-            if (segment.Array.Length - segment.Offset < sizeOfT)
+            if (segment.Count < sizeOfT)
             {
                 return null;
             }
@@ -31,6 +31,25 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             where T : struct
         {
             return StructFromBytes<T>(new ArraySegment<byte>(bytes));
+        }
+
+        public static byte[] BytesFromStruct<T>(in T t)
+            where T : struct
+        {
+            var sizeOfT = Marshal.SizeOf<T>();
+            var buffer = new byte[sizeOfT];
+
+            GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            try
+            {
+                var ptr = handle.AddrOfPinnedObject();
+                Marshal.StructureToPtr<T>(t, ptr, false);
+                return buffer;
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
     }
 }
