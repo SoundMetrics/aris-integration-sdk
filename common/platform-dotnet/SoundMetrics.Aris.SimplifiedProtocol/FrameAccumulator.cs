@@ -118,6 +118,8 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
         private Frame PackageFrame()
         {
+            frameHeader.FrameIndex = nextFrameIndex++;
+
             return new Frame
             {
                 Header = frameHeader,
@@ -142,6 +144,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
         private WorkInProgress wip = new WorkInProgress();
         private ArisFrameHeader frameHeader;
+        private uint nextFrameIndex = 0;
 
         private enum FrameCompletion { IncompleteFrame, CompleteFrame };
 

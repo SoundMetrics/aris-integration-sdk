@@ -322,18 +322,6 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
                 Assert.AreEqual(2, frameCount);
                 Assert.IsNotNull(frame);
 
-                AssertArraysAreEqual(
-                    BytesFromStruct(frameInfo.FrameHeader),
-                    BytesFromStruct(frame.Header)
-                    );
-                // This assertion fails with the following message:
-                //      'Assert.AreEqual failed.
-                //          Expected:<Aris.FileTypes.ArisFrameHeader>.
-                //            Actual:<Aris.FileTypes.ArisFrameHeader>.'
-                // This seems a bit nonsensical, as the values prove to be identical,
-                // so we're using AssertArraysAreEqual, above.
-                //Assert.AreEqual<ArisFrameHeader>(frameInfo.FrameHeader, frame.Header);
-
                 AssertArraysAreEqual<byte>(
                     frameInfo.Samples,
                     frame.Samples.ToManagedArray());
