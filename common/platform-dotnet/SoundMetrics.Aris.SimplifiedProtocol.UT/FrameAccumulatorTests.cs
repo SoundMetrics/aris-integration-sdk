@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -264,6 +265,61 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
                     ApplyValidFrame(fa, frameIndex: 42, sampleCount: 24);
 
                 Assert.AreEqual(1, frameCount);
+                Assert.IsNotNull(frame);
+
+                AssertArraysAreEqual(
+                    BytesFromStruct(frameInfo.FrameHeader),
+                    BytesFromStruct(frame.Header)
+                    );
+                // This assertion fails with the following message:
+                //      'Assert.AreEqual failed.
+                //          Expected:<Aris.FileTypes.ArisFrameHeader>.
+                //            Actual:<Aris.FileTypes.ArisFrameHeader>.'
+                // This seems a bit nonsensical, as the values prove to be identical,
+                // so we're using AssertArraysAreEqual, above.
+                //Assert.AreEqual<ArisFrameHeader>(frameInfo.FrameHeader, frame.Header);
+
+                AssertArraysAreEqual<byte>(
+                    frameInfo.Samples,
+                    frame.Samples.ToManagedArray());
+            }
+        }
+
+        [TestMethod]
+        public void DuplicateSamplePackets()
+        {
+            Frame frame = null;
+            int frameCount = 0;
+            var fa = new FrameAccumulator();
+
+            using (var _ = fa.Frames.Subscribe(newFrame =>
+            {
+                frame = newFrame;
+                ++frameCount;
+            }))
+            {
+                // Send the fram header packet.
+                var (firstPacket, _) = GenerateFirstPacket(0, 24);
+                Debug.WriteLine("  Sending first packet");
+                fa.ReceivePacket(firstPacket);
+
+                // Send duplicate samples.
+                var (packets, _) = GenerateSamplePackets(0, 24);
+                var doubledPackets =
+                    packets.SelectMany(packet => new[] { packet, packet });
+                foreach (var packet in doubledPackets)
+                {
+                    Debug.WriteLine($"  Sending sample packet");
+                    fa.ReceivePacket(packet);
+                }
+
+                // Send a valid frame.
+                var frameInfo =
+                    ApplyValidFrame(fa, frameIndex: 86, sampleCount: 24);
+
+                // Should receive our first frame constructed from duplicates,
+                // followed by our second, normal frame.
+                Assert.AreEqual(2, frameCount);
                 Assert.IsNotNull(frame);
 
                 AssertArraysAreEqual(

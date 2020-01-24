@@ -1,4 +1,6 @@
-﻿using Aris.FileTypes;
+﻿//#define SHOW_FRAME_ACCUMULATOR_DEBUG_LOG
+
+using Aris.FileTypes;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
@@ -10,6 +12,12 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
     public class FrameAccumulator
     {
+        [System.Diagnostics.Conditional("SHOW_FRAME_ACCUMULATOR_DEBUG_LOG")]
+        public void Log(string format, params object[] args)
+        {
+            System.Diagnostics.Debug.WriteLine("FrameAccumulator: " + format, args);
+        }
+
         public void ReceivePacket(byte[] packet)
         {
             ReceivePacket(new ArraySegment<byte>(packet));
@@ -39,6 +47,10 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             in FramePacketHeader packetHeader,
             in ArraySegment<byte> payload)
         {
+            Log($"ReceivePacket: frameIndex {packetHeader.FrameIndex}; "
+                + $"partNumber {packetHeader.PartNumber}; "
+                + $"payload size {payload.Count}");
+
             if (packetHeader.PartNumber == 0)
             {
                 var newFrameHeader = StructFromBytes<ArisFrameHeader>(payload);
@@ -53,29 +65,39 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                     else
                     {
                         // Ignore someone's packet
+                        Log("Part 0 has invalid frame header");
                     }
                 }
                 else
                 {
                     // Invalid frame header in first packet
+                    Log("Part 0 has incomplete frame header");
                     Reset();
                 }
 
             }
             else if (packetHeader.FrameIndex != wip.FrameIndex)
             {
+                Log("Frame index skipped; resetting");
                 Reset();
             }
             else if (packetHeader.PartNumber == wip.GetNextPartNumber())
             {
+                Log($"Adding samples to frame {packetHeader.FrameIndex}");
+
                 if (wip.AddSamples(packetHeader.PartNumber, payload)
                         == FrameCompletion.CompleteFrame)
                 {
+                    Log($"Completed frame {packetHeader.FrameIndex}");
                     var frame = PackageFrame();
                     frameSubject.OnNext(frame);
 
                     Reset();
                 }
+            }
+            else
+            {
+                Log($"Ignoring duplicate part frame index {packetHeader.FrameIndex}; part {packetHeader.PartNumber}");
             }
         }
 
