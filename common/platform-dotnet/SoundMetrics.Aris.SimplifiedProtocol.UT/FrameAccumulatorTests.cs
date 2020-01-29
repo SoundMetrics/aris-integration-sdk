@@ -84,6 +84,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
                 FrameSize = sampleCount,
                 FrameIndex = frameIndex,
                 PartNumber = 0,
+                PayloadSize = (uint)Marshal.SizeOf<ArisFrameHeader>()
             };
 
             var frameHeader = new ArisFrameHeader
@@ -114,6 +115,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
                 FrameSize = (uint)samples.Count,
                 FrameIndex = frameIndex,
                 PartNumber = partNumber,
+                PayloadSize = (uint)samples.Count
             };
 
             return BytesFromStruct(packetHeader)
