@@ -62,7 +62,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
 
             foreach (var packet in samplePackets)
             {
-                fa.ReceivePacket(packet);
+                fa.ReceiveRawPacket(packet);
             }
 
             return new GeneratedFrameInfo
@@ -258,7 +258,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
                 // Send incomplete samples.
                 var (packets, _) = GenerateSamplePackets(0, 24);
                 var firstSamplePacketOnly = packets.First();
-                fa.ReceivePacket(firstSamplePacketOnly);
+                fa.ReceiveRawPacket(firstSamplePacketOnly);
 
                 // Send a valid frame.
                 var frameInfo =
@@ -310,7 +310,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol.UT
                 foreach (var packet in doubledPackets)
                 {
                     Debug.WriteLine($"  Sending sample packet");
-                    fa.ReceivePacket(packet);
+                    fa.ReceiveRawPacket(packet);
                 }
 
                 // Send a valid frame.

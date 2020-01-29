@@ -35,6 +35,11 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         /// Zero-based index of this part for this frame.
         /// </summary>
         public uint PartNumber;
+
+        /// <summary>
+        /// The number of octets in the payload.
+        /// </summary>
+        public uint PayloadSize;
     }
 
     public static class FramePacketHeaderExtensions
@@ -47,7 +52,6 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         public static FramePacketHeader? FromBytes(ArraySegment<byte> bytes)
         {
             var headerSize = Marshal.SizeOf<FramePacketHeader>();
-            Debug.Assert(headerSize == 20);
 
             var newHeader = StructFromBytes<FramePacketHeader>(bytes);
             if (newHeader.HasValue)

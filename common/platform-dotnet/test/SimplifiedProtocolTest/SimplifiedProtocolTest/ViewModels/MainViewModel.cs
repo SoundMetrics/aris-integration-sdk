@@ -1,9 +1,13 @@
 ﻿using SimplifiedProtocolTest.Helpers;
+using SoundMetrics.Aris.SimplifiedProtocol;
+using System;
 using System.Net.Sockets;
+using System.Reactive.Linq;
+using System.Threading;
 
 namespace SimplifiedProtocolTest.ViewModels
 {
-    public class MainViewModel : Observable
+    public class MainViewModel : SimplifiedProtocolTest.Helpers.Observable
     {
         public MainViewModel()
         {
@@ -46,6 +50,15 @@ namespace SimplifiedProtocolTest.ViewModels
             set { Set(ref hostname, value); }
         }
 
+        private uint frameIndex;
+
+        public uint FrameIndex
+        {
+            get { return frameIndex; }
+            set { Set(ref frameIndex, value); }
+        }
+
+
 
         private ConnectionModel connection;
 
@@ -70,10 +83,18 @@ namespace SimplifiedProtocolTest.ViewModels
                 Connection = new ConnectionModel(hostname);
                 CanConnect = false;
                 IsConnected = true;
+                Connection.Frames
+                    .ObserveOn(SynchronizationContext.Current)
+                    .Subscribe(frame => FrameIndex = frame.Header.FrameIndex);
             }
             catch (SocketException)
             {
             }
+        }
+
+        private void OnFrame(Frame frame)
+        {
+            FrameIndex = frame.Header.FrameIndex;
         }
 
         private string hostname = "192.168.10.155";

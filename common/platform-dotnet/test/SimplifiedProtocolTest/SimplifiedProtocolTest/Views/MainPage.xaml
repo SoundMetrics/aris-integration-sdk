@@ -45,7 +45,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock>Image is reversed, left to right</TextBlock>
+                <TextBlock Margin="4" Foreground="DarkRed">Image is reversed, left to right.
+                Note: this test app cannot reconnect.</TextBlock>
                 <StackPanel Orientation="Horizontal"
                             Grid.Row="1">
                     <Button Content="Test Pattern"
@@ -60,16 +61,24 @@
                             Margin="2 0"
                             Command="{x:Bind ViewModel.StartDefaultAcquireCommand}"
                             />
+                    <TextBlock Margin="8 0"
+                               Text="Frame index:"
+                               VerticalAlignment="Center"
+                               />
+                    <TextBlock Text="{x:Bind ViewModel.FrameIndex, Mode=OneWay}"
+                               VerticalAlignment="Center"
+                               />
+
                 </StackPanel>
             </Grid>
             <TextBox HorizontalAlignment="Stretch"
-                         VerticalAlignment="Stretch"
-                         Grid.Column="1"
-                         Grid.RowSpan="3"
-                         TextWrapping="Wrap"
-                         PlaceholderText="?"
-                         Text="{x:Bind ViewModel.Connection.Feedback, Mode=OneWay}"
-                         />
+                     VerticalAlignment="Stretch"
+                     Grid.Column="1"
+                     Grid.RowSpan="3"
+                     TextWrapping="Wrap"
+                     PlaceholderText="?"
+                     Text="{x:Bind ViewModel.Connection.Feedback, Mode=OneWay}"
+                     />
         </Grid>
     </Grid>
 </Page>

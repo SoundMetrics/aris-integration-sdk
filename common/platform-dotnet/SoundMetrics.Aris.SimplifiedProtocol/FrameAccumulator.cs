@@ -20,10 +20,10 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
         public void ReceivePacket(byte[] packet)
         {
-            ReceivePacket(new ArraySegment<byte>(packet));
+            ReceiveRawPacket(new ArraySegment<byte>(packet));
         }
 
-        public void ReceivePacket(ArraySegment<byte> packet)
+        public void ReceiveRawPacket(ArraySegment<byte> packet)
         {
             var packetHeader = FramePacketHeaderExtensions.FromBytes(packet);
             if (packetHeader.HasValue)
@@ -32,9 +32,9 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                     new ArraySegment<byte>(
                         packet.Array,
                         PacketHeaderSize,
-                        packet.Count - PacketHeaderSize);
+                        (int)packetHeader.Value.PayloadSize);
 
-                ReceivePacket(packetHeader.Value, payload);
+                ReceivePacketPayload(packetHeader.Value, payload);
             }
             else
             {
@@ -43,13 +43,25 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             }
         }
 
-        private void ReceivePacket(
+        private void ReceivePacketPayload(
             in FramePacketHeader packetHeader,
             in ArraySegment<byte> payload)
         {
-            Log($"ReceivePacket: frameIndex {packetHeader.FrameIndex}; "
+            Log($"ReceivePacketPayload: frameIndex {packetHeader.FrameIndex}; "
                 + $"partNumber {packetHeader.PartNumber}; "
                 + $"payload size {payload.Count}");
+
+            var expectedPayloadSize =
+                packetHeader.PartNumber == 0
+                    ? (uint)Marshal.SizeOf<ArisFrameHeader>()
+                    : packetHeader.PayloadSize;
+
+            if (expectedPayloadSize != payload.Count)
+            {
+                Log($"Malformed packet: payload_size {packetHeader.PayloadSize} doesn't match; "
+                    + $"expected payload size is {expectedPayloadSize}");
+                return;
+            }
 
             if (packetHeader.PartNumber == 0)
             {

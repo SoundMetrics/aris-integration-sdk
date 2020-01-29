@@ -1,6 +1,7 @@
 ﻿using SimplifiedProtocolTest.Helpers;
 using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
 using System.Text;
@@ -16,6 +17,10 @@ namespace SimplifiedProtocolTest
             const int commandPort = 56888;
             commandStream = new TcpClient(hostname, commandPort);
             Feedback = "Connected.\n";
+
+            frameReceiver = new UdpClient();
+            frameReceiver.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+            Task.Run(() => ReceiveFramePackets());
 
             var synchronizationContext = SynchronizationContext.Current;
             Task.Run(() => ReadAndPostFeedback(synchronizationContext));
@@ -33,7 +38,16 @@ namespace SimplifiedProtocolTest
             private set { Set(ref feedback, value); }
         }
 
-        public IObservable<object> Frames {  get { return frameSubject; } }
+        public IObservable<Frame> Frames {  get { return frameAccumulator.Frames; } }
+
+        private async void ReceiveFramePackets()
+        {
+            while (true)
+            {
+                var udpResult = await frameReceiver.ReceiveAsync();
+                frameAccumulator.ReceivePacket(udpResult.Buffer);
+            }
+        }
 
         private async void ReadAndPostFeedback(SynchronizationContext synchronizationContext)
         {
@@ -52,12 +66,15 @@ namespace SimplifiedProtocolTest
 
         private void InitializeConnection()
         {
+            var frameReceiverEp = (IPEndPoint)frameReceiver.Client.LocalEndPoint;
+            var frameReceiverPort = frameReceiverEp.Port;
+
             SendCommand(
                 commandStream.Client,
                 "initialize",
                 "salinity brackish",
                 "datetime " + ArisDatetime.GetTimestamp(),
-                "rcvr_port " + "56999"
+                $"rcvr_port {frameReceiverPort}"
                 );
         }
 
@@ -91,10 +108,11 @@ namespace SimplifiedProtocolTest
             socket.Send(commandBytes);
         }
 
+        private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();
+
         private byte[] receiveBuffer = new byte[4096];
         private string offUIFeedbackAccumulator = "";
         private TcpClient commandStream;
         private UdpClient frameReceiver;
-        private Subject<object> frameSubject = new Subject<object>();
     }
 }
