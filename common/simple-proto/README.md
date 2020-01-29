@@ -7,61 +7,94 @@
 
 ## Command Format
 
-This protocol uses a TCP stream to control an ARIS, which is also done with the protocol buffer-based protocol described in the related SDK documentation.
+This protocol uses a TCP stream to control an ARIS, which is also done with the protocol buffer-based protocol described in the related SDK documentation. In the case of this simplified protocol, client software should also read from the TCP stream as the ARIS will send feedback to commands.
 
-However, in this case the commands are text-based, and protocol buffer isn't necessary. A command consists of a command name followed by 0 or more lines of key-value pairs. The command is terminated by an empty line.
+In this protocol, the commands are text-based, and protocol buffer isn't necessary. A command consists of a command name followed by 0 or more lines of key-value pairs. The command is terminated by an empty line.
+
+*Note that you can use WireShark or other network tools to observe the command & response from the ARIS.*
 
 For illustration purposes only, we're showing new lines as `\n` here:
 
 ```
   lightbulb\n
-  enable=true\n
-  rgb=255,0,0\n
+  enable true\n
+  rgb=255,255,255\n
   \n
 ```
 
 The command name is alone on the first line. All command names and argument names are lower case.
 
-Command parameters are passed as key-value pairs, where the key is the argument name. In the case of duplicates, the last value stated is used.
+Command parameters are passed as key-value pairs, separated by a space, where the key is the argument name. In the case of duplicates, the last value stated is used.
 
-The value of a key-value pair is everything to the right of the `'='` character, until the end of the line. The newline character (`'\n'`) is required; carriage return (`'\r'`) is ignored.
+The value of a key-value pair is everything to the right of the parameter name, until the end of the line. The newline character (`'\n'`) is required; carriage return (`'\r'`) is ignored.
 
 ## Commands
 
 ### `initialize`
 
-`initialize` is required every time a connection is made, and must be the first command given. Nothing should be sent to the ARIS before this command. The first bytes of data received on the TCP stream dictate whether the simplified protocol is in use; therefore, the first line of the `initialize` command should be a single write to the TCP stream.
+`initialize` is required every time a connection is made, and must be the first command given. Nothing should be sent to the ARIS before this command. The first bytes of data received on the TCP stream dictate whether the simplified protocol is in use; the first line of the `initialize` command must be the first data written to the TCP stream.
 
 | Parameter | Description |
 |-|-|
-| `salinity` | Required. There are three valid values: `fresh`, `brackish`, and `saltwater`. Salinity affects the speed of sound in water, and affects calculations involving time and distance. |
-| `feedback` | Optional, false by default. Valid values are `true` and `false`. This controls whether the ARIS responds to commands with descriptive feedback text, which may be useful during integration. This parameter may have little value after your integration is complete. If `false`, the ARIS sends nothing to the integrator's over the TCP stream. <br/>*Note that you can use WireShark or other network tools to watch the command & response from the ARIS while `feedback` is `true.`* |
-| `datetime` | Setting the date and time should be considered mandatory by all integrators. If the RTC were to fail, times would not be consistent across power cycles. The required format is `2017-Apr-01 13:24:35`; US English is assumed for the month abbreviation. See below for more on formatting this parameter. |
-| `rcvr_port` | Required. This is the port number on which you will receive frames. You should open your receive socket before connecting to the ARIS. |
+| `salinity` | **Required.** There are three valid values: `fresh`, `brackish`, and `saltwater`. Salinity affects the speed of sound in water, and affects calculations involving time and distance. |
+| `datetime` | **Required.** Setting the date and time should be considered mandatory by all integrators. If the RTC were to fail, times would not be consistent across power cycles. The required format is `2017-Apr-01 13:24:35`; US English is assumed for the month abbreviation. See below for more on formatting this parameter. |
+| `rcvr_port` | **Required.** This is the port number on which you will receive frames. You should open your receive socket before requesting frame data from the ARIS. |
 | `rcvr_ip` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will send frames to the host that opened the command connection. |
+| `rcvr_syslog` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will relay syslog messages to the host that opened the command connection. |
+
+#### Example `initialize` Command
+
+Newlines are shown for illustration.
+
+```
+initialize\n
+salinity brackish\n
+rcvr_port 52833\n
+datetime 2020-Jan-14 10:57:42\n
+\n
+```
+
+#### Example Feedback
+
+```
+Welcome to ARIS rev 2.8.8689 Simplified Protocol
+Feedback for 'initialize':
+Found required fields for initialize.
+```
 
 #### Formatting the `datetime` parameter
 
 The ARIS expects the datetime parameter to be in the form
 
 ```
-  2019-Apr-01 13:24:35
+2019-Apr-01 13:24:35
 ```
 
 The ARIS also expects the month abbreviation to be from the en_US locale. If your client software uses `strftime()` but runs on a computer with a different locale, it could fail to set the ARIS' time properly.
 
 We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` [here](https://github.com/SoundMetrics/aris-integration-sdk/blob/94f2a5b1fd5c6c77089619aca9b6a890ee957531/common/code/CommandBuilder/CommandBuilder.cpp#L150).
 
+### `testpattern`
+
+Sending the `testpattern` command causes the ARIS to return frames containing a test pattern. This may be used for testing during integration with client software.
+
+This command has no parameters.
+
+### `passive`
+
+Sending the `passive` command causes the ARIS to acquire images without transmitting. This may be used for observing the effect of electrical noise on a vehicle.
+
 ### `acquire`
 
 `acquire` sets the ARIS imaging parameters such that image data will be assembled into frames and delivered to the client software.
 
+(Note that, unlike the protobuf-based protocol, data returned via the simplified protocol is already in correct order for display. Beam 0 remains on the right side of the image.)
+
 | Parameter | Description |
 |-|-|
-| `cookie` | Optional. This value is reflected in frame headers when these settings are applied. If used, this should be a monotonically increasing value. If not provided, the ARIS will generate a value. |
-| `start_range` | asdfasdfasdf |
-| `end_range` | asdfasdfasdf |
-| `frame_rate` | Optional. If not provided, the ARIS will use the fastest frame rate possible, up to 15 frames per second. Valid range is 1.0 &ndash; 15.0. The ARIS will constrain this value as needed if required by the laws of physics. |
+| `start_range` | **Required.** The nearest edge of the image, in meters. |
+| `end_range` | **Required.** The farthest edge of the image, in meters. |
+| `frame_rate` | Optional. If not provided, the ARIS will use the fastest frame rate possible, up to 15 frames per second. Valid values are 1.0 to 15.0. The ARIS will constrain this value as needed if required by the laws of physics. |
 | `beams` | Optional. Allowed values are `full` and `half`. `full` denotes a higher cross-range resolution. If not provided, the ARIS will use `full` beams. |
 | `samples_per_beam` | Optional, default is 1000. Valid range is 200 &ndash; 4000. |
 
@@ -83,10 +116,6 @@ Frequency
 
 `stop-acquire` stops frame acquisition. The client connection to the ARIS is still intact.
 
-### `noise-check`
-
-`noise-check`
-
 ### *(more commands to come)*
 
 ## Frame Format
@@ -97,11 +126,13 @@ This table describes the header that starts the payload on each datagram. (All i
 
 | Field | Type | Offset | Description |
 |-|-|-|-|
-| `part_ header_ size` | `uint32_t` | 0 | The size of this header, up to but not including `payload`. `payload`  follows the header immediately. |
-| `frame_ size` | `uint32_t` | 4 | This is the size of the ARIS frame header (1024 bytes) + the size of the frame's sample data. In other words, after you've reassembled the frame parts, this is 1024 + &lsaquo;total samples&rsaquo;. |
-| `sequence_ number` | `uint32_t` | 8 | Represents the location of this part's `payload` in the reassembled frame. The first datagram's sequence number is 0. If the frame's first datagram carried only the frame header (which is 1024 bytes), the second datagram's sequence number would be 1024. |
-| `frame_ index` | `int32_t` | 12 | Identifies this frame. There are generally multiple datagrams per frame. If `frame_index` changes before the complete frame is received, the previous frame is incomplete. |
-| `payload` | `uint8_t[]` | `part_ header_ size` |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
+| `signature` | `uint32_t` | 0 | Contains the value `0x53495241` (little-endian; "ARIS"). |
+| `header_ size` | `uint32_t` | 4 | The size of this header, up to but not including `payload`. `payload`  follows the header immediately. |
+| `frame_ size` | `uint32_t` | 8 | This is the size of the ARIS frame header (1024 bytes) + the size of the frame's sample data. In other words, after you've reassembled the frame parts, this is 1024 + &lsaquo;total samples&rsaquo;. |
+| `frame_ index` | `uint32_t` | 12 | Identifies this frame. There are generally multiple datagrams per frame. If `frame_index` changes before the complete frame is received, the previous frame is incomplete. |
+| `part_ number` | `uint32_t` | 16 | A zero based index of the parts of the current frame. The first datagram's sequence number is 0. Frame's first datagram carries only the frame header (which is 1024 bytes), the second datagram's payload contains the first samples of the frame. |
+| `payload_size` | `uint32_t` | 20 | The number of octets in the payload. |
+| `payload` | `uint8_t[]` | `parkt_ header_ size` |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
 
 Datagrams forming a very small frame could look those below, where there are 128 beams in the frame and 10 samples per beam.
 
