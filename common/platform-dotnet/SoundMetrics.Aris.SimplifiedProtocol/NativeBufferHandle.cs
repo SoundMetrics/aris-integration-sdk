@@ -72,16 +72,17 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             return contents.Sum(c => c.Count);
         }
 
-        private static ArraySegment<byte>[] CacheToArray(
-            IEnumerable<ArraySegment<byte>> contents
-        )
+        private static T[] CacheToArray<T>(IEnumerable<T> contents)
         {
             if (contents == null)
             {
                 throw new ArgumentNullException(nameof(contents));
             }
 
-            return (contents is ArraySegment<byte>[] array) ? array : contents.ToArray();
+            return
+                (contents is T[] array)
+                ? array
+                : contents.ToArray();
         }
 
         private void Initialize(ArraySegment<byte> contents)
