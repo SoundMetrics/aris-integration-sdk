@@ -1,4 +1,4 @@
-﻿using Aris.FileTypes;
+﻿using SoundMetrics.Aris.Headers;
 
 namespace SoundMetrics.Aris.SimplifiedProtocol
 {

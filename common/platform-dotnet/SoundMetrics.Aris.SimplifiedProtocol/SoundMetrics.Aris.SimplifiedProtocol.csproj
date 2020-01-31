@@ -5,10 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\submodules\aris-file-sdk\type-definitions\CSharp\FrameHeader.cs" Link="externals\FrameHeader.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="SoundMetrics.Aris.Headers" Version="2.0.9-alpha" />
     <PackageReference Include="System.Reactive" Version="4.1.2" />
   </ItemGroup>
 

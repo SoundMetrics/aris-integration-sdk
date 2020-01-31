@@ -1,9 +1,11 @@
 ﻿using SimplifiedProtocolTest.Helpers;
+using SoundMetrics.Aris.Headers;
 using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Threading;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace SimplifiedProtocolTest.ViewModels
 {
@@ -55,7 +57,15 @@ namespace SimplifiedProtocolTest.ViewModels
         public uint FrameIndex
         {
             get { return frameIndex; }
-            set { Set(ref frameIndex, value); }
+            private set { Set(ref frameIndex, value); }
+        }
+
+        private WriteableBitmap frameBitmap;
+
+        public WriteableBitmap FrameBitmap
+        {
+            get { return frameBitmap; }
+            private set { Set(ref frameBitmap, value); }
         }
 
 
@@ -95,10 +105,21 @@ namespace SimplifiedProtocolTest.ViewModels
         private void OnFrame(Frame frame)
         {
             FrameIndex = frame.Header.FrameIndex;
+            FrameBitmap = LoadBitmap();
 
         // See the following page for discussion of writing pixels to a
         // UWP WriteableBitmap.
         // https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.media.imaging.writeablebitmap.pixelbuffer#Windows_UI_Xaml_Media_Imaging_WriteableBitmap_PixelBuffer
+
+            // Naive, but functional version to start:
+            WriteableBitmap LoadBitmap()
+            {
+                var width = frame.Header.GetBeamCount();
+                var height = frame.Header.SamplesPerBeam;
+                var writeableBitmap = new WriteableBitmap((int)width, (int)height);
+
+                return writeableBitmap;
+            }
         }
 
         private string hostname = "192.168.10.155";

@@ -71,6 +71,13 @@
 
                 </StackPanel>
             </Grid>
+
+            <Grid Grid.Row="2">
+                <Image x:Name="imageControl"
+                       Source="{x:Bind ViewModel.FrameBitmap}"
+                       />
+            </Grid>
+
             <TextBox HorizontalAlignment="Stretch"
                      VerticalAlignment="Stretch"
                      Grid.Column="1"
