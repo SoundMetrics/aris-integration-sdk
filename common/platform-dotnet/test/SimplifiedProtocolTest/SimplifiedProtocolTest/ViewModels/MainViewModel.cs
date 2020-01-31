@@ -85,7 +85,7 @@ namespace SimplifiedProtocolTest.ViewModels
                 IsConnected = true;
                 Connection.Frames
                     .ObserveOn(SynchronizationContext.Current)
-                    .Subscribe(frame => FrameIndex = frame.Header.FrameIndex);
+                    .Subscribe(OnFrame);
             }
             catch (SocketException)
             {
@@ -95,6 +95,10 @@ namespace SimplifiedProtocolTest.ViewModels
         private void OnFrame(Frame frame)
         {
             FrameIndex = frame.Header.FrameIndex;
+
+        // See the following page for discussion of writing pixels to a
+        // UWP WriteableBitmap.
+        // https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.media.imaging.writeablebitmap.pixelbuffer#Windows_UI_Xaml_Media_Imaging_WriteableBitmap_PixelBuffer
         }
 
         private string hostname = "192.168.10.155";
