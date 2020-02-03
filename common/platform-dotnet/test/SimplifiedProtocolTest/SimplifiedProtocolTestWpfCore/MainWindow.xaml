@@ -5,8 +5,82 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimplifiedProtocolTestWpfCore"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="SimplifiiedProtocolTestWpfCore" Height="450" Width="800">
     <Grid>
+        <Grid
+            Margin="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
 
+            <StackPanel Orientation="Horizontal" Margin="0 8">
+                <TextBox x:Name="HostnameBox"
+                         Width="140"
+                         Height="32"
+                         VerticalAlignment="Top"
+                         Text="{Binding Hostname,
+                            Mode=TwoWay,
+                            UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Width="80"
+                        Content="Connect"
+                        Margin="4 0"
+                        VerticalAlignment="Top"
+                        IsEnabled="{Binding CanConnect}"
+                        Command="{Binding ConnectCommand}"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Margin="4" Foreground="DarkRed">Image is reversed, left to right.
+                Note: this test app cannot reconnect.</TextBlock>
+                <StackPanel Orientation="Horizontal"
+                            Grid.Row="1">
+                    <Button Content="Test Pattern"
+                            Margin="2 0"
+                            Command="{Binding StartTestPatternCommand}"
+                            />
+                    <Button Content="Passive Mode"
+                            Margin="2 0"
+                            Command="{Binding StartPassiveModeCommand}"
+                            />
+                    <Button Content="Default Acquire"
+                            Margin="2 0"
+                            Command="{Binding StartDefaultAcquireCommand}"
+                            />
+                    <TextBlock Margin="8 0"
+                               Text="Frame index:"
+                               VerticalAlignment="Center"
+                               />
+                    <TextBlock Text="{Binding FrameIndex, Mode=OneWay}"
+                               VerticalAlignment="Center"
+                               />
+
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="2">
+                <Image x:Name="imageControl"
+                       Source="{Binding FrameBitmap}"
+                       />
+            </Grid>
+
+            <TextBox HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch"
+                     Grid.Column="1"
+                     Grid.RowSpan="3"
+                     TextWrapping="Wrap"
+                     Text="{Binding Connection.Feedback, Mode=OneWay}"
+                     />
+        </Grid>
     </Grid>
 </Window>
