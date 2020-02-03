@@ -43,6 +43,8 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             return result;
         }
 
+        internal NativeBufferHandle UnderlyingHandle { get => hNativeBuffer; }
+
         #region IDisposable Support
 
         private bool disposedValue = false; // To detect redundant calls
