@@ -40,12 +40,25 @@ namespace SimplifiedProtocolTestWpfCore
 
         public IObservable<Frame> Frames {  get { return frameAccumulator.Frames; } }
 
-        private async void ReceiveFramePackets()
+        private /*async*/ void ReceiveFramePackets()
         {
-            while (true)
+            try
             {
-                var udpResult = await frameReceiver.ReceiveAsync();
-                frameAccumulator.ReceivePacket(udpResult.Buffer);
+                while (true)
+                {
+                    //var udpResult = await frameReceiver.ReceiveAsync();
+                    //frameAccumulator.ReceivePacket(udpResult.Buffer);
+
+                    // False initialization for call to Receive(ref)
+                    IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
+
+                    var bytes = frameReceiver.Receive(ref ep);
+                    frameAccumulator.ReceivePacket(bytes);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Socket was closed.
             }
         }
 

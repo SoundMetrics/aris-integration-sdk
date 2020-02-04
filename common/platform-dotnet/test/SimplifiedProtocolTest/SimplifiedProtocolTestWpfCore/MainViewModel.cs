@@ -2,9 +2,11 @@
 using SoundMetrics.Aris.Headers;
 using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -99,33 +101,80 @@ namespace SimplifiedProtocolTestWpfCore
                     .ObserveOn(SynchronizationContext.Current)
                     .Subscribe(OnFrame);
             }
-            catch (SocketException)
+            catch (SocketException e)
             {
+                Debug.WriteLine($"SocketException: {e.Message}");
             }
         }
 
         private void OnFrame(Frame frame)
         {
             FrameIndex = frame.Header.FrameIndex;
-            FrameBitmap = LoadBitmap();
+            FrameBitmap = LoadBitmap(FrameBitmap);
 
-        // See the following page for discussion of writing pixels to a
-        // UWP WriteableBitmap.
-        // https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.media.imaging.writeablebitmap.pixelbuffer#Windows_UI_Xaml_Media_Imaging_WriteableBitmap_PixelBuffer
-
-            // Naive, but functional version to start:
-            WriteableBitmap LoadBitmap()
+            // The render thread may be using while we're here
+            // on the UI thread.
+            if (FrameBitmap.TryLock(bufferLockTimeout))
             {
-                var width = frame.Header.GetBeamCount();
-                var height = frame.Header.SamplesPerBeam;
-                var writeableBitmap = new WriteableBitmap(
-                    (int)width, (int)height,
-                    96, 96,
-                    PixelFormats.Gray8,
-                    null);
+                PaintMe(FrameBitmap);
+                FrameBitmap.Unlock();
+            }
 
-                return writeableBitmap;
+            void PaintMe(WriteableBitmap writeableBitmap)
+            {
+                unsafe
+                {
+                    // Get a pointer to the back buffer.
+                    IntPtr pBackBuffer = writeableBitmap.BackBuffer;
+
+                    for (int row = 0; row < 16; ++row)
+                    {
+                        for (int column = 0; row < 16; ++row)
+                        {
+                            // Find the address of the pixel to draw.
+                            pBackBuffer += row * writeableBitmap.BackBufferStride;
+                            pBackBuffer += column * 4;
+
+                            // Compute the pixel's color.
+                            int color_data = 255 << 16; // R
+                            color_data |= 128 << 8;   // G
+                            color_data |= 255 << 0;   // B
+
+                            // Assign the color data to the pixel.
+                            *((int*)pBackBuffer) = color_data;
+                        }
+                    }
+                }
+
+                // Specify the area of the bitmap that changed.
+                writeableBitmap.AddDirtyRect(
+                    new Int32Rect(0, 0, writeableBitmap.PixelWidth, writeableBitmap.PixelHeight));
+            }
+
+            WriteableBitmap LoadBitmap(WriteableBitmap existing)
+            {
+                var width = (int)frame.Header.GetBeamCount();
+                var height = (int)frame.Header.SamplesPerBeam;
+
+                var useExisting =
+                    existing != null
+                    && width == existing.PixelWidth
+                    && height == existing.PixelHeight;
+
+                var currentBitmap =
+                    useExisting
+                        ? existing
+                        : new WriteableBitmap(
+                            width, height,
+                            96, 96,
+                            PixelFormats.Gray8,
+                            null);
+
+                return currentBitmap;
             }
         }
+
+        private static readonly Duration bufferLockTimeout =
+            new Duration(TimeSpan.FromMilliseconds(10));
     }
 }

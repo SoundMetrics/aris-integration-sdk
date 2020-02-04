@@ -68,9 +68,11 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="2"
+                  Margin="2">
                 <Image x:Name="imageControl"
                        Source="{Binding FrameBitmap}"
+                       Width="400"
                        />
             </Grid>
 
