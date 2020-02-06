@@ -80,7 +80,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                         Reset(packetHeader.FrameIndex, packetHeader.FrameSize);
                         frameHeader = newFrameHeader.Value;
 
-                        nativeBuffer = new NativeBufferHandle((int)packetHeader.FrameSize);
+                        nativeBuffer = new NativeBuffer((int)packetHeader.FrameSize);
                     }
                     else
                     {
@@ -172,7 +172,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         private readonly Subject<Frame> frameSubject = new Subject<Frame>();
 
         private WorkInProgress wip = new WorkInProgress();
-        private NativeBufferHandle nativeBuffer;
+        private NativeBuffer nativeBuffer;
         private ArisFrameHeader frameHeader;
         private uint nextFrameIndex = 0;
 
@@ -192,7 +192,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             public FrameCompletion AddSamples(
                 uint partNumber,
                 ArraySegment<byte> samples,
-                NativeBufferHandle nativeBuffer)
+                NativeBuffer nativeBuffer)
             {
                 if (samples.Count == 0)
                 {

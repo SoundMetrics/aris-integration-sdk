@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 namespace SoundMetrics.Aris.SimplifiedProtocol
 {
     [DebuggerDisplay("{Handle} {ShortString}")]
-    public sealed class NativeBufferHandle : SafeHandleZeroOrMinusOneIsInvalid
+    public sealed class NativeBuffer : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public NativeBufferHandle(int bufferLength)
+        public NativeBuffer(int bufferLength)
             : base(ownsHandle: true)
         {
             var hBuffer =

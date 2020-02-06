@@ -129,7 +129,7 @@ namespace SimplifiedProtocolTestWpfCore
 
             unsafe void PaintMe(
                 WriteableBitmap bitmap,
-                NativeBufferHandle src,
+                NativeBuffer src,
                 int beamCount)
             {
                 var bitmapBuffer = bitmap.BackBuffer;
