@@ -116,40 +116,56 @@ namespace SimplifiedProtocolTestWpfCore
             // on the UI thread.
             if (FrameBitmap.TryLock(bufferLockTimeout))
             {
-                PaintMe(FrameBitmap);
-                FrameBitmap.Unlock();
+                try
+                {
+                    Debug.WriteLine($"Painting {frame.Samples.ShortString}"); // TODO REMOVE
+                    PaintMe(FrameBitmap, frame.Samples, (int)frame.Header.GetBeamCount());
+                }
+                finally
+                {
+                    FrameBitmap.Unlock();
+                }
             }
 
-            void PaintMe(WriteableBitmap writeableBitmap)
+            unsafe void PaintMe(
+                WriteableBitmap bitmap,
+                NativeBufferHandle src,
+                int beamCount)
             {
-                unsafe
+                var bitmapBuffer = bitmap.BackBuffer;
+
+                var nativeSource = src.DangerousGetHandle();
+                var rowCount = bitmap.PixelHeight;
+                var destinationStride = bitmap.BackBufferStride;
+
+                byte* pDest = (byte*)bitmapBuffer.ToPointer(),
+                      pSrc = (byte*)nativeSource.ToPointer();
+
+                for (byte* pDestRow = pDest, pSrcRow = pSrc;
+                        pDestRow < pDest + (rowCount * destinationStride);
+                        pDestRow += destinationStride, pSrcRow += beamCount)
                 {
-                    // Get a pointer to the back buffer.
-                    IntPtr pBackBuffer = writeableBitmap.BackBuffer;
+                    byte* pOut = pDestRow,
+                          pIn = pSrcRow;
 
-                    for (int row = 0; row < 16; ++row)
+                    for (var beamIdx = 0; beamIdx < beamCount; ++beamIdx)
                     {
-                        for (int column = 0; row < 16; ++row)
-                        {
-                            // Find the address of the pixel to draw.
-                            pBackBuffer += row * writeableBitmap.BackBufferStride;
-                            pBackBuffer += column * 4;
+                        *pOut = *pIn;
+                        ++pOut;
+                        ++pIn;
 
-                            // Compute the pixel's color.
-                            int color_data = 255 << 16; // R
-                            color_data |= 128 << 8;   // G
-                            color_data |= 255 << 0;   // B
-
-                            // Assign the color data to the pixel.
-                            *((int*)pBackBuffer) = color_data;
-                        }
+                        //var count = upsampleCounts[beamIdx];
+                        //for (var iter = 0; iter < count; ++iter, ++pOut)
+                        //{
+                        //    *pOut = *pIn;
+                        //}
                     }
                 }
 
-                // Specify the area of the bitmap that changed.
-                writeableBitmap.AddDirtyRect(
-                    new Int32Rect(0, 0, writeableBitmap.PixelWidth, writeableBitmap.PixelHeight));
+                bitmap.AddDirtyRect(
+                    new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight));
             }
+
 
             WriteableBitmap LoadBitmap(WriteableBitmap existing)
             {
@@ -175,6 +191,6 @@ namespace SimplifiedProtocolTestWpfCore
         }
 
         private static readonly Duration bufferLockTimeout =
-            new Duration(TimeSpan.FromMilliseconds(10));
+            new Duration(TimeSpan.FromMilliseconds(2));
     }
 }

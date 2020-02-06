@@ -73,6 +73,7 @@
                 <Image x:Name="imageControl"
                        Source="{Binding FrameBitmap}"
                        Width="400"
+                       Stretch="Fill"
                        />
             </Grid>
 

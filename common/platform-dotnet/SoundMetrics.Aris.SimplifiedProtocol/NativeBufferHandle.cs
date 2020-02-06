@@ -1,23 +1,21 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.SimplifiedProtocol
 {
+    [DebuggerDisplay("{Handle} {ShortString}")]
     public sealed class NativeBufferHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        private NativeBufferHandle(IntPtr hBuffer, int bufferLength)
+        public NativeBufferHandle(int bufferLength)
             : base(ownsHandle: true)
         {
-            base.SetHandle(hBuffer);
+            var hBuffer =
+                Marshal.AllocHGlobal(ValidateLength(bufferLength));
+            SetHandle(hBuffer);
             this.bufferLength = bufferLength;
-        }
-
-        public NativeBufferHandle(int bufferLength)
-            : this(Marshal.AllocHGlobal(ValidateLength(bufferLength)), bufferLength)
-        {
+            InitializeBuffer(DangerousGetHandle(), bufferLength, 0xCC);
         }
 
         private static int ValidateLength(int length)
@@ -30,114 +28,82 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             return length;
         }
 
-        public NativeBufferHandle(ArraySegment<byte> contents)
-            : this(contents.Count)
+        public void Append(ArraySegment<byte> contents)
         {
-            if (contents.Array == null)
+            var remainingBuffer = bufferLength - position;
+
+            if (contents.Count > remainingBuffer)
             {
-                throw new ArgumentNullException(nameof(contents));
-            }
-
-            if (contents.Count == 0)
-            {
-                throw new ArgumentException("Empty contents");
-            }
-
-            Initialize(contents);
-        }
-
-        public NativeBufferHandle(IEnumerable<ArraySegment<byte>> contents)
-            : this(CacheToArray(contents))
-        {
-        }
-
-        private NativeBufferHandle(ArraySegment<byte>[] contents)
-            : this(TotalSize(contents))
-        {
-            if (this.Length == 0 || contents.Sum(c => c.Count) == 0)
-            {
-                throw new ArgumentException("Empty contents");
-            }
-
-            Initialize(contents);
-        }
-
-        private static int TotalSize(ArraySegment<byte>[] contents)
-        {
-            if (contents == null)
-            {
-                throw new ArgumentNullException(nameof(contents));
-            }
-
-            return contents.Sum(c => c.Count);
-        }
-
-        private static T[] CacheToArray<T>(IEnumerable<T> contents)
-        {
-            if (contents == null)
-            {
-                throw new ArgumentNullException(nameof(contents));
-            }
-
-            return
-                (contents is T[] array)
-                ? array
-                : contents.ToArray();
-        }
-
-        private void Initialize(ArraySegment<byte> contents)
-        {
-            InitializeSegment(contents, 0);
-        }
-
-        private void Initialize(IEnumerable<ArraySegment<byte>> contents)
-        {
-            var segments =
-                (contents is ArraySegment<byte>[] array) ? array : contents.ToArray();
-
-            int offset = 0;
-
-            foreach (var segment in segments)
-            {
-                InitializeSegment(segment, offset);
-                offset += segment.Count;
-            }
-        }
-
-        private void InitializeSegment(ArraySegment<byte> contents, int offset)
-        {
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(offset),
-                    $"offset is {offset}"
-                    );
-            }
-
-            if (offset >= Length || offset + contents.Count > Length)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(contents),
-                    "The contents do not fit in this buffer"
-                    );
+                throw new ArgumentException(
+                    "Cannot append contents, it is too long",
+                    nameof(contents));
             }
 
             var source = contents.Array;
             var startIndex = contents.Offset;
-            var ptr = Handle + offset;
+            var ptr = DangerousGetHandle() + position;
+
             Marshal.Copy(source, startIndex, ptr, contents.Count);
+
+            if (position == 0) // TODO REMOVE
+            {
+                Debug.WriteLine($"Started {ShortString}");
+            }
+
+            position += contents.Count;
         }
 
         protected override bool ReleaseHandle()
         {
-            Marshal.FreeHGlobal(Handle);
+            InitializeBuffer(DangerousGetHandle(), bufferLength, 0xDD);
+            Marshal.FreeHGlobal(DangerousGetHandle());
             return true;
         }
 
-        internal IntPtr Handle { get => base.DangerousGetHandle(); }
+        // Test support.
+        internal byte[] ToManagedArray()
+        {
+            var result = new byte[Length];
+            Marshal.Copy(DangerousGetHandle(), result, 0, result.Length);
+            return result;
+        }
+
+        public byte[] ToManagedArray(int length)
+        {
+            var result = new byte[length];
+            Marshal.Copy(DangerousGetHandle(), result, 0, length);
+            return result;
+        }
+
 
         public int Length { get => bufferLength; }
 
+        internal IntPtr Handle { get => DangerousGetHandle(); }
+
+        public string ShortString
+        {
+            get {
+                var elementCount = Math.Min(5, bufferLength);
+                var bytes = ToManagedArray(elementCount);
+                var elements = String.Join(" ", bytes);
+
+                return $"[{elements}...({DangerousGetHandle()})]";
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private static unsafe void InitializeBuffer(IntPtr buffer, int length, byte value)
+        {
+            var pBuffer = (byte*)buffer.ToPointer();
+            var pEnd = pBuffer + length;
+
+            for (; pBuffer < pEnd; ++pBuffer)
+            {
+                *pBuffer = value;
+            }
+        }
+
         private readonly int bufferLength;
+        private int position;
     }
 }

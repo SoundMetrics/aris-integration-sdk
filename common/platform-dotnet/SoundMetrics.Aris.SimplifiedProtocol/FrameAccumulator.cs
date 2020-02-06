@@ -71,8 +71,16 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                     var isValid = ValidateFrameHeader(newFrameHeader.Value);
                     if (isValid)
                     {
+                        Log($"FrameAccumulator: Starting frame {newFrameHeader.Value.FrameIndex}");
+                        if (nativeBuffer != null)
+                        {
+                            Log("Abandoning previous frame");
+                        }
+
                         Reset(packetHeader.FrameIndex, packetHeader.FrameSize);
                         frameHeader = newFrameHeader.Value;
+
+                        nativeBuffer = new NativeBufferHandle((int)packetHeader.FrameSize);
                     }
                     else
                     {
@@ -95,15 +103,23 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             }
             else if (packetHeader.PartNumber == wip.GetNextPartNumber())
             {
-                Log($"Adding samples to frame {packetHeader.FrameIndex}");
+                Log($"Adding samples to frame {packetHeader.FrameIndex}/{packetHeader.PartNumber}");
 
-                if (wip.AddSamples(packetHeader.PartNumber, payload)
+                if (wip.AddSamples(packetHeader.PartNumber, payload, nativeBuffer)
                         == FrameCompletion.CompleteFrame)
                 {
                     Log($"Completed frame {packetHeader.FrameIndex}");
-                    var frame = PackageFrame();
-                    frameSubject.OnNext(frame);
 
+                    var frame = PackageFrame();
+
+                    // We are not on the UI thread, but frame listeners are on
+                    // the UI thread, and callbacks happen asynchronously, so
+                    // don't dispose the native buffer, just clear our reference
+                    // to it.
+                    nativeBuffer = null;
+                    System.Diagnostics.Debug.WriteLine($"Completed {frame.Samples.ShortString}");
+
+                    frameSubject.OnNext(frame);
                     Reset();
                 }
             }
@@ -116,6 +132,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         public void Reset()
         {
             wip = new WorkInProgress();
+            nativeBuffer = null;
         }
 
         private void Reset(uint frameIndex, uint expectedSampleCount)
@@ -135,7 +152,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             return new Frame
             {
                 Header = frameHeader,
-                Samples = new NativeBuffer(wip.Samples),
+                Samples = nativeBuffer,
             };
         }
 
@@ -155,6 +172,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
         private readonly Subject<Frame> frameSubject = new Subject<Frame>();
 
         private WorkInProgress wip = new WorkInProgress();
+        private NativeBufferHandle nativeBuffer;
         private ArisFrameHeader frameHeader;
         private uint nextFrameIndex = 0;
 
@@ -165,14 +183,16 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             public uint? CurrentPartNumber;
             public uint? FrameIndex;
             public uint ExpectedSampleCount;
-            public List<ArraySegment<byte>> Samples;
             public int SamplesReceived;
 
             public uint GetNextPartNumber() =>
                 CurrentPartNumber.HasValue ? CurrentPartNumber.Value + 1 : 0;
 
 
-            public FrameCompletion AddSamples(uint partNumber, ArraySegment<byte> samples)
+            public FrameCompletion AddSamples(
+                uint partNumber,
+                ArraySegment<byte> samples,
+                NativeBufferHandle nativeBuffer)
             {
                 if (samples.Count == 0)
                 {
@@ -186,12 +206,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                     return FrameCompletion.IncompleteFrame;
                 }
 
-                if (Samples == null)
-                {
-                    Samples = new List<ArraySegment<byte>>();
-                }
-
-                Samples.Add(samples);
+                nativeBuffer.Append(samples);
                 SamplesReceived += samples.Count;
                 CurrentPartNumber = GetNextPartNumber();
 

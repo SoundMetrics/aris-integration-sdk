@@ -19,6 +19,7 @@ namespace SimplifiedProtocolTestWpfCore
             Feedback = "Connected.\n";
 
             frameReceiver = new UdpClient();
+            frameReceiver.Client.ReceiveBufferSize = 2 * 1024 * 1024;
             frameReceiver.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
             Task.Run(() => ReceiveFramePackets());
 
