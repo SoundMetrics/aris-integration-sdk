@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplifiedProtocolTest", "SimplifiedProtocolTest\SimplifiedProtocolTest.csproj", "{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimplifiedProtocolTest.Core", "SimplifiedProtocolTest.Core\SimplifiedProtocolTest.Core.csproj", "{6ED3A7DF-8B27-437A-8B88-239423162E82}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.SimplifiedProtocol", "..\..\SoundMetrics.Aris.SimplifiedProtocol\SoundMetrics.Aris.SimplifiedProtocol.csproj", "{8EE4A18F-6BD5-414A-A48B-4AB75982C702}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.SimplifiedProtocol.UT", "..\..\SoundMetrics.Aris.SimplifiedProtocol.UT\SoundMetrics.Aris.SimplifiedProtocol.UT.csproj", "{8956BE05-F312-4FCE-9F82-D0DCC88FEFEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplifiedProtocolTestWpfCore", "SimplifiedProtocolTestWpfCore\SimplifiedProtocolTestWpfCore.csproj", "{7F01F467-EA80-4E5D-9ABC-420F482E88A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimplifiedProtocolTestWpfCore", "SimplifiedProtocolTestWpfCore\SimplifiedProtocolTestWpfCore.csproj", "{7F01F467-EA80-4E5D-9ABC-420F482E88A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,32 +25,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|ARM.ActiveCfg = Debug|ARM
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|ARM.Build.0 = Debug|ARM
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|ARM.Deploy.0 = Debug|ARM
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|ARM64.Build.0 = Debug|ARM64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|ARM64.Deploy.0 = Debug|ARM64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|x64.ActiveCfg = Debug|x64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|x64.Build.0 = Debug|x64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|x64.Deploy.0 = Debug|x64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|x86.ActiveCfg = Debug|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|x86.Build.0 = Debug|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Debug|x86.Deploy.0 = Debug|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|Any CPU.ActiveCfg = Release|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|ARM.ActiveCfg = Release|ARM
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|ARM.Build.0 = Release|ARM
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|ARM.Deploy.0 = Release|ARM
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|ARM64.ActiveCfg = Release|ARM64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|ARM64.Build.0 = Release|ARM64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|ARM64.Deploy.0 = Release|ARM64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|x64.ActiveCfg = Release|x64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|x64.Build.0 = Release|x64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|x64.Deploy.0 = Release|x64
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|x86.ActiveCfg = Release|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|x86.Build.0 = Release|x86
-		{7E7E8CBF-734B-4F3C-9848-8E01DB8A6353}.Release|x86.Deploy.0 = Release|x86
 		{6ED3A7DF-8B27-437A-8B88-239423162E82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6ED3A7DF-8B27-437A-8B88-239423162E82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ED3A7DF-8B27-437A-8B88-239423162E82}.Debug|ARM.ActiveCfg = Debug|Any CPU
