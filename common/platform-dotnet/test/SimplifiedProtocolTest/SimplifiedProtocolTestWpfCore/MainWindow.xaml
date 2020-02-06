@@ -69,12 +69,22 @@
             </Grid>
 
             <Grid Grid.Row="2"
-                  Margin="2">
+                  Margin="4 8">
                 <Image x:Name="imageControl"
                        Source="{Binding FrameBitmap}"
                        Width="400"
                        Stretch="Fill"
-                       />
+                       RenderTransformOrigin="0.5 0.5"
+                       >
+                    <!--
+                        Beam 0 is normally on the right size of the image.
+                        Sample 0 is always at the bottom of the image.
+                        This rotation puts the test image in the right orientation.
+                    -->
+                    <Image.RenderTransform>
+                        <RotateTransform Angle="180" />
+                    </Image.RenderTransform>
+                </Image>
             </Grid>
 
             <TextBox HorizontalAlignment="Stretch"
