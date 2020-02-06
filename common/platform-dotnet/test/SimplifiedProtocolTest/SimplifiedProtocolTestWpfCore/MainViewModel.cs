@@ -118,7 +118,6 @@ namespace SimplifiedProtocolTestWpfCore
             {
                 try
                 {
-                    Debug.WriteLine($"Painting {frame.Samples.ShortString}"); // TODO REMOVE
                     PaintMe(FrameBitmap, frame.Samples, (int)frame.Header.GetBeamCount());
                 }
                 finally

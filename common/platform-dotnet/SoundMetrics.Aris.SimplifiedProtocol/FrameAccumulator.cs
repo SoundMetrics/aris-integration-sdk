@@ -117,7 +117,6 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
                     // don't dispose the native buffer, just clear our reference
                     // to it.
                     nativeBuffer = null;
-                    System.Diagnostics.Debug.WriteLine($"Completed {frame.Samples.ShortString}");
 
                     frameSubject.OnNext(frame);
                     Reset();

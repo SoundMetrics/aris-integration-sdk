@@ -45,11 +45,6 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
 
             Marshal.Copy(source, startIndex, ptr, contents.Count);
 
-            if (position == 0) // TODO REMOVE
-            {
-                Debug.WriteLine($"Started {ShortString}");
-            }
-
             position += contents.Count;
         }
 
