@@ -94,9 +94,17 @@ Sending the `passive` command causes the ARIS to acquire images without transmit
 |-|-|
 | `start_range` | **Required.** The nearest edge of the image, in meters. |
 | `end_range` | **Required.** The farthest edge of the image, in meters. |
-| `frame_rate` | Optional. If not provided, the ARIS will use the fastest frame rate possible, up to 15 frames per second. Valid values are 1.0 to 15.0. The ARIS will constrain this value as needed if required by the laws of physics. |
+| `frame_rate` | Optional. If not provided, the ARIS will use the fastest frame rate possible, up to 15 frames per second. Valid values are 1.0 to 15.0. ARIS will constrain this value as needed if required by the laws of physics. |
 | `beams` | Optional. Allowed values are `full` and `half`. `full` denotes a higher cross-range resolution. If not provided, the ARIS will use `full` beams. |
 | `samples_per_beam` | Optional, default is 1000. Valid range is 200 &ndash; 4000. |
+
+#### Environmental Effects
+
+Water temperature, depth, and salinity have an effect on computed speed of sound which, in turn, affects parameters used in image acquisition. Client software indicates salinity during protocol initialization, but water temperature and depth can vary over time.
+
+`acquire` uses the water temperature and depth at the time the `acquire` command is received to determine parameters for image acquisition. ARIS does not update those parameters if the measured water temperature or depth changes&mdash;to avoid modifying image acquisition settings during operations.
+
+Note that water temperature and depth readings can change drastically between "on deck" and "in the water."
 
 Ranges...
 
