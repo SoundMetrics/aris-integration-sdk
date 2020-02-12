@@ -63,6 +63,7 @@ namespace SoundMetrics.Aris.SimplifiedProtocol
             return result;
         }
 
+        // Test support.
         public byte[] ToManagedArray(int length)
         {
             var result = new byte[length];
