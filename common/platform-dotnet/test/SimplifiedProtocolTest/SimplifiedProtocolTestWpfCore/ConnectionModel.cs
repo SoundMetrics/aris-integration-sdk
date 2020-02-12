@@ -68,10 +68,10 @@ namespace SimplifiedProtocolTestWpfCore
             while (true)
             {
                 var bytesRead =
-                    await commandStream.Client.ReceiveAsync(receiveBuffer, SocketFlags.None);
+                    await commandStream.Client.ReceiveAsync(feedbackReceiveBuffer, SocketFlags.None);
                 if (bytesRead > 0)
                 {
-                    var s = Encoding.ASCII.GetString(receiveBuffer, 0, bytesRead);
+                    var s = Encoding.ASCII.GetString(feedbackReceiveBuffer, 0, bytesRead);
                     offUIFeedbackAccumulator = offUIFeedbackAccumulator + s;
                     synchronizationContext.Post(_ => Feedback = offUIFeedbackAccumulator, null);
                 }
@@ -124,7 +124,7 @@ namespace SimplifiedProtocolTestWpfCore
 
         private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();
 
-        private byte[] receiveBuffer = new byte[4096];
+        private byte[] feedbackReceiveBuffer = new byte[4096];
         private string offUIFeedbackAccumulator = "";
         private TcpClient commandStream;
         private UdpClient frameReceiver;

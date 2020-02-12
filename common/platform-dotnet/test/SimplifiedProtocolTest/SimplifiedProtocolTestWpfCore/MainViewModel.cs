@@ -48,7 +48,7 @@ namespace SimplifiedProtocolTestWpfCore
         }
 
 
-        private string hostname = "192.168.10.155";
+        private string hostname = "192.168.10.138";
 
         public string Hostname
         {
