@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimplifiedProtocolTestWpfCore"
         mc:Ignorable="d"
-        Title="SimplifiiedProtocolTestWpfCore" Height="450" Width="800">
-    <Grid>
+        Title="SimplifiiedProtocolTestWpfCore" Height="1200" Width="1000">
+    <Grid TextElement.FontSize="15">
         <Grid
             Margin="8">
             <Grid.RowDefinitions>
@@ -15,8 +15,8 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Orientation="Horizontal" Margin="0 8">
@@ -41,8 +41,12 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Margin="4" Foreground="DarkRed">Image is reversed, left to right.
-                Note: this test app cannot reconnect.</TextBlock>
+                <TextBlock Margin="4"
+                           Foreground="DarkRed"
+                           TextWrapping="Wrap">
+                    Image is reversed, left to right.
+                    Note: this test app cannot reconnect.
+                </TextBlock>
                 <StackPanel Orientation="Horizontal"
                             Grid.Row="1">
                     <Button Content="Test Pattern"
@@ -87,13 +91,19 @@
                 </Image>
             </Grid>
 
-            <TextBox HorizontalAlignment="Stretch"
-                     VerticalAlignment="Stretch"
-                     Grid.Column="1"
-                     Grid.RowSpan="3"
-                     TextWrapping="Wrap"
-                     Text="{Binding Connection.Feedback, Mode=OneWay}"
-                     />
+            <TextBox
+                x:Name="FeedbackText"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Grid.Column="1"
+                Grid.RowSpan="3"
+                TextWrapping="Wrap"
+                FontFamily="Consolas"
+                Text="{Binding Connection.Feedback, Mode=OneWay}"
+                IsReadOnly="True"
+                VerticalScrollBarVisibility="Visible"
+                TextChanged="Feedback_Changed"
+                />
         </Grid>
     </Grid>
 </Window>

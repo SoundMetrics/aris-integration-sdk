@@ -14,5 +14,10 @@ namespace SimplifiedProtocolTestWpfCore
             InitializeComponent();
             DataContext = ViewModel;
         }
+
+        private void Feedback_Changed(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            FeedbackText.ScrollToEnd();
+        }
     }
 }

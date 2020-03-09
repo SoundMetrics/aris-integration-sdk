@@ -1,6 +1,7 @@
 ﻿using SimplifiedProtocolTest.Helpers;
 using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
@@ -23,8 +24,8 @@ namespace SimplifiedProtocolTestWpfCore
             frameReceiver.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
             Task.Run(() => ReceiveFramePackets());
 
-            var synchronizationContext = SynchronizationContext.Current;
-            Task.Run(() => ReadAndPostFeedback(synchronizationContext));
+            synchronizationContext = SynchronizationContext.Current;
+            Task.Run(() => ReadAndPostFeedback());
 
             InitializeConnection();
         }
@@ -63,7 +64,7 @@ namespace SimplifiedProtocolTestWpfCore
             }
         }
 
-        private async void ReadAndPostFeedback(SynchronizationContext synchronizationContext)
+        private async void ReadAndPostFeedback()
         {
             while (true)
             {
@@ -72,10 +73,27 @@ namespace SimplifiedProtocolTestWpfCore
                 if (bytesRead > 0)
                 {
                     var s = Encoding.ASCII.GetString(feedbackReceiveBuffer, 0, bytesRead);
-                    offUIFeedbackAccumulator = offUIFeedbackAccumulator + s;
-                    synchronizationContext.Post(_ => Feedback = offUIFeedbackAccumulator, null);
+                    var indentedFeedback =
+                        String.Join("\n",
+                            s.Split("\n").Select(s => "| " + s)
+                        )
+                        + "\n";
+
+                    PostFeedback(indentedFeedback);
                 }
             }
+        }
+
+        private void PostFeedback(string message)
+        {
+            SendOrPostCallback performUpdate = _ =>
+            {
+                // All updates are queued to the UI thread.
+                offUIFeedbackAccumulator = offUIFeedbackAccumulator + message;
+                Feedback = offUIFeedbackAccumulator;
+            };
+
+            synchronizationContext.Post(performUpdate, null);
         }
 
         private void InitializeConnection()
@@ -115,14 +133,36 @@ namespace SimplifiedProtocolTestWpfCore
                 "end_range 5");
         }
 
-        private static void SendCommand(Socket socket, params string[] commandLines)
+        private static string FormatCommand(string[] commandLines) =>
+            string.Join("\n", commandLines) + "\n\n";
+
+        private static string FormatCommandForLogging(string[] commandLines) =>
+            string.Join("\\n\n", commandLines) + "\\n\n\\n\n";
+
+        private void SendCommand(
+            Socket socket,
+            params string[] commandLines)
         {
-            var command = string.Join("\n", commandLines) + "\n\n";
+            PostCommandFeedback(commandLines);
+
+            var command = FormatCommand(commandLines);
             var commandBytes = Encoding.ASCII.GetBytes(command);
             socket.Send(commandBytes);
+
+            void PostCommandFeedback(string[] commandLines)
+            {
+                var feedback =
+                    "\n"
+                    + "Sending command:\n"
+                    + ">>>>>>>>\n"
+                    + FormatCommandForLogging(commandLines)
+                    + "<<<<<<<<\n";
+                PostFeedback(feedback);
+            }
         }
 
         private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();
+        private readonly SynchronizationContext synchronizationContext;
 
         private byte[] feedbackReceiveBuffer = new byte[4096];
         private string offUIFeedbackAccumulator = "";
