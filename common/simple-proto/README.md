@@ -1,11 +1,17 @@
 # Simplified Protocol
 
-## Caveats
+This document describes a simplified protocol for commanding an ARIS. The Protocol Buffer-based method of interacting with the sonar has occasionally been problematic for integration partners. This _Simplified Protocol_ consists of two parts:
 
-* This folder proposes a simplified protocol for commanding an ARIS. Until this reaches the `master` branch, this should be considered "not released." The targeted milestone is a future ARIScope 2.8 release.
-* On completion, this protocol will *likely* guarantee that the ARIS samples are correctly reordered, rather than requiring integrators' software to reorder samples. The earlier protocol will continue to require integrators' software reordering per the reordered flag in order to provide continuity for past integrations.
+* The **Command Protocol** is implemented over a 2-way TCP stream. ASCII-based commands are sent to the ARIS. An ASCII-based response is received from the ARIS, indicating success or failure.
+* The **Frame Protocol** is implemented as a 1-way UDP stream of datagrams. The receiver must assemble the datagrams into a complete frame.
 
-## Command Format
+## Caveats ### REMOVE ON RELEASE
+
+* This document _proposes_ a simplified protocol for commanding an ARIS. Until this reaches the `master` branch, this should be considered "not released." The targeted milestone is a future ARIScope 2.8 release.
+* On completion, this protocol *may* guarantee that the ARIS samples are correctly reordered, rather than requiring integrators' software to reorder samples. The earlier protocol will continue to require integrators' software reordering per the reordered flag in order to provide continuity for past integrations.
+* The name _Simplified Protocol_ may change.
+
+## Command Protocol
 
 This protocol uses a TCP stream to control an ARIS, which is also done with the protocol buffer-based protocol described in the related SDK documentation. In the case of this simplified protocol, client software should also read from the TCP stream as the ARIS will send feedback to commands.
 
@@ -15,7 +21,7 @@ In this protocol, the commands are text-based, and protocol buffer isn't necessa
 
 For illustration purposes only, we're showing new lines as `\n` here:
 
-```
+```txt
   lightbulb\n
   enable true\n
   rgb=255,255,255\n
@@ -28,9 +34,9 @@ Command parameters are passed as key-value pairs, separated by a space, where th
 
 The value of a key-value pair is everything to the right of the parameter name, until the end of the line. The newline character (`'\n'`) is required; carriage return (`'\r'`) is ignored.
 
-## Commands
+### Commands
 
-### `initialize`
+#### `initialize`
 
 `initialize` is required every time a connection is made, and must be the first command given. Nothing should be sent to the ARIS before this command. The first bytes of data received on the TCP stream dictate whether the simplified protocol is in use; the first line of the `initialize` command must be the first data written to the TCP stream.
 
@@ -42,31 +48,38 @@ The value of a key-value pair is everything to the right of the parameter name, 
 | `rcvr_ip` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will send frames to the host that opened the command connection. |
 | `rcvr_syslog` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will relay syslog messages to the host that opened the command connection. |
 
-#### Example `initialize` Command
+##### Example `initialize` Command
 
 Newlines are shown for illustration.
 
-```
-initialize\n
-salinity brackish\n
-rcvr_port 52833\n
-datetime 2020-Jan-14 10:57:42\n
-\n
-```
-
-#### Example Feedback
-
-```
-Welcome to ARIS rev 2.8.8689 Simplified Protocol
-Feedback for 'initialize':
-Found required fields for initialize.
+```txt
+  initialize\n
+  salinity brackish\n
+  datetime 2020-Mar-17 08:52:40\n
+  rcvr_port 50681\n
+  \n
 ```
 
-#### Formatting the `datetime` parameter
+#### Command Response for `initialize`
+
+The ARIS will respond to the `initialize` command with the following:
+
+```txt
+  200 OK\n
+  Welcome to ARIS\n
+    ArisApp rev 2.8.8711\n
+    Simplified Protocol enabled.\n
+  Feedback for 'initialize':\n
+  Setting salinity=15\n
+  Sonar system date and time set to 2020-Mar-17 08:52:40\n
+  \n
+```
+
+### Formatting the `datetime` parameter
 
 The ARIS expects the datetime parameter to be in the form
 
-```
+```txt
 2019-Apr-01 13:24:35
 ```
 
@@ -74,15 +87,64 @@ The ARIS also expects the month abbreviation to be from the en_US locale. If you
 
 We provide example code that formats the datetime value in a locale-invariant fashion, found in function `format_invariant_datetime()` [here](https://github.com/SoundMetrics/aris-integration-sdk/blob/94f2a5b1fd5c6c77089619aca9b6a890ee957531/common/code/CommandBuilder/CommandBuilder.cpp#L150).
 
+### Command Response Codes
+
+Command response codes are on the first line of the response from the ARIS. Possible codes are:
+
+* `200 OK` &ndash; This indicates success. Note that when settings a range, the parameters given may be altered somewhat to make the request comply with the the laws of physics, and the abilities of the ARIS.
+* `400 Bad Request` &ndash; This indicates an error; the request contains an unexpected or out-of-range value.
+* `404 Not Found` &ndash; This indicates an error; the ARIS does not understand the command requested.
+
+**Please note:**
+> The use of HTTP response codes in this protocol does not imply the availability of other capabilities found in the HTTP protocol. This is not an HTTP-based protocol.
+
 ### `testpattern`
 
 Sending the `testpattern` command causes the ARIS to return frames containing a test pattern. This may be used for testing during integration with client software.
 
 This command has no parameters.
 
+#### Command Response for `testpattern`
+
+The ARIS will respond to the `testpattern` command with the following:
+
+```txt
+  200 OK\n
+  settings-cookie 1\n
+  Feedback for 'testpattern':\n
+  Applying settings.\n
+  \n
+```
+
+### Settings Cookie
+
+In the command response for `testpattern`, there is a line for the "settings cookie:"
+
+```txt
+  settings-cookie N\n
+```
+
+Here 'N' indicates the value of the settings cookie. Each successive acquisition attempt&mdash;including the `testpattern` and `passive` commands&mdash;is recorded with a new value for the settings cookie. The settings cookie also appears in the ARIS frame header, in either the `AppliedSettings` or `ConstrainedSettings` field.
+
+**Note:**
+> If settings are applied as-is, the cookie appears in the `AppliedSettings` field. If the settings were constrained prior to application, the cookie apperas in the `ConstrainedSettings` field.
+
+**Also note:**
+> The `settings-cookie` value is made available primarily for testing purposes. However, if you use it for any purpose be aware that, due to latency in data acquisition, the frame received immediately after changing acquisition settings may have the previous settings' cookie value and settings applied.
+
 ### `passive`
 
 Sending the `passive` command causes the ARIS to acquire images without transmitting. This may be used for observing the effect of electrical noise on a vehicle.
+
+#### Command Response for `passive`
+
+```txt
+  200 OK\n
+  settings-cookie 2\n
+  Feedback for 'passive':\n
+  Applying settings.\n
+  \n
+```
 
 ### `acquire`
 
@@ -98,6 +160,31 @@ Sending the `passive` command causes the ARIS to acquire images without transmit
 | `beams` | Optional. Allowed values are `full` and `half`. `full` denotes a higher cross-range resolution. If not provided, the ARIS will use `full` beams. |
 | `samples_per_beam` | Optional, default is 1000. Valid range is 200 &ndash; 4000. |
 | `frequency` | Options, default is `auto`. Valid values are `auto`, `low`, and `high`.
+
+#### Example Command for `acquire`
+
+```txt
+  acquire\n
+  start_range 1\n
+  end_range 5\n
+  \n
+```
+
+#### Command Response for `acquire`
+
+```txt
+  200 OK\n
+  settings-cookie 3\n
+  Feedback for 'acquire':\n
+  Clear transmit enable in frame header until done raising 150 volts.\n
+  Limiting to frame_period=73880 (13.54 fps); requested=66666 (15.00 fps)\n
+  Applying settings.\n
+  \n
+
+```
+
+**Note:**
+> There may be the occasional feedback that represents work-in-progress on the ARIS. For example, `Clear transmit enable...` above does not refer to your command, but a process used to bring up imaging for the first time.
 
 #### Environmental Effects
 
@@ -123,7 +210,7 @@ Frequency
 
 ### *(more commands to come)*
 
-## Frame Format
+## Frame Protocol
 
 In the simplified protocol, ARIS image data will be sent via UDP. One frame is broken up into multiple UDP datagrams, allowing us to adjust inter-datagram timing to accommodate slower network equipment. The payloads in multiple datagrams with the same frame index must be reassembled into a complete frame.
 
