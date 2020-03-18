@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
+    using IntegrationTestCase =
+        Func<string, ITestOperations, IObservable<Frame>, IntegrationTestResult>;
+
     internal static partial class IntegrationTest
     {
         public static Task<IntegrationTestResult[]>
@@ -51,29 +54,55 @@ namespace SimplifiedProtocolTestWpfCore
         }
 
         private static IntegrationTestResult RunTestSafe(
-            ITestOperations testOperaions,
+            ITestOperations testOperations,
             IObservable<Frame> frameObservable,
             IntegrationTestCase testCase)
         {
             // TODO ### implement
-            return new IntegrationTestResult
-            {
-                Success = false,
-                TestName = testCase.Name,
-                Messages = new List<string> { "No code to run tests yet" },
+
+            // ### Func<string, ITestOperations, IObservable<Frame>, IntegrationTestResult>
+            var methodInfo = testCase.Method;
+            var testName = methodInfo.Name;
+
+            var callParameters = new object[]
+            {   testName,
+                testOperations,
+                frameObservable
             };
-        }
 
-        private delegate
-            IntegrationTestResult IntegrationTestRunner(
-                string name,
-                ITestOperations testOperations,
-                IObservable<Frame> frameObservable);
+            try
+            {
+                var result = methodInfo.Invoke(
+                    null, // instance object
+                    callParameters);
 
-        private struct IntegrationTestCase
-        {
-            public string Name;
-            public IntegrationTestRunner IntegrationTestRunner;
+                if (result is IntegrationTestResult testResult)
+                {
+                    return testResult;
+                }
+                else
+                {
+                    return new IntegrationTestResult
+                    {
+                        Success = false,
+                        TestName = testName,
+                        Messages = new List<string> { "Test did not return a valid result" },
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new IntegrationTestResult
+                {
+                    Success = false,
+                    TestName = testName,
+                    Messages = new List<string>
+                    {
+                        "Test threw an exception: " + ex.Message
+                    },
+                };
+            }
+
         }
     }
 }

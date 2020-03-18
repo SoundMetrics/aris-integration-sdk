@@ -3,25 +3,16 @@ using System;
 
 namespace SimplifiedProtocolTestWpfCore
 {
+    using IntegrationTestCase =
+        Func<string, ITestOperations, IObservable<Frame>, IntegrationTestResult>;
+
     internal static partial class IntegrationTest
     {
         private static IntegrationTestCase[] CreateTestCases()
         {
-            return new[]
+            return new IntegrationTestCase[]
             {
-                MakeTestCase("Dummy test", DummyTest),
-            };
-        }
-
-        private static IntegrationTestCase
-            MakeTestCase(
-                string name,
-                IntegrationTestRunner testRunner)
-        {
-            return new IntegrationTestCase
-            {
-                Name = name,
-                IntegrationTestRunner = testRunner,
+                DummyTest,
             };
         }
 
