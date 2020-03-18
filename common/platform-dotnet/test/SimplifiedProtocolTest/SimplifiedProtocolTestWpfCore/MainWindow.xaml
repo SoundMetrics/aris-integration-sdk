@@ -39,6 +39,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <TextBlock Margin="4"
@@ -48,7 +49,14 @@
                     Note: this test app cannot reconnect.
                 </TextBlock>
                 <StackPanel Orientation="Horizontal"
-                            Grid.Row="1">
+                            Grid.Row="1"
+                            IsEnabled="{Binding NotRunningIntegrationTest}">
+                    <StackPanel.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="Margin" Value="4 0"/>
+                            <Setter Property="Padding" Value="4 0"/>
+                        </Style>
+                    </StackPanel.Resources>
                     <Button Content="Test Pattern"
                             Margin="2 0"
                             Command="{Binding StartTestPatternCommand}"
@@ -61,6 +69,14 @@
                             Margin="2 0"
                             Command="{Binding StartDefaultAcquireCommand}"
                             />
+                    <Button Content="Integration Test"
+                            Margin="2 0"
+                            Command="{Binding RunIntegrationTestCommand}"
+                            />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            Grid.Row="2"
+                            Margin="2 2">
                     <TextBlock Margin="8 0"
                                Text="Frame index:"
                                VerticalAlignment="Center"
@@ -68,7 +84,6 @@
                     <TextBlock Text="{Binding FrameIndex, Mode=OneWay}"
                                VerticalAlignment="Center"
                                />
-
                 </StackPanel>
             </Grid>
 

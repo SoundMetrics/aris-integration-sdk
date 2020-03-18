@@ -26,12 +26,49 @@ namespace SimplifiedProtocolTestWpfCore
             StartDefaultAcquireCommand = new RelayCommand(
                 () => Connection?.StartDefaultAcquireMode(),
                 () => Connection != null);
+            RunIntegrationTestCommand = new RelayCommand(
+                async () =>
+                {
+                    IsRunningIntegrationTest = true;
+
+                    try
+                    {
+                        // ### run tests
+                        if (Connection is ITestOperations testOperations
+                            && Connection?.Frames is IObservable<Frame> frameObservable)
+                        {
+                            using (var cts = new CancellationTokenSource())
+                            {
+                                var results =
+                                    await IntegrationTest.RunAsync(
+                                            testOperations, frameObservable, cts.Token);
+
+                                // ### report test results
+                            }
+                        }
+                        else
+                        {
+                            // ### test operations is null or
+                            // ### Connection.Frames is null
+
+                            // ### report test results
+                        }
+                    }
+                    finally
+                    {
+                        IsRunningIntegrationTest = false;
+                    }
+                },
+
+                () => Connection != null
+                );
         }
 
         public RelayCommand ConnectCommand { get; private set; }
         public RelayCommand StartTestPatternCommand { get; private set; }
         public RelayCommand StartPassiveModeCommand { get; private set; }
         public RelayCommand StartDefaultAcquireCommand { get; private set; }
+        public RelayCommand RunIntegrationTestCommand { get; private set; }
 
         private bool canConnect = true;
         public bool CanConnect
@@ -47,6 +84,21 @@ namespace SimplifiedProtocolTestWpfCore
             set { Set(ref isConnected, value); }
         }
 
+        private bool notRunningIntegrationTest = true;
+
+        public bool NotRunningIntegrationTest
+        {
+            get { return notRunningIntegrationTest; }
+            private set
+            {
+                Set(ref notRunningIntegrationTest, value);
+            }
+        }
+
+        private bool IsRunningIntegrationTest
+        {
+            set { NotRunningIntegrationTest = !value; }
+        }
 
         private string hostname = "192.168.10.138";
 
