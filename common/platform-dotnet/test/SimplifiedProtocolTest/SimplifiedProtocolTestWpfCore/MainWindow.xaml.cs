@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading;
+using System.Windows;
 
 namespace SimplifiedProtocolTestWpfCore
 {
@@ -7,11 +8,12 @@ namespace SimplifiedProtocolTestWpfCore
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainViewModel ViewModel { get; } = new MainViewModel();
+        public MainViewModel ViewModel { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
+            ViewModel = new MainViewModel(SynchronizationContext.Current);
             DataContext = ViewModel;
         }
 

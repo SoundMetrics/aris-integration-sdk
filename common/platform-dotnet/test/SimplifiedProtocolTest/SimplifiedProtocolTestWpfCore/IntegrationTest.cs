@@ -15,16 +15,18 @@ namespace SimplifiedProtocolTestWpfCore
     {
         public static Task<IntegrationTestResult[]>
             RunAsync(
+                SynchronizationContext uiSyncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
                 CancellationToken ct)
         {
             var testCases = CreateTestCases();
             return Task<IntegrationTestResult[]>.Run(
-                () => RunTestCases(testOperations, frameObservable, testCases, ct));
+                () => RunTestCases(uiSyncContext, testOperations, frameObservable, testCases, ct));
         }
 
         private static IntegrationTestResult[] RunTestCases(
+            SynchronizationContext uiSyncContext,
             ITestOperations testOperations,
             IObservable<Frame> frameObservable,
             IEnumerable<IntegrationTestCase> localTestCases,
@@ -70,10 +72,13 @@ namespace SimplifiedProtocolTestWpfCore
 
             Frame? WaitOnAFrame()
             {
-                Frame? frame = null;
+                Frame? receivedFrame = null;
 
                 var timeout = TimeSpan.FromSeconds(2);
-                var observation = frameObservable.SingleOrDefaultAsync();
+                var observation =
+                    frameObservable
+                        .FirstOrDefaultAsync()
+                        .ObserveOn(uiSyncContext);
 
                 using (var timeoutCancellation = new CancellationTokenSource(timeout))
                 using (var doneSignal = new ManualResetEventSlim())
@@ -81,7 +86,7 @@ namespace SimplifiedProtocolTestWpfCore
                     observation.Subscribe(
                         frame =>
                         {
-                            Interlocked.Exchange(ref frame, frame);
+                            Interlocked.Exchange(ref receivedFrame, frame);
                             doneSignal.Set();
                         },
                         timeoutCancellation.Token);
@@ -89,7 +94,7 @@ namespace SimplifiedProtocolTestWpfCore
                     doneSignal.Wait(timeout);
                 }
 
-                return frame;
+                return receivedFrame;
             }
         }
 

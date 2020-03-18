@@ -16,8 +16,13 @@ namespace SimplifiedProtocolTestWpfCore
 {
     public sealed class MainViewModel : SimplifiedProtocolTest.Helpers.Observable
     {
-        public MainViewModel()
+        public MainViewModel(SynchronizationContext? uiSyncContext)
         {
+            if (uiSyncContext is null)
+            {
+                throw new ArgumentNullException(nameof(uiSyncContext));
+            }
+
             ConnectCommand = new RelayCommand(OnConnect);
             StartTestPatternCommand = new RelayCommand(
                 () => Connection?.StartTestPattern(),
@@ -47,7 +52,10 @@ namespace SimplifiedProtocolTestWpfCore
                                 {
                                     testResults =
                                         await IntegrationTest.RunAsync(
-                                                testOperations, frameObservable, cts.Token);
+                                            uiSyncContext,
+                                            testOperations,
+                                            frameObservable,
+                                            cts.Token);
                                 }
                             }
                             else
