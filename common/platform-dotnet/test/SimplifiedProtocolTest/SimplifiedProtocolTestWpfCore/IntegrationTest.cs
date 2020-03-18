@@ -11,14 +11,16 @@ namespace SimplifiedProtocolTestWpfCore
     {
         public static Task<IntegrationTestResult[]>
             RunAsync(
-
-                IObservable<Frame> frameObservable, CancellationToken ct)
+                ITestOperations testOperations,
+                IObservable<Frame> frameObservable,
+                CancellationToken ct)
         {
             return Task<IntegrationTestResult[]>.Run(
-                () => RunTestCases(frameObservable, testCases, ct));
+                () => RunTestCases(testOperations, frameObservable, testCases, ct));
         }
 
         private static IntegrationTestResult[] RunTestCases(
+            ITestOperations testOperations,
             IObservable<Frame> frameObservable,
             IEnumerable<IntegrationTestCase> localTestCases,
             CancellationToken ct)
@@ -42,15 +44,17 @@ namespace SimplifiedProtocolTestWpfCore
                         break;
                     }
 
-                    yield return RunTestSafe(frameObservable, testCase);
+                    yield return RunTestSafe(testOperations, frameObservable, testCase);
                 }
             }
         }
 
         private static IntegrationTestResult RunTestSafe(
+            ITestOperations testOperaions,
             IObservable<Frame> frameObservable,
             IntegrationTestCase testCase)
         {
+            // TODO ### implement
             return new IntegrationTestResult
             {
                 Success = false,
@@ -62,6 +66,7 @@ namespace SimplifiedProtocolTestWpfCore
         private delegate
             IntegrationTestResult IntegrationTestRunner(
                 string name,
+                ITestOperations testOperations,
                 IObservable<Frame> frameObservable);
 
         private struct IntegrationTestCase

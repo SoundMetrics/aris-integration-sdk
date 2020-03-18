@@ -8,7 +8,7 @@
             {
                 Name = "Dummy test",
                 IntegrationTestRunner =
-                    (frameObservable, name) => { return new IntegrationTestResult(); },
+                    (testOperations, frameObservable, name) => { return new IntegrationTestResult(); },
             },
         };
     }
