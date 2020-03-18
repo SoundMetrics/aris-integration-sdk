@@ -57,8 +57,12 @@ namespace SimplifiedProtocolTestWpfCore
                     {
                         yield return new IntegrationTestResult
                         {
+                            TestName = testCase.Method.Name,
                             Success = false,
-                            Messages = new List<string> { "Couldn't receive a frame" },
+                            Messages = new List<string>
+                            {
+                                "Couldn't receive a frame; please start acquisition before running tests"
+                            },
                         };
                     }
                 }

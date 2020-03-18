@@ -136,7 +136,7 @@
                     VerticalAlignment="Stretch"
                     TextWrapping="Wrap"
                     FontFamily="Consolas"
-                    Text="{Binding Connection.Feedback, Mode=OneWay}"
+                    Text="{Binding IntegrationTestReport, Mode=OneWay}"
                     IsReadOnly="True"
                     VerticalScrollBarVisibility="Visible"
                     TextChanged="Feedback_Changed"

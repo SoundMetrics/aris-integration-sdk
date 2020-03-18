@@ -7,12 +7,11 @@ namespace SimplifiedProtocolTestWpfCore
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainViewModel ViewModel { get; private set;  }
+        public MainViewModel ViewModel { get; } = new MainViewModel();
 
         public MainWindow()
         {
             InitializeComponent();
-            ViewModel = new MainViewModel(text => IntegrationTestResultText.Text = text);
             DataContext = ViewModel;
         }
 

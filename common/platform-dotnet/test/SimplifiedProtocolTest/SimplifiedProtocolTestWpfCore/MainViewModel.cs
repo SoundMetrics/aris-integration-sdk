@@ -16,11 +16,8 @@ namespace SimplifiedProtocolTestWpfCore
 {
     public sealed class MainViewModel : SimplifiedProtocolTest.Helpers.Observable
     {
-        public MainViewModel(
-            Action<string> setIntegrationTestResults)
+        public MainViewModel()
         {
-            this.setIntegrationTestResults = setIntegrationTestResults;
-
             ConnectCommand = new RelayCommand(OnConnect);
             StartTestPatternCommand = new RelayCommand(
                 () => Connection?.StartTestPattern(),
@@ -38,7 +35,7 @@ namespace SimplifiedProtocolTestWpfCore
 
                     try
                     {
-                        setIntegrationTestResults("");
+                        IntegrationTestReport = "";
 
                         IEnumerable<IntegrationTestResult> testResults = new IntegrationTestResult[0];
 
@@ -149,6 +146,13 @@ namespace SimplifiedProtocolTestWpfCore
             private set { Set(ref frameBitmap, value); }
         }
 
+        private string integrationTestReport = "";
+        public string IntegrationTestReport
+        {
+            get { return integrationTestReport; }
+            private set { Set(ref integrationTestReport, value); }
+        }
+
 
 
         private ConnectionModel? connection;
@@ -162,6 +166,7 @@ namespace SimplifiedProtocolTestWpfCore
                 StartTestPatternCommand.OnCanExecuteChanged();
                 StartPassiveModeCommand.OnCanExecuteChanged();
                 StartDefaultAcquireCommand.OnCanExecuteChanged();
+                RunIntegrationTestCommand.OnCanExecuteChanged();
             }
         }
 
@@ -297,12 +302,13 @@ namespace SimplifiedProtocolTestWpfCore
                 buf.AppendLine();
             }
 
-            setIntegrationTestResults(buf.ToString());
+            buf.AppendLine($"Successes: {successes}");
+            buf.AppendLine($"Failures:  {failures}");
+
+            IntegrationTestReport = buf.ToString();
         }
 
         private static readonly Duration bufferLockTimeout =
             new Duration(TimeSpan.FromMilliseconds(2));
-
-        private readonly Action<string> setIntegrationTestResults;
     }
 }
