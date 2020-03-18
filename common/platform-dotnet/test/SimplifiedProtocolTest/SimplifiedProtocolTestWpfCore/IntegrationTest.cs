@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
-    internal static class IntegrationTest
+    internal static partial class IntegrationTest
     {
         public static Task<IntegrationTestResult[]> RunAsync(CancellationToken ct)
         {
@@ -57,14 +57,5 @@ namespace SimplifiedProtocolTestWpfCore
             public string Name;
             public IntegrationTestRunner IntegrationTestRunner;
         }
-
-        private static readonly IntegrationTestCase[] testCases =
-        {
-            new IntegrationTestCase
-            {
-                Name = "Dummy test",
-                IntegrationTestRunner = name => { return new IntegrationTestResult(); },
-            },
-        };
     }
 }
