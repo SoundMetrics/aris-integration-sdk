@@ -14,7 +14,8 @@ namespace SimplifiedProtocolTestWpfCore
 {
     public sealed class MainViewModel : SimplifiedProtocolTest.Helpers.Observable
     {
-        public MainViewModel()
+        public MainViewModel(
+            Action<string> setIntegrationTestResults)
         {
             ConnectCommand = new RelayCommand(OnConnect);
             StartTestPatternCommand = new RelayCommand(
@@ -33,6 +34,8 @@ namespace SimplifiedProtocolTestWpfCore
 
                     try
                     {
+                        setIntegrationTestResults("");
+
                         // ### run tests
                         if (Connection is ITestOperations testOperations
                             && Connection?.Frames is IObservable<Frame> frameObservable)
@@ -212,12 +215,6 @@ namespace SimplifiedProtocolTestWpfCore
                         *pOut = *pIn;
                         ++pOut;
                         ++pIn;
-
-                        //var count = upsampleCounts[beamIdx];
-                        //for (var iter = 0; iter < count; ++iter, ++pOut)
-                        //{
-                        //    *pOut = *pIn;
-                        //}
                     }
                 }
 

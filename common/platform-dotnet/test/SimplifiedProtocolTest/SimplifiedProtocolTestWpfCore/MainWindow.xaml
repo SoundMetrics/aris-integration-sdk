@@ -106,19 +106,42 @@
                 </Image>
             </Grid>
 
-            <TextBox
-                x:Name="FeedbackText"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
+            <Grid
                 Grid.Column="1"
-                Grid.RowSpan="3"
-                TextWrapping="Wrap"
-                FontFamily="Consolas"
-                Text="{Binding Connection.Feedback, Mode=OneWay}"
-                IsReadOnly="True"
-                VerticalScrollBarVisibility="Visible"
-                TextChanged="Feedback_Changed"
-                />
+                Grid.RowSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBox
+                    x:Name="FeedbackText"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    TextWrapping="Wrap"
+                    FontFamily="Consolas"
+                    Text="{Binding Connection.Feedback, Mode=OneWay}"
+                    IsReadOnly="True"
+                    VerticalScrollBarVisibility="Visible"
+                    TextChanged="Feedback_Changed"
+                    />
+                <Label
+                    Grid.Row="1"
+                    Margin="2 4"
+                    Content="Integration test results:"/>
+                <TextBox
+                    x:Name="IntegrationTestResultText"
+                    Grid.Row="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    TextWrapping="Wrap"
+                    FontFamily="Consolas"
+                    Text="{Binding Connection.Feedback, Mode=OneWay}"
+                    IsReadOnly="True"
+                    VerticalScrollBarVisibility="Visible"
+                    TextChanged="Feedback_Changed"
+                    />
+            </Grid>
         </Grid>
     </Grid>
 </Window>
