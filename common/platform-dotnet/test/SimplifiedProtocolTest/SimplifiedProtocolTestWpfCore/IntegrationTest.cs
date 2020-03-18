@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SoundMetrics.Aris.SimplifiedProtocol;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,12 +9,17 @@ namespace SimplifiedProtocolTestWpfCore
 {
     internal static partial class IntegrationTest
     {
-        public static Task<IntegrationTestResult[]> RunAsync(CancellationToken ct)
+        public static Task<IntegrationTestResult[]>
+            RunAsync(
+
+                IObservable<Frame> frameObservable, CancellationToken ct)
         {
-            return Task<IntegrationTestResult[]>.Run(() => RunTestCases(testCases, ct));
+            return Task<IntegrationTestResult[]>.Run(
+                () => RunTestCases(frameObservable, testCases, ct));
         }
 
         private static IntegrationTestResult[] RunTestCases(
+            IObservable<Frame> frameObservable,
             IEnumerable<IntegrationTestCase> localTestCases,
             CancellationToken ct)
         {
@@ -35,12 +42,14 @@ namespace SimplifiedProtocolTestWpfCore
                         break;
                     }
 
-                    yield return RunTestSafe(testCase);
+                    yield return RunTestSafe(frameObservable, testCase);
                 }
             }
         }
 
-        private static IntegrationTestResult RunTestSafe(IntegrationTestCase testCase)
+        private static IntegrationTestResult RunTestSafe(
+            IObservable<Frame> frameObservable,
+            IntegrationTestCase testCase)
         {
             return new IntegrationTestResult
             {
@@ -50,7 +59,10 @@ namespace SimplifiedProtocolTestWpfCore
             };
         }
 
-        private delegate IntegrationTestResult IntegrationTestRunner(string name);
+        private delegate
+            IntegrationTestResult IntegrationTestRunner(
+                string name,
+                IObservable<Frame> frameObservable);
 
         private struct IntegrationTestCase
         {

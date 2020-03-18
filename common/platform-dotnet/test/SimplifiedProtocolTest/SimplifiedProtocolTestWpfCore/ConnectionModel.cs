@@ -4,14 +4,13 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
-    public class ConnectionModel : Observable
+    public sealed class ConnectionModel : Observable, ITestOperations
     {
         public ConnectionModel(string hostname)
         {
@@ -40,7 +39,7 @@ namespace SimplifiedProtocolTestWpfCore
             private set { Set(ref feedback, value); }
         }
 
-        public IObservable<Frame> Frames {  get { return frameAccumulator.Frames; } }
+        public IObservable<Frame> Frames { get { return frameAccumulator.Frames; } }
 
         private /*async*/ void ReceiveFramePackets()
         {
@@ -48,9 +47,6 @@ namespace SimplifiedProtocolTestWpfCore
             {
                 while (true)
                 {
-                    //var udpResult = await frameReceiver.ReceiveAsync();
-                    //frameAccumulator.ReceivePacket(udpResult.Buffer);
-
                     // False initialization for call to Receive(ref)
                     IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
 

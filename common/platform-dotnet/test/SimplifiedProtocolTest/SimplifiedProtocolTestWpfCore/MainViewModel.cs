@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 
 namespace SimplifiedProtocolTestWpfCore
 {
-    public class MainViewModel : SimplifiedProtocolTest.Helpers.Observable
+    public sealed class MainViewModel : SimplifiedProtocolTest.Helpers.Observable
     {
         public MainViewModel()
         {
