@@ -2,9 +2,11 @@
 using SoundMetrics.Aris.Headers;
 using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Reactive.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -17,6 +19,8 @@ namespace SimplifiedProtocolTestWpfCore
         public MainViewModel(
             Action<string> setIntegrationTestResults)
         {
+            this.setIntegrationTestResults = setIntegrationTestResults;
+
             ConnectCommand = new RelayCommand(OnConnect);
             StartTestPatternCommand = new RelayCommand(
                 () => Connection?.StartTestPattern(),
@@ -36,26 +40,44 @@ namespace SimplifiedProtocolTestWpfCore
                     {
                         setIntegrationTestResults("");
 
-                        // ### run tests
-                        if (Connection is ITestOperations testOperations
-                            && Connection?.Frames is IObservable<Frame> frameObservable)
-                        {
-                            using (var cts = new CancellationTokenSource())
-                            {
-                                var results =
-                                    await IntegrationTest.RunAsync(
-                                            testOperations, frameObservable, cts.Token);
+                        IEnumerable<IntegrationTestResult> testResults = new IntegrationTestResult[0];
 
-                                // ### report test results
+                        if (Connection is ITestOperations testOperations)
+                        {
+                            if (Connection?.Frames is IObservable<Frame> frameObservable)
+                            {
+                                using (var cts = new CancellationTokenSource())
+                                {
+                                    testResults =
+                                        await IntegrationTest.RunAsync(
+                                                testOperations, frameObservable, cts.Token);
+                                }
+                            }
+                            else
+                            {
+                                testResults = new IntegrationTestResult[]
+                                {
+                                    new IntegrationTestResult
+                                    {
+                                        Success = false,
+                                        Messages = new List<string> { "Connectio or Connection.Frames was null" },
+                                    }
+                                };
                             }
                         }
                         else
                         {
-                            // ### test operations is null or
-                            // ### Connection.Frames is null
-
-                            // ### report test results
+                            testResults = new IntegrationTestResult[]
+                            {
+                                new IntegrationTestResult
+                                {
+                                    Success = false,
+                                    Messages = new List<string> { "testOperation was null" },
+                                }
+                            };
                         }
+
+                        PostIntegrationTestResults(testResults);
                     }
                     finally
                     {
@@ -142,8 +164,6 @@ namespace SimplifiedProtocolTestWpfCore
                 StartDefaultAcquireCommand.OnCanExecuteChanged();
             }
         }
-
-
 
         private void OnConnect()
         {
@@ -252,7 +272,37 @@ namespace SimplifiedProtocolTestWpfCore
             }
         }
 
+        private void PostIntegrationTestResults(IEnumerable<IntegrationTestResult> testResults)
+        {
+            var successes = 0;
+            var failures = 0;
+            var buf = new StringBuilder();
+
+            foreach (var testResult in testResults)
+            {
+                var success = testResult.Success;
+
+                successes += success ? 1 : 0;
+                failures += success ? 0 : 1;
+
+                var successText = success ? "succeeded" : "FAILED";
+                var report = $"Test '{testResult.TestName}' {successText}";
+                buf.AppendLine(report);
+
+                if (!success)
+                {
+                    buf.AppendLine(String.Join(";", testResult.Messages));
+                }
+
+                buf.AppendLine();
+            }
+
+            setIntegrationTestResults(buf.ToString());
+        }
+
         private static readonly Duration bufferLockTimeout =
             new Duration(TimeSpan.FromMilliseconds(2));
+
+        private readonly Action<string> setIntegrationTestResults;
     }
 }
