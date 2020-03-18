@@ -93,7 +93,7 @@ namespace SimplifiedProtocolTestWpfCore
                 Feedback = offUIFeedbackAccumulator;
             };
 
-            synchronizationContext.Post(performUpdate, null);
+            synchronizationContext?.Post(performUpdate, null);
         }
 
         private void InitializeConnection()
@@ -162,7 +162,7 @@ namespace SimplifiedProtocolTestWpfCore
         }
 
         private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();
-        private readonly SynchronizationContext synchronizationContext;
+        private readonly SynchronizationContext? synchronizationContext;
 
         private byte[] feedbackReceiveBuffer = new byte[4096];
         private string offUIFeedbackAccumulator = "";

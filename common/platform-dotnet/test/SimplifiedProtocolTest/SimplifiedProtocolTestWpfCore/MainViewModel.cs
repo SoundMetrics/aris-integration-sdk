@@ -18,13 +18,13 @@ namespace SimplifiedProtocolTestWpfCore
         {
             ConnectCommand = new RelayCommand(OnConnect);
             StartTestPatternCommand = new RelayCommand(
-                () => Connection.StartTestPattern(),
+                () => Connection?.StartTestPattern(),
                 () => Connection != null);
             StartPassiveModeCommand = new RelayCommand(
-                () => Connection.StartPassiveMode(),
+                () => Connection?.StartPassiveMode(),
                 () => Connection != null);
             StartDefaultAcquireCommand = new RelayCommand(
-                () => Connection.StartDefaultAcquireMode(),
+                () => Connection?.StartDefaultAcquireMode(),
                 () => Connection != null);
         }
 
@@ -64,9 +64,9 @@ namespace SimplifiedProtocolTestWpfCore
             private set { Set(ref frameIndex, value); }
         }
 
-        private WriteableBitmap frameBitmap;
+        private WriteableBitmap? frameBitmap;
 
-        public WriteableBitmap FrameBitmap
+        public WriteableBitmap? FrameBitmap
         {
             get { return frameBitmap; }
             private set { Set(ref frameBitmap, value); }
@@ -74,9 +74,9 @@ namespace SimplifiedProtocolTestWpfCore
 
 
 
-        private ConnectionModel connection;
+        private ConnectionModel? connection;
 
-        public ConnectionModel Connection
+        public ConnectionModel? Connection
         {
             get { return connection; }
             set
@@ -112,17 +112,25 @@ namespace SimplifiedProtocolTestWpfCore
             FrameIndex = frame.Header.FrameIndex;
             FrameBitmap = LoadBitmap(FrameBitmap);
 
-            // The render thread may be using while we're here
-            // on the UI thread.
-            if (FrameBitmap.TryLock(bufferLockTimeout))
+            var frameBitmap = FrameBitmap;
+            if (frameBitmap != null)
             {
-                try
+                // The render thread may be using while we're here
+                // on the UI thread.
+                if (frameBitmap.TryLock(bufferLockTimeout))
                 {
-                    PaintMe(FrameBitmap, frame.Samples, (int)frame.Header.GetBeamCount());
-                }
-                finally
-                {
-                    FrameBitmap.Unlock();
+                    try
+                    {
+                        uint? beamCount = frame.Header.GetBeamCount();
+                        if (beamCount.HasValue)
+                        {
+                            PaintMe(frameBitmap, frame.Samples, (int)beamCount.Value);
+                        }
+                    }
+                    finally
+                    {
+                        frameBitmap.Unlock();
+                    }
                 }
             }
 
@@ -166,9 +174,15 @@ namespace SimplifiedProtocolTestWpfCore
             }
 
 
-            WriteableBitmap LoadBitmap(WriteableBitmap existing)
+            WriteableBitmap? LoadBitmap(WriteableBitmap? existing)
             {
-                var width = (int)frame.Header.GetBeamCount();
+                uint? beamCount = frame.Header.GetBeamCount();
+                if (!beamCount.HasValue)
+                {
+                    return existing;
+                }
+
+                var width = (int)beamCount.Value;
                 var height = (int)frame.Header.SamplesPerBeam;
 
                 var useExisting =
@@ -177,7 +191,7 @@ namespace SimplifiedProtocolTestWpfCore
                     && height == existing.PixelHeight;
 
                 var currentBitmap =
-                    useExisting
+                    (useExisting && existing != null)
                         ? existing
                         : new WriteableBitmap(
                             width, height,
