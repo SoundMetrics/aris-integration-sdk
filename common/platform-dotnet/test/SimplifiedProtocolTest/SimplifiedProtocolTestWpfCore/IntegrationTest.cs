@@ -3,13 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
-    using IntegrationTestCase =
+    using IntegrationTestFunc =
         Func<string, ITestOperations, IObservable<Frame>, Frame, IntegrationTestResult>;
+
+    struct IntegrationTestCase
+    {
+        public string TestName;
+        public IntegrationTestFunc TestFunction;
+    }
 
     internal static partial class IntegrationTest
     {
@@ -59,7 +66,7 @@ namespace SimplifiedProtocolTestWpfCore
                     {
                         yield return new IntegrationTestResult
                         {
-                            TestName = testCase.Method.Name,
+                            TestName = testCase.TestName,
                             Success = false,
                             Messages = new List<string>
                             {
@@ -104,11 +111,11 @@ namespace SimplifiedProtocolTestWpfCore
             IntegrationTestCase testCase,
             Frame previousFrame)
         {
-            var testName = testCase.Method.Name;
+            var testName = testCase.TestName;
 
             try
             {
-                if (testCase(testName, testOperations, frameObservable, previousFrame)
+                if (testCase.TestFunction(testName, testOperations, frameObservable, previousFrame)
                     is IntegrationTestResult testResult)
                 {
                     return testResult;
@@ -125,13 +132,20 @@ namespace SimplifiedProtocolTestWpfCore
             }
             catch (Exception ex)
             {
+                var exceptionMessage = new StringBuilder();
+                exceptionMessage.AppendLine($"Test threw an exception: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    exceptionMessage.AppendLine($"Inner exception: {ex.InnerException.Message}");
+                }
+
                 return new IntegrationTestResult
                 {
                     Success = false,
                     TestName = testName,
                     Messages = new List<string>
                     {
-                        "Test threw an exception: " + ex.Message
+                        exceptionMessage.ToString()
                     },
                 };
             }
