@@ -4,7 +4,7 @@ using System;
 namespace SimplifiedProtocolTestWpfCore
 {
     using IntegrationTestCase =
-        Func<string, ITestOperations, IObservable<Frame>, IntegrationTestResult>;
+        Func<string, ITestOperations, IObservable<Frame>, Frame, IntegrationTestResult>;
 
     internal static partial class IntegrationTest
     {
@@ -19,7 +19,8 @@ namespace SimplifiedProtocolTestWpfCore
         private static IntegrationTestResult DummyTest(
             string name,
             ITestOperations testOperations,
-            IObservable<Frame> frameObservable)
+            IObservable<Frame> frameObservable,
+            Frame previousFrame)
         {
             throw new Exception("DummyTest");
         }

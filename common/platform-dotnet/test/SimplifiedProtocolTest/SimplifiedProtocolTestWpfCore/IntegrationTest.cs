@@ -2,13 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
     using IntegrationTestCase =
-        Func<string, ITestOperations, IObservable<Frame>, IntegrationTestResult>;
+        Func<string, ITestOperations, IObservable<Frame>, Frame, IntegrationTestResult>;
 
     internal static partial class IntegrationTest
     {
@@ -37,7 +38,7 @@ namespace SimplifiedProtocolTestWpfCore
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        // Return a failed "cancelled" result only if
+                        // Return a "cancelled" result only if
                         // there were more test cases to work on.
                         yield return new IntegrationTestResult
                         {
@@ -48,35 +49,58 @@ namespace SimplifiedProtocolTestWpfCore
                         break;
                     }
 
-                    yield return RunTestSafe(testOperations, frameObservable, testCase);
+                    if (WaitOnAFrame() is Frame previousFrame)
+                    {
+                        yield return RunTestSafe(testOperations, frameObservable, testCase, previousFrame);
+                    }
+                    else
+                    {
+                        yield return new IntegrationTestResult
+                        {
+                            Success = false,
+                            Messages = new List<string> { "Couldn't receive a frame" },
+                        };
+                    }
                 }
+            }
+
+            Frame? WaitOnAFrame()
+            {
+                Frame? frame = null;
+
+                var timeout = TimeSpan.FromSeconds(2);
+                var observation = frameObservable.SingleOrDefaultAsync();
+
+                using (var timeoutCancellation = new CancellationTokenSource(timeout))
+                using (var doneSignal = new ManualResetEventSlim())
+                {
+                    observation.Subscribe(
+                        frame =>
+                        {
+                            Interlocked.Exchange(ref frame, frame);
+                            doneSignal.Set();
+                        },
+                        timeoutCancellation.Token);
+
+                    doneSignal.Wait(timeout);
+                }
+
+                return frame;
             }
         }
 
         private static IntegrationTestResult RunTestSafe(
             ITestOperations testOperations,
             IObservable<Frame> frameObservable,
-            IntegrationTestCase testCase)
+            IntegrationTestCase testCase,
+            Frame previousFrame)
         {
-            // TODO ### implement
-
-            // ### Func<string, ITestOperations, IObservable<Frame>, IntegrationTestResult>
-            var methodInfo = testCase.Method;
-            var testName = methodInfo.Name;
-
-            var callParameters = new object[]
-            {   testName,
-                testOperations,
-                frameObservable
-            };
+            var testName = testCase.Method.Name;
 
             try
             {
-                var result = methodInfo.Invoke(
-                    null, // instance object
-                    callParameters);
-
-                if (result is IntegrationTestResult testResult)
+                if (testCase(testName, testOperations, frameObservable, previousFrame)
+                    is IntegrationTestResult testResult)
                 {
                     return testResult;
                 }
