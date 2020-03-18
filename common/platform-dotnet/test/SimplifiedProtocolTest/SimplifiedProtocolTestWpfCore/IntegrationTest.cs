@@ -15,6 +15,7 @@ namespace SimplifiedProtocolTestWpfCore
                 IObservable<Frame> frameObservable,
                 CancellationToken ct)
         {
+            var testCases = CreateTestCases();
             return Task<IntegrationTestResult[]>.Run(
                 () => RunTestCases(testOperations, frameObservable, testCases, ct));
         }

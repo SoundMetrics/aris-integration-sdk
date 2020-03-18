@@ -1,15 +1,36 @@
-﻿namespace SimplifiedProtocolTestWpfCore
+﻿using SoundMetrics.Aris.SimplifiedProtocol;
+using System;
+
+namespace SimplifiedProtocolTestWpfCore
 {
     internal static partial class IntegrationTest
     {
-        private static readonly IntegrationTestCase[] testCases =
+        private static IntegrationTestCase[] CreateTestCases()
         {
-            new IntegrationTestCase
+            return new[]
             {
-                Name = "Dummy test",
-                IntegrationTestRunner =
-                    (testOperations, frameObservable, name) => { return new IntegrationTestResult(); },
-            },
-        };
+                MakeTestCase("Dummy test", DummyTest),
+            };
+        }
+
+        private static IntegrationTestCase
+            MakeTestCase(
+                string name,
+                IntegrationTestRunner testRunner)
+        {
+            return new IntegrationTestCase
+            {
+                Name = name,
+                IntegrationTestRunner = testRunner,
+            };
+        }
+
+        private static IntegrationTestResult DummyTest(
+            string name,
+            ITestOperations testOperations,
+            IObservable<Frame> frameObservable)
+        {
+            throw new Exception("DummyTest");
+        }
     }
 }
