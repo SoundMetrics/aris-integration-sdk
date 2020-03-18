@@ -60,26 +60,14 @@ namespace SimplifiedProtocolTestWpfCore
                             }
                             else
                             {
-                                testResults = new IntegrationTestResult[]
-                                {
-                                    new IntegrationTestResult
-                                    {
-                                        Success = false,
-                                        Messages = new List<string> { "Connectio or Connection.Frames was null" },
-                                    }
-                                };
+                                testResults =
+                                    MakeNegativeResult(
+                                        "Connection or Connection.Frames was null");
                             }
                         }
                         else
                         {
-                            testResults = new IntegrationTestResult[]
-                            {
-                                new IntegrationTestResult
-                                {
-                                    Success = false,
-                                    Messages = new List<string> { "testOperation was null" },
-                                }
-                            };
+                            testResults = MakeNegativeResult("testOperation was null");
                         }
 
                         PostIntegrationTestResults(testResults);
@@ -92,6 +80,16 @@ namespace SimplifiedProtocolTestWpfCore
 
                 () => Connection != null
                 );
+
+            IEnumerable<IntegrationTestResult> MakeNegativeResult(string message)
+            {
+                yield return
+                    new IntegrationTestResult
+                    {
+                        Success = false,
+                        Messages = new List<string> { message },
+                    };
+            }
         }
 
         public RelayCommand ConnectCommand { get; private set; }
