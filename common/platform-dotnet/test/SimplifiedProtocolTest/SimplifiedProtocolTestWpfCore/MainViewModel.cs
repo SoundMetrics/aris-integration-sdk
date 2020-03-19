@@ -305,11 +305,14 @@ namespace SimplifiedProtocolTestWpfCore
                     buf.AppendLine(String.Join(";", testResult.Messages));
                 }
 
+                buf.AppendLine("----------------------------------------");
                 buf.AppendLine();
             }
 
             buf.AppendLine($"Successes: {successes}");
             buf.AppendLine($"Failures:  {failures}");
+            buf.AppendLine("========================================");
+            buf.AppendLine();
 
             IntegrationTestReport = buf.ToString();
         }

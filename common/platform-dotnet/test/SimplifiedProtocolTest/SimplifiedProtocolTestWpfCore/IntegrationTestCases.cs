@@ -4,11 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace SimplifiedProtocolTestWpfCore
 {
     using IntegrationTestFunc =
-        Func<string, ITestOperations, IObservable<Frame>, Frame, IntegrationTestResult>;
+        Func<
+            string,
+            SynchronizationContext,
+            ITestOperations,
+            IObservable<Frame>,
+            Frame,
+            CancellationToken,
+            IntegrationTestResult>;
 
     internal static partial class IntegrationTest
     {
@@ -29,7 +37,7 @@ namespace SimplifiedProtocolTestWpfCore
                 ToTestFunction(MethodInfo methodInfo)
             {
                 IntegrationTestFunc testFunction =
-                    (name, testOperations, framesObservable, previousFrame) =>
+                    (name, syncContext, testOperations, framesObservable, previousFrame, ct) =>
                     {
                         object? output =
                             methodInfo.Invoke(
@@ -37,9 +45,11 @@ namespace SimplifiedProtocolTestWpfCore
                                 new object?[]
                                 {
                                         name,
+                                        syncContext,
                                         testOperations,
                                         framesObservable,
                                         previousFrame,
+                                        ct,
                                 });
                         if (output is IntegrationTestResult result)
                         {
@@ -66,18 +76,23 @@ namespace SimplifiedProtocolTestWpfCore
         {
             public static IntegrationTestResult DummyTest(
                 string name,
+                SynchronizationContext syncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
-                Frame previousFrame)
+                Frame previousFrame,
+                CancellationToken ct)
             {
+                WaitOnAFrame(syncContext, testOperations, frameObservable, ct);
                 throw new Exception("DummyTest");
             }
 
             public static IntegrationTestResult DummyTest2(
                 string name,
+                SynchronizationContext syncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
-                Frame previousFrame)
+                Frame previousFrame,
+                CancellationToken ct)
             {
                 return new IntegrationTestResult
                 {
