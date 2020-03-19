@@ -71,7 +71,7 @@ namespace SimplifiedProtocolTestWpfCore
 
                     IntegrationTestResult? testResult = null;
 
-                    if (WaitOnAFrame(syncContext, testOperations, frameObservable, ct)
+                    if (testOperations.WaitOnAFrame(syncContext, ct)
                         is Frame earlierFrame)
                     {
                         testResult = RunTestSafe(
@@ -98,37 +98,6 @@ namespace SimplifiedProtocolTestWpfCore
                     yield return testResult;
                 }
             }
-        }
-
-        private static Frame? WaitOnAFrame(
-            SynchronizationContext uiSyncContext,
-            ITestOperations testOperations,
-            IObservable<Frame> frameObservable,
-            CancellationToken ct)
-        {
-            Frame? receivedFrame = null;
-
-            var timeout = TimeSpan.FromSeconds(2);
-            var observation =
-                frameObservable
-                    .FirstOrDefaultAsync()
-                    .ObserveOn(uiSyncContext);
-
-            using (var timeoutCancellation = new CancellationTokenSource(timeout))
-            using (var doneSignal = new ManualResetEventSlim())
-            {
-                observation.Subscribe(
-                    frame =>
-                    {
-                        Interlocked.Exchange(ref receivedFrame, frame);
-                        doneSignal.Set();
-                    },
-                    timeoutCancellation.Token);
-
-                doneSignal.Wait(timeout);
-            }
-
-            return receivedFrame;
         }
 
         private static IntegrationTestResult RunTestSafe(

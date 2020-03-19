@@ -82,7 +82,6 @@ namespace SimplifiedProtocolTestWpfCore
                 Frame earlierFrame,
                 CancellationToken ct)
             {
-                WaitOnAFrame(syncContext, testOperations, frameObservable, ct);
                 throw new Exception("DummyTest");
             }
 

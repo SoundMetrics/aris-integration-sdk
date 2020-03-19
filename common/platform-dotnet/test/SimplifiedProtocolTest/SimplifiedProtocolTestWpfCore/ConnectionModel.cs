@@ -1,9 +1,9 @@
-﻿using SimplifiedProtocolTest.Helpers;
-using SoundMetrics.Aris.SimplifiedProtocol;
+﻿using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
@@ -11,7 +11,8 @@ using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
-    public sealed class ConnectionModel : Observable, ITestOperations
+    public sealed class ConnectionModel
+        : SimplifiedProtocolTest.Helpers.Observable, ITestOperations
     {
         public ConnectionModel(string hostname)
         {
@@ -185,6 +186,36 @@ namespace SimplifiedProtocolTestWpfCore
                 "start_range 1",
                 "end_range 5");
         }
+
+        public Frame? WaitOnAFrame(
+            SynchronizationContext uiSyncContext,
+            CancellationToken ct)
+        {
+            Frame? receivedFrame = null;
+
+            var timeout = TimeSpan.FromSeconds(2);
+            var observation =
+                Frames
+                    .FirstOrDefaultAsync()
+                    .ObserveOn(uiSyncContext);
+
+            using (var timeoutCancellation = new CancellationTokenSource(timeout))
+            using (var doneSignal = new ManualResetEventSlim())
+            {
+                observation.Subscribe(
+                    frame =>
+                    {
+                        Interlocked.Exchange(ref receivedFrame, frame);
+                        doneSignal.Set();
+                    },
+                    timeoutCancellation.Token);
+
+                doneSignal.Wait(timeout);
+            }
+
+            return receivedFrame;
+        }
+
 
         private static string FormatCommand(string[] commandLines) =>
             string.Join("\n", commandLines) + "\n\n";

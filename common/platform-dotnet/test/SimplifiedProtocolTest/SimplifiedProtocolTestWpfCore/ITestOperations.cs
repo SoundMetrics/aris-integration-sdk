@@ -1,5 +1,6 @@
 ﻿using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
+using System.Threading;
 
 namespace SimplifiedProtocolTestWpfCore
 {
@@ -9,5 +10,9 @@ namespace SimplifiedProtocolTestWpfCore
 
         void StartPassiveMode();
         void StartTestPattern();
+
+        Frame? WaitOnAFrame(
+            SynchronizationContext uiSyncContext,
+            CancellationToken ct);
     }
 }
