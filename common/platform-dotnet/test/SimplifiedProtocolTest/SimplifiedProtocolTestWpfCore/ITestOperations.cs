@@ -13,6 +13,7 @@ namespace SimplifiedProtocolTestWpfCore
 
         Frame? WaitOnAFrame(
             SynchronizationContext uiSyncContext,
+            Predicate<Frame> predicate,
             CancellationToken ct);
     }
 }

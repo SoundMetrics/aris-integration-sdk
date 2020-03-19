@@ -74,7 +74,7 @@ namespace SimplifiedProtocolTestWpfCore
 
         private static class TestCases
         {
-            public static IntegrationTestResult DummyTest(
+            public static IntegrationTestResult ToPassiveThenToTestPattern(
                 string name,
                 SynchronizationContext syncContext,
                 ITestOperations testOperations,
@@ -82,23 +82,43 @@ namespace SimplifiedProtocolTestWpfCore
                 Frame earlierFrame,
                 CancellationToken ct)
             {
-                throw new Exception("DummyTest");
-            }
+                testOperations.StartPassiveMode();
 
-            public static IntegrationTestResult DummyTest2(
-                string name,
-                SynchronizationContext syncContext,
-                ITestOperations testOperations,
-                IObservable<Frame> frameObservable,
-                Frame earlierFrame,
-                CancellationToken ct)
-            {
-                return new IntegrationTestResult
+                Predicate<Frame> anyValidCookie = frame => frame.Header.AppliedSettings > 0;
+
+                if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame passiveFrame)
                 {
-                    TestName = name,
-                    Success = false,
-                    Messages = new List<string> { "derp" },
-                };
+                    var passiveSettingsCookie = passiveFrame.Header.AppliedSettings;
+
+                    testOperations.StartTestPattern();
+
+                    Predicate<Frame> isNewCookie = frame => frame.Header.AppliedSettings > passiveSettingsCookie;
+                    if (testOperations.WaitOnAFrame(syncContext, isNewCookie, ct) is Frame frame)
+                    {
+                        return new IntegrationTestResult
+                        {
+                            Success = true,
+                            TestName = name,
+                            Messages = new List<string> { "Found new settings after switch to test pattern." },
+                        };
+                    }
+                    else
+                    {
+                        return new IntegrationTestResult
+                        {
+                            Success = false,
+                            TestName = name,
+                            Messages = new List<string>
+                            {
+                                "Couldn't detect settings change on change to test pattern.",
+                            },
+                        };
+                    }
+                }
+                else
+                {
+                    throw new Exception("Could not get a frame after going passive.");
+                }
             }
         }
     }

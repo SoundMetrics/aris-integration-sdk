@@ -189,6 +189,7 @@ namespace SimplifiedProtocolTestWpfCore
 
         public Frame? WaitOnAFrame(
             SynchronizationContext uiSyncContext,
+            Predicate<Frame> predicate,
             CancellationToken ct)
         {
             Frame? receivedFrame = null;
@@ -196,6 +197,7 @@ namespace SimplifiedProtocolTestWpfCore
             var timeout = TimeSpan.FromSeconds(2);
             var observation =
                 Frames
+                    .Where(frame => predicate(frame))
                     .FirstOrDefaultAsync()
                     .ObserveOn(uiSyncContext);
 

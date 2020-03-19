@@ -300,10 +300,7 @@ namespace SimplifiedProtocolTestWpfCore
                 var report = $"Test '{testResult.TestName}' {successText}";
                 buf.AppendLine(report);
 
-                if (!success)
-                {
-                    buf.AppendLine(String.Join(";", testResult.Messages));
-                }
+                buf.AppendLine(String.Join(";", testResult.Messages));
 
                 buf.AppendLine("----------------------------------------");
                 buf.AppendLine();

@@ -71,7 +71,9 @@ namespace SimplifiedProtocolTestWpfCore
 
                     IntegrationTestResult? testResult = null;
 
-                    if (testOperations.WaitOnAFrame(syncContext, ct)
+                    Predicate<Frame> anyFrame = _ => true;
+
+                    if (testOperations.WaitOnAFrame(syncContext, anyFrame, ct)
                         is Frame earlierFrame)
                     {
                         testResult = RunTestSafe(
