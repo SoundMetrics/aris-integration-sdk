@@ -72,7 +72,7 @@ namespace SimplifiedProtocolTestWpfCore
                     IntegrationTestResult? testResult = null;
 
                     if (WaitOnAFrame(syncContext, testOperations, frameObservable, ct)
-                        is Frame previousFrame)
+                        is Frame earlierFrame)
                     {
                         testResult = RunTestSafe(
                                         syncContext,
@@ -80,7 +80,7 @@ namespace SimplifiedProtocolTestWpfCore
                                         frameObservable,
                                         testCase,
                                         ct,
-                                        previousFrame);
+                                        earlierFrame);
                     }
                     else
                     {
@@ -137,7 +137,7 @@ namespace SimplifiedProtocolTestWpfCore
             IObservable<Frame> frameObservable,
             IntegrationTestCase testCase,
             CancellationToken ct,
-            Frame previousFrame)
+            Frame earlierFrame)
         {
             var testName = testCase.TestName;
 
@@ -148,7 +148,7 @@ namespace SimplifiedProtocolTestWpfCore
                                 syncContext,
                                 testOperations,
                                 frameObservable,
-                                previousFrame,
+                                earlierFrame,
                                 ct)
                     is IntegrationTestResult testResult)
                 {

@@ -37,7 +37,7 @@ namespace SimplifiedProtocolTestWpfCore
                 ToTestFunction(MethodInfo methodInfo)
             {
                 IntegrationTestFunc testFunction =
-                    (name, syncContext, testOperations, framesObservable, previousFrame, ct) =>
+                    (name, syncContext, testOperations, framesObservable, earlierFrame, ct) =>
                     {
                         object? output =
                             methodInfo.Invoke(
@@ -48,7 +48,7 @@ namespace SimplifiedProtocolTestWpfCore
                                         syncContext,
                                         testOperations,
                                         framesObservable,
-                                        previousFrame,
+                                        earlierFrame,
                                         ct,
                                 });
                         if (output is IntegrationTestResult result)
@@ -79,7 +79,7 @@ namespace SimplifiedProtocolTestWpfCore
                 SynchronizationContext syncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
-                Frame previousFrame,
+                Frame earlierFrame,
                 CancellationToken ct)
             {
                 WaitOnAFrame(syncContext, testOperations, frameObservable, ct);
@@ -91,7 +91,7 @@ namespace SimplifiedProtocolTestWpfCore
                 SynchronizationContext syncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
-                Frame previousFrame,
+                Frame earlierFrame,
                 CancellationToken ct)
             {
                 return new IntegrationTestResult
