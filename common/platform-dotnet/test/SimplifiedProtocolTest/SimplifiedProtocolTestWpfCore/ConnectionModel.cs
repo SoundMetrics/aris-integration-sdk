@@ -68,6 +68,7 @@ namespace SimplifiedProtocolTestWpfCore
 
                 (uint resultCode, string resultString) ParseResult(string[] lines)
                 {
+                    // This is not high-quality parsing. You can do better.
                     var line = lines[0];
                     var parts = line.Split(" ");
                     var code = uint.Parse(parts[0]);
@@ -77,6 +78,7 @@ namespace SimplifiedProtocolTestWpfCore
 
                 uint ParseSettingsCookie(string[] lines)
                 {
+                    // This is not high-quality parsing. You can do better.
                     var line = lines[1];
                     var parts = line.Split(" ");
 
