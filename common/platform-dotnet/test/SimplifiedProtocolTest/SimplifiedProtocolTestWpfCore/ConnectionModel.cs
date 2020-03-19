@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,22 @@ namespace SimplifiedProtocolTestWpfCore
     {
         public ConnectionModel(string hostname)
         {
+            feedbackSubject = new Subject<string>();
+            feedbackReceiverSub = feedbackSubject.Subscribe(feedback =>
+                {
+
+                    PostExplanatoryText(MakeIndentedFeedback(feedback));
+
+                    string MakeIndentedFeedback(string lines)
+                    {
+                        return
+                            String.Join("\n",
+                                lines.Split("\n").Select(line => "| " + line)
+                            )
+                            + "\n";
+                    }
+                });
+
             const int commandPort = 56888;
             commandStream = new TcpClient(hostname, commandPort);
             Feedback = "Connected.\n";
@@ -69,18 +86,12 @@ namespace SimplifiedProtocolTestWpfCore
                 if (bytesRead > 0)
                 {
                     var s = Encoding.ASCII.GetString(feedbackReceiveBuffer, 0, bytesRead);
-                    var indentedFeedback =
-                        String.Join("\n",
-                            s.Split("\n").Select(s => "| " + s)
-                        )
-                        + "\n";
-
-                    PostFeedback(indentedFeedback);
+                    feedbackSubject.OnNext(s);
                 }
             }
         }
 
-        private void PostFeedback(string message)
+        private void PostExplanatoryText(string message)
         {
             SendOrPostCallback performUpdate = _ =>
             {
@@ -139,26 +150,28 @@ namespace SimplifiedProtocolTestWpfCore
             Socket socket,
             params string[] commandLines)
         {
-            PostCommandFeedback(commandLines);
+            PostCommandText(commandLines);
 
             var command = FormatCommand(commandLines);
             var commandBytes = Encoding.ASCII.GetBytes(command);
             socket.Send(commandBytes);
 
-            void PostCommandFeedback(string[] commandLines)
+            void PostCommandText(string[] commandLines)
             {
-                var feedback =
+                var commandText =
                     "\n"
                     + "Sending command:\n"
                     + ">>>>>>>>\n"
                     + FormatCommandForLogging(commandLines)
                     + "<<<<<<<<\n";
-                PostFeedback(feedback);
+                PostExplanatoryText(commandText);
             }
         }
 
         private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();
         private readonly SynchronizationContext? synchronizationContext;
+        private readonly Subject<string> feedbackSubject;
+        private readonly IDisposable feedbackReceiverSub;
 
         private byte[] feedbackReceiveBuffer = new byte[4096];
         private string offUIFeedbackAccumulator = "";
