@@ -19,7 +19,8 @@ namespace SimplifiedProtocolTestWpfCore
             feedbackReceiverSub = feedbackSubject.Subscribe(feedback =>
                 {
 
-                    PostExplanatoryText(MakeIndentedFeedback(feedback));
+                    PostExplanatoryText(
+                        MakeIndentedFeedback(feedback));
 
                     string MakeIndentedFeedback(string lines)
                     {
@@ -29,6 +30,13 @@ namespace SimplifiedProtocolTestWpfCore
                             )
                             + "\n";
                     }
+                });
+
+            parsedFeedbackSubject = new Subject<ParsedFeedbackFromSonar>();
+            parsedFeedbackObserver = feedbackSubject.Subscribe(feedback =>
+                {
+                    var lines = feedback.Split("\n");
+                    parsedFeedbackSubject.OnNext(ParseFeedback(lines));
                 });
 
             const int commandPort = 56888;
@@ -44,6 +52,42 @@ namespace SimplifiedProtocolTestWpfCore
             Task.Run(() => ReadAndPostFeedback());
 
             InitializeConnection();
+
+            ParsedFeedbackFromSonar ParseFeedback(string[] lines)
+            {
+                var (resultCode, resultString) = ParseResult(lines);
+                var settingsCookie = ParseSettingsCookie(lines);
+
+                return new ParsedFeedbackFromSonar
+                {
+                    RawFeedback = feedback,
+                    ResultCode = resultCode,
+                    ResultString = resultString,
+                    SettingsCookie = settingsCookie,
+                };
+
+                (uint resultCode, string resultString) ParseResult(string[] lines)
+                {
+                    var line = lines[0];
+                    var parts = line.Split(" ");
+                    var code = uint.Parse(parts[0]);
+                    var s = parts[1];
+                    return (code, s);
+                }
+
+                uint ParseSettingsCookie(string[] lines)
+                {
+                    var line = lines[1];
+                    var parts = line.Split(" ");
+
+                    if (parts[0] != "settings-cookie")
+                    {
+                        throw new Exception($"Unexpected value on the second line :{parts[0]}");
+                    }
+
+                    return uint.Parse(parts[1]);
+                }
+            }
         }
 
         public bool IsConnected { get { return true; } }
@@ -146,15 +190,39 @@ namespace SimplifiedProtocolTestWpfCore
         private static string FormatCommandForLogging(string[] commandLines) =>
             string.Join("\\n\n", commandLines) + "\\n\n\\n\n";
 
-        private void SendCommand(
+        private ParsedFeedbackFromSonar SendCommand(
             Socket socket,
             params string[] commandLines)
         {
             PostCommandText(commandLines);
 
-            var command = FormatCommand(commandLines);
-            var commandBytes = Encoding.ASCII.GetBytes(command);
-            socket.Send(commandBytes);
+            ParsedFeedbackFromSonar feedback = new ParsedFeedbackFromSonar { };
+
+            using (var doneSignal = new ManualResetEventSlim())
+            {
+                Action<ParsedFeedbackFromSonar> feedbackHandler =
+                    parsedFeedback =>
+                    {
+                        feedback = parsedFeedback;
+                        doneSignal.Set();
+                    };
+
+                using (var _ = parsedFeedbackSubject.Subscribe(feedbackHandler))
+                {
+
+
+                    var command = FormatCommand(commandLines);
+                    var commandBytes = Encoding.ASCII.GetBytes(command);
+                    socket.Send(commandBytes);
+
+                    if (!doneSignal.Wait(TimeSpan.FromSeconds(2)))
+                    {
+                        throw new Exception("Didn't receive feedback");
+                    }
+                }
+            }
+
+            return feedback;
 
             void PostCommandText(string[] commandLines)
             {
@@ -168,10 +236,20 @@ namespace SimplifiedProtocolTestWpfCore
             }
         }
 
+        private class ParsedFeedbackFromSonar
+        {
+            public string RawFeedback { get; set; } = "";
+            public uint ResultCode;
+            public string ResultString { get; set; } = "";
+            public uint SettingsCookie;
+        }
+
         private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();
         private readonly SynchronizationContext? synchronizationContext;
         private readonly Subject<string> feedbackSubject;
         private readonly IDisposable feedbackReceiverSub;
+        private readonly Subject<ParsedFeedbackFromSonar> parsedFeedbackSubject;
+        private readonly IDisposable parsedFeedbackObserver;
 
         private byte[] feedbackReceiveBuffer = new byte[4096];
         private string offUIFeedbackAccumulator = "";
