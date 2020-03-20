@@ -17,7 +17,8 @@ This protocol uses a TCP stream to control an ARIS, which is also done with the 
 
 In this protocol, the commands are text-based, and protocol buffer isn't necessary. A command consists of a command name followed by 0 or more lines of key-value pairs. The command is terminated by an empty line.
 
-*Note that you can use WireShark or other network tools to observe the command & response from the ARIS.*
+**Note:**
+> You can use WireShark to observe the command & response from the ARIS as they pass over the network.
 
 For illustration purposes only, we're showing new lines as `\n` here:
 
@@ -184,7 +185,7 @@ Sending the `passive` command causes the ARIS to acquire images without transmit
 ```
 
 **Note:**
-> There may be the occasional feedback that represents work-in-progress on the ARIS. For example, `Clear transmit enable...` above does not refer to your command, but a process used to bring up imaging for the first time.
+> There may be the occasional feedback from the ARIS that represents work-in-progress on the ARIS. For example, `Clear transmit enable...` above does not refer to your command, but a process used to bring up imaging for the first time. If you see feedback that doesn't appear to relate to your command, you can probably ignore it.
 
 #### Environmental Effects
 
@@ -194,9 +195,9 @@ Water temperature, depth, and salinity have an effect on computed speed of sound
 
 Note that water temperature and depth readings can change drastically between "on deck" and "in the water."
 
-Ranges...
+#### [More About Ranges]
 
-More about beams & tradeoffs...
+#### [More about beams & tradeoffs]
 
 | Model | Full beams | Half beams |
 |-|-|-|
@@ -204,11 +205,11 @@ More about beams & tradeoffs...
 | ARIS 1800 | 96  | 48  |
 | ARIS 3000 | 128 | 64  |
 
-Gain
+#### [Gain]
 
-Frequency
+#### [Frequency]
 
-### *(more commands to come)*
+### [Rotator Commands]
 
 ## Frame Protocol
 
