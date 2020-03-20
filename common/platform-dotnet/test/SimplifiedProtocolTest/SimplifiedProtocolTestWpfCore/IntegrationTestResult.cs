@@ -6,6 +6,6 @@ namespace SimplifiedProtocolTestWpfCore
     {
         public string TestName = "";
         public bool Success = false;
-        public List<string> Messages = new List<string> { "Uninitialized test result" };
+        public IEnumerable<string> Messages = new string[] { "Uninitialized test result" };
     }
 }

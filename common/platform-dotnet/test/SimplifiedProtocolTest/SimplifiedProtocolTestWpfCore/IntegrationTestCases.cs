@@ -1,4 +1,5 @@
-﻿using SoundMetrics.Aris.SimplifiedProtocol;
+﻿using SoundMetrics.Aris.Headers;
+using SoundMetrics.Aris.SimplifiedProtocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,15 @@ namespace SimplifiedProtocolTestWpfCore
             Frame,
             CancellationToken,
             IntegrationTestResult>;
+
+    internal static class ArisFrameExtensions
+    {
+        public static uint SettingsCookieInUse(this in ArisFrameHeader header)
+        {
+            // May return zero at the time this is written, March 20, 2020.
+            return Math.Max(header.AppliedSettings, header.ConstrainedSettings);
+        }
+    }
 
     internal static partial class IntegrationTest
     {
@@ -53,6 +63,7 @@ namespace SimplifiedProtocolTestWpfCore
                                 });
                         if (output is IntegrationTestResult result)
                         {
+                            result.TestName = name;
                             return result;
                         }
                         else
@@ -72,6 +83,43 @@ namespace SimplifiedProtocolTestWpfCore
             }
         }
 
+        private static (bool success, Frame? frame) WaitOnSettingsChange(
+            SynchronizationContext syncContext,
+            ITestOperations testOperations,
+            Action<SynchronizationContext, ITestOperations, CancellationToken> testAction,
+            CancellationToken ct
+            )
+        {
+            if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame passiveFrame)
+            {
+                var previousSettingsInUse = passiveFrame.Header.SettingsCookieInUse();
+                Predicate<Frame> isNewSettings = frame => frame.Header.SettingsCookieInUse() > previousSettingsInUse;
+
+                testAction(syncContext, testOperations, ct);
+
+                Frame? frame = testOperations.WaitOnAFrame(syncContext, isNewSettings, ct) as Frame;
+                return (frame != null, frame);
+            }
+            else
+            {
+                return (false, null);
+            }
+        }
+
+        private static readonly Predicate<Frame> anyValidCookie = frame => frame.Header.AppliedSettings > 0;
+
+        private static IntegrationTestResult MakeResult(bool success, params string[] messages)
+        {
+            return new IntegrationTestResult
+            {
+                Success = success,
+                Messages = messages,
+            };
+        }
+
+        /// <summary>
+        /// Test cases go here and are found via reflection.I believe
+        /// </summary>
         private static class TestCases
         {
             public static IntegrationTestResult ToPassiveThenToTestPattern(
@@ -84,40 +132,25 @@ namespace SimplifiedProtocolTestWpfCore
             {
                 testOperations.StartPassiveMode();
 
-                Predicate<Frame> anyValidCookie = frame => frame.Header.AppliedSettings > 0;
-
                 if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame passiveFrame)
                 {
-                    var passiveSettingsCookie = passiveFrame.Header.AppliedSettings;
+                    Action<SynchronizationContext, ITestOperations, CancellationToken> testAction =
+                        (syncContext, testOpoerations, CancellationToken)
+                            => { testOperations.StartTestPattern(); };
 
-                    testOperations.StartTestPattern();
+                    var (success, message) =
+                        WaitOnSettingsChange(syncContext, testOperations, testAction, ct)
+                        switch
+                        {
+                            (true, Frame frame) => (true, "Found new settings after switch to test pattern."),
+                            _ => (false, "Couldn't detect settings change on change to test pattern.")
+                        };
 
-                    Predicate<Frame> isNewCookie = frame => frame.Header.AppliedSettings > passiveSettingsCookie;
-                    if (testOperations.WaitOnAFrame(syncContext, isNewCookie, ct) is Frame frame)
-                    {
-                        return new IntegrationTestResult
-                        {
-                            Success = true,
-                            TestName = name,
-                            Messages = new List<string> { "Found new settings after switch to test pattern." },
-                        };
-                    }
-                    else
-                    {
-                        return new IntegrationTestResult
-                        {
-                            Success = false,
-                            TestName = name,
-                            Messages = new List<string>
-                            {
-                                "Couldn't detect settings change on change to test pattern.",
-                            },
-                        };
-                    }
+                    return MakeResult(success, message);
                 }
                 else
                 {
-                    throw new Exception("Could not get a frame after going passive.");
+                    return MakeResult(false, "Could not get a frame after going passive.");
                 }
             }
         }
