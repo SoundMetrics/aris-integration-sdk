@@ -142,8 +142,40 @@ namespace SimplifiedProtocolTestWpfCore
                         WaitOnSettingsChange(syncContext, testOperations, testAction, ct)
                         switch
                         {
-                            (true, Frame frame) => (true, "Found new settings after switch to test pattern."),
-                            _ => (false, "Couldn't detect settings change on change to test pattern.")
+                            (true, Frame frame) => (true, "Found new settings after switch."),
+                            _ => (false, "Couldn't detect settings change.")
+                        };
+
+                    return MakeResult(success, message);
+                }
+                else
+                {
+                    return MakeResult(false, "Could not get a frame after going passive.");
+                }
+            }
+
+            public static IntegrationTestResult ToTestPatternThenToPassive(
+                string name,
+                SynchronizationContext syncContext,
+                ITestOperations testOperations,
+                IObservable<Frame> frameObservable,
+                Frame earlierFrame,
+                CancellationToken ct)
+            {
+                testOperations.StartTestPattern();
+
+                if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame passiveFrame)
+                {
+                    Action<SynchronizationContext, ITestOperations, CancellationToken> testAction =
+                        (syncContext, testOpoerations, CancellationToken)
+                            => { testOperations.StartPassiveMode(); };
+
+                    var (success, message) =
+                        WaitOnSettingsChange(syncContext, testOperations, testAction, ct)
+                        switch
+                        {
+                            (true, Frame frame) => (true, "Found new settings after switch."),
+                            _ => (false, "Couldn't detect settings change.")
                         };
 
                     return MakeResult(success, message);
