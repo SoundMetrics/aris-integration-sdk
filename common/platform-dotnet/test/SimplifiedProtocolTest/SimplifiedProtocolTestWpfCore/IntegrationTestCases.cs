@@ -179,6 +179,36 @@ namespace SimplifiedProtocolTestWpfCore
                     return MakeResult(false, "Could not get a frame after going passive.");
                 }
             }
+
+            public static IntegrationTestResult ToTestPatternThenToDefaultAcquire(
+                SynchronizationContext syncContext,
+                ITestOperations testOperations,
+                IObservable<Frame> frameObservable,
+                CancellationToken ct)
+            {
+                testOperations.StartTestPattern();
+
+                if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame passiveFrame)
+                {
+                    Action<SynchronizationContext, ITestOperations, CancellationToken> testAction =
+                        (syncContext, testOpoerations, CancellationToken)
+                            => { testOperations.StartDefaultAcquireMode(); };
+
+                    var (success, message) =
+                        WaitOnSettingsChange(syncContext, testOperations, testAction, ct)
+                        switch
+                        {
+                            (true, Frame frame) => (true, "Found new settings after switch."),
+                            _ => (false, "Couldn't detect settings change.")
+                        };
+
+                    return MakeResult(success, message);
+                }
+                else
+                {
+                    return MakeResult(false, "Could not get a frame after going passive.");
+                }
+            }
         }
     }
 }
