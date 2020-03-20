@@ -10,6 +10,7 @@ namespace SimplifiedProtocolTestWpfCore
 
         void StartPassiveMode();
         void StartTestPattern();
+        void StartDefaultAcquireMode();
 
         Frame? WaitOnAFrame(
             SynchronizationContext uiSyncContext,

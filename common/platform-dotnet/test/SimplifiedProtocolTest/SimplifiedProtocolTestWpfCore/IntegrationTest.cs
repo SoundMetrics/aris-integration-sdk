@@ -12,11 +12,9 @@ namespace SimplifiedProtocolTestWpfCore
 {
     using IntegrationTestFunc =
         Func<
-            string,
             SynchronizationContext,
             ITestOperations,
             IObservable<Frame>,
-            Frame,
             CancellationToken,
             IntegrationTestResult>;
 
@@ -69,35 +67,12 @@ namespace SimplifiedProtocolTestWpfCore
                     // Get frames flowing if they haven't already started.
                     testOperations.StartTestPattern();
 
-                    IntegrationTestResult? testResult = null;
-
-                    Predicate<Frame> anyFrame = _ => true;
-
-                    if (testOperations.WaitOnAFrame(syncContext, anyFrame, ct)
-                        is Frame earlierFrame)
-                    {
-                        testResult = RunTestSafe(
-                                        syncContext,
-                                        testOperations,
-                                        frameObservable,
-                                        testCase,
-                                        ct,
-                                        earlierFrame);
-                    }
-                    else
-                    {
-                        testResult = new IntegrationTestResult
-                        {
-                            TestName = testCase.TestName,
-                            Success = false,
-                            Messages = new List<string>
-                            {
-                                "Timeout: no frames received."
-                            },
-                        };
-                    }
-
-                    yield return testResult;
+                    yield return RunTestSafe(
+                                    syncContext,
+                                    testOperations,
+                                    frameObservable,
+                                    testCase,
+                                    ct);
                 }
             }
         }
@@ -107,19 +82,16 @@ namespace SimplifiedProtocolTestWpfCore
             ITestOperations testOperations,
             IObservable<Frame> frameObservable,
             IntegrationTestCase testCase,
-            CancellationToken ct,
-            Frame earlierFrame)
+            CancellationToken ct)
         {
             var testName = testCase.TestName;
 
             try
             {
                 if (testCase.TestFunction(
-                                testName,
                                 syncContext,
                                 testOperations,
                                 frameObservable,
-                                earlierFrame,
                                 ct)
                     is IntegrationTestResult testResult)
                 {

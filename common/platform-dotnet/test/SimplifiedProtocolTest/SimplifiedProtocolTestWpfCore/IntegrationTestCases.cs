@@ -11,11 +11,9 @@ namespace SimplifiedProtocolTestWpfCore
 {
     using IntegrationTestFunc =
         Func<
-            string,
             SynchronizationContext,
             ITestOperations,
             IObservable<Frame>,
-            Frame,
             CancellationToken,
             IntegrationTestResult>;
 
@@ -46,19 +44,19 @@ namespace SimplifiedProtocolTestWpfCore
             IntegrationTestCase
                 ToTestFunction(MethodInfo methodInfo)
             {
+                var name = methodInfo.Name;
+
                 IntegrationTestFunc testFunction =
-                    (name, syncContext, testOperations, framesObservable, earlierFrame, ct) =>
+                    (syncContext, testOperations, framesObservable, ct) =>
                     {
                         object? output =
                             methodInfo.Invoke(
                                 null,
                                 new object?[]
                                 {
-                                        name,
                                         syncContext,
                                         testOperations,
                                         framesObservable,
-                                        earlierFrame,
                                         ct,
                                 });
                         if (output is IntegrationTestResult result)
@@ -123,11 +121,9 @@ namespace SimplifiedProtocolTestWpfCore
         private static class TestCases
         {
             public static IntegrationTestResult ToPassiveThenToTestPattern(
-                string name,
                 SynchronizationContext syncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
-                Frame earlierFrame,
                 CancellationToken ct)
             {
                 testOperations.StartPassiveMode();
@@ -155,11 +151,9 @@ namespace SimplifiedProtocolTestWpfCore
             }
 
             public static IntegrationTestResult ToTestPatternThenToPassive(
-                string name,
                 SynchronizationContext syncContext,
                 ITestOperations testOperations,
                 IObservable<Frame> frameObservable,
-                Frame earlierFrame,
                 CancellationToken ct)
             {
                 testOperations.StartTestPattern();
