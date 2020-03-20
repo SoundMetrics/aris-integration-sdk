@@ -209,7 +209,7 @@ Note that water temperature and depth readings can change drastically between "o
 
 #### [Frequency]
 
-### [Rotator Commands]
+### [ARx Rotator Commands]
 
 ## Frame Protocol
 
