@@ -22,10 +22,12 @@ let main argv =
     printWelcomeMessage Console.Out
 
     match ProgramArguments.GetProgramArguments argv with
-    | Arguments args -> ()
+    | Arguments args -> failwith "NYI"
+
     | Message message ->
         Console.Out.WriteLine(message)
         getUsage() |> Console.Out.WriteLine
+
     | ShowUsage ->
         getUsage() |> Console.Out.WriteLine
 
