@@ -5,13 +5,15 @@ open System.Collections
 open System.Collections.Generic
 
 type RangeGeneratorAdvance<'T> = 'T -> 'T option
-type RangeGeneratorIsDone<'T> = 'T -> 'T -> bool
 
 type public RangeGenerator<'T when 'T :> IComparable<'T>>
     (start: 'T,
      endInclusive: 'T,
-     advance: RangeGeneratorAdvance<'T>,
-     isDone: RangeGeneratorIsDone<'T>) =
+     advance: RangeGeneratorAdvance<'T>) =
+
+    do
+        if endInclusive.CompareTo(start) > 0 then
+            raise (ArgumentOutOfRangeException("endInclusive", "end must be >= start"))
 
     interface IEnumerable<'T> with
         member this.GetEnumerator(): IEnumerator =
@@ -23,7 +25,6 @@ type public RangeGenerator<'T when 'T :> IComparable<'T>>
     member internal __.Start = start
     member internal __.EndInclusive = endInclusive
     member internal __.Advance = advance
-    member internal __.IsDone = isDone
 
 and internal EnumeratorState<'T> =
     | BeforeFirst
@@ -34,6 +35,8 @@ and internal RangeGeneratorEnumerator<'T when 'T :> IComparable<'T>>
         (generator: RangeGenerator<'T>) =
 
     let mutable state = BeforeFirst
+
+    let isPastEnd (value: 'T) = value.CompareTo(generator.EndInclusive) > 0
 
     interface IEnumerator<'T> with
         member __.Current: 'T =
@@ -57,6 +60,9 @@ and internal RangeGeneratorEnumerator<'T when 'T :> IComparable<'T>>
 
             | Enumerating value ->
                 match generator.Advance value with
+                | Some newValue when isPastEnd newValue ->
+                    state <- Done
+                    false
                 | Some newValue ->
                     state <- Enumerating newValue
                     true
