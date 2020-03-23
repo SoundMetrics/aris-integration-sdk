@@ -4,7 +4,7 @@ open System
 open System.Collections
 open System.Collections.Generic
 
-type RangeGeneratorAdvance<'T> = 'T -> 'T option
+type RangeGeneratorAdvance<'T> = 'T -> 'T
 
 type public RangeGenerator<'T when 'T :> IComparable<'T>>
     (start: 'T,
@@ -12,7 +12,7 @@ type public RangeGenerator<'T when 'T :> IComparable<'T>>
      advance: RangeGeneratorAdvance<'T>) =
 
     do
-        if endInclusive.CompareTo(start) > 0 then
+        if endInclusive.CompareTo(start) < 0 then
             raise (ArgumentOutOfRangeException("endInclusive", "end must be >= start"))
 
     interface IEnumerable<'T> with
@@ -60,15 +60,12 @@ and internal RangeGeneratorEnumerator<'T when 'T :> IComparable<'T>>
 
             | Enumerating value ->
                 match generator.Advance value with
-                | Some newValue when isPastEnd newValue ->
+                | newValue when isPastEnd newValue ->
                     state <- Done
                     false
-                | Some newValue ->
+                | newValue ->
                     state <- Enumerating newValue
                     true
-                | None ->
-                    state <- Done
-                    false
 
             | Done -> false
 
