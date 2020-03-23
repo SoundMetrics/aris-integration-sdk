@@ -34,7 +34,7 @@ and internal RangeGeneratorEnumerator<'T> (generator: RangeGenerator<'T>) =
     let mutable state = BeforeFirst
 
     interface IEnumerator<'T> with
-        member this.Current: 'T =
+        member __.Current: 'T =
             match state with
             | Enumerating value -> value
 
@@ -46,7 +46,7 @@ and internal RangeGeneratorEnumerator<'T> (generator: RangeGenerator<'T>) =
 
         member __.Dispose(): unit = ()
 
-        member this.MoveNext(): bool =
+        member __.MoveNext(): bool =
             match state with
             | BeforeFirst ->
                 let firstValue = generator.Start
