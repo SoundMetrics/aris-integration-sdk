@@ -1,12 +1,13 @@
 ﻿namespace RangeGenerator
 
+open System
 open System.Collections
 open System.Collections.Generic
 
 type RangeGeneratorAdvance<'T> = 'T -> 'T option
 type RangeGeneratorIsDone<'T> = 'T -> 'T -> bool
 
-type public RangeGenerator<'T>
+type public RangeGenerator<'T when 'T :> IComparable<'T>>
     (start: 'T,
      endInclusive: 'T,
      advance: RangeGeneratorAdvance<'T>,
@@ -29,7 +30,8 @@ and internal EnumeratorState<'T> =
     | Enumerating of value: 'T
     | Done
 
-and internal RangeGeneratorEnumerator<'T> (generator: RangeGenerator<'T>) =
+and internal RangeGeneratorEnumerator<'T when 'T :> IComparable<'T>>
+        (generator: RangeGenerator<'T>) =
 
     let mutable state = BeforeFirst
 
