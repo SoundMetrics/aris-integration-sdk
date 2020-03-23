@@ -22,6 +22,9 @@ type public RangeGenerator<'T when 'T :> IComparable<'T>>
         member this.GetEnumerator(): IEnumerator<'T> =
             new RangeGeneratorEnumerator<'T>(this) :> IEnumerator<'T>
 
+    member public this.GetEnumerator(): IEnumerator<'T> =
+        (this :> IEnumerable<'T>).GetEnumerator()
+
     member internal __.Start = start
     member internal __.EndInclusive = endInclusive
     member internal __.Advance = advance
