@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="RangeGeneratorFloatOptionTests.fs" />
+    <Compile Include="RangeGeneratorIntOptionTests.fs" />
     <Compile Include="RangeGeneratorFloatTests.fs" />
     <Compile Include="RangeGeneratorIntTests.fs" />
     <Compile Include="Program.fs" />

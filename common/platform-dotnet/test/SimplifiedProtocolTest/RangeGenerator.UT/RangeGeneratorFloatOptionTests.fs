@@ -5,13 +5,13 @@ open Microsoft.VisualStudio.TestTools.UnitTesting
 open SoundMetrics.Data.RangeGenerator
 
 [<TestClass>]
-type RangeGeneratorFloatTests () =
+type RangeGeneratorFloatOptionTests () =
 
     let advance (increment: float) = fun value -> value + increment
 
     [<TestMethod>]
     member __.EqualStartAndEnd () =
-        makeRange 1.0 1.0 (advance 1.0)
+        makeOptionalRange 1.0 1.0 (advance 1.0)
         |> Seq.toArray // make it concrete
         |> ignore
 
@@ -20,7 +20,7 @@ type RangeGeneratorFloatTests () =
 
     [<TestMethod>]
     member __.EndGreaterThanStart () =
-        makeRange 1.0 2.0 (advance 1.0)
+        makeOptionalRange 1.0 2.0 (advance 1.0)
         |> Seq.toArray // make it concrete
         |> ignore
 
@@ -30,7 +30,7 @@ type RangeGeneratorFloatTests () =
     [<TestMethod>]
     member __.EndLessThanStart () =
         Assert.ThrowsException<ArgumentOutOfRangeException>(fun () ->
-            makeRange 2.0 1.0 (advance 1.0)
+            makeOptionalRange 2.0 1.0 (advance 1.0)
             |> Seq.toArray // make it concrete
             |> ignore
 
@@ -44,9 +44,9 @@ type RangeGeneratorFloatTests () =
         let increment = 0.000001
         let start = 1.0
         let endInclusive = start
-        let expected = [| start |]
+        let expected = [| None; Some start |]
         let actual =
-            makeRange start endInclusive (advance increment)
+            makeOptionalRange start endInclusive (advance increment)
             |> Seq.toArray // make it concrete
 
         CollectionAssert.AreEqual(expected, actual)
@@ -56,9 +56,9 @@ type RangeGeneratorFloatTests () =
         let increment = 0.000001
         let start = 1.0
         let endInclusive = start + increment
-        let expected = [| start; endInclusive |]
+        let expected = [| None; Some start; Some endInclusive |]
         let actual =
-            makeRange start endInclusive (advance increment)
+            makeOptionalRange start endInclusive (advance increment)
             |> Seq.toArray
 
         CollectionAssert.AreEqual(expected, actual)
@@ -68,9 +68,9 @@ type RangeGeneratorFloatTests () =
         let increment = 0.000001
         let start = 1.0
         let endInclusive = start + increment + increment // don't multiply by 2, that's different than addition
-        let expected = [| start; start + increment; endInclusive |]
+        let expected = [| None; Some start; Some (start + increment); Some endInclusive |]
         let actual =
-            makeRange start endInclusive (advance increment)
+            makeOptionalRange start endInclusive (advance increment)
             |> Seq.toArray
 
         CollectionAssert.AreEqual(expected, actual)

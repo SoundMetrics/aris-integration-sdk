@@ -2,14 +2,17 @@ namespace RangeGenerator.UT
 
 open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open RangeGenerator
+open SoundMetrics.Data.RangeGenerator
 
 [<TestClass>]
 type RangeGeneratorIntTests () =
 
+    let advance (increment: int) = fun value -> value + increment
+
     [<TestMethod>]
     member __.EqualStartAndEnd () =
-        RangeGenerator<int>(1, 1, fun value -> value + 1)
+        makeRange 1 1 (advance 1)
+        |> Seq.toArray // make it concrete
         |> ignore
 
         // No exception occurred
@@ -17,7 +20,7 @@ type RangeGeneratorIntTests () =
 
     [<TestMethod>]
     member __.EndGreaterThanStart () =
-        RangeGenerator<int>(1, 2, fun value -> value + 1)
+        makeRange 1 2 (advance 1)
         |> ignore
 
         // No exception occurred
@@ -26,7 +29,9 @@ type RangeGeneratorIntTests () =
     [<TestMethod>]
     member __.EndLessThanStart () =
         Assert.ThrowsException<ArgumentOutOfRangeException>(fun () ->
-            let _ = RangeGenerator<int>(2, 1, fun value -> value + 1)
+            makeRange 2 1 (advance 1)
+            |> ignore
+
             // An exception should ahve occurred
             Assert.IsTrue(false);
             )
@@ -38,7 +43,7 @@ type RangeGeneratorIntTests () =
         let endInclusive = 1
         let expected = [| start |]
         let actual =
-            RangeGenerator(start, endInclusive, fun value -> value + 1)
+            makeRange start endInclusive (advance 1)
             |> Seq.toArray
 
         CollectionAssert.AreEqual(expected, actual)
@@ -49,7 +54,19 @@ type RangeGeneratorIntTests () =
         let endInclusive = 2
         let expected = [| start; endInclusive |]
         let actual =
-            RangeGenerator(start, endInclusive, fun value -> value + 1)
+            makeRange start endInclusive (advance 1)
+            |> Seq.toArray
+
+        CollectionAssert.AreEqual(expected, actual)
+
+    [<TestMethod>]
+    member __.SecondNextSmallestInterval () =
+        let increment = 1
+        let start = 1
+        let endInclusive = start + 2
+        let expected = [| start; start + increment; endInclusive |]
+        let actual =
+            makeRange start endInclusive (advance increment)
             |> Seq.toArray
 
         CollectionAssert.AreEqual(expected, actual)
