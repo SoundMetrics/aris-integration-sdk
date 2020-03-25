@@ -4,6 +4,14 @@ using System.Threading;
 
 namespace SimplifiedProtocolTestWpfCore
 {
+    using SettingsCookie = UInt32;
+
+    public struct AcquireSettings
+    {
+        public float StartRange;
+        public float EndRange;
+    }
+
     internal interface  ITestOperations
     {
         IObservable<Frame> Frames { get; }
@@ -11,6 +19,8 @@ namespace SimplifiedProtocolTestWpfCore
         void StartPassiveMode();
         void StartTestPattern();
         void StartDefaultAcquireMode();
+
+        SettingsCookie StartAcquire(AcquireSettings settings);
 
         Frame? WaitOnAFrame(
             SynchronizationContext uiSyncContext,

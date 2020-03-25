@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\SoundMetrics.Aris.SimplifiedProtocol\SoundMetrics.Aris.SimplifiedProtocol.csproj" />
+    <ProjectReference Include="..\RangeGenerator\RangeGenerator.fsproj" />
   </ItemGroup>
 
 </Project>

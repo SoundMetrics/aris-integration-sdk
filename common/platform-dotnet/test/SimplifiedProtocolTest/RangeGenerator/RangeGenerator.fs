@@ -79,6 +79,13 @@ module RangeGenerator =
                     new RangeGeneratorEnumerator<'T>(start, endInclusive, advance) :> IEnumerator<'T>
         }
 
+    let inline MakeRange<'T when 'T :> IComparable<'T> and 'T : comparison>
+                (start: 'T, endInclusive: 'T, advance: Func<'T, 'T>)
+                : IEnumerable<'T> =
+
+        let advance' = fun value -> advance.Invoke(value)
+        makeRange<'T> start endInclusive advance'
+
     /// Support for makeOptionalRange<'T>.
     type RangeGeneratorEnumeratorWithOption<'T when 'T :> IComparable<'T> and 'T : comparison>
                     (start: 'T
@@ -143,3 +150,25 @@ module RangeGenerator =
                 member __.GetEnumerator(): IEnumerator<'T option> =
                     new RangeGeneratorEnumeratorWithOption<'T>(start, endInclusive, advance) :> IEnumerator<'T option>
         }
+
+    let inline MakeOptionalRangeNullable<'T when 'T : struct
+                                            and 'T :> ValueType
+                                            and 'T : (new: unit -> 'T)
+                                            and 'T :> IComparable<'T>
+                                            and 'T : comparison>
+            (start: 'T, endInclusive: 'T, advance: 'T -> 'T)
+            : IEnumerable<Nullable<'T>> =
+
+        makeOptionalRange<'T> start endInclusive advance
+        |> Seq.map Option.toNullable
+
+    let inline MakeOptionalRange<'T when 'T : not struct
+                                    and 'T : (new: unit -> 'T)
+                                    and 'T : null
+                                    and 'T :> IComparable<'T>
+                                    and 'T : comparison>
+            (start: 'T, endInclusive: 'T, advance: 'T -> 'T)
+            : IEnumerable<'T> =
+
+        makeOptionalRange<'T> start endInclusive advance
+        |> Seq.map Option.toObj

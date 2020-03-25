@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
+    using SettingsCookie = UInt32;
+
     public sealed class ConnectionModel
         : SimplifiedProtocolTest.Helpers.Observable, ITestOperations
     {
@@ -185,6 +187,18 @@ namespace SimplifiedProtocolTestWpfCore
                 "acquire",
                 "start_range 1",
                 "end_range 5");
+        }
+
+        public SettingsCookie StartAcquire(AcquireSettings settings)
+        {
+            var parsedFeedback =
+                SendCommand(
+                    commandStream.Client,
+                    "acquire",
+                    $"start_range {settings.StartRange}",
+                    $"end_range {settings.EndRange}");
+
+            return parsedFeedback.SettingsCookie;
         }
 
         public Frame? WaitOnAFrame(

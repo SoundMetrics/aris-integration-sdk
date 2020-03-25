@@ -1,5 +1,6 @@
 ﻿using SoundMetrics.Aris.Headers;
 using SoundMetrics.Aris.SimplifiedProtocol;
+using SoundMetrics.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ using System.Threading;
 
 namespace SimplifiedProtocolTestWpfCore
 {
+    using static RangeGenerator;
+
     using IntegrationTestFunc =
         Func<
             SynchronizationContext,
@@ -207,6 +210,67 @@ namespace SimplifiedProtocolTestWpfCore
                 else
                 {
                     return MakeResult(false, "Could not get a frame after going passive.");
+                }
+            }
+
+            public static IntegrationTestResult TestVariousAcquireValues(
+                SynchronizationContext syncContext,
+                ITestOperations testOperations,
+                IObservable<Frame> frameObservable,
+                CancellationToken ct)
+            {
+                testOperations.StartTestPattern();
+
+                List<string> failures = new List<string>();
+
+                if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame _)
+                {
+                    foreach (var settings in EnumerateAcquireSettings())
+                    {
+                        var expectedSettingsCookie = testOperations.StartAcquire(settings);
+                        using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+                        {
+                            Predicate<Frame> predicate =
+                                frame => expectedSettingsCookie == frame.Header.SettingsCookieInUse();
+                            Frame? frame = testOperations.WaitOnAFrame(syncContext, predicate, cts.Token);
+
+                            if (frame is null)
+                            {
+                                var failure = $"Failed to get frame on {settings}";
+                                failures.Add(failure);
+                            }
+                        }
+                    }
+
+                    var success = failures.Count == 0;
+                    var message = success ? "Success." : "One or more tests failed";
+                    var messages = new[] { message }.Concat(failures).ToArray();
+
+                    return MakeResult(success, messages);
+                }
+                else
+                {
+                    return MakeResult(false, "Could not get a frame after going passive.");
+                }
+
+                static IEnumerable<AcquireSettings> EnumerateAcquireSettings()
+                {
+                    foreach (var startRange in MakeRange(1.0f, 19.0f, AdvanceRange))
+                    {
+                        foreach (var endRange in MakeRange(startRange + 1.0f, 20.0f, AdvanceRange))
+                        {
+                            yield return new AcquireSettings
+                            {
+                                StartRange = startRange,
+                                EndRange = endRange,
+                            };
+                        }
+                    }
+
+                    float AdvanceRange(float range)
+                    {
+                        return range + 1.0f;
+                    }
                 }
             }
         }
