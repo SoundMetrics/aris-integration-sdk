@@ -160,7 +160,7 @@ Sending the `passive` command causes the ARIS to acquire images without transmit
 | `frame_rate` | Optional. If not provided, the ARIS will use the fastest frame rate possible, up to 15 frames per second. Valid values are 1.0 to 15.0. ARIS will constrain this value as needed if required by the laws of physics. |
 | `beams` | Optional. Allowed values are `full` and `half`. `full` denotes a higher cross-range resolution. If not provided, the ARIS will use `full` beams. |
 | `samples_per_beam` | Optional, default is 1000. Valid range is 200 &ndash; 4000. |
-| `frequency` | Options, default is `auto`. Valid values are `auto`, `low`, and `high`.
+| `frequency` | Optional, default is `auto`. Valid values are `auto`, `low`, and `high`.
 
 #### Example Command for `acquire`
 
