@@ -49,18 +49,18 @@ REM Don't use the old nuget.
 
 SET NUGET_EXE=.\submodules\vcpkg\downloads\tools\nuget-4.6.2-windows\nuget.exe
 
-%NUGET_EXE% restore tools\arislog\arislog.sln
-
-REM pushd tools\arislog\arislog
-REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x86"
-REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x64"
-REM popd
-
-msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
-IF %ERRORLEVEL% NEQ 0 EXIT /B 1
-
-msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
-IF %ERRORLEVEL% NEQ 0 EXIT /B 1
+REM %NUGET_EXE% restore tools\arislog\arislog.sln
+REM 
+REM REM pushd tools\arislog\arislog
+REM REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x86"
+REM REM msbuild /t:restore /p:Configuration="Release" /p:Platform="x64"
+REM REM popd
+REM 
+REM msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x86"
+REM IF %ERRORLEVEL% NEQ 0 EXIT /B 1
+REM 
+REM msbuild tools\arislog\arislog.sln /t:Rebuild /p:Configuration="Release" /p:Platform="x64"
+REM IF %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 
 %NUGET_EXE% restore sample-code\vc-using-framestream\vc-using-framestream.sln
