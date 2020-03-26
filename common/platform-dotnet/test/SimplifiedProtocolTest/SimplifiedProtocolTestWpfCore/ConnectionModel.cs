@@ -68,7 +68,12 @@ namespace SimplifiedProtocolTestWpfCore
             ParsedFeedbackFromSonar ParseFeedback(string[] lines)
             {
                 var (resultCode, resultString) = ParseResult(lines);
-                var settingsCookie = ParseSettingsCookie(lines);
+
+                uint settingsCookie = 0;
+                if (resultCode == 200)
+                {
+                    settingsCookie = ParseSettingsCookie(lines);
+                }
 
                 return new ParsedFeedbackFromSonar
                 {
