@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Serilog;
 using System.Windows;
 
 namespace SimplifiedProtocolTestWpfCore
@@ -13,5 +8,17 @@ namespace SimplifiedProtocolTestWpfCore
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            const string LoggingTemplate =
+                "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+
+            Log.Logger = new LoggerConfiguration()
+                            //.MinimumLevel.Debug()
+                            .WriteTo.Debug(outputTemplate: LoggingTemplate)
+                            .CreateLogger();
+        }
     }
 }

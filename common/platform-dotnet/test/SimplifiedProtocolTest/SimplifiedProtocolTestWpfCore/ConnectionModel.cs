@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -48,7 +49,15 @@ namespace SimplifiedProtocolTestWpfCore
 
             frameReceiver = new UdpClient();
             frameReceiver.Client.ReceiveBufferSize = 2 * 1024 * 1024;
-            frameReceiver.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+
+            var commandStreamEP = (IPEndPoint)commandStream.Client.LocalEndPoint;
+            Serilog.Log.Information($"commandStreamEP={commandStreamEP}");
+
+            frameReceiver.Client.Bind(new IPEndPoint(commandStreamEP.Address, 0));
+
+            Serilog.Log.Information(
+                $"frameReceiver bound to local endpoint: {frameReceiver.Client.LocalEndPoint}");
+
             Task.Run(() => ReceiveFramePackets());
 
             synchronizationContext = SynchronizationContext.Current;
@@ -120,9 +129,10 @@ namespace SimplifiedProtocolTestWpfCore
                     frameAccumulator.ReceivePacket(bytes);
                 }
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException ex)
             {
                 // Socket was closed.
+                Serilog.Log.Information($"Frame receiver bailed: {ex.Message}");
             }
         }
 
