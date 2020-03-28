@@ -296,14 +296,19 @@ namespace SimplifiedProtocolTestWpfCore
                 successes += success ? 1 : 0;
                 failures += success ? 0 : 1;
 
-                var successText = success ? "succeeded" : "FAILED";
-                var report = $"Test '{testResult.TestName}' {successText}";
-                buf.AppendLine(report);
+                if (!success)
+                {
+                    var report = $"Test '{testResult.TestName}' FAILED";
+                    buf.AppendLine(report);
 
-                buf.AppendLine(String.Join(";", testResult.Messages));
+                    foreach (var message in testResult.Messages)
+                    {
+                        buf.AppendLine(message);
+                    }
 
-                buf.AppendLine("----------------------------------------");
-                buf.AppendLine();
+                    buf.AppendLine("----------------------------------------");
+                    buf.AppendLine();
+                }
             }
 
             buf.AppendLine($"Successes: {successes}");

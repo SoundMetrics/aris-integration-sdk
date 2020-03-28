@@ -45,7 +45,11 @@ namespace SimplifiedProtocolTestWpfCore
             IEnumerable<IntegrationTestCase> localTestCases,
             CancellationToken ct)
         {
-            return RunTestCases().ToArray();
+            var cachedResults = RunTestCases().ToArray();
+            var failedResults = cachedResults.Where(result => !result.Success).ToArray();
+            Serilog.Log.Information($"RunTestCases: total results: {cachedResults.Length}; failed: {failedResults.Length}");
+
+            return failedResults;
 
             IEnumerable<IntegrationTestResult> RunTestCases()
             {

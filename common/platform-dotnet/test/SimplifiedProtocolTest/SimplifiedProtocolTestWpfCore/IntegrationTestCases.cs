@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 namespace SimplifiedProtocolTestWpfCore
@@ -225,32 +226,60 @@ namespace SimplifiedProtocolTestWpfCore
 
                 if (testOperations.WaitOnAFrame(syncContext, anyValidCookie, ct) is Frame _)
                 {
-                    foreach (var settings in EnumerateAcquireSettings())
-                    {
-                        var expectedSettingsCookie = testOperations.StartAcquire(settings);
-                        using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
-                        {
-                            Predicate<Frame> predicate =
-                                frame => expectedSettingsCookie == frame.Header.SettingsCookieInUse();
-                            Frame? frame = testOperations.WaitOnAFrame(syncContext, predicate, cts.Token);
+                    int testNumber = 0;
 
-                            if (frame is null)
+                    foreach (var acquireSetings in EnumerateAcquireSettings())
+                    {
+                        var parsedSonarFeedback = testOperations.StartAcquire(acquireSetings);
+                        if (parsedSonarFeedback.ResultCode == 200)
+                        {
+                            using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
                             {
-                                var failure = $"Failed to get frame on {settings}";
-                                failures.Add(failure);
+                                var expectedSettingsCookie = parsedSonarFeedback.SettingsCookie;
+                                Predicate<Frame> predicate =
+                                    frame =>
+                                        expectedSettingsCookie == frame.Header.SettingsCookieInUse();
+                                Frame? frame = testOperations.WaitOnAFrame(syncContext, predicate, cts.Token);
+
+                                if (frame is null)
+                                {
+                                    var failure = $"Failed to get frame on {acquireSetings}";
+                                    failures.Add(failure);
+                                }
                             }
                         }
+                        else
+                        {
+                            failures.Add(
+                                DescribeFailedTestCase(
+                                    testNumber, acquireSetings, parsedSonarFeedback));
+                        }
+
+                        ++testNumber;
                     }
 
                     var success = failures.Count == 0;
-                    var message = success ? "Success." : "One or more tests failed";
-                    var messages = new[] { message }.Concat(failures).ToArray();
-
-                    return MakeResult(success, messages);
+                    return MakeResult(success, failures.ToArray());
                 }
                 else
                 {
                     return MakeResult(false, "Could not get a frame after going passive.");
+                }
+
+                static string DescribeFailedTestCase(
+                    int testNumber,
+                    AcquireSettings acquireSettings,
+                    ParsedFeedbackFromSonar parsedFeedback)
+                {
+                    var buffer = new StringBuilder();
+                    buffer.AppendLine($"testNumber: {testNumber}");
+                    buffer.Append("Settings: ");
+                    buffer.AppendLine(acquireSettings.ToString());
+
+                    buffer.AppendLine("Feedback:");
+                    buffer.Append(parsedFeedback.RawFeedback);
+
+                    return buffer.ToString();
                 }
 
                 static IEnumerable<AcquireSettings> EnumerateAcquireSettings()

@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -12,8 +11,6 @@ using System.Threading.Tasks;
 
 namespace SimplifiedProtocolTestWpfCore
 {
-    using SettingsCookie = UInt32;
-
     public sealed class ConnectionModel
         : SimplifiedProtocolTest.Helpers.Observable, ITestOperations
     {
@@ -65,7 +62,7 @@ namespace SimplifiedProtocolTestWpfCore
 
             InitializeConnection();
 
-            ParsedFeedbackFromSonar ParseFeedback(string[] lines)
+            static ParsedFeedbackFromSonar ParseFeedback(string[] lines)
             {
                 var (resultCode, resultString) = ParseResult(lines);
 
@@ -77,7 +74,7 @@ namespace SimplifiedProtocolTestWpfCore
 
                 return new ParsedFeedbackFromSonar
                 {
-                    RawFeedback = feedback,
+                    RawFeedback = String.Join("\n", lines),
                     ResultCode = resultCode,
                     ResultString = resultString,
                     SettingsCookie = settingsCookie,
@@ -174,10 +171,12 @@ namespace SimplifiedProtocolTestWpfCore
 
             SendCommand(
                 commandStream.Client,
-                "initialize",
-                "salinity brackish",
-                "datetime " + ArisDatetime.GetTimestamp(),
-                $"rcvr_port {frameReceiverPort}"
+                new CommandRequest(
+                    "initialize",
+                    "salinity brackish",
+                    "datetime " + ArisDatetime.GetTimestamp(),
+                    $"rcvr_port {frameReceiverPort}"
+                    )
                 );
         }
 
@@ -185,35 +184,37 @@ namespace SimplifiedProtocolTestWpfCore
         {
             SendCommand(
                 commandStream.Client,
-                "testpattern");
+                new CommandRequest("testpattern"));
         }
 
         public void StartPassiveMode()
         {
             SendCommand(
                 commandStream.Client,
-                "passive");
+                new CommandRequest("passive"));
         }
 
         public void StartDefaultAcquireMode()
         {
             SendCommand(
                 commandStream.Client,
-                "acquire",
-                "start_range 1",
-                "end_range 5");
+                new CommandRequest(
+                    "acquire",
+                    "start_range 1",
+                    "end_range 5")
+                );
         }
 
-        public SettingsCookie StartAcquire(AcquireSettings settings)
+        public ParsedFeedbackFromSonar StartAcquire(AcquireSettings settings)
         {
-            var parsedFeedback =
+            return
                 SendCommand(
                     commandStream.Client,
-                    "acquire",
-                    $"start_range {settings.StartRange}",
-                    $"end_range {settings.EndRange}");
-
-            return parsedFeedback.SettingsCookie;
+                    new CommandRequest(
+                        "acquire",
+                        $"start_range {settings.StartRange}",
+                        $"end_range {settings.EndRange}")
+                    );
         }
 
         public Frame? WaitOnAFrame(
@@ -248,17 +249,17 @@ namespace SimplifiedProtocolTestWpfCore
         }
 
 
-        private static string FormatCommand(string[] commandLines) =>
-            string.Join("\n", commandLines) + "\n\n";
+        private static string FormatCommand(CommandRequest commandRequest) =>
+            string.Join("\n", commandRequest.Text) + "\n\n";
 
         private static string FormatCommandForLogging(string[] commandLines) =>
             string.Join("\\n\n", commandLines) + "\\n\n\\n\n";
 
         private ParsedFeedbackFromSonar SendCommand(
             Socket socket,
-            params string[] commandLines)
+            CommandRequest commandRequest)
         {
-            PostCommandText(commandLines);
+            PostCommandText(commandRequest);
 
             ParsedFeedbackFromSonar feedback = new ParsedFeedbackFromSonar { };
 
@@ -275,7 +276,7 @@ namespace SimplifiedProtocolTestWpfCore
                 {
 
 
-                    var command = FormatCommand(commandLines);
+                    var command = FormatCommand(commandRequest);
                     var commandBytes = Encoding.ASCII.GetBytes(command);
                     socket.Send(commandBytes);
 
@@ -288,24 +289,17 @@ namespace SimplifiedProtocolTestWpfCore
 
             return feedback;
 
-            void PostCommandText(string[] commandLines)
+            void PostCommandText(CommandRequest commandRequest)
             {
                 var commandText =
                     "\n"
                     + "Sending command:\n"
                     + ">>>>>>>>\n"
-                    + FormatCommandForLogging(commandLines)
+                    + string.Join("\\n\n", commandRequest.Text)
+                    + "\\n\n"
                     + "<<<<<<<<\n";
                 PostExplanatoryText(commandText);
             }
-        }
-
-        private class ParsedFeedbackFromSonar
-        {
-            public string RawFeedback { get; set; } = "";
-            public uint ResultCode;
-            public string ResultString { get; set; } = "";
-            public uint SettingsCookie;
         }
 
         private readonly FrameAccumulator frameAccumulator = new FrameAccumulator();

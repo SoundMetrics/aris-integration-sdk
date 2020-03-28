@@ -6,10 +6,23 @@ namespace SimplifiedProtocolTestWpfCore
 {
     using SettingsCookie = UInt32;
 
+    public class ParsedFeedbackFromSonar
+    {
+        public string RawFeedback { get; set; } = "";
+        public uint ResultCode;
+        public string ResultString { get; set; } = "";
+        public SettingsCookie SettingsCookie;
+    }
+
     public struct AcquireSettings
     {
         public float StartRange;
         public float EndRange;
+
+        public override string ToString()
+        {
+            return $"start={StartRange}; end={EndRange}";
+        }
     }
 
     internal interface  ITestOperations
@@ -20,7 +33,7 @@ namespace SimplifiedProtocolTestWpfCore
         void StartTestPattern();
         void StartDefaultAcquireMode();
 
-        SettingsCookie StartAcquire(AcquireSettings settings);
+        ParsedFeedbackFromSonar StartAcquire(AcquireSettings settings);
 
         Frame? WaitOnAFrame(
             SynchronizationContext uiSyncContext,
