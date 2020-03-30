@@ -44,7 +44,7 @@ The value of a key-value pair is everything to the right of the parameter name, 
 | Parameter | Description |
 |-|-|
 | `salinity` | **Required.** There are three valid values: `fresh`, `brackish`, and `saltwater`. Salinity affects the speed of sound in water, and affects calculations involving time and distance. |
-| `datetime` | **Required.** Setting the date and time should be considered mandatory by all integrators. If the RTC were to fail, times would not be consistent across power cycles. The required format is `2017-Apr-01 13:24:35`; US English is assumed for the month abbreviation. See below for more on formatting this parameter. |
+| `datetime` | **Required.** Setting the date and time should be considered mandatory by all integrators. If the ARIS' onboard clock were to fail, times would not be consistent across power cycles. The required format is `2017-Apr-01 13:24:35`; US English is assumed for the month abbreviation. See below for more on formatting this parameter. |
 | `rcvr_port` | **Required.** This is the port number on which you will receive frames. You should open your receive socket before requesting frame data from the ARIS. |
 | `rcvr_ip` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will send frames to the host that opened the command connection. |
 | `rcvr_syslog` | Optional. Specifies an IPv4 address in dotted format. E.g., `192.168.1.42`. If not provided, the ARIS will relay syslog messages to the host that opened the command connection. |
@@ -92,7 +92,7 @@ We provide example code that formats the datetime value in a locale-invariant fa
 
 Command response codes are on the first line of the response from the ARIS. Possible codes are:
 
-* `200 OK` &ndash; This indicates success. Note that when settings a range, the parameters given may be altered somewhat to make the request comply with the the laws of physics, and the abilities of the ARIS.
+* `200 OK` &ndash; This indicates success. Note that when setting a range, the parameters given may be constrained to make the request comply with the the laws of physics, and the abilities of the ARIS.
 * `400 Bad Request` &ndash; This indicates an error; the request contains an unexpected or out-of-range value.
 * `404 Not Found` &ndash; This indicates an error; the ARIS does not understand the command requested.
 
@@ -128,14 +128,14 @@ In the command response for `testpattern`, there is a line for the "settings coo
 Here 'N' indicates the value of the settings cookie. Each successive acquisition attempt&mdash;including the `testpattern` and `passive` commands&mdash;is recorded with a new value for the settings cookie. The settings cookie also appears in the ARIS frame header, in either the `AppliedSettings` or `ConstrainedSettings` field.
 
 **Note:**
-> If settings are applied as-is, the cookie appears in the `AppliedSettings` field. If the settings were constrained prior to application, the cookie apperas in the `ConstrainedSettings` field.
+> If settings are applied as-is, the cookie appears in the `AppliedSettings` field. If the settings were constrained prior to application, the cookie appears in the `ConstrainedSettings` field.
 
 **Also note:**
 > The `settings-cookie` value is made available primarily for testing purposes. However, if you use it for any purpose be aware that, due to latency in data acquisition, the frame received immediately after changing acquisition settings may have the previous settings' cookie value and settings applied.
 
 ### `passive`
 
-Sending the `passive` command causes the ARIS to acquire images without transmitting. This may be used for observing the effect of electrical noise on a vehicle.
+Sending the `passive` command causes the ARIS to acquire images without transmitting. This may be used for observing the presence of electrical or acoustic noise on a vehicle.
 
 #### Command Response for `passive`
 
@@ -220,14 +220,14 @@ This table describes the header that starts the payload on each datagram. (All i
 | Field | Type | Offset | Description |
 |-|-|-|-|
 | `signature` | `uint32_t` | 0 | Contains the value `0x53495241` (little-endian; "ARIS"). |
-| `header_ size` | `uint32_t` | 4 | The size of this header, up to but not including `payload`. `payload`  follows the header immediately. |
-| `frame_ size` | `uint32_t` | 8 | This is the size of the ARIS frame header (1024 bytes) + the size of the frame's sample data. In other words, after you've reassembled the frame parts, this is 1024 + &lsaquo;total samples&rsaquo;. |
-| `frame_ index` | `uint32_t` | 12 | Identifies this frame. There are generally multiple datagrams per frame. If `frame_index` changes before the complete frame is received, the previous frame is incomplete. |
-| `part_ number` | `uint32_t` | 16 | A zero based index of the parts of the current frame. The first datagram's sequence number is 0. Frame's first datagram carries only the frame header (which is 1024 bytes), the second datagram's payload contains the first samples of the frame. |
+| `header_size` | `uint32_t` | 4 | The size of this header, up to but not including `payload`. `payload`  follows the header immediately. |
+| `frame_size` | `uint32_t` | 8 | This is the size of the ARIS frame header (1024 bytes) + the size of the frame's sample data. In other words, after you've reassembled the frame parts, this is 1024 + &lsaquo;total samples&rsaquo;. |
+| `frame_index` | `uint32_t` | 12 | Identifies this frame. There are generally multiple datagrams per frame. If `frame_index` changes before the complete frame is received, the previous frame is incomplete. |
+| `part_number` | `uint32_t` | 16 | A zero based index of the parts of the current frame. The first datagram's sequence number is 0. Frame's first datagram carries only the frame header (which is 1024 bytes), the second datagram's payload contains the first samples of the frame. |
 | `payload_size` | `uint32_t` | 20 | The number of octets in the payload. |
-| `payload` | `uint8_t[]` | `parkt_ header_ size` |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
+| `payload` | `uint8_t[]` | `part_ header_ size` |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
 
-Datagrams forming a very small frame could look those below, where there are 128 beams in the frame and 10 samples per beam.
+Datagrams forming a very small frame could look those below, where there are 128 beams in the frame and 10 samples per beam. (10 is not a valid )
 
 The first datagram contains the frame header in `payload` followed by 460 of the 1280 sample bytes. (Total sample count is `beams` &times; `samples_per_beam`.)
 
