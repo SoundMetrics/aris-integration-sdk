@@ -120,7 +120,6 @@ module EventMatcherExtensions =
     open System.Threading
     open System.Threading.Tasks
 
-    [<Extension>]
     type IObserver<'Ev> with
 
         /// Extension for C# users.
