@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SoundMetrics.Data2;
+using SoundMetrics.Data;
 using System;
 
 namespace SoundMetrics.Data.UT

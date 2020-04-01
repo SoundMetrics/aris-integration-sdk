@@ -2,7 +2,7 @@
 
 using System;
 
-namespace SoundMetrics.Data2
+namespace SoundMetrics.Data
 {
     public struct Range<T> where T : IComparable, IComparable<T>
     {
