@@ -123,7 +123,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.HID.Windows", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.HID.Windows.UT", "SoundMetrics.HID.Windows.UT\SoundMetrics.HID.Windows.UT.csproj", "{21FED0F7-2832-473E-A8DA-2BA9872F39DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Data2", "SoundMetrics.Data2\SoundMetrics.Data2.csproj", "{DC34DA33-8D1B-4F02-80EE-423A2C7DA7DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Data2", "SoundMetrics.Data2\SoundMetrics.Data2.csproj", "{DC34DA33-8D1B-4F02-80EE-423A2C7DA7DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
