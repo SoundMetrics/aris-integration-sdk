@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright 2011-2020 Sound Metrics Corp. All Rights Reserved.
+
+using System;
 
 namespace SoundMetrics.Data
 {
