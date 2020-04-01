@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Data\SoundMetrics.Data.fsproj" />
+    <ProjectReference Include="..\SoundMetrics.Data2\SoundMetrics.Data2.csproj" />
   </ItemGroup>
 
 </Project>
