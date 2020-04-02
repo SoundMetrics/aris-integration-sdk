@@ -15,10 +15,12 @@ namespace SoundMetrics.Data.FilterAdapters
 
         public interface IFilteredProperty<T> : INotifyPropertyChanged
         {
+            void AddValue(T value);
+
             T FilteredValue { get; }
         }
 
-        private class FilteredPropertyImpl<T>
+        private sealed class FilteredPropertyImpl<T>
             : INotifyPropertyChanged, IFilteredProperty<T>
         {
             public FilteredPropertyImpl(IBufferedFilter<T> filter)
@@ -28,11 +30,11 @@ namespace SoundMetrics.Data.FilterAdapters
 
             public void AddValue(T value)
             {
-                T newValue;
+                T newFilteredValue;
 
-                if (filter.AddValue(value, out newValue))
+                if (filter.AddValue(value, out newFilteredValue))
                 {
-                    FilteredValue = newValue;
+                    FilteredValue = newFilteredValue;
                 }
             }
 
