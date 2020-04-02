@@ -1,9 +1,10 @@
 ﻿// Copyright 2020 Sound Metrics Corp. All Rights Reserved.
 
+using SoundMetrics.Data.Filters;
 using System;
 using System.ComponentModel;
 
-namespace SoundMetrics.Data.Filters
+namespace SoundMetrics.Data.FilterAdapters
 {
     public static class FilteredProperty
     {
@@ -14,10 +15,12 @@ namespace SoundMetrics.Data.Filters
 
         public interface IFilteredProperty<T> : INotifyPropertyChanged
         {
+            void AddValue(T value);
+
             T FilteredValue { get; }
         }
 
-        private class FilteredPropertyImpl<T>
+        private sealed class FilteredPropertyImpl<T>
             : INotifyPropertyChanged, IFilteredProperty<T>
         {
             public FilteredPropertyImpl(IBufferedFilter<T> filter)
@@ -27,11 +30,11 @@ namespace SoundMetrics.Data.Filters
 
             public void AddValue(T value)
             {
-                T newValue;
+                T newFilteredValue;
 
-                if (filter.AddValue(value, out newValue))
+                if (filter.AddValue(value, out newFilteredValue))
                 {
-                    FilteredValue = newValue;
+                    FilteredValue = newFilteredValue;
                 }
             }
 

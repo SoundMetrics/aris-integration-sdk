@@ -28,13 +28,21 @@ namespace SoundMetrics.Data.Filters
             itemCount = Math.Min(itemCount + 1, buffer.Length);
             var isBufferFull = itemCount == buffer.Length;
 
-            Array.Sort(buffer, 0, itemCount);
+            var sorted = SortIntoCopy(buffer, itemCount);
 
             var currentValueIndex = itemCount / 2;
-            var currentValue = buffer[currentValueIndex];
+            var currentValue = sorted[currentValueIndex];
 
             filteredValue = currentValue;
             return isBufferFull;
+
+            T[] SortIntoCopy(T[] values, int length)
+            {
+                var copy = new T[length];
+                Array.Copy(values, copy, length);
+                Array.Sort(copy);
+                return copy;
+            }
         }
 
         private readonly T[] buffer;
