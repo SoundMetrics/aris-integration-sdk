@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Reactive.Subjects;
 using System.Text;
 
-namespace SoundMetrics.Data2
+namespace SoundMetrics.Data.FilterAdapters
 {
     public static class ObservableFilteredValue
     {
-        public static IObservable<T> Create<T>(IBufferedFilter<T> filter)
+        public static IObservableFilteredValue<T> Create<T>(IBufferedFilter<T> filter)
         {
             return new ObservableFilteredValueImpl<T>(filter);
         }
