@@ -1,9 +1,10 @@
 ﻿// Copyright 2020 Sound Metrics Corp. All Rights Reserved.
 
+using SoundMetrics.Data.Filters;
 using System;
 using System.ComponentModel;
 
-namespace SoundMetrics.Data.Filters
+namespace SoundMetrics.Data.FilterAdapters
 {
     public static class FilteredProperty
     {
