@@ -40,15 +40,16 @@ namespace SoundMetrics.Data.UT
             // specially defined in F# to be used in other CLI languages.
 
             var myZero = FineDuration.Zero; // avoid warning CS1718 - comparison to self
+
             Assert.IsTrue(myZero == FineDuration.Zero);
             Assert.IsTrue(FineDuration.Zero != FineDuration.OneMicrosecond);
 
             Assert.IsTrue(FineDuration.Zero < FineDuration.OneMicrosecond);
-            Assert.IsTrue(FineDuration.Zero <= FineDuration.Zero);
+            Assert.IsTrue(FineDuration.Zero <= myZero);
             Assert.IsTrue(FineDuration.Zero <= FineDuration.FromMicroseconds(double.Epsilon));
 
             Assert.IsTrue(FineDuration.OneMicrosecond > FineDuration.Zero);
-            Assert.IsTrue(FineDuration.Zero >= FineDuration.Zero);
+            Assert.IsTrue(FineDuration.Zero >= myZero);
             Assert.IsTrue(FineDuration.FromMicroseconds(double.Epsilon) >= FineDuration.Zero);
         }
 
