@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "arisfile": {
+      "commandName": "Project",
+      "commandLineArgs": "--file-path \"c:\\users\\curtn\\Downloads\\SN111_RecordTest_2020-03-09_125322.aris\""
+    }
+  }
+}
