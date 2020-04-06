@@ -1,9 +1,7 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Headers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace arisfile.analysis
 {
@@ -11,11 +9,11 @@ namespace arisfile.analysis
 
     public static class Analysis
     {
-        public delegate void AnalysisFunction(ArisFrameAccessor frameAccessor);
+        public delegate void FrameAnalysisFunction(ArisFrameAccessor frameAccessor);
 
         public static void Run(
             Stream stream,
-            params AnalysisFunction[] analysisFunctions)
+            params FrameAnalysisFunction[] analysisFunctions)
         {
             CheckFileTraits(stream);
             EnumerateFramesForAnalysis(stream, analysisFunctions);
@@ -23,7 +21,7 @@ namespace arisfile.analysis
 
         private static void EnumerateFramesForAnalysis(
             Stream stream,
-            AnalysisFunction[] analysisFunctions)
+            FrameAnalysisFunction[] analysisFunctions)
         {
             stream.Seek(0, SeekOrigin.Begin);
             foreach (var frame in new ArisFile(stream).Frames)

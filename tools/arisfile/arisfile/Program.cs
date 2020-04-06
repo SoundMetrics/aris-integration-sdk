@@ -1,7 +1,9 @@
 ﻿using arisfile.analysis;
 using CommandLine;
 using Serilog;
+using System;
 using System.IO;
+using static arisfile.analysis.Analysis;
 
 namespace arisfile
 {
@@ -46,6 +48,7 @@ namespace arisfile
                             Analysis.Run(
                                 stream
                                 , AnalysisFunctions.EmitFrameIndex
+                                , AnalysisFunctions.MakeTimelineChecker2()
                                 );
                         }
                     }
@@ -64,6 +67,63 @@ namespace arisfile
             {
                 Log.Information(
                     $"Frame {frame.ArisFrameHeader.FrameIndex} (calculated: {frame.CalculatedFrameIndex})");
+            }
+
+            public static FrameAnalysisFunction MakeTimelineChecker()
+            {
+                DateTime? previousTopsideTimestamp = null;
+                DateTime? previousSonarTimestamp = null;
+
+                return frameAccessor =>
+                {
+                    var currentTopside = frameAccessor.ArisFrameHeader.GetTopsideTimestamp();
+                    var currentSonar = frameAccessor.ArisFrameHeader.GetArisTimestamp();
+
+                    if (previousTopsideTimestamp is DateTime previousTopside
+                        && previousSonarTimestamp is DateTime previousSonar)
+                    {
+                        if (currentTopside < previousTopside || currentSonar < previousSonar)
+                        {
+                            Log.Warning($"Retrograde timestamp:");
+                        }
+                    }
+
+                    previousTopsideTimestamp = frameAccessor.ArisFrameHeader.GetTopsideTimestamp();
+                    previousSonarTimestamp = frameAccessor.ArisFrameHeader.GetArisTimestamp();
+
+                    Log.Information($"### ARIS: {previousSonarTimestamp}; topside: {previousTopsideTimestamp}");
+                };
+            }
+
+            public static FrameAnalysisFunction MakeTimelineChecker2()
+            {
+                ulong? previousTopsideTimestamp = null;
+                ulong? previousSonarTimestamp = null;
+
+                return frameAccessor =>
+                {
+                    var currentTopside = frameAccessor.ArisFrameHeader.FrameTime;
+                    var currentSonar = frameAccessor.ArisFrameHeader.sonarTimeStamp;
+
+                    if (previousTopsideTimestamp is ulong previousTopside
+                        && previousSonarTimestamp is ulong previousSonar)
+                    {
+                        if (currentTopside < previousTopside || currentSonar < previousSonar)
+                        {
+                            Log.Warning("Out-of-order timestamp(s):");
+                        }
+                    }
+
+                    long? topsideDelta = (long)currentTopside - (long?)previousTopsideTimestamp;
+                    long? sonarDelta = (long)currentSonar - (long?)previousSonarTimestamp;
+
+                    previousTopsideTimestamp = frameAccessor.ArisFrameHeader.FrameTime;
+                    previousSonarTimestamp = frameAccessor.ArisFrameHeader.sonarTimeStamp;
+
+                    Log.Information(
+                        $"    ARIS: {previousSonarTimestamp} (\u03b4 {sonarDelta} \u00b5s); "
+                        + $"topside: {previousTopsideTimestamp} (\u03b4 {topsideDelta} \u00b5s)");
+                };
             }
         }
     }
