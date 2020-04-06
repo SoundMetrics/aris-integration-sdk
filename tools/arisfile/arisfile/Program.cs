@@ -43,7 +43,10 @@ namespace arisfile
                         {
                             Log.Information("Opened '{FilePath}'.", options.FilePath);
 
-                            Analysis.Run(stream);
+                            Analysis.Run(
+                                stream
+                                , AnalysisFunctions.EmitFrameIndex
+                                );
                         }
                     }
                     catch (IOException ex)
@@ -54,5 +57,14 @@ namespace arisfile
         }
 
         private static Stream OpenArisFile(string path) => File.OpenRead(path);
+
+        private static class AnalysisFunctions
+        {
+            public static void EmitFrameIndex(ArisFrameAccessor frame)
+            {
+                Log.Information(
+                    $"Frame {frame.ArisFrameHeader.FrameIndex} (calculated: {frame.CalculatedFrameIndex})");
+            }
+        }
     }
 }
