@@ -13,7 +13,7 @@ const auto kPingTimerPeriod = boost::posix_time::seconds(2);
 // you may need a bigger buffer. During development this sample
 // program ran fine with a 16KB buffer, but all it does is wrangle
 // packets.
-// 
+//
 // You probably want a substantial buffer; more if your hardware
 // spec is slow or there's a lot going on in your system (context
 // switching, for example).
@@ -134,14 +134,17 @@ Aris::Common::AcousticSettings Connection::SetCookie(const Aris::Common::Acousti
 std::vector<uint8_t> Connection::CreatePingTemplate() {
   aris::Command command = std::move(Aris::Network::CommandBuilder::Ping());
 
-  const uint32_t msgLength = command.ByteSize();
+  const uint32_t msgLength = static_cast<uint32_t>(command.ByteSizeLong());
   const auto prefixLength = sizeof msgLength;
 
   // Make enough space to store the message length prefix with the message.
   std::vector<uint8_t> buf(prefixLength + msgLength);
 
   // The message is prefixed by the message length in network order.
-  *reinterpret_cast<uint32_t*>(&buf[0]) = htonl(command.ByteSize());
+  *reinterpret_cast<uint32_t*>(&buf[0]) =
+    htonl(
+      static_cast<uint32_t>(
+        command.ByteSizeLong()));
   command.SerializeToArray(&buf[prefixLength], msgLength);
 
   // Normally you would just send the command to the ARIS rather than
@@ -151,7 +154,7 @@ std::vector<uint8_t> Connection::CreatePingTemplate() {
 
 void Connection::SerializeCommand(const aris::Command & cmd, std::vector<uint8_t>& buffer)
 {
-  const uint32_t msgLength = cmd.ByteSize();
+  const uint32_t msgLength = static_cast<uint32_t>(cmd.ByteSizeLong());
   const auto prefixLength = sizeof msgLength;
 
   // Make enough space to store the message length prefix with the message.
@@ -159,7 +162,10 @@ void Connection::SerializeCommand(const aris::Command & cmd, std::vector<uint8_t
   buffer.resize(totalMessageLength);
 
   // The message is prefixed by the message length in network order.
-  *reinterpret_cast<uint32_t*>(&buffer[0]) = htonl(cmd.ByteSize());
+  *reinterpret_cast<uint32_t*>(&buffer[0]) =
+    htonl(
+      static_cast<uint32_t>(
+        cmd.ByteSizeLong()));
   cmd.SerializeToArray(&buffer[prefixLength], msgLength);
 }
 
