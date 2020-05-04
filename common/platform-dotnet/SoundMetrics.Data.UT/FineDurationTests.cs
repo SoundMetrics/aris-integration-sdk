@@ -39,15 +39,17 @@ namespace SoundMetrics.Data.UT
             // Makes use of LT, GT, EQ, NEQ, GTEQ, LTEQ, operators, some of which have to be
             // specially defined in F# to be used in other CLI languages.
 
-            Assert.IsTrue(FineDuration.Zero == FineDuration.Zero);
+            var myZero = FineDuration.Zero; // avoid warning CS1718 - comparison to self
+
+            Assert.IsTrue(myZero == FineDuration.Zero);
             Assert.IsTrue(FineDuration.Zero != FineDuration.OneMicrosecond);
 
             Assert.IsTrue(FineDuration.Zero < FineDuration.OneMicrosecond);
-            Assert.IsTrue(FineDuration.Zero <= FineDuration.Zero);
+            Assert.IsTrue(FineDuration.Zero <= myZero);
             Assert.IsTrue(FineDuration.Zero <= FineDuration.FromMicroseconds(double.Epsilon));
 
             Assert.IsTrue(FineDuration.OneMicrosecond > FineDuration.Zero);
-            Assert.IsTrue(FineDuration.Zero >= FineDuration.Zero);
+            Assert.IsTrue(FineDuration.Zero >= myZero);
             Assert.IsTrue(FineDuration.FromMicroseconds(double.Epsilon) >= FineDuration.Zero);
         }
 
@@ -137,8 +139,10 @@ namespace SoundMetrics.Data.UT
             expected = FineDuration.FromMicroseconds(double.PositiveInfinity);
             a = FineDuration.FromMicroseconds(1);
             b = 0;
-            actual = a / b;
-            Assert.AreEqual(expected, actual);
+            var _ = Assert.ThrowsException<DivideByZeroException>(() =>
+            {
+                actual = a / b;
+            });
 
             expected = FineDuration.FromMicroseconds(8);
             a = FineDuration.FromMicroseconds(8);

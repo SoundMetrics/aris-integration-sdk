@@ -39,3 +39,23 @@ Pointers to some interesting bits of the sample code:
 This sample also serves as a test program for the multicasting implementation built into the frame stream code. Multicasting of ARIS frames is uncommon, most integrators default to point-to-point delivery of the frames.
 
 For more on using multicasting with ARIS, please see the ARIS Integration SDK documentation.
+
+# Build Notes
+
+In VS 2019 the generated protocol source no longer built successfully. Warnin C4996
+appeared in great quantity, and we treat warnings as errors.
+
+A short term solution was applied, namely, XXXXXXX.
+
+The warnings in question appear like this (path truncated):
+
+```
+...\generated_message_table_driven.h(209, 50): error C2220: the following warning is treated as an error
+...\generated_message_table_driven.h(209, 50): warning C4996: 'std::is_pod<google::protobuf::internal::ParseTableField>': warning STL4025: std::is_pod and std::is_pod_v are deprecated in C++20. The std::is_trivially_copyable and/or std::is_standard_layout traits likely suit your use case. You can define _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+...\generated_message_table_driven.h(210, 59): warning C4996: 'std::is_pod<google::protobuf::internal::AuxillaryParseTableField>': warning STL4025: std::is_pod and std::is_pod_v are deprecated in C++20. The std::is_trivially_copyable and/or std::is_standard_layout traits likely suit your use case. You can define _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+...\generated_message_table_driven.h(211, 69): warning C4996: 'std::is_pod<google::protobuf::internal::AuxillaryParseTableField::enum_aux>': warning STL4025: std::is_pod and std::is_pod_v are deprecated in C++20. The std::is_trivially_copyable and/or std::is_standard_layout traits likely suit your use case. You can define _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+...\generated_message_table_driven.h(212, 72): warning C4996: 'std::is_pod<google::protobuf::internal::AuxillaryParseTableField::message_aux>': warning STL4025: std::is_pod and std::is_pod_v are deprecated in C++20. The std::is_trivially_copyable and/or std::is_standard_layout traits likely suit your use case. You can define _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+...\generated_message_table_driven.h(213, 71): warning C4996: 'std::is_pod<google::protobuf::internal::AuxillaryParseTableField::string_aux>': warning STL4025: std::is_pod and std::is_pod_v are deprecated in C++20. The std::is_trivially_copyable and/or std::is_standard_layout traits likely suit your use case. You can define _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+...\generated_message_table_driven.h(214, 45): warning C4996: 'std::is_pod<google::protobuf::internal::ParseTable>': warning STL4025: std::is_pod and std::is_pod_v are deprecated in C++20. The std::is_trivially_copyable and/or std::is_standard_layout traits likely suit your use case. You can define _SILENCE_CXX20_IS_POD_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+...\generated_message_table_driven.h(209, 50): error C2220: the following warning is treated as an error
+```
