@@ -14,6 +14,9 @@ This SDK, beginning with version 2.0, supersedes a previous ARIS 1.x SDK. The ol
 
 This SDK does not support for the DIDSON sonar. Please contact support@soundmetrics.com for more information on DIDSON protocols.
 
+### Release History
+The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
+
 ## Contents
 
 ### Documentation
@@ -63,9 +66,6 @@ Contains Protocol Buffer files describing messages sent to/received from the ARI
 ### External Tools
 
 This repository makes use of **vcpkg** for building **arislog** and **vc-using-framestream**. **vcpkg** is an external tool that downloads the source code for `protobuf` and builds it. The version of protobuf downloaded is coded within the `vcpkg` submodule and, therefore, won't change unless we update that submodule.
-
-### Release History
-The release history of this SDK is tracked [here](release-history.md). Releases are available [here](https://github.com/SoundMetrics/aris-integration-sdk/releases).
 
 ## Git-specific Issues
 This git repository includes the submodule `aris-file-sdk`. If you intend to clone this repo
