@@ -127,6 +127,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Data2", "Sound
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris", "SoundMetrics.Aris\SoundMetrics.Aris.csproj", "{81183C20-9DB6-454B-A250-5D799CDEFD63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.UT", "SoundMetrics.Aris.UT\SoundMetrics.Aris.UT.csproj", "{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -265,6 +267,10 @@ Global
 		{81183C20-9DB6-454B-A250-5D799CDEFD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81183C20-9DB6-454B-A250-5D799CDEFD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81183C20-9DB6-454B-A250-5D799CDEFD63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
