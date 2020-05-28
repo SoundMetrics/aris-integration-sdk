@@ -21,8 +21,8 @@ The `-m` option causes the program to use a hard-coded multicast group for deliv
 ## Building the Code
 
 To build this solution, first run `prepare-vcpkg.cmd` (in the root of this repository)
-in a Visual Studio 2019 command prompt. If your attempt to build the solution and
-*.pb.h or *.pb.cc files cannot be found, you need to run `prepare-vcpkg.cmd`.
+in a Visual Studio 2019 command prompt. If you attempt to build the solution and
+*.pb.h or *.pb.cc files cannot be found, you need to run `prepare-vcpkg.cmd` first.
 
 This solution may be built with Visual Studio or msbuild.
 The project uses the script `generate-protobuf-files.cmd` to generate the
