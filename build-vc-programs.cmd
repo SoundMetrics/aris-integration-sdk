@@ -18,6 +18,8 @@ REM --------------
 REM On successful execution of this script the vcpkg tools will be built and
 REM the projects built by this script will have been built successfully.
 
+@ECHO OFF
+
 REM ---------------------------------------------------------------------------
 REM Bootstrap and build vcpkg
 
@@ -54,8 +56,10 @@ REM they're built in separate build steps on the build server.
 GOTO End
 
 :VSCmdPrompt
-ECHO Couldn't find environment variable 'VisualStudioVersion'.
-ECHO Are you at a Visual Studio developer command prompt?
+ECHO ------------------------------------------------------------------------
+ECHO ERROR: Couldn't find environment variable 'VisualStudioVersion'.
+ECHO You must run this script form a Visual Studio developer command prompt.
+ECHO ------------------------------------------------------------------------
 EXIT /B 1
 
 :End
