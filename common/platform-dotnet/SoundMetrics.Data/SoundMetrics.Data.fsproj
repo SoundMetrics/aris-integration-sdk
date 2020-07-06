@@ -30,6 +30,10 @@
     <Compile Include="FineDuration.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.2" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="$(ProjectDir)..\generate-build-info.cmd ^&#xD;&#xA;  $(ProjectDir)..\ ^&#xD;&#xA;  $(ConfigurationName) ^&#xD;&#xA;  FSharp ^&#xD;&#xA;  SoundMetrics.Data ^&#xD;&#xA;  $(ProjectDir)BuildInfo.fs ^&#xD;&#xA;  %BUILD_NUMBER% ^&#xD;&#xA;  %BUILD_VCS_NUMBER%" />
   </Target>
