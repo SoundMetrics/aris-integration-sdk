@@ -12,4 +12,8 @@
     <Folder Include="Data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
+  </ItemGroup>
+
 </Project>
