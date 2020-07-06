@@ -14,8 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		add-local-packages.ps1 = add-local-packages.ps1
 		build-packages.ps1 = build-packages.ps1
-		..\..\build-vc-programs.cmd = ..\..\build-vc-programs.cmd
 		generate-build-info.cmd = generate-build-info.cmd
+		..\..\prepare-vcpkg.cmd = ..\..\prepare-vcpkg.cmd
 		push-packages.cmd = push-packages.cmd
 		README.md = README.md
 		ROADMAP.md = ROADMAP.md
@@ -123,9 +123,9 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SoundMetrics.Aris.Comms.UT"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Data2", "SoundMetrics.Data2\SoundMetrics.Data2.csproj", "{DC34DA33-8D1B-4F02-80EE-423A2C7DA7DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris", "SoundMetrics.Aris\SoundMetrics.Aris.csproj", "{81183C20-9DB6-454B-A250-5D799CDEFD63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris", "SoundMetrics.Aris\SoundMetrics.Aris.csproj", "{81183C20-9DB6-454B-A250-5D799CDEFD63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.UT", "SoundMetrics.Aris.UT\SoundMetrics.Aris.UT.csproj", "{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.UT", "SoundMetrics.Aris.UT\SoundMetrics.Aris.UT.csproj", "{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

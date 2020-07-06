@@ -1,4 +1,4 @@
-REM build-vc-programs.cmd
+REM prepare-vcpkg.cmd
 
 REM This script does the following:
 REM     1) Bootstraps (builds) the VCPKG submodule; VCPKG is used to be the
