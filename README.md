@@ -65,7 +65,13 @@ Contains Protocol Buffer files describing messages sent to/received from the ARI
 
 ### External Tools
 
-This repository makes use of **vcpkg** for building **arislog** and **vc-using-framestream**. **vcpkg** is an external tool that downloads the source code for `protobuf` and builds it. The version of protobuf downloaded is coded within the `vcpkg` submodule and, therefore, won't change unless we update that submodule.
+This repository makes use of `vcpkg` for building `arislog` and `vc-using-framestream`.
+`vcpkg` is an external tool that downloads the source code for `protobuf` and builds it.
+The version of protobuf downloaded is coded within the `vcpkg` submodule and, therefore,
+won't change unless we update that submodule.
+
+To build the `arislog` and `vc-using-framestream` samples, first run `prepare-vcpkg.cmd`
+in a Visual Studio 2019 command prompt.
 
 ## Git-specific Issues
 This git repository includes the submodule `aris-file-sdk`. If you intend to clone this repo
