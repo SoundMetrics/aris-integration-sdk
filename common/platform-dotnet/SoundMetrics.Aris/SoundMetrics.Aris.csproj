@@ -6,10 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.9.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data\" />
+    <PackageReference Include="SoundMetrics.Aris.Headers" Version="2.0.9-alpha" />
   </ItemGroup>
 
   <ItemGroup>
