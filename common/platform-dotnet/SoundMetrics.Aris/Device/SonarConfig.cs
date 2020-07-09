@@ -1,4 +1,5 @@
 ﻿using SoundMetrics.Aris.Data;
+using SoundMetrics.Aris.Headers;
 using System;
 using System.Collections.Generic;
 
@@ -7,6 +8,26 @@ namespace SoundMetrics.Aris.Device
     public sealed class InvalidSonarConfig : Exception
     {
         public InvalidSonarConfig(string message) : base(message) { }
+    }
+
+    public struct SampleGeometry
+    {
+        public int BeamCount;
+        public int SamplesPerBeam;
+        public int TotalSampleCount;
+        public int PingsPerFrame;
+
+        public void Deconstruct(
+            out int beamCount,
+            out int samplesPerBeam,
+            out int totalSampleCount,
+            out int pingsPerFrame)
+        {
+            beamCount = BeamCount;
+            samplesPerBeam = SamplesPerBeam;
+            totalSampleCount = TotalSampleCount;
+            pingsPerFrame = PingsPerFrame;
+        }
     }
 
     internal static class SonarConfig
@@ -196,6 +217,24 @@ namespace SoundMetrics.Aris.Device
         public static PingMode GetDefaultPingModeForSystemType(SystemType systemType)
         {
             return SystemTypePingModeInfos[(int)systemType].DefaultPingMode;
+        }
+
+        public static SampleGeometry GetSampleGeometry(in ArisFrameHeader frameHeader)
+        {
+            var pingMode = PingMode.From((int)frameHeader.PingMode);
+            pingMode.AssertValid();
+
+            var pingModeDefinition = GetPingModeDefinition(pingMode);
+            var beamCount = pingModeDefinition.ChannelCount; // ChannelCount here is actually the beam count
+            var totalSampleCount = beamCount * (int)frameHeader.SamplesPerBeam;
+
+            return new SampleGeometry
+            {
+                BeamCount = beamCount,
+                SamplesPerBeam = (int)frameHeader.SamplesPerBeam,
+                TotalSampleCount = totalSampleCount,
+                PingsPerFrame = pingModeDefinition.PingsPerFrame,
+            };
         }
     }
 }

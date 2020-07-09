@@ -51,22 +51,22 @@ namespace SoundMetrics.Aris.Device
             return new PingMode(integralValue, isValid: false);
         }
 
-        internal bool IsValid() => IsValidIntegralValue(this.integralValue);
+        internal bool IsValid => IsValidIntegralValue(this.integralValue);
 
         private static bool IsValidIntegralValue(int integralValue) =>
             ValidValues.Contains(integralValue);
 
-        internal void AssertValid()
+        public void AssertValid()
         {
-            if (!IsValid())
+            if (!IsValid)
             {
-                throw new InvalidSonarConfig("Invalid ping mode");
+                throw new InvalidSonarConfig($"Invalid ping mode '{integralValue}");
             }
         }
 
         internal void AssertInvalid()
         {
-            if (IsValid())
+            if (IsValid)
             {
                 throw new InvalidSonarConfig("Expected invalid ping mode");
             }

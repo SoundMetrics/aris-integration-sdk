@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CollectRecordingStats": {
+      "commandName": "Project",
+      "commandLineArgs": "\"H:\\ARIScopeRecordings\\"
+    }
+  }
+}

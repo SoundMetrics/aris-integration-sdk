@@ -127,6 +127,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris", "SoundM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.UT", "SoundMetrics.Aris.UT\SoundMetrics.Aris.UT.csproj", "{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{CB7E5BDF-01A7-465C-BF80-069DDA22379D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectRecordingStats", "Samples\CollectRecordingStats\CollectRecordingStats.csproj", "{14FB0E4E-8C6D-4AA7-A129-606091C73121}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -265,6 +269,10 @@ Global
 		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9ED219A-BFE2-4A6C-A8DD-C3EE44F26F28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14FB0E4E-8C6D-4AA7-A129-606091C73121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14FB0E4E-8C6D-4AA7-A129-606091C73121}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14FB0E4E-8C6D-4AA7-A129-606091C73121}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14FB0E4E-8C6D-4AA7-A129-606091C73121}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -283,6 +291,7 @@ Global
 		{C443D597-F58F-4C1A-A9A1-D1727FCDA6FC} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{004BAF15-08FE-4E12-BCF2-845F76DFFA1A} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 		{C07FF4E0-05F7-4B90-845C-83EEBBC4CA5A} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
+		{14FB0E4E-8C6D-4AA7-A129-606091C73121} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}
