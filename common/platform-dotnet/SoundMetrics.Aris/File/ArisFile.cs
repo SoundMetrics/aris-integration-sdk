@@ -57,29 +57,35 @@ namespace SoundMetrics.Aris.File
             {
                 using (file)
                 {
-                    ValidateFileHeader();
-                    AdvancePastFileHeader(file);
-
-                    while (true)
+                    if (IsValidFileHeader(arisFilePath, out string badFileHeader))
                     {
-                        var (successfulRead, frameHeader) = ReadFrameHeader(file);
-                        if (!successfulRead)
-                        {
-                            break;
-                        }
+                        AdvancePastFileHeader(file);
 
-                        var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
-
-                        // TODO not expected behavior, skipping over samples at the moment.
+                        while (true)
                         {
-                            var pos = file.Position;
-                            if (file.Seek(totalSampleCount, SeekOrigin.Current) != pos + totalSampleCount)
+                            var (successfulRead, frameHeader) = ReadFrameHeader(file);
+                            if (!successfulRead)
                             {
-                                throw new Exception("Couldn't seek past samples");
+                                break;
                             }
-                        }
 
-                        yield return FrameResult.FromFrame(frameHeader);
+                            var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
+
+                            // TODO not expected behavior, skipping over samples at the moment.
+                            {
+                                var pos = file.Position;
+                                if (file.Seek(totalSampleCount, SeekOrigin.Current) != pos + totalSampleCount)
+                                {
+                                    throw new Exception("Couldn't seek past samples");
+                                }
+                            }
+
+                            yield return FrameResult.FromFrame(frameHeader);
+                        }
+                    }
+                    else
+                    {
+                        yield return FrameResult.FromError(badFileHeader);
                     }
                 }
             }
@@ -88,14 +94,6 @@ namespace SoundMetrics.Aris.File
             {
                 // TODO handle IOException here on currently active file...
                 return System.IO.File.OpenRead(arisFilePath);
-            }
-
-            void ValidateFileHeader()
-            {
-                if (!IsValidFileHeader(arisFilePath, out string reason))
-                {
-                    throw new Exception($"Invalid file header: '{reason}'; '{arisFilePath}'");
-                }
             }
 
             void ValidateFrameHeader(in ArisFrameHeader frameHeader)
@@ -135,10 +133,15 @@ namespace SoundMetrics.Aris.File
             var size = Marshal.SizeOf<T>();
             var readBuffer = new byte[size];
 
-            if (stream.Read(readBuffer) != size)
+            var bytesRead = stream.Read(readBuffer);
+            if (bytesRead == 0)
             {
                 t = default;
                 return false;
+            }
+            else if (bytesRead != size)
+            {
+                throw new Exception("Couldn't read the expected value");
             }
 
             var hmem = Marshal.AllocHGlobal(size);
