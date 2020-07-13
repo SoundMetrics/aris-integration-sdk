@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -10,7 +11,8 @@ namespace CollectRecordingStats
         static void Main(string[] args)
         {
             Parser.Default.ParseArguments<CommandLineOptions>(args)
-                .WithParsed(RunProgram)
+                .WithParsed(options =>
+                    LogProgramTime(() => RunProgram(options)))
                 .WithNotParsed(errors => { });
         }
 
@@ -31,7 +33,24 @@ namespace CollectRecordingStats
                 {
                     Console.WriteLine(FormatFileOutput(file));
                 }
+            }
+        }
 
+        private static void LogProgramTime(Action action)
+        {
+            var success = false;
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                action();
+                success = true;
+            }
+            finally
+            {
+                var elapsed = stopwatch.Elapsed;
+                var result = success ? "succeeded" : "failed";
+                Console.WriteLine($"Program {result}; elapsed time=[{elapsed}]");
             }
         }
 
