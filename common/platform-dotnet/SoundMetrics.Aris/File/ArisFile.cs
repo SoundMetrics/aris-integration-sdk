@@ -37,8 +37,7 @@ namespace SoundMetrics.Aris.File
         public static long GetFileLength(string filePath) =>
             new FileInfo(filePath).Length;
 
-        // NOTE: currently does not return frame data.
-        public static IEnumerable<FrameResult> EnumerateFrames(string arisFilePath)
+        public static IEnumerable<FrameResult> EnumerateFrameHeaders(string arisFilePath)
         {
             try
             {

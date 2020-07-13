@@ -17,7 +17,7 @@ namespace CollectRecordingStats
 
             var fileLength = ArisFile.GetFileLength(filePath);
 
-            foreach (var frame in ArisFile.EnumerateFrames(filePath))
+            foreach (var frame in ArisFile.EnumerateFrameHeaders(filePath))
             {
                 if (frame.Success)
                 {
