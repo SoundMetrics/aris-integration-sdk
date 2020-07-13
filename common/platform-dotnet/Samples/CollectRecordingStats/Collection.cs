@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CollectRecordingStats
 {
@@ -109,12 +108,11 @@ namespace CollectRecordingStats
         public static CollectionResult GatherAllStats(IEnumerable<string> folderPaths)
         {
             var existingFolders = folderPaths.Where(path => Directory.Exists(path));
-            var tasks = existingFolders
-                .Select(path => Task.Run(() => GatherFolderStats(path)))
+            var results = existingFolders
+                .Select(path => GatherFolderStats(path))
                 .ToArray();
 
-            Task.WaitAll(tasks);
-            return CollectionResult.Merge(tasks.Select(t => t.Result));
+            return CollectionResult.Merge(results);
         }
 
         private static CollectionResult GatherFolderStats(string folderPath)
