@@ -62,29 +62,39 @@ namespace SoundMetrics.Aris.File
 
                         while (true)
                         {
-                            var (successfulRead, frameHeader) = ReadFrameHeader(file);
-                            if (!successfulRead)
+                            if (ReadFrameHeader(file, out ArisFrameHeader frameHeader))
+                            {
+                                AdvancePastSamples(file, frameHeader);
+                                yield return FrameResult.FromFrame(frameHeader);
+                            }
+                            else
                             {
                                 break;
                             }
-
-                            var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
-
-                            // TODO not expected behavior, skipping over samples at the moment.
-                            {
-                                var pos = file.Position;
-                                if (file.Seek(totalSampleCount, SeekOrigin.Current) != pos + totalSampleCount)
-                                {
-                                    throw new Exception("Couldn't seek past samples");
-                                }
-                            }
-
-                            yield return FrameResult.FromFrame(frameHeader);
                         }
                     }
                     else
                     {
                         yield return FrameResult.FromError(badFileHeader);
+                    }
+                }
+
+                static void AdvancePastSamples(FileStream file, in ArisFrameHeader frameHeader)
+                {
+                    var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
+
+                    {
+                        var pos = file.Position;
+                        if (file.Seek(totalSampleCount, SeekOrigin.Current) == pos + totalSampleCount)
+                        {
+                            // Successful.
+                        }
+                        else
+                        {
+                            // Couldn't seek past the samples, meaning we hit the end
+                            // of the file. Ignore this condition and let the next frame
+                            // header read fail to get a frame header.
+                        }
                     }
                 }
             }
@@ -113,16 +123,15 @@ namespace SoundMetrics.Aris.File
                 }
             }
 
-            (bool success, ArisFrameHeader frameHeader)
-                ReadFrameHeader(FileStream file)
+            bool ReadFrameHeader(FileStream file, out ArisFrameHeader frameHeader)
             {
-                if (Read(file, out ArisFrameHeader frameHeader))
+                if (Read(file, out frameHeader))
                 {
                     ValidateFrameHeader(frameHeader);
-                    return (true, frameHeader);
+                    return true;
                 }
 
-                return (false, new ArisFrameHeader());
+                return false;
             }
         }
 
