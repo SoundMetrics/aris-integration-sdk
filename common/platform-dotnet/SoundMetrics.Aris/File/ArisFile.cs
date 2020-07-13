@@ -41,7 +41,7 @@ namespace SoundMetrics.Aris.File
         {
             try
             {
-                return EnumerateTheFile(OpenFile());
+                return EnumerateAllFrameHeaders(OpenFile());
             }
             catch (IOException ex)
             {
@@ -52,7 +52,7 @@ namespace SoundMetrics.Aris.File
             }
 
             // This exists only so we can catch and return in the main body of the function.
-            IEnumerable<FrameResult> EnumerateTheFile(FileStream file)
+            IEnumerable<FrameResult> EnumerateAllFrameHeaders(FileStream file)
             {
                 using (file)
                 {
