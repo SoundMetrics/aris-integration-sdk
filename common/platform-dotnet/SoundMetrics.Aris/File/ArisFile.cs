@@ -1,4 +1,4 @@
-﻿using SoundMetrics.Aris.Headers;
+﻿using SoundMetrics.Aris.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,12 +60,15 @@ namespace SoundMetrics.Aris.File
                     {
                         AdvancePastFileHeader(file);
 
+                        var frameHeaderArray = new Memory<ArisFrameHeader>(new ArisFrameHeader[1]);
+
                         while (true)
                         {
-                            if (ReadFrameHeader(file, out ArisFrameHeader frameHeader))
+                            var span = frameHeaderArray.Span;
+                            if (ReadFrameHeader(file, span))
                             {
-                                AdvancePastSamples(file, frameHeader);
-                                yield return FrameResult.FromFrame(frameHeader);
+                                AdvancePastSamples(file, MemoryMarshal.GetReference(span));
+                                yield return FrameResult.FromFrame(MemoryMarshal.GetReference(span));
                             }
                             else
                             {
@@ -123,11 +126,11 @@ namespace SoundMetrics.Aris.File
                 }
             }
 
-            bool ReadFrameHeader(FileStream file, out ArisFrameHeader frameHeader)
+            bool ReadFrameHeader(FileStream file, in Span<ArisFrameHeader> frameHeader)
             {
-                if (Read(file, out frameHeader))
+                if (Read(file, frameHeader))
                 {
-                    ValidateFrameHeader(frameHeader);
+                    ValidateFrameHeader(MemoryMarshal.GetReference(frameHeader));
                     return true;
                 }
 
@@ -135,44 +138,24 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        private static bool Read<T>(Stream stream, out T t)
+        private static bool Read<T>(Stream stream, in Span<T> t)
             where T : struct
         {
-            var size = Marshal.SizeOf<T>();
-            var readBuffer = new byte[size];
-
-            var bytesRead = stream.Read(readBuffer);
-            if (bytesRead == 0)
-            {
-                t = default;
-                return false;
-            }
-            else if (bytesRead != size)
-            {
-                throw new Exception("Couldn't read the expected value");
-            }
-
-            var hmem = Marshal.AllocHGlobal(size);
-            try
-            {
-                Marshal.Copy(readBuffer, 0, hmem, size);
-
-                t = Marshal.PtrToStructure<T>(hmem);
-                return true;
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(hmem);
-            }
+            var byteSpan = MemoryMarshal.AsBytes(t);
+            var bytesRead = stream.Read(byteSpan);
+            return bytesRead == byteSpan.Length;
         }
 
         internal static bool IsValidFileHeader(string arisFilePath, out string reason)
         {
             using (var file = System.IO.File.OpenRead(arisFilePath))
             {
-                if (Read(file, out ArisFileHeader fileHeader))
+                var fileHeaderArray = new Memory<ArisFileHeader>(new ArisFileHeader[1]);
+                var span = fileHeaderArray.Span;
+
+                if (Read(file, span))
                 {
-                    if (fileHeader.Version != ArisFileHeader.ArisFileSignature)
+                    if (span[0].Version != ArisFileHeader.ArisFileSignature)
                     {
                         reason = "Invalid file signature";
                         return false;

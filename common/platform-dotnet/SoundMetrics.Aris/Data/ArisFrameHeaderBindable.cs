@@ -1,6 +1,4 @@
-﻿using SoundMetrics.Aris.Headers;
-
-namespace SoundMetrics.Aris.Data
+﻿namespace SoundMetrics.Aris.Data
 {
     public sealed class ArisFrameHeaderBindable
     {

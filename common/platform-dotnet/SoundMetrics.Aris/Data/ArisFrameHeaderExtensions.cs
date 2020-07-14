@@ -1,5 +1,4 @@
-﻿using SoundMetrics.Aris.Headers;
-using System;
+﻿using System;
 
 namespace SoundMetrics.Aris.Data
 {
