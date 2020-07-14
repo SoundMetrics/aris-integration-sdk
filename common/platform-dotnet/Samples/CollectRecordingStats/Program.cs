@@ -63,7 +63,7 @@ namespace CollectRecordingStats
 
             ("FirstFrameSonarTimestamp", file => Quote(file.FirstFrameSonarTimestamp)),
             ("LastFrameSonarTimestamp", file => Quote(file.LastFrameSonarTimestamp)),
-            ("RecordingSpan",
+            ("RecordingSpanSeconds",
                 file => file.RecordingSpan?.TotalSeconds.ToString(CultureInfo.InvariantCulture)),
 
             ("AverageFramePeriodMillis",
