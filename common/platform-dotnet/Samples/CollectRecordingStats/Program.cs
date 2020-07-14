@@ -20,7 +20,7 @@ namespace CollectRecordingStats
         {
             var result = Collection.GatherAllStats(options.FolderPaths.ToArray());
 
-            var columnNames = Extractors.Select(ex => ex.ValueName);
+            var columnNames = Extractors.Select(v => v.Name);
             Console.WriteLine(string.Join(",", columnNames));
 
             foreach (var file in result.Files)
@@ -54,35 +54,25 @@ namespace CollectRecordingStats
             }
         }
 
-        private struct ValueExtractor
+        private delegate string ExtractValue(CollectedFile collectedFile);
+
+        private static readonly (string Name, ExtractValue Extract)[] Extractors =
         {
-            public string ValueName;
-            public Func<CollectedFile, string> Extract;
+            ("FileLength", file => InvariantString(file.FileLength)),
+            ("FrameCount", file => InvariantString(file.FrameCount)),
 
-            public ValueExtractor(string valueName, Func<CollectedFile, string> extract)
-            {
-                this.ValueName = valueName;
-                this.Extract = extract;
-            }
-        }
+            ("FirstFrameSonarTimestamp", file => Quote(file.FirstFrameSonarTimestamp)),
+            ("LastFrameSonarTimestamp", file => Quote(file.LastFrameSonarTimestamp)),
 
-        private static readonly ValueExtractor[] Extractors =
-        {
-            new ValueExtractor("FileLength", file => InvariantString(file.FileLength)),
-            new ValueExtractor("FrameCount", file => InvariantString(file.FrameCount)),
-
-            new ValueExtractor("FirstFrameSonarTimestamp", file => Quote(file.FirstFrameSonarTimestamp)),
-            new ValueExtractor("LastFrameSonarTimestamp", file => Quote(file.LastFrameSonarTimestamp)),
-
-            new ValueExtractor("AverageFramePeriodMillis",
+            ("AverageFramePeriodMillis",
                  file => file.AverageFramePeriod?.TotalMilliseconds.ToString(CultureInfo.InvariantCulture)), // sonar timestamp
 
-            new ValueExtractor("FirstGoTime", file => file.FirstGoTime?.ToString(CultureInfo.InvariantCulture)),
-            new ValueExtractor("LastGoTime", file => file.LastGoTime?.ToString(CultureInfo.InvariantCulture)),
-            new ValueExtractor("AverageGoTimePeriodMillis", file =>
+            ("FirstGoTime", file => file.FirstGoTime?.ToString(CultureInfo.InvariantCulture)),
+            ("LastGoTime", file => file.LastGoTime?.ToString(CultureInfo.InvariantCulture)),
+            ("AverageGoTimePeriodMillis", file =>
                 (file.AverageGoTimePeriodMicros / 1000.0)?.ToString(CultureInfo.InvariantCulture)),
 
-            new ValueExtractor("FilePath", file => Quote(file.Path)),
+            ("FilePath", file => Quote(file.Path)),
         };
 
         private static string FormatFileOutput(CollectedFile file) =>
