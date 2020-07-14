@@ -7,9 +7,24 @@ namespace CollectRecordingStats
         public string Path { get; private set; }
         public long FileLength { get; private set; }
         public long FrameCount { get; private set; }
+
         public DateTime? FirstFrameSonarTimestamp { get; private set; }
         public DateTime? LastFrameSonarTimestamp { get; private set; }
+        public TimeSpan? RecordingSpan
+        {
+            get => LastFrameSonarTimestamp - FirstFrameSonarTimestamp;
+        }
+
         public TimeSpan? AverageFramePeriod { get; private set; }
+
+        public double? AverageRequestedFrameRate { get; private set; }
+        public TimeSpan? AverageRequestedFramePeriod
+        {
+            get => AverageRequestedFrameRate.HasValue
+                    ? (TimeSpan?)TimeSpan.FromSeconds(1.0 / AverageRequestedFrameRate.Value)
+                    : null;
+        }
+
         public ulong? FirstGoTime { get; private set; }
         public ulong? LastGoTime { get; private set; }
         public double? AverageGoTimePeriodMicros { get; private set; }
