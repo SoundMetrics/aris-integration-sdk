@@ -68,8 +68,6 @@ namespace CollectRecordingStats
 
             ("AverageFramePeriodMillis",
                  file => file.AverageFramePeriod?.TotalMilliseconds.ToString(CultureInfo.InvariantCulture)), // sonar timestamp
-            ("AverageRequestedFramePeriodSeconds",
-                file => file.AverageRequestedFramePeriod?.TotalSeconds.ToString(CultureInfo.InvariantCulture)),
 
             ("FirstGoTime", file => file.FirstGoTime?.ToString(CultureInfo.InvariantCulture)),
             ("LastGoTime", file => file.LastGoTime?.ToString(CultureInfo.InvariantCulture)),
