@@ -57,9 +57,9 @@ namespace CollectRecordingStats
         private struct ValueExtractor
         {
             public string ValueName;
-            public Func<CollectionFile, string> Extract;
+            public Func<CollectedFile, string> Extract;
 
-            public ValueExtractor(string valueName, Func<CollectionFile, string> extract)
+            public ValueExtractor(string valueName, Func<CollectedFile, string> extract)
             {
                 this.ValueName = valueName;
                 this.Extract = extract;
@@ -85,7 +85,7 @@ namespace CollectRecordingStats
             new ValueExtractor("FilePath", file => Quote(file.Path)),
         };
 
-        private static string FormatFileOutput(CollectionFile file) =>
+        private static string FormatFileOutput(CollectedFile file) =>
             string.Join(",", Extractors.Select(ex => ex.Extract(file)));
 
         private static string InvariantString(long i) => i.ToString(CultureInfo.InvariantCulture);

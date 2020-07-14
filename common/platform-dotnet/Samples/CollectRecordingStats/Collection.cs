@@ -7,11 +7,11 @@ namespace CollectRecordingStats
 
     public class CollectionResult
     {
-        public List<CollectionFile> Files { get; private set; }
+        public List<CollectedFile> Files { get; private set; }
 
         public CollectionResult() {}
 
-        public CollectionResult(IEnumerable<CollectionFile> files)
+        public CollectionResult(IEnumerable<CollectedFile> files)
         {
             Files = files.ToList();
         }

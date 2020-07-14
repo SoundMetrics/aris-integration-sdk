@@ -6,7 +6,7 @@ namespace CollectRecordingStats
 {
     public static class FileInfo
     {
-        public static CollectionFile Gather(string filePath)
+        public static CollectedFile Gather(string filePath)
         {
             string errorMessage = null;
             long frameCount = 0;
@@ -44,7 +44,7 @@ namespace CollectRecordingStats
 
             if (errorMessage is null)
             {
-                return new CollectionFile(
+                return new CollectedFile(
                     filePath,
                     fileLength,
                     frameCount,
@@ -55,7 +55,7 @@ namespace CollectRecordingStats
             }
             else
             {
-                return new CollectionFile(filePath, errorMessage);
+                return new CollectedFile(filePath, errorMessage);
             }
         }
     }
