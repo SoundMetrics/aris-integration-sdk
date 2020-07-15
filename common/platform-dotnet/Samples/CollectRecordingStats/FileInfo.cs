@@ -1,4 +1,4 @@
-﻿using SoundMetrics.Aris.Data;
+﻿using SoundMetrics.Aris.Data.Wrappers;
 using SoundMetrics.Aris.File;
 using System;
 
@@ -23,8 +23,13 @@ namespace CollectRecordingStats
                 {
                     ++frameCount;
 
-                    var sonarTimestamp = frame.FrameHeader.GetSonarTimestamp();
-                    var goTime = frame.FrameHeader.GoTime;
+                    var (sonarTimestamp, goTime) =
+                        frame.FrameHeader.WithParts(
+                            (in ArisFrameHeaderParts hdr) =>
+                            {
+                                var timing = hdr.Time;
+                                return (timing.SonarTimestamp, timing.GoTime);
+                            });
 
                     if (!firstFrameSonarTimestamp.HasValue)
                     {
