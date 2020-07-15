@@ -37,11 +37,14 @@ FrameStreamListener::FrameStreamListener(
     , std::function<void(FrameBuilder &)> onFrameComplete
     , std::function<size_t()> getReadBufferSize
     , address targetSonar
+    , bool sendAcks
     , optional<udp::endpoint> receiveFrom
     )
     : socket(io), readBuffer(getReadBufferSize()), sonarFilter(targetSonar),
-      frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
-                     onFrameComplete) {
+      frameAssembler(
+          boost::bind(
+              sendAcks ? &FrameStreamListener::SendAck : &FrameStreamListener::SendNoAck, this, _1, _2),
+          onFrameComplete) {
   assert(onFrameComplete);
   assert(getReadBufferSize);
 

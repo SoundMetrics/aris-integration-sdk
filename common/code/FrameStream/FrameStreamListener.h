@@ -62,7 +62,29 @@ public:
                       // the multicast group and port number must be decided ahead
                       // of time. Otherwise, pass an empty optional<>().
                       , optional<boost::asio::ip::udp::endpoint> receiveFrom
+                      )
+      : FrameStreamListener(
+          io,
+          onFrameComplete,
+          getReadBufferSize,
+          targetSonar,
+          true, // backwards-compatible for sending acks
+          receiveFrom)
+  {
+  }
+
+  FrameStreamListener(boost::asio::io_service &io
+                      , std::function<void(FrameBuilder &)> onFrameComplete
+                      , std::function<size_t()> getReadBufferSize // network buffer size
+                      , boost::asio::ip::address targetSonar
+                      , bool sendAcks
+                      // Most applications do not need to specify the receiveFrom
+                      // endpoint. This is primarily used for multicasting where
+                      // the multicast group and port number must be decided ahead
+                      // of time. Otherwise, pass an empty optional<>().
+                      , optional<boost::asio::ip::udp::endpoint> receiveFrom
                       );
+
   ~FrameStreamListener();
 
   FrameStreamListener(const FrameStreamListener&) = delete;
@@ -87,6 +109,7 @@ private:
   void HandlePacketFrom(const boost::system::error_code &error,
                         size_t bytesRead);
   void SendAck(int frameIndex, int dataOffset);
+  constexpr void SendNoAck(int, int) { }
 };
 }
 }
