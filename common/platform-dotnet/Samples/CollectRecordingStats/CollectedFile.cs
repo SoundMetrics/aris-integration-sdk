@@ -7,6 +7,7 @@ namespace CollectRecordingStats
         public string Path { get; private set; }
         public long FileLength { get; private set; }
         public long FrameCount { get; private set; }
+        public bool EarlyExit { get; private set; }
 
         public DateTime? FirstFrameSonarTimestamp { get; private set; }
         public DateTime? LastFrameSonarTimestamp { get; private set; }
@@ -73,6 +74,7 @@ namespace CollectRecordingStats
             }
 
             ErrorMessage = errorMessage;
+            EarlyExit = true;
         }
 
         private CollectedFile(string path)

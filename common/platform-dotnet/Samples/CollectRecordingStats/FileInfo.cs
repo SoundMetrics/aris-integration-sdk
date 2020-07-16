@@ -10,6 +10,7 @@ namespace CollectRecordingStats
         {
             string errorMessage = null;
             long frameCount = 0;
+            bool earlyExit = false;
             DateTime? firstFrameSonarTimestamp = null;
             DateTime? lastFrameSonarTimestamp = null;
             ulong? firstGoTime = null;
@@ -43,6 +44,7 @@ namespace CollectRecordingStats
                 else
                 {
                     errorMessage = frame.ErrorMessage;
+                    earlyExit = true;
                     break;
                 }
             }

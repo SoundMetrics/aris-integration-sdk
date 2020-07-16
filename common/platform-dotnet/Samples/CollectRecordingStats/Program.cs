@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Serilog;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -6,6 +7,8 @@ using System.Linq;
 
 namespace CollectRecordingStats
 {
+    using AddLoggerFn = Func<LoggerConfiguration, LoggerConfiguration>;
+
     class Program
     {
         static void Main(string[] args)
@@ -18,6 +21,9 @@ namespace CollectRecordingStats
 
         private static void RunProgram(CommandLineOptions options)
         {
+            ConfigureLogging(options);
+            Log.Information("Starting {ProgramName}", Process.GetCurrentProcess().ProcessName);
+
             var result = Collection.GatherAllStats(options.FolderPaths.ToArray());
 
             var columnNames = Extractors.Select(v => v.Name);
@@ -36,6 +42,20 @@ namespace CollectRecordingStats
             }
         }
 
+        private static void ConfigureLogging(CommandLineOptions options)
+        {
+            if (options.LogPath is string path)
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .WriteTo.File(path)
+                    .CreateLogger();
+            }
+            else
+            {
+                Log.Logger = new LoggerConfiguration().CreateLogger();
+            }
+        }
+
         private static void LogProgramTime(Action action)
         {
             var success = false;
@@ -49,8 +69,10 @@ namespace CollectRecordingStats
             finally
             {
                 var elapsed = stopwatch.Elapsed;
-                var result = success ? "succeeded" : "failed";
-                Console.WriteLine($"Program {result}; elapsed time=[{elapsed}]");
+                var result = success ? "completed" : "failed";
+                Log.Information(
+                    "Program {result}; elapsed time=[{elapsed}]",
+                    result, elapsed);
             }
         }
 

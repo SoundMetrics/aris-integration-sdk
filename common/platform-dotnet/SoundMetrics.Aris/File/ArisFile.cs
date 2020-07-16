@@ -156,7 +156,7 @@ namespace SoundMetrics.Aris.File
                 {
                     if (span[0].Version != ArisFileHeader.ArisFileSignature)
                     {
-                        reason = "Invalid file signature";
+                        reason = $"Invalid file signature in '{arisFilePath}'";
                         return false;
                     }
 
@@ -165,7 +165,7 @@ namespace SoundMetrics.Aris.File
                 }
                 else
                 {
-                    reason = "Couldn't read the file header";
+                    reason = $"Couldn't read the file header in '{arisFilePath}'";
                     return false;
                 }
             }

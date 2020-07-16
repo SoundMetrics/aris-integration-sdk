@@ -2,7 +2,7 @@
   "profiles": {
     "CollectRecordingStats": {
       "commandName": "Project",
-      "commandLineArgs": "\"H:\\ARIScopeRecordings\\"
+      "commandLineArgs": "--log H:\\ARIScopeRecordings\\run.log H:\\ARIScopeRecordings\\"
     }
   }
 }

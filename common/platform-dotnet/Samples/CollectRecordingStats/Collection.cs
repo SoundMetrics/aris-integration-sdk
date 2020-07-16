@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Serilog;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -40,7 +42,31 @@ namespace CollectRecordingStats
 
         private static CollectionResult GatherFolderStats(string folderPath)
         {
+            Log.Information("Logging folder {folderPath}", folderPath);
+
+            var startTime = DateTime.Now;
+
             var filesResult = GatherFiles(folderPath);
+            var endTime = DateTime.Now;
+            var duration = endTime - startTime;
+            var fileCount = filesResult.Files.Count;
+            var earlyExits = filesResult.Files.Count(f => f.EarlyExit);
+            var fileBytes = filesResult.Files.Sum(f => f.FileLength);
+            var fileGiBs = (double)fileBytes / (1024 * 1024 * 1024);
+
+            Log.Information(
+                "Completed in {duration}. {fileCount} files; {earlyExists} early exists; {fileGiBs} GiB",
+                duration, fileCount, earlyExits, fileGiBs);
+
+            if (earlyExits > 0)
+            {
+                foreach (var errorMessage in
+                    filesResult.Files.Where(f => f.EarlyExit).Select(f => f.ErrorMessage))
+                {
+                    Log.Information("Early exit: \"{errorMessage}\"", errorMessage);
+                }
+            }
+
             var folders = Directory.EnumerateDirectories(folderPath);
             var foldersResults = GatherAllStats(folders);
 
