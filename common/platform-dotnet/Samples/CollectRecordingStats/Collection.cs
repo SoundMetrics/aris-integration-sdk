@@ -52,11 +52,11 @@ namespace CollectRecordingStats
             var fileCount = filesResult.Files.Count;
             var earlyExits = filesResult.Files.Count(f => f.EarlyExit);
             var fileBytes = filesResult.Files.Sum(f => f.FileLength);
-            var fileGiBs = (double)fileBytes / (1024 * 1024 * 1024);
+            var fileGBs = (double)fileBytes / 1_000_000_000;
 
             Log.Information(
-                "Completed '{folderPath}' in {duration}. {fileCount} files; {earlyExits} early exits; {fileGiBs} GiB.",
-                folderPath, duration, fileCount, earlyExits, fileGiBs);
+                "Completed '{folderPath}' in {duration}. {fileCount} files; {earlyExits} early exits; {fileGBs} GB.",
+                folderPath, duration, fileCount, earlyExits, fileGBs);
 
             if (earlyExits > 0)
             {
