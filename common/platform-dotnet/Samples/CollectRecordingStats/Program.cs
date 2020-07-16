@@ -23,6 +23,12 @@ namespace CollectRecordingStats
         {
             ConfigureLogging(options);
             Log.Information("Starting {ProgramName}", Process.GetCurrentProcess().ProcessName);
+            Log.Information("LogPath=[{LogPath}]", options.LogPath);
+
+            foreach (var folderPath in options.FolderPaths)
+            {
+                Log.Information("FolderPath=[{FolderPath}]", folderPath);
+            }
 
             var result = Collection.GatherAllStats(options.FolderPaths.ToArray());
 

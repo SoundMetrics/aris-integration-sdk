@@ -42,7 +42,7 @@ namespace CollectRecordingStats
 
         private static CollectionResult GatherFolderStats(string folderPath)
         {
-            Log.Information("Logging folder {folderPath}", folderPath);
+            Log.Information("Processing folder '{folderPath}'.", folderPath);
 
             var startTime = DateTime.Now;
 
@@ -55,8 +55,8 @@ namespace CollectRecordingStats
             var fileGiBs = (double)fileBytes / (1024 * 1024 * 1024);
 
             Log.Information(
-                "Completed in {duration}. {fileCount} files; {earlyExists} early exists; {fileGiBs} GiB",
-                duration, fileCount, earlyExits, fileGiBs);
+                "Completed '{folderPath}' in {duration}. {fileCount} files; {earlyExits} early exits; {fileGiBs} GiB.",
+                folderPath, duration, fileCount, earlyExits, fileGiBs);
 
             if (earlyExits > 0)
             {
