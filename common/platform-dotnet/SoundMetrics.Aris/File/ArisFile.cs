@@ -41,7 +41,7 @@ namespace SoundMetrics.Aris.File
         {
             try
             {
-                return EnumerateAllFrameHeaders(OpenFile());
+                return EnumerateAllFrameHeaders(OpenFile(arisFilePath));
             }
             catch (IOException ex)
             {
@@ -81,31 +81,30 @@ namespace SoundMetrics.Aris.File
                         yield return FrameResult.FromError(badFileHeader);
                     }
                 }
+            }
 
-                static void AdvancePastSamples(FileStream file, in ArisFrameHeader frameHeader)
+            static void AdvancePastSamples(FileStream file, in ArisFrameHeader frameHeader)
+            {
+                var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
+
                 {
-                    var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
-
+                    var pos = file.Position;
+                    if (file.Seek(totalSampleCount, SeekOrigin.Current) == pos + totalSampleCount)
                     {
-                        var pos = file.Position;
-                        if (file.Seek(totalSampleCount, SeekOrigin.Current) == pos + totalSampleCount)
-                        {
-                            // Successful.
-                        }
-                        else
-                        {
-                            // Couldn't seek past the samples, meaning we hit the end
-                            // of the file. Ignore this condition and let the next frame
-                            // header read fail to get a frame header.
-                        }
+                        // Successful.
+                    }
+                    else
+                    {
+                        // Couldn't seek past the samples, meaning we hit the end
+                        // of the file. Ignore this condition and let the next frame
+                        // header read fail to get a frame header.
                     }
                 }
             }
 
-            FileStream OpenFile()
+            static FileStream OpenFile(string path)
             {
-                // TODO handle IOException here on currently active file...
-                return System.IO.File.OpenRead(arisFilePath);
+                return System.IO.File.OpenRead(path);
             }
 
             void ValidateFrameHeader(in ArisFrameHeader frameHeader)
