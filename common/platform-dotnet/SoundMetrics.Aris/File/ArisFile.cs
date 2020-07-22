@@ -6,45 +6,8 @@ using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.File
 {
-    public static class ArisFile
+    public static partial class ArisFile
     {
-        public sealed class Box<T>
-            where T : struct
-        {
-            public Box(in T value)
-            {
-                this.Value = value;
-            }
-
-            public T Value { get; private set; }
-        }
-
-        public struct FrameHeaderResult
-        {
-            public Box<ArisFrameHeader> FrameHeader { get; private set; }
-            public bool Success { get; private set; }
-            public string ErrorMessage { get; private set; }
-
-            public static FrameHeaderResult FromFrameHeader(in ArisFrameHeader frameHeader)
-            {
-                return new FrameHeaderResult
-                {
-                    Success = true,
-                    FrameHeader = new Box<ArisFrameHeader>(frameHeader),
-                    ErrorMessage = "",
-                };
-            }
-
-            public static FrameHeaderResult FromError(string errorMessage)
-            {
-                return new FrameHeaderResult
-                {
-                    Success = false,
-                    ErrorMessage = errorMessage ?? "",
-                };
-            }
-        }
-
         public static long GetFileLength(string filePath) =>
             new FileInfo(filePath).Length;
 
@@ -52,7 +15,7 @@ namespace SoundMetrics.Aris.File
         {
             try
             {
-                return EnumerateAllFrameHeaders(OpenFile(arisFilePath));
+                return EnumerateAllFrameHeaders(System.IO.File.OpenRead(arisFilePath));
             }
             catch (IOException ex)
             {
@@ -112,39 +75,39 @@ namespace SoundMetrics.Aris.File
                     }
                 }
             }
+        }
 
-            static FileStream OpenFile(string path)
+        public static IEnumerable<ArisFrame> EnumerateFrames(string arisFilePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static bool ReadFrameHeader(FileStream file, in Span<ArisFrameHeader> frameHeader)
+        {
+            if (Read(file, frameHeader))
             {
-                return System.IO.File.OpenRead(path);
+                ValidateFrameHeader(MemoryMarshal.GetReference(frameHeader));
+                return true;
             }
 
-            void ValidateFrameHeader(in ArisFrameHeader frameHeader)
+            return false;
+        }
+
+        private static void AdvancePastFileHeader(FileStream file)
+        {
+            var fileHeaderSize = Marshal.SizeOf<ArisFileHeader>();
+            var pos = file.Seek(fileHeaderSize, SeekOrigin.Begin);
+            if (pos != fileHeaderSize)
             {
-                if (!IsValidFrameHeader(frameHeader, out string reason))
-                {
-                    throw new Exception($"Invalid frame header: {reason}");
-                }
+                throw new Exception("Incomplete file header");
             }
+        }
 
-            void AdvancePastFileHeader(FileStream file)
+        private static void ValidateFrameHeader(in ArisFrameHeader frameHeader)
+        {
+            if (!IsValidFrameHeader(frameHeader, out string reason))
             {
-                var fileHeaderSize = Marshal.SizeOf<ArisFileHeader>();
-                var pos = file.Seek(fileHeaderSize, SeekOrigin.Begin);
-                if (pos != fileHeaderSize)
-                {
-                    throw new Exception("Incomplete file header");
-                }
-            }
-
-            bool ReadFrameHeader(FileStream file, in Span<ArisFrameHeader> frameHeader)
-            {
-                if (Read(file, frameHeader))
-                {
-                    ValidateFrameHeader(MemoryMarshal.GetReference(frameHeader));
-                    return true;
-                }
-
-                return false;
+                throw new Exception($"Invalid frame header: {reason}");
             }
         }
 
