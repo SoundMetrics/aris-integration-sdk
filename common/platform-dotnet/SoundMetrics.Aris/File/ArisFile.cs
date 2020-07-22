@@ -11,22 +11,12 @@ namespace SoundMetrics.Aris.File
         public static long GetFileLength(string filePath) =>
             new FileInfo(filePath).Length;
 
-        public static IEnumerable<FrameHeaderResult> EnumerateFrameHeaders(string arisFilePath)
+        public static IEnumerable<ArisFrameHeader> EnumerateFrameHeaders(string arisFilePath)
         {
-            try
-            {
-                return EnumerateAllFrameHeaders(System.IO.File.OpenRead(arisFilePath));
-            }
-            catch (IOException ex)
-            {
-                return new[]
-                {
-                    FrameHeaderResult.FromError($"An exception occurred: {ex.Message}")
-                };
-            }
+            return EnumerateAllFrameHeaders(System.IO.File.OpenRead(arisFilePath));
 
             // This exists only so we can catch and return in the main body of the function.
-            IEnumerable<FrameHeaderResult> EnumerateAllFrameHeaders(FileStream file)
+            IEnumerable<ArisFrameHeader> EnumerateAllFrameHeaders(FileStream file)
             {
                 using (file)
                 {
@@ -42,7 +32,7 @@ namespace SoundMetrics.Aris.File
                             if (ReadFrameHeader(file, span))
                             {
                                 AdvancePastSamples(file, MemoryMarshal.GetReference(span));
-                                yield return FrameHeaderResult.FromFrameHeader(MemoryMarshal.GetReference(span));
+                                yield return MemoryMarshal.GetReference(span);
                             }
                             else
                             {
@@ -52,7 +42,7 @@ namespace SoundMetrics.Aris.File
                     }
                     else
                     {
-                        yield return FrameHeaderResult.FromError(badFileHeader);
+                        throw new ArisFormatException(badFileHeader);
                     }
                 }
             }

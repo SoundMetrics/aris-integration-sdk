@@ -8,7 +8,6 @@ namespace CollectRecordingStats
     {
         public static CollectedFile Gather(string filePath)
         {
-            string errorMessage = null;
             long frameCount = 0;
             DateTime? firstFrameSonarTimestamp = null;
             DateTime? lastFrameSonarTimestamp = null;
@@ -17,14 +16,14 @@ namespace CollectRecordingStats
 
             var fileLength = ArisFile.GetFileLength(filePath);
 
-            foreach (var frame in ArisFile.EnumerateFrameHeaders(filePath))
+            try
             {
-                if (frame.Success)
+                foreach (var frameHeader in ArisFile.EnumerateFrameHeaders(filePath))
                 {
                     ++frameCount;
 
                     var (sonarTimestamp, goTime) =
-                        frame.FrameHeader.Value.WithParts(
+                        frameHeader.WithParts(
                             (in ArisFrameHeaderParts hdr) =>
                             {
                                 var timing = hdr.Time;
@@ -40,28 +39,21 @@ namespace CollectRecordingStats
                     lastFrameSonarTimestamp = sonarTimestamp;
                     lastGoTime = goTime;
                 }
-                else
-                {
-                    errorMessage = frame.ErrorMessage;
-                    break;
-                }
+
+            }
+            catch (Exception ex)
+            {
+                return new CollectedFile(filePath, ex.Message);
             }
 
-            if (errorMessage is null)
-            {
-                return new CollectedFile(
-                    filePath,
-                    fileLength,
-                    frameCount,
-                    firstFrameSonarTimestamp,
-                    lastFrameSonarTimestamp,
-                    firstGoTime,
-                    lastGoTime);
-            }
-            else
-            {
-                return new CollectedFile(filePath, errorMessage);
-            }
+            return new CollectedFile(
+                filePath,
+                fileLength,
+                frameCount,
+                firstFrameSonarTimestamp,
+                lastFrameSonarTimestamp,
+                firstGoTime,
+                lastGoTime);
         }
     }
 }
