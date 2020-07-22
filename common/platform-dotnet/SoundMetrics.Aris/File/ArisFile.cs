@@ -19,15 +19,15 @@ namespace SoundMetrics.Aris.File
             public T Value { get; private set; }
         }
 
-        public struct FrameResult
+        public struct FrameHeaderResult
         {
             public Box<ArisFrameHeader> FrameHeader { get; private set; }
             public bool Success { get; private set; }
             public string ErrorMessage { get; private set; }
 
-            public static FrameResult FromFrame(in ArisFrameHeader frameHeader)
+            public static FrameHeaderResult FromFrameHeader(in ArisFrameHeader frameHeader)
             {
-                return new FrameResult
+                return new FrameHeaderResult
                 {
                     Success = true,
                     FrameHeader = new Box<ArisFrameHeader>(frameHeader),
@@ -35,9 +35,9 @@ namespace SoundMetrics.Aris.File
                 };
             }
 
-            public static FrameResult FromError(string errorMessage)
+            public static FrameHeaderResult FromError(string errorMessage)
             {
-                return new FrameResult
+                return new FrameHeaderResult
                 {
                     Success = false,
                     ErrorMessage = errorMessage ?? "",
@@ -48,7 +48,7 @@ namespace SoundMetrics.Aris.File
         public static long GetFileLength(string filePath) =>
             new FileInfo(filePath).Length;
 
-        public static IEnumerable<FrameResult> EnumerateFrameHeaders(string arisFilePath)
+        public static IEnumerable<FrameHeaderResult> EnumerateFrameHeaders(string arisFilePath)
         {
             try
             {
@@ -58,12 +58,12 @@ namespace SoundMetrics.Aris.File
             {
                 return new[]
                 {
-                    FrameResult.FromError($"An exception occurred: {ex.Message}")
+                    FrameHeaderResult.FromError($"An exception occurred: {ex.Message}")
                 };
             }
 
             // This exists only so we can catch and return in the main body of the function.
-            IEnumerable<FrameResult> EnumerateAllFrameHeaders(FileStream file)
+            IEnumerable<FrameHeaderResult> EnumerateAllFrameHeaders(FileStream file)
             {
                 using (file)
                 {
@@ -79,7 +79,7 @@ namespace SoundMetrics.Aris.File
                             if (ReadFrameHeader(file, span))
                             {
                                 AdvancePastSamples(file, MemoryMarshal.GetReference(span));
-                                yield return FrameResult.FromFrame(MemoryMarshal.GetReference(span));
+                                yield return FrameHeaderResult.FromFrameHeader(MemoryMarshal.GetReference(span));
                             }
                             else
                             {
@@ -89,7 +89,7 @@ namespace SoundMetrics.Aris.File
                     }
                     else
                     {
-                        yield return FrameResult.FromError(badFileHeader);
+                        yield return FrameHeaderResult.FromError(badFileHeader);
                     }
                 }
             }
