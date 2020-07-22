@@ -8,18 +8,29 @@ namespace SoundMetrics.Aris.File
 {
     public static class ArisFile
     {
-        public class FrameResult
+        public sealed class Box<T>
+            where T : struct
         {
-            public ArisFrameHeader FrameHeader;
-            public bool Success;
-            public string ErrorMessage;
+            public Box(in T value)
+            {
+                this.Value = value;
+            }
+
+            public T Value { get; private set; }
+        }
+
+        public struct FrameResult
+        {
+            public Box<ArisFrameHeader> FrameHeader { get; private set; }
+            public bool Success { get; private set; }
+            public string ErrorMessage { get; private set; }
 
             public static FrameResult FromFrame(in ArisFrameHeader frameHeader)
             {
                 return new FrameResult
                 {
                     Success = true,
-                    FrameHeader = frameHeader,
+                    FrameHeader = new Box<ArisFrameHeader>(frameHeader),
                     ErrorMessage = "",
                 };
             }

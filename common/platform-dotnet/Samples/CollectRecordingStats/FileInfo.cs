@@ -10,7 +10,6 @@ namespace CollectRecordingStats
         {
             string errorMessage = null;
             long frameCount = 0;
-            bool earlyExit = false;
             DateTime? firstFrameSonarTimestamp = null;
             DateTime? lastFrameSonarTimestamp = null;
             ulong? firstGoTime = null;
@@ -25,7 +24,7 @@ namespace CollectRecordingStats
                     ++frameCount;
 
                     var (sonarTimestamp, goTime) =
-                        frame.FrameHeader.WithParts(
+                        frame.FrameHeader.Value.WithParts(
                             (in ArisFrameHeaderParts hdr) =>
                             {
                                 var timing = hdr.Time;
@@ -44,7 +43,6 @@ namespace CollectRecordingStats
                 else
                 {
                     errorMessage = frame.ErrorMessage;
-                    earlyExit = true;
                     break;
                 }
             }
