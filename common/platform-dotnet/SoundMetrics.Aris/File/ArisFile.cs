@@ -13,37 +13,31 @@ namespace SoundMetrics.Aris.File
 
         public static IEnumerable<ArisFrameHeader> EnumerateFrameHeaders(string arisFilePath)
         {
-            return EnumerateAllFrameHeaders(System.IO.File.OpenRead(arisFilePath));
-
-            // This exists only so we can catch and return in the main body of the function.
-            IEnumerable<ArisFrameHeader> EnumerateAllFrameHeaders(FileStream file)
+            using (var file = System.IO.File.OpenRead(arisFilePath))
             {
-                using (file)
+                if (IsValidFileHeader(arisFilePath, out string badFileHeader))
                 {
-                    if (IsValidFileHeader(arisFilePath, out string badFileHeader))
+                    AdvancePastFileHeader(file);
+
+                    var frameHeaderArray = new Memory<ArisFrameHeader>(new ArisFrameHeader[1]);
+
+                    while (true)
                     {
-                        AdvancePastFileHeader(file);
-
-                        var frameHeaderArray = new Memory<ArisFrameHeader>(new ArisFrameHeader[1]);
-
-                        while (true)
+                        var span = frameHeaderArray.Span;
+                        if (ReadFrameHeader(file, span))
                         {
-                            var span = frameHeaderArray.Span;
-                            if (ReadFrameHeader(file, span))
-                            {
-                                AdvancePastSamples(file, MemoryMarshal.GetReference(span));
-                                yield return MemoryMarshal.GetReference(span);
-                            }
-                            else
-                            {
-                                break;
-                            }
+                            AdvancePastSamples(file, MemoryMarshal.GetReference(span));
+                            yield return MemoryMarshal.GetReference(span);
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
-                    else
-                    {
-                        throw new ArisFormatException(badFileHeader);
-                    }
+                }
+                else
+                {
+                    throw new ArisFormatException(badFileHeader);
                 }
             }
 
