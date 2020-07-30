@@ -2,38 +2,38 @@
 
 namespace SoundMetrics.Aris.Data.Wrappers
 {
-    public ref struct ArisFrameHeaderParts
+    public ref struct FrameHeaderParts
     {
-        public ArisFrameHeaderParts(Span<ArisFrameHeader> frameHeader)
+        public FrameHeaderParts(Span<FrameHeader> frameHeader)
         {
             this.frameHeader = frameHeader;
         }
 
-        public bool HasValidSignature { get => frameHeader[0].Version == ArisFrameHeader.ArisFrameSignature; }
+        public bool HasValidSignature { get => frameHeader[0].Version == Data.FrameHeader.ArisFrameSignature; }
 
         public ArisFrameHeaderIdentity Identity { get => new ArisFrameHeaderIdentity(this); }
         public ArisFrameHeaderTime Time { get => new ArisFrameHeaderTime(this); }
         public ArisFrameHeaderEnvironment Environment{ get => new ArisFrameHeaderEnvironment(this); }
 
-        internal Span<ArisFrameHeader> FrameHeader { get => frameHeader; }
+        internal Span<FrameHeader> FrameHeader { get => frameHeader; }
 
-        private readonly Span<ArisFrameHeader> frameHeader;
+        private readonly Span<FrameHeader> frameHeader;
     }
 
     //--------------------------------------------------------------------------
 
     public static class ArisFrameHeaderPartsExtensions
     {
-        public delegate T WrapperAction<T>(in ArisFrameHeaderParts parts);
+        public delegate T WrapperAction<T>(in FrameHeaderParts parts);
 
         public static unsafe T WithParts<T>(
-            this in ArisFrameHeader frameHeader,
+            this in FrameHeader frameHeader,
             WrapperAction<T> withParts)
         {
-            fixed (ArisFrameHeader* pfh = &frameHeader)
+            fixed (FrameHeader* pfh = &frameHeader)
             {
-                var hdr = new Span<ArisFrameHeader>(pfh, 1);
-                return withParts(new ArisFrameHeaderParts(hdr));
+                var hdr = new Span<FrameHeader>(pfh, 1);
+                return withParts(new FrameHeaderParts(hdr));
             }
         }
     }
@@ -42,7 +42,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
 
     public ref struct ArisFrameHeaderIdentity
     {
-        public ArisFrameHeaderIdentity(ArisFrameHeaderParts parts)
+        public ArisFrameHeaderIdentity(FrameHeaderParts parts)
         {
             this.parts = parts;
         }
@@ -54,14 +54,14 @@ namespace SoundMetrics.Aris.Data.Wrappers
 
         public uint FrameIndex { get => parts.FrameHeader[0].FrameIndex; }
 
-        private readonly ArisFrameHeaderParts parts;
+        private readonly FrameHeaderParts parts;
     }
 
     //--------------------------------------------------------------------------
 
     public ref struct ArisFrameHeaderTime
     {
-        public ArisFrameHeaderTime(ArisFrameHeaderParts parts)
+        public ArisFrameHeaderTime(FrameHeaderParts parts)
         {
             this.parts = parts;
         }
@@ -70,7 +70,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
         {
             get
             {
-                return ArisFrameHeaderExtensions.SonarOffsetToDateTime(parts.FrameHeader[0].sonarTimeStamp);
+                return FrameHeaderExtensions.SonarOffsetToDateTime(parts.FrameHeader[0].sonarTimeStamp);
             }
         }
 
@@ -79,7 +79,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
         {
             get
             {
-                return ArisFrameHeaderExtensions.SonarOffsetToDateTime(GoTime);
+                return FrameHeaderExtensions.SonarOffsetToDateTime(GoTime);
             }
         }
 
@@ -88,7 +88,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
         {
             get
             {
-                return ArisFrameHeaderExtensions.SonarOffsetToDateTime(TopsideTime);
+                return FrameHeaderExtensions.SonarOffsetToDateTime(TopsideTime);
             }
         }
 
@@ -110,14 +110,14 @@ namespace SoundMetrics.Aris.Data.Wrappers
 
         public TimeSpan Uptime { get => TimeSpan.FromSeconds(parts.FrameHeader[0].Uptime); }
 
-        private readonly ArisFrameHeaderParts parts;
+        private readonly FrameHeaderParts parts;
     }
 
     //--------------------------------------------------------------------------
 
     public ref struct ArisFrameHeaderEnvironment
     {
-        public ArisFrameHeaderEnvironment(ArisFrameHeaderParts parts)
+        public ArisFrameHeaderEnvironment(FrameHeaderParts parts)
         {
             this.parts = parts;
         }
@@ -134,6 +134,6 @@ namespace SoundMetrics.Aris.Data.Wrappers
         /// Note: m/s
         public float SoundSpeed { get => parts.FrameHeader[0].SoundSpeed; }
 
-        private readonly ArisFrameHeaderParts parts;
+        private readonly FrameHeaderParts parts;
     }
 }

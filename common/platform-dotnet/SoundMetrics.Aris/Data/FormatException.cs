@@ -2,9 +2,9 @@
 
 namespace SoundMetrics.Aris.Data
 {
-    public sealed class ArisFormatException : Exception
+    public sealed class FormatException : Exception
     {
-        public ArisFormatException(string message)
+        public FormatException(string message)
             : base(message)
         {
 

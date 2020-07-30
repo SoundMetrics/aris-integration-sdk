@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Data
 
     // Defines the metadata at the start of an ARIS frame.
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    public unsafe struct ArisFrameHeader
+    public unsafe struct FrameHeader
     {
         public const uint ArisFileSignature = 0x05464444;
         public const uint ArisFrameSignature = 0x05464444;

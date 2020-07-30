@@ -24,7 +24,7 @@ namespace CollectRecordingStats
 
                     var (sonarTimestamp, goTime) =
                         frameHeader.WithParts(
-                            (in ArisFrameHeaderParts hdr) =>
+                            (in FrameHeaderParts hdr) =>
                             {
                                 var timing = hdr.Time;
                                 return (timing.SonarTimestamp, timing.GoTime);

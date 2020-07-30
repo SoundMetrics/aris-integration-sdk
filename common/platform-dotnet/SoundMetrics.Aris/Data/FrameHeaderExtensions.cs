@@ -9,7 +9,7 @@ namespace SoundMetrics.Aris.Data
         Aris1200 = 2,
     }
 
-    public static class ArisFrameHeaderExtensions
+    public static class FrameHeaderExtensions
     {
         public static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 

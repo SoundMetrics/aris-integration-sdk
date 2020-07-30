@@ -3,9 +3,9 @@ using System;
 
 namespace SoundMetrics.Aris.Data
 {
-    public class ArisFrame
+    public class Frame
     {
-        public ArisFrame(in ArisFrameHeader frameHeader, ByteBuffer samples)
+        public Frame(in FrameHeader frameHeader, ByteBuffer samples)
         {
             if (samples is null)
             {
@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Data
             Samples = samples;
         }
 
-        public ArisFrameHeader FrameHeader { get; private set; }
+        public FrameHeader FrameHeader { get; private set; }
         public ByteBuffer Samples { get; private set; }
     }
 }

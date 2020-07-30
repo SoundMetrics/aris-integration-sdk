@@ -218,7 +218,7 @@ namespace SoundMetrics.Aris.Device
             return SystemTypePingModeInfos[(int)systemType].DefaultPingMode;
         }
 
-        public static SampleGeometry GetSampleGeometry(in ArisFrameHeader frameHeader)
+        public static SampleGeometry GetSampleGeometry(in FrameHeader frameHeader)
         {
             var pingMode = PingMode.From((int)frameHeader.PingMode);
             pingMode.AssertValid();

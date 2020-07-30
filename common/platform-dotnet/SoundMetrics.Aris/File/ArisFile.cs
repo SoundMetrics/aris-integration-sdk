@@ -12,7 +12,7 @@ namespace SoundMetrics.Aris.File
         public static long GetFileLength(string filePath) =>
             new FileInfo(filePath).Length;
 
-        public static IEnumerable<ArisFrameHeader> EnumerateFrameHeaders(string arisFilePath)
+        public static IEnumerable<FrameHeader> EnumerateFrameHeaders(string arisFilePath)
         {
             using (var file = System.IO.File.OpenRead(arisFilePath))
             {
@@ -20,7 +20,7 @@ namespace SoundMetrics.Aris.File
                 {
                     AdvancePastFileHeader(file);
 
-                    var frameHeaderArray = new Memory<ArisFrameHeader>(new ArisFrameHeader[1]);
+                    var frameHeaderArray = new Memory<FrameHeader>(new FrameHeader[1]);
 
                     while (true)
                     {
@@ -38,11 +38,11 @@ namespace SoundMetrics.Aris.File
                 }
                 else
                 {
-                    throw new ArisFormatException(badFileHeader);
+                    throw new Data.FormatException(badFileHeader);
                 }
             }
 
-            static void AdvancePastSamples(FileStream file, in ArisFrameHeader frameHeader)
+            static void AdvancePastSamples(FileStream file, in FrameHeader frameHeader)
             {
                 var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
 
@@ -62,7 +62,7 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        public static IEnumerable<ArisFrame> EnumerateFrames(string arisFilePath)
+        public static IEnumerable<Frame> EnumerateFrames(string arisFilePath)
         {
             using (var file = System.IO.File.OpenRead(arisFilePath))
             {
@@ -70,11 +70,11 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        public static IEnumerable<ArisFrame> EnumerateFrames(Stream stream)
+        public static IEnumerable<Frame> EnumerateFrames(Stream stream)
         {
             if (ReadFileHeader(stream, out var fileHeader, out var badReason))
             {
-                var frameHeaderArray = new Memory<ArisFrameHeader>(new ArisFrameHeader[1]);
+                var frameHeaderArray = new Memory<FrameHeader>(new FrameHeader[1]);
 
                 while (true)
                 {
@@ -82,7 +82,7 @@ namespace SoundMetrics.Aris.File
                     if (ReadFrameHeader(stream, span))
                     {
                         var samples = ReadSamples(stream, frameHeaderArray.Span[0]);
-                        yield return new ArisFrame(frameHeaderArray.Span[0], samples);
+                        yield return new Frame(frameHeaderArray.Span[0], samples);
                     }
                     else
                     {
@@ -92,10 +92,10 @@ namespace SoundMetrics.Aris.File
             }
             else
             {
-                throw new ArisFormatException(badReason);
+                throw new Data.FormatException(badReason);
             }
 
-            ByteBuffer ReadSamples(Stream stream, in ArisFrameHeader frameHeader)
+            ByteBuffer ReadSamples(Stream stream, in FrameHeader frameHeader)
             {
                 var (_, _, totalSampleCount, _) = SonarConfig.GetSampleGeometry(frameHeader);
                 var sampleBuffer =
@@ -106,14 +106,14 @@ namespace SoundMetrics.Aris.File
                             var bytesRead = stream.Read(buffer);
                             if (bytesRead != totalSampleCount)
                             {
-                                throw new ArisFormatException("Couldn't read all frame samples");
+                                throw new Data.FormatException("Couldn't read all frame samples");
                             }
                         });
                 return sampleBuffer;
             }
         }
 
-        private static bool ReadFrameHeader(Stream stream, in Span<ArisFrameHeader> frameHeader)
+        private static bool ReadFrameHeader(Stream stream, in Span<FrameHeader> frameHeader)
         {
             if (Read(stream, frameHeader))
             {
@@ -126,7 +126,7 @@ namespace SoundMetrics.Aris.File
 
         private static void AdvancePastFileHeader(Stream stream)
         {
-            var fileHeaderSize = Marshal.SizeOf<ArisFileHeader>();
+            var fileHeaderSize = Marshal.SizeOf<FileHeader>();
             var pos = stream.Seek(fileHeaderSize, SeekOrigin.Begin);
             if (pos != fileHeaderSize)
             {
@@ -134,7 +134,7 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        private static void ValidateFrameHeader(in ArisFrameHeader frameHeader)
+        private static void ValidateFrameHeader(in FrameHeader frameHeader)
         {
             if (!IsValidFrameHeader(frameHeader, out string reason))
             {
@@ -156,7 +156,7 @@ namespace SoundMetrics.Aris.File
             {
                 if (ReadFileHeader(file, out var fileHeader, out var badReason))
                 {
-                    if (fileHeader.Version != ArisFileHeader.ArisFileSignature)
+                    if (fileHeader.Version != FileHeader.ArisFileSignature)
                     {
                         reason = $"Invalid file signature in '{arisFilePath}'";
                         return false;
@@ -175,15 +175,15 @@ namespace SoundMetrics.Aris.File
 
         internal static bool ReadFileHeader(
             Stream stream,
-            out ArisFileHeader fileHeader,
+            out FileHeader fileHeader,
             out string reason)
         {
-            var fileHeaderArray = new Memory<ArisFileHeader>(new ArisFileHeader[1]);
+            var fileHeaderArray = new Memory<FileHeader>(new FileHeader[1]);
             var span = fileHeaderArray.Span;
 
             if (Read(stream, span))
             {
-                if (span[0].Version != ArisFileHeader.ArisFileSignature)
+                if (span[0].Version != FileHeader.ArisFileSignature)
                 {
                     fileHeader = default;
                     reason = $"Invalid file signature";
@@ -202,9 +202,9 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        internal static bool IsValidFrameHeader(in ArisFrameHeader frameHeader, out string reason)
+        internal static bool IsValidFrameHeader(in FrameHeader frameHeader, out string reason)
         {
-            if (frameHeader.Version != ArisFrameHeader.ArisFrameSignature)
+            if (frameHeader.Version != FrameHeader.ArisFrameSignature)
             {
                 reason = "Invalid frame signature";
                 return false;
