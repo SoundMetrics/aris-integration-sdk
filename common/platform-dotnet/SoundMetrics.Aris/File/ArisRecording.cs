@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.File
 {
-    public static partial class ArisFile
+    public static partial class ArisRecording
     {
         public static long GetFileLength(string filePath) =>
             new FileInfo(filePath).Length;

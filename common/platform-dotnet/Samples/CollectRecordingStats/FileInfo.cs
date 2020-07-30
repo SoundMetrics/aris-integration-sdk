@@ -14,11 +14,11 @@ namespace CollectRecordingStats
             ulong? firstGoTime = null;
             ulong? lastGoTime = null;
 
-            var fileLength = ArisFile.GetFileLength(filePath);
+            var fileLength = ArisRecording.GetFileLength(filePath);
 
             try
             {
-                foreach (var frameHeader in ArisFile.EnumerateFrameHeaders(filePath))
+                foreach (var frameHeader in ArisRecording.EnumerateFrameHeaders(filePath))
                 {
                     ++frameCount;
 
