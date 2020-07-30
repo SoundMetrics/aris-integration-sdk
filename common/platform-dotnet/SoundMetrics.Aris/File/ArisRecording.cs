@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.File
 {
+    using static Serialization;
+
     public static partial class ArisRecording
     {
         public static long GetFileLength(string filePath) =>
@@ -20,15 +22,14 @@ namespace SoundMetrics.Aris.File
                 {
                     AdvancePastFileHeader(file);
 
-                    var frameHeaderArray = new Memory<FrameHeader>(new FrameHeader[1]);
+                    FrameHeader frameHeader;
 
                     while (true)
                     {
-                        var span = frameHeaderArray.Span;
-                        if (ReadFrameHeader(file, span))
+                        if (ReadFrameHeader(file, out frameHeader))
                         {
-                            AdvancePastSamples(file, MemoryMarshal.GetReference(span));
-                            yield return MemoryMarshal.GetReference(span);
+                            AdvancePastSamples(file, frameHeader);
+                            yield return frameHeader;
                         }
                         else
                         {
@@ -74,15 +75,14 @@ namespace SoundMetrics.Aris.File
         {
             if (ReadFileHeader(stream, out var fileHeader, out var badReason))
             {
-                var frameHeaderArray = new Memory<FrameHeader>(new FrameHeader[1]);
+                FrameHeader frameHeader;
 
                 while (true)
                 {
-                    var span = frameHeaderArray.Span;
-                    if (ReadFrameHeader(stream, span))
+                    if (ReadFrameHeader(stream, out frameHeader))
                     {
-                        var samples = ReadSamples(stream, frameHeaderArray.Span[0]);
-                        yield return new Frame(frameHeaderArray.Span[0], samples);
+                        var samples = ReadSamples(stream, frameHeader);
+                        yield return new Frame(frameHeader, samples);
                     }
                     else
                     {
@@ -113,11 +113,11 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        private static bool ReadFrameHeader(Stream stream, in Span<FrameHeader> frameHeader)
+        private static bool ReadFrameHeader(Stream stream, out FrameHeader frameHeader)
         {
-            if (Read(stream, frameHeader))
+            if (stream.ReadStruct(out frameHeader))
             {
-                ValidateFrameHeader(MemoryMarshal.GetReference(frameHeader));
+                ValidateFrameHeader(frameHeader);
                 return true;
             }
 
@@ -140,14 +140,6 @@ namespace SoundMetrics.Aris.File
             {
                 throw new Exception($"Invalid frame header: {reason}");
             }
-        }
-
-        private static bool Read<T>(Stream stream, in Span<T> t)
-            where T : struct
-        {
-            var byteSpan = MemoryMarshal.AsBytes(t);
-            var bytesRead = stream.Read(byteSpan);
-            return bytesRead == byteSpan.Length;
         }
 
         internal static bool IsValidFileHeader(string arisFilePath, out string reason)
@@ -178,19 +170,15 @@ namespace SoundMetrics.Aris.File
             out FileHeader fileHeader,
             out string reason)
         {
-            var fileHeaderArray = new Memory<FileHeader>(new FileHeader[1]);
-            var span = fileHeaderArray.Span;
-
-            if (Read(stream, span))
+            if (stream.ReadStruct(out fileHeader))
             {
-                if (span[0].Version != FileHeader.ArisFileSignature)
+                if (fileHeader.Version != FileHeader.ArisFileSignature)
                 {
                     fileHeader = default;
                     reason = $"Invalid file signature";
                     return false;
                 }
 
-                fileHeader = span[0];
                 reason = "";
                 return true;
             }
