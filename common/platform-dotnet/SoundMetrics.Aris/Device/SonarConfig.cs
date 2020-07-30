@@ -9,12 +9,27 @@ namespace SoundMetrics.Aris.Device
         public InvalidSonarConfig(string message) : base(message) { }
     }
 
+    /// <summary>
+    /// Describes the &quot;shape&quot; of a frame's samples.
+    /// </summary>
     public struct SampleGeometry
     {
-        public int BeamCount;
-        public int SamplesPerBeam;
-        public int TotalSampleCount;
-        public int PingsPerFrame;
+        internal SampleGeometry(
+            int beamCount,
+            int samplesPerBeam,
+            int totalSampleCount,
+            int pingsPerFrame)
+        {
+            BeamCount = beamCount;
+            SamplesPerBeam = samplesPerBeam;
+            TotalSampleCount = totalSampleCount;
+            PingsPerFrame = pingsPerFrame;
+        }
+
+        public int BeamCount { get; private set; }
+        public int SamplesPerBeam { get; private set; }
+        public int TotalSampleCount { get; private set; }
+        public int PingsPerFrame { get; private set; }
 
         public void Deconstruct(
             out int beamCount,
@@ -227,13 +242,11 @@ namespace SoundMetrics.Aris.Device
             var beamCount = pingModeDefinition.ChannelCount; // ChannelCount here is actually the beam count
             var totalSampleCount = beamCount * (int)frameHeader.SamplesPerBeam;
 
-            return new SampleGeometry
-            {
-                BeamCount = beamCount,
-                SamplesPerBeam = (int)frameHeader.SamplesPerBeam,
-                TotalSampleCount = totalSampleCount,
-                PingsPerFrame = pingModeDefinition.PingsPerFrame,
-            };
+            return new SampleGeometry(
+                beamCount: beamCount,
+                samplesPerBeam: (int)frameHeader.SamplesPerBeam,
+                totalSampleCount: totalSampleCount,
+                pingsPerFrame: pingModeDefinition.PingsPerFrame);
         }
     }
 }
