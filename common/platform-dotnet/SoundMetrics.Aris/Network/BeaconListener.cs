@@ -13,18 +13,8 @@ namespace SoundMetrics.Aris.Network
     public sealed class BeaconListener : IDisposable
     {
         public BeaconListener()
+            : this(SynchronizationContext.Current)
         {
-            if (SynchronizationContext.Current is null)
-            {
-                throw new InvalidOperationException(
-                    "SynchronizationContext.Current cannot be null");
-            }
-
-            Initialize(
-                SynchronizationContext.Current,
-                out bufferedQueue,
-                out udpListeners,
-                out beaconSubscriptions);
         }
 
         public BeaconListener(SynchronizationContext syncContext)
@@ -34,19 +24,6 @@ namespace SoundMetrics.Aris.Network
                 throw new ArgumentNullException(nameof(syncContext));
             }
 
-            Initialize(
-                syncContext,
-                out bufferedQueue,
-                out udpListeners,
-                out beaconSubscriptions);
-        }
-
-        private void Initialize(
-            SynchronizationContext syncContext,
-            out BufferedMessageQueue<UdpReceived> bufferedQueue,
-            out UdpListener[] udpListeners,
-            out IDisposable[] beaconSubscriptions)
-        {
             bufferedQueue = new BufferedMessageQueue<UdpReceived>(ParseUdpPacket);
 
             udpListeners = new UdpListener[]
@@ -151,6 +128,11 @@ namespace SoundMetrics.Aris.Network
             {
                 if (disposing)
                 {
+                    foreach (var udp in udpListeners)
+                    {
+                        udp.Dispose();
+                    }
+
                     foreach (var sub in beaconSubscriptions)
                     {
                         sub.Dispose();
@@ -177,7 +159,6 @@ namespace SoundMetrics.Aris.Network
         private readonly UdpListener[] udpListeners;
         private readonly IDisposable[] beaconSubscriptions;
         private readonly BufferedMessageQueue<UdpReceived> bufferedQueue;
-        private readonly SynchronizationContext syncContext;
         private bool disposed;
     }
 }
