@@ -4,13 +4,48 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 
 namespace SoundMetrics.Aris.Network
 {
     public sealed class BeaconListener : IDisposable
     {
         public BeaconListener()
+        {
+            if (SynchronizationContext.Current is null)
+            {
+                throw new InvalidOperationException(
+                    "SynchronizationContext.Current cannot be null");
+            }
+
+            Initialize(
+                SynchronizationContext.Current,
+                out bufferedQueue,
+                out udpListeners,
+                out beaconSubscriptions);
+        }
+
+        public BeaconListener(SynchronizationContext syncContext)
+        {
+            if (syncContext is null)
+            {
+                throw new ArgumentNullException(nameof(syncContext));
+            }
+
+            Initialize(
+                syncContext,
+                out bufferedQueue,
+                out udpListeners,
+                out beaconSubscriptions);
+        }
+
+        private void Initialize(
+            SynchronizationContext syncContext,
+            out BufferedMessageQueue<UdpReceived> bufferedQueue,
+            out UdpListener[] udpListeners,
+            out IDisposable[] beaconSubscriptions)
         {
             bufferedQueue = new BufferedMessageQueue<UdpReceived>(ParseUdpPacket);
 
@@ -29,7 +64,10 @@ namespace SoundMetrics.Aris.Network
 
             beaconSubscriptions =
                 udpListeners
-                    .Select(listener => listener.Packets.Subscribe(ReceiveUdpPacket))
+                    .Select(listener =>
+                        listener.Packets
+                            .ObserveOn(syncContext)
+                            .Subscribe(ReceiveUdpPacket))
                     .ToArray();
         }
 
@@ -139,6 +177,7 @@ namespace SoundMetrics.Aris.Network
         private readonly UdpListener[] udpListeners;
         private readonly IDisposable[] beaconSubscriptions;
         private readonly BufferedMessageQueue<UdpReceived> bufferedQueue;
+        private readonly SynchronizationContext syncContext;
         private bool disposed;
     }
 }
