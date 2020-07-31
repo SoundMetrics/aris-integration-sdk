@@ -11,6 +11,7 @@ namespace SoundMetrics.Aris.Network
     {
         public DateTimeOffset Timestamp;
         public UdpReceiveResult Received;
+        public int LocalPort;
     }
 
     internal sealed class UdpListener : IDisposable
@@ -26,12 +27,12 @@ namespace SoundMetrics.Aris.Network
                 reuseAddress);
             udp.Client.Bind(new IPEndPoint(address, port));
 
-            Task.Run(Listen);
+            Task.Run(() => Listen(port));
         }
 
         public IObservable<UdpReceived> Packets => receivedSubject;
 
-        private async void Listen()
+        private async void Listen(int localPort)
         {
             bool keepGoing = true;
 
@@ -45,6 +46,7 @@ namespace SoundMetrics.Aris.Network
                     {
                         Timestamp = timestamp,
                         Received = received,
+                        LocalPort = localPort,
                     });
                 }
                 catch (ObjectDisposedException)

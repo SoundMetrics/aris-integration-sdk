@@ -8,11 +8,11 @@ using System.Reactive.Subjects;
 
 namespace SoundMetrics.Aris.Network
 {
-    internal sealed class BeaconListener : IDisposable
+    public sealed class BeaconListener : IDisposable
     {
         public BeaconListener()
         {
-            bufferedQueue = new BufferedActionQueue<UdpReceived>(ParseUdpPacket);
+            bufferedQueue = new BufferedMessageQueue<UdpReceived>(ParseUdpPacket);
 
             udpListeners = new UdpListener[]
             {
@@ -40,7 +40,7 @@ namespace SoundMetrics.Aris.Network
 
         private void ParseUdpPacket(UdpReceived udpReceived)
         {
-            switch (udpReceived.Received.RemoteEndPoint.Port)
+            switch (udpReceived.LocalPort)
             {
                 case NetworkConstants.ArisAvailabilityListenerPortV2:
                     // Explorer, Defender, Voyager. Ignore Defender, we
@@ -138,7 +138,7 @@ namespace SoundMetrics.Aris.Network
         private readonly Subject<ArisBeacon> beaconSubject = new Subject<ArisBeacon>();
         private readonly UdpListener[] udpListeners;
         private readonly IDisposable[] beaconSubscriptions;
-        private readonly BufferedActionQueue<UdpReceived> bufferedQueue;
+        private readonly BufferedMessageQueue<UdpReceived> bufferedQueue;
         private bool disposed;
     }
 }

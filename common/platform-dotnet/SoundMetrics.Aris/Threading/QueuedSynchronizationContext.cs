@@ -19,6 +19,13 @@ namespace SoundMetrics.Aris.Threading
             new Thread(() => RunOnCurrentThread(ct)).Start();
         }
 
+        public static QueuedSynchronizationContext RunOnAThread(CancellationToken ct)
+        {
+            var context = new QueuedSynchronizationContext(ct);
+            new Thread(() => context.RunOnCurrentThread(ct)).Start();
+            return context;
+        }
+
         public void Dispose()
         {
             if (!workQueue.IsCompleted)

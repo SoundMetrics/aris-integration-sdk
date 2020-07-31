@@ -3,13 +3,15 @@ using System.Threading.Tasks.Dataflow;
 
 namespace SoundMetrics.Aris.Network
 {
-    internal sealed class BufferedActionQueue<Message> : IDisposable
+    internal sealed class BufferedMessageQueue<Message> : IDisposable
     {
-        public BufferedActionQueue(Action<Message> action)
+        public BufferedMessageQueue(Action<Message> action)
         {
             bufferBlock = new BufferBlock<Message>();
             actionBlock = new ActionBlock<Message>(action);
-            actionSub = bufferBlock.LinkTo(actionBlock);
+            actionSub = bufferBlock.LinkTo(
+                            actionBlock,
+                            new DataflowLinkOptions { PropagateCompletion = true });
         }
 
         public bool Post(Message message)
