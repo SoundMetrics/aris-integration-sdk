@@ -1,4 +1,5 @@
-﻿using SoundMetrics.Aris.Availability;
+﻿using Serilog;
+using SoundMetrics.Aris.Availability;
 using SoundMetrics.Aris.Network;
 using SoundMetrics.Aris.Threading;
 using System;
@@ -11,7 +12,8 @@ namespace UnnamedTestProgram
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Watching for beacons...");
+            ConfigureLogger();
+            Log.Information("Watching for beacons...");
 
             using (var cts = new CancellationTokenSource())
             using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
@@ -29,7 +31,7 @@ namespace UnnamedTestProgram
                 }
             }
 
-            Console.WriteLine("Exiting.");
+            Log.Information("Exiting.");
         }
 
         private static void OnBeaconReceived(ArisBeacon beacon)
@@ -50,7 +52,17 @@ namespace UnnamedTestProgram
                 throw new Exception($"Unexpected beacon type: {beaconType.Name}");
             }
 
-            Console.WriteLine($"ARIS {model} {beacon.SerialNumber} [{beacon.IPAddress}]");
+            Log.Information("ARIS {model} {serialNumber} [{IPAddress}]",
+                model, beacon.SerialNumber, beacon.IPAddress);
+        }
+
+        private static void ConfigureLogger()
+        {
+            const string loggingTemplate =
+                "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+            Log.Logger = new LoggerConfiguration()
+                            .WriteTo.Console(outputTemplate: loggingTemplate)
+                            .CreateLogger();
         }
     }
 }
