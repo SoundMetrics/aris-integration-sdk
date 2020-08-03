@@ -14,28 +14,47 @@ namespace SoundMetrics.Aris.Threading
     /// http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
     public sealed class QueuedSynchronizationContext : SynchronizationContext, IDisposable
     {
-        public QueuedSynchronizationContext(CancellationToken ct)
+        public QueuedSynchronizationContext(CancellationTokenSource cts)
         {
-            new Thread(() => RunOnCurrentThread(ct)).Start();
+            this.cts = cts;
+            new Thread(() => RunOnCurrentThread(cts.Token)).Start();
         }
 
-        public static QueuedSynchronizationContext RunOnAThread(CancellationToken ct)
+        public static QueuedSynchronizationContext RunOnAThread(CancellationTokenSource cts)
         {
-            var context = new QueuedSynchronizationContext(ct);
-            new Thread(() => context.RunOnCurrentThread(ct)).Start();
+            var context = new QueuedSynchronizationContext(cts);
+            new Thread(() => context.RunOnCurrentThread(cts.Token)).Start();
             return context;
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                disposed = true;
+
+                if (disposing)
+                {
+                    cts.Cancel();
+                    if (!workQueue.IsCompleted)
+                    {
+                        workQueue.CompleteAdding();
+                    }
+
+                    doneSignal.Wait();
+                    workQueue.Dispose();
+                    doneSignal.Dispose();
+                }
+
+                // no unmanaged resources
+            }
         }
 
         public void Dispose()
         {
-            if (!workQueue.IsCompleted)
-            {
-                Complete();
-            }
-
-            doneSignal.Wait();
-            workQueue.Dispose();
-            doneSignal.Dispose();
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         public override void Post(SendOrPostCallback d, object state)
@@ -45,8 +64,18 @@ namespace SoundMetrics.Aris.Threading
                 throw new ArgumentNullException(nameof(d));
             }
 
-            var workItem = (d, state);
-            workQueue.Add(workItem);
+            if (disposed) return;
+
+            try
+            {
+                var workItem = (d, state);
+                workQueue.Add(workItem);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Asynchronous callbacks try to post here, so they may
+                // not know yet that it's disposed. It remains a race condition.
+            }
         }
 
         public override void Send(SendOrPostCallback _d, object _state)
@@ -75,13 +104,11 @@ namespace SoundMetrics.Aris.Threading
             }
         }
 
-        public void Complete()
-        {
-            workQueue.CompleteAdding();
-        }
-
-        private readonly ManualResetEventSlim doneSignal = new ManualResetEventSlim();
+        private readonly ManualResetEventSlim doneSignal = new ManualResetEventSlim(false);
         private readonly BlockingCollection<WorkItem> workQueue =
             new BlockingCollection<WorkItem>();
+        private readonly CancellationTokenSource cts;
+
+        private bool disposed;
     }
 }

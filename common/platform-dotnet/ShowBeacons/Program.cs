@@ -1,7 +1,7 @@
-﻿using SoundMetrics.Aris.Network;
+﻿using SoundMetrics.Aris.Availability;
+using SoundMetrics.Aris.Network;
 using SoundMetrics.Aris.Threading;
 using System;
-using System.Net;
 using System.Reactive.Linq;
 using System.Threading;
 
@@ -11,32 +11,10 @@ namespace ShowBeacons
     {
         static void Main(string[] args)
         {
-            var targetSerialNumber = "24";
-            var findTimeout = TimeSpan.FromSeconds(5);
+            Console.WriteLine("Watching for beacons...");
 
-            Console.WriteLine($"Watching for ARIS {targetSerialNumber}...");
-            if (FindAris(targetSerialNumber, findTimeout, out var ipAddress))
-            {
-                Console.WriteLine($"ARIS {targetSerialNumber} [{ipAddress}]");
-            }
-            else
-            {
-                Console.WriteLine($"Could not find ARIS {targetSerialNumber}");
-            }
-
-            Console.WriteLine("Exiting.");
-        }
-
-        private static bool FindAris(
-            string targetSerialNumber,
-            TimeSpan timeout,
-            out IPAddress ipAddress)
-        {
-            IPAddress foundAddress = null;
-
-            using (var doneSignal = new ManualResetEventSlim(false))
             using (var cts = new CancellationTokenSource())
-            using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts.Token))
+            using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
             {
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
@@ -45,21 +23,34 @@ namespace ShowBeacons
                     beaconListener
                         .Beacons
                         .ObserveOn(syncContext)
-                        .Subscribe(beacon =>
-                        {
-                            if (beacon.SerialNumber == targetSerialNumber)
-                            {
-                                foundAddress = beacon.IPAddress;
-                                doneSignal.Set();
-                            }
-                        }))
+                        .Subscribe(OnBeaconReceived))
                 {
-                    doneSignal.Wait(timeout);
+                    Thread.Sleep(TimeSpan.FromSeconds(5));
                 }
             }
 
-            ipAddress = foundAddress;
-            return !(ipAddress is null);
+            Console.WriteLine("Exiting.");
+        }
+
+        private static void OnBeaconReceived(ArisBeacon beacon)
+        {
+            var beaconType = beacon.GetType();
+            string model;
+
+            if (beaconType == typeof(ExplorerBeacon))
+            {
+                model = "Explorer";
+            }
+            else if (beaconType == typeof(VoyagerBeacon))
+            {
+                model = "Voyager";
+            }
+            else
+            {
+                throw new Exception($"Unexpected beacon type: {beaconType.Name}");
+            }
+
+            Console.WriteLine($"ARIS {model} {beacon.SerialNumber} [{beacon.IPAddress}]");
         }
     }
 }
