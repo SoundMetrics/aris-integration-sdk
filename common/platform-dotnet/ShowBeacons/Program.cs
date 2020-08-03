@@ -50,7 +50,7 @@ namespace ShowBeacons
                 throw new Exception($"Unexpected beacon type: {beaconType.Name}");
             }
 
-            Console.WriteLine($"ARIS {model} {beacon.SerialNumber}");
+            Console.WriteLine($"ARIS {model} {beacon.SerialNumber} [{beacon.IPAddress}]");
         }
     }
 }
