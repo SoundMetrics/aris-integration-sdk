@@ -1,5 +1,6 @@
 ﻿// Copyright (c) 2015-2020 Sound Metrics. All Rights Reserved.
 
+using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -94,8 +95,14 @@ namespace SoundMetrics.Aris.Threading
                         d.Invoke(state);
                     }
                 }
-                catch
+                catch (OperationCanceledException)
                 {
+                    // This is thrown when GetConsumingEnumerable is canceled.
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("QueuedSynchronizationContext observed a {exceptionType} exception {exceptionMessage}: {stackTrace}",
+                        ex.GetType().Name, ex.Message, ex.StackTrace);
                 }
             }
             finally

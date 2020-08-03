@@ -58,17 +58,29 @@ namespace SoundMetrics.Aris
 
         private void OnBeacon(AvailabilityChange notice)
         {
-            if (!Object.Equals(arisAddress, notice.Beacon.IPAddress))
+            if (notice.Beacon is ArisBeacon beacon)
             {
-                Log.Information("ARIS {serialNumber} {action} {ipAddress}",
-                    notice.Beacon.SerialNumber,
-                    arisAddress is null ? "found at" : "moved to",
-                    notice.Beacon.IPAddress);
+                var isNew = notice.ChangeType == AvailabilityChangeType.BeginAvailability;
+                var addressChanged =
+                    !isNew && !Object.Equals(arisAddress, beacon.IPAddress);
+
+                if (isNew || addressChanged)
+                {
+                    Log.Information("ARIS {serialNumber} {action} {ipAddress}",
+                        beacon.SerialNumber,
+                        addressChanged ? "moved to" : "found at",
+                        beacon.IPAddress);
+                }
 
                 arisAddress = notice.Beacon.IPAddress;
                 addressAvailable.Set();
             }
-
+            else
+            {
+                Log.Information("No longer hearing from ARIS {serialNumbre}",
+                    this.serialNumber);
+                arisAddress = default;
+            }
         }
 
         private void Dispose(bool disposing)

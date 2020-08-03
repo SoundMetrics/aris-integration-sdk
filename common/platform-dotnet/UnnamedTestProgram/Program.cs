@@ -1,9 +1,8 @@
 ﻿using Serilog;
+using SoundMetrics.Aris;
 using SoundMetrics.Aris.Availability;
-using SoundMetrics.Aris.Network;
 using SoundMetrics.Aris.Threading;
 using System;
-using System.Reactive.Linq;
 using System.Threading;
 
 namespace UnnamedTestProgram
@@ -13,22 +12,16 @@ namespace UnnamedTestProgram
         static void Main(string[] args)
         {
             ConfigureLogger();
+
             Log.Information("Watching for beacons...");
 
             using (var cts = new CancellationTokenSource())
             using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
+            using (var conduit = new ArisConduit("24", syncContext))
             {
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                using (var beaconListener = new BeaconListener())
-                using (var _ =
-                    beaconListener
-                        .Beacons
-                        .ObserveOn(syncContext)
-                        .Subscribe(OnBeaconReceived))
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(5));
-                }
+                Thread.Sleep(TimeSpan.FromSeconds(1265));
             }
 
             Log.Information("Exiting.");

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -14,6 +13,7 @@ namespace SoundMetrics.Aris.Availability
     public enum AvailabilityChangeType
     {
         BeginAvailability,
+        UpdatedAvailability,
         EndAvailability,
     };
 
@@ -97,7 +97,7 @@ namespace SoundMetrics.Aris.Availability
                 UpdateDevice();
             }
 
-            bool IsNewDevice() => devices.ContainsKey(key);
+            bool IsNewDevice() => !devices.ContainsKey(key);
 
             void AddNewDevice()
             {
@@ -107,7 +107,11 @@ namespace SoundMetrics.Aris.Availability
                         LastHeard = now,
                         LatestBeacon = beacon,
                     };
-                throw new NotImplementedException("Needs to udpate subject");
+                changeSubject.OnNext(new AvailabilityChange
+                {
+                    ChangeType = AvailabilityChangeType.BeginAvailability,
+                    Beacon = beacon,
+                });
             }
 
             void UpdateDevice()
@@ -122,10 +126,11 @@ namespace SoundMetrics.Aris.Availability
                         LatestBeacon = beacon
                     };
 
-                if (hasIPAddressChanged)
+                changeSubject.OnNext(new AvailabilityChange
                 {
-                    throw new NotImplementedException("Needs to report change in IP address");
-                }
+                    ChangeType = AvailabilityChangeType.UpdatedAvailability,
+                    Beacon = beacon,
+                });
             }
         }
 
@@ -150,7 +155,11 @@ namespace SoundMetrics.Aris.Availability
             void RemoveDevice(SerialNumber key)
             {
                 devices.Remove(key);
-                throw new NotImplementedException("Needs to udpate subject");
+                changeSubject.OnNext(new AvailabilityChange
+                {
+                    ChangeType = AvailabilityChangeType.EndAvailability,
+                    Beacon = default,
+                });
             }
         }
 
@@ -160,6 +169,7 @@ namespace SoundMetrics.Aris.Availability
             {
                 if (disposing)
                 {
+                    observerSub.Dispose();
                     beaconListener.Dispose();
 
                     changeSubject.OnCompleted();
