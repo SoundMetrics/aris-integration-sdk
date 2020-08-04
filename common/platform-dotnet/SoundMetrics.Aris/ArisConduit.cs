@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Availability;
+using SoundMetrics.Aris.Connection;
 using System;
 using System.Net;
 using System.Reactive.Linq;
@@ -62,7 +63,7 @@ namespace SoundMetrics.Aris
             {
                 var isNew = notice.ChangeType == AvailabilityChangeType.BeginAvailability;
                 var addressChanged =
-                    !isNew && !Object.Equals(arisAddress, beacon.IPAddress);
+                    !isNew && !Object.Equals(lastObservedAddress, beacon.IPAddress);
 
                 if (isNew || addressChanged)
                 {
@@ -72,14 +73,15 @@ namespace SoundMetrics.Aris
                         beacon.IPAddress);
                 }
 
-                arisAddress = notice.Beacon.IPAddress;
-                addressAvailable.Set();
+                lastObservedAddress = notice.Beacon.IPAddress;
+                stateMachine.SetTargetAddress(notice.Beacon.IPAddress);
             }
             else
             {
                 Log.Information("No longer hearing from ARIS {serialNumbre}",
                     this.serialNumber);
-                arisAddress = default;
+                lastObservedAddress = default;
+                stateMachine.SetTargetAddress(default);
             }
         }
 
@@ -91,7 +93,6 @@ namespace SoundMetrics.Aris
                 {
                     availabilitySub.Dispose();
                     availability.Dispose();
-                    addressAvailable.Dispose();
                 }
 
                 // no unmanaged resources
@@ -110,9 +111,9 @@ namespace SoundMetrics.Aris
         private readonly SynchronizationContext syncContext;
         private readonly Availability.Availability availability;
         private readonly IDisposable availabilitySub;
-        private readonly ManualResetEventSlim addressAvailable = new ManualResetEventSlim(false);
+        private readonly StateMachine stateMachine = new StateMachine();
 
-        private IPAddress arisAddress;
+        private IPAddress lastObservedAddress;
         private bool disposed;
     }
 }

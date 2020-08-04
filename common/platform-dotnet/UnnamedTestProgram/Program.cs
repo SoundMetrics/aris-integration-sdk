@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using SoundMetrics.Aris;
 using SoundMetrics.Aris.Threading;
-using System;
 using System.Threading;
 
 namespace UnnamedTestProgram
@@ -20,7 +19,8 @@ namespace UnnamedTestProgram
             {
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                Thread.Sleep(TimeSpan.FromSeconds(1265));
+                const int MaxMillisecondSleep = int.MaxValue;
+                Thread.Sleep(MaxMillisecondSleep);
             }
 
             Log.Information("Exiting.");
@@ -31,6 +31,9 @@ namespace UnnamedTestProgram
             const string loggingTemplate =
                 "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
             Log.Logger = new LoggerConfiguration()
+#if DEBUG
+                            .MinimumLevel.Debug()
+#endif
                             .WriteTo.Console(outputTemplate: loggingTemplate)
                             .CreateLogger();
         }

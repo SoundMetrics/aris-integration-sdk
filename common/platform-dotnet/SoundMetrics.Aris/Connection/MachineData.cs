@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal sealed class ArisConnection : IDisposable
+    internal sealed class MachineData : IDisposable
     {
         private void Dispose(bool disposing)
         {
@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (disposing)
                 {
-                    tcp?.Dispose();
+                    tcp.Dispose();
                 }
 
                 // no unmanaged resources
@@ -27,7 +27,6 @@ namespace SoundMetrics.Aris.Connection
         }
 
         private bool disposed;
-        private ConnectionState state = ConnectionState.Start;
         private TcpClient tcp;
     }
 }
