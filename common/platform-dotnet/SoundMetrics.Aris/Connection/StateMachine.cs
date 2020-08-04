@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
@@ -24,6 +25,19 @@ namespace SoundMetrics.Aris.Connection
             var tickTimerPeriod = TimeSpan.FromSeconds(1);
             var nextDue = tickTimerPeriod;
             tickSource = new Timer(OnTimerTick, default, nextDue, tickTimerPeriod);
+
+            NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
+            NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
+        }
+
+        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        {
+            events.Post(new NetworkAvailabilityChanged(e));
+        }
+
+        private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
+        {
+            events.Post(new NetworkAddressChanged());
         }
 
         public void SetTargetAddress(IPAddress targetAddress)
@@ -42,6 +56,8 @@ namespace SoundMetrics.Aris.Connection
                 case AddressChanged _:
                 case Tick _:
                 case Cycle _:
+                case NetworkAddressChanged _:
+                case NetworkAvailabilityChanged _:
                     InvokeDoProcessing(ev);
                     break;
 

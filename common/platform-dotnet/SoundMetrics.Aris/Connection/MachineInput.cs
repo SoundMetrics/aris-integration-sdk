@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
@@ -58,5 +59,23 @@ namespace SoundMetrics.Aris.Connection
         }
 
         public IPAddress TargetAddress { get; private set; }
+    }
+
+    /// <summary>
+    /// Indicates that the host's network configuration has changed.
+    /// </summary>
+    internal sealed class NetworkAddressChanged : IMachineEvent { }
+
+    /// <summary>
+    /// Indicates that the host's network availability has changed.
+    /// </summary>
+    internal sealed class NetworkAvailabilityChanged : IMachineEvent
+    {
+        public NetworkAvailabilityChanged(NetworkAvailabilityEventArgs args)
+        {
+            EventArgs = args;
+        }
+
+        public NetworkAvailabilityEventArgs EventArgs { get; private set; }
     }
 }
