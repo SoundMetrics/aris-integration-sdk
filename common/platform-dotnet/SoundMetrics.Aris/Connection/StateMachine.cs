@@ -18,8 +18,12 @@ namespace SoundMetrics.Aris.Connection
             stateHandlers = InitializeHandlerMap();
         }
 
-        public StateMachine()
+        public StateMachine(string serialNumber)
         {
+            Log.Debug("ARIS {serialNumber} StateMachine.ctor", serialNumber);
+
+            this.serialNumber = serialNumber;
+
             events = new BufferedMessageQueue<IMachineEvent>(ProcessEvent);
 
             var tickTimerPeriod = TimeSpan.FromSeconds(1);
@@ -42,6 +46,12 @@ namespace SoundMetrics.Aris.Connection
 
         public void SetTargetAddress(IPAddress targetAddress)
         {
+            if (!Object.Equals(this.targetAddress, targetAddress))
+            {
+                Log.Debug("ARIS {serialNumber} address changing from {addr1} to {addr2}",
+                    serialNumber, this.targetAddress, targetAddress);
+            }
+
             this.targetAddress = targetAddress;
             events.Post(new AddressChanged(targetAddress));
         }
@@ -134,6 +144,11 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (disposing)
                 {
+                    NetworkChange.NetworkAddressChanged -= NetworkChange_NetworkAddressChanged;
+                    NetworkChange.NetworkAvailabilityChanged -= NetworkChange_NetworkAvailabilityChanged;
+
+                    tickSource.Dispose();
+
                     ShutDown();
                     events.Dispose();
                 }
@@ -165,6 +180,7 @@ namespace SoundMetrics.Aris.Connection
         private static readonly HandlerMap stateHandlers;
         private readonly BufferedMessageQueue<IMachineEvent> events;
         private readonly Timer tickSource;
+        private readonly string serialNumber;
 
         private bool disposed;
         private IPAddress targetAddress;

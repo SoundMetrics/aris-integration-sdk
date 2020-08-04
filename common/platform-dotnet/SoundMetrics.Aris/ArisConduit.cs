@@ -42,6 +42,8 @@ namespace SoundMetrics.Aris
                 availability.Changes
                     .ObserveOn(syncContext)
                     .Subscribe(OnBeacon);
+
+            stateMachine = new StateMachine(serialNumber);
         }
 
         private static SynchronizationContext ValidateSynchronizationContext(
@@ -67,10 +69,11 @@ namespace SoundMetrics.Aris
 
                 if (isNew || addressChanged)
                 {
-                    Log.Information("ARIS {serialNumber} {action} {ipAddress}",
-                        beacon.SerialNumber,
-                        addressChanged ? "moved to" : "found at",
-                        beacon.IPAddress);
+                    var fmt =
+                        addressChanged
+                            ? "ARIS {serialNumber} moved to {ipAddress}"
+                            : "ARIS {serialNumber} found at {ipAddress}";
+                    Log.Information(fmt, beacon.SerialNumber, beacon.IPAddress);
                 }
 
                 lastObservedAddress = notice.Beacon.IPAddress;
@@ -78,7 +81,7 @@ namespace SoundMetrics.Aris
             }
             else
             {
-                Log.Information("No longer hearing from ARIS {serialNumbre}",
+                Log.Information("ARIS {serialNumber} is no longer heard",
                     this.serialNumber);
                 lastObservedAddress = default;
                 stateMachine.SetTargetAddress(default);
@@ -111,7 +114,7 @@ namespace SoundMetrics.Aris
         private readonly SynchronizationContext syncContext;
         private readonly Availability.Availability availability;
         private readonly IDisposable availabilitySub;
-        private readonly StateMachine stateMachine = new StateMachine();
+        private readonly StateMachine stateMachine;
 
         private IPAddress lastObservedAddress;
         private bool disposed;
