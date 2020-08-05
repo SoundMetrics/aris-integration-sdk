@@ -38,12 +38,14 @@ namespace SoundMetrics.Aris.Connection
     /// </summary>
     internal sealed class Tick : IMachineEvent
     {
-        public Tick(DateTimeOffset timestamp)
+        public Tick(DateTimeOffset timestamp, IPAddress deviceAddress)
         {
             Timestamp = timestamp;
+            DeviceAddress = deviceAddress;
         }
 
         public DateTimeOffset Timestamp { get; private set; }
+        public IPAddress DeviceAddress { get; private set; }
     }
 
     /// <summary>

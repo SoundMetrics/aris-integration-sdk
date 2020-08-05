@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Serilog;
+using System.Diagnostics;
+using System.Net;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -9,14 +11,17 @@ namespace SoundMetrics.Aris.Connection
             public static (ConnectionState?, MachineData data)
                 DoProcessing(MachineData data, IMachineEvent ev)
             {
-                if (ev is Tick _)
+                if (ev is Tick tick && tick.DeviceAddress is IPAddress deviceAddress)
                 {
-                    return (default, data);
+                    Debug.Assert(data is null);
+                    Log.Debug("{state} notes device address {deviceAddress}",
+                        nameof(WatchingForDevice), deviceAddress);
+
+                    var machineData = new MachineData(deviceAddress);
+                    return (ConnectionState.AttemptingConnection, machineData);
                 }
-                else
-                {
-                    return (default, data);
-                }
+
+                return (default, data);
             }
 
             public static StateHandler StateHandler =>

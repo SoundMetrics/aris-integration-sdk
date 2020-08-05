@@ -59,7 +59,7 @@ namespace SoundMetrics.Aris.Connection
         }
 
         private void OnTimerTick(object _) =>
-            events.Post(new Tick(DateTimeOffset.Now));
+            events.Post(new Tick(DateTimeOffset.Now, targetAddress));
 
         private void ProcessEvent(IMachineEvent ev)
         {
@@ -78,8 +78,6 @@ namespace SoundMetrics.Aris.Connection
 
                 case Stop stop:
                     Transition(ConnectionState.End, ev);
-                    InvokeDoProcessing(ev);
-
                     stop.MarkComplete();
                     Debug.Assert(state.ConnectionState == ConnectionState.End);
                     break;

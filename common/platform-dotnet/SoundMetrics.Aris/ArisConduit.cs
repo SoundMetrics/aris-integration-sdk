@@ -35,6 +35,10 @@ namespace SoundMetrics.Aris
             this.serialNumber = serialNumber;
             this.syncContext = syncContext;
 
+            // Create the state machine before setting up the inputs
+            // that drive it.
+            stateMachine = new StateMachine(serialNumber);
+
             availability = new Availability.Availability(
                 TimeSpan.FromSeconds(5),
                 syncContext);
@@ -42,8 +46,6 @@ namespace SoundMetrics.Aris
                 availability.Changes
                     .ObserveOn(syncContext)
                     .Subscribe(OnBeacon);
-
-            stateMachine = new StateMachine(serialNumber);
         }
 
         private static SynchronizationContext ValidateSynchronizationContext(

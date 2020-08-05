@@ -1,10 +1,18 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Connection
 {
     internal sealed class MachineData : IDisposable
     {
+        public MachineData(IPAddress deviceAddress)
+        {
+            DeviceAddress = deviceAddress;
+        }
+
+        public IPAddress DeviceAddress { get; }
+
         private void Dispose(bool disposing)
         {
             if (!disposed)
