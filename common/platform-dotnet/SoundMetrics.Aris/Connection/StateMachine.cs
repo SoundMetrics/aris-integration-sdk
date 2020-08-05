@@ -63,35 +63,51 @@ namespace SoundMetrics.Aris.Connection
 
         private void ProcessEvent(IMachineEvent ev)
         {
-            switch (ev)
+            try
             {
-                case DeviceAddressChanged _:
-                case Cycle _:
-                case NetworkAddressChanged _:
-                case NetworkAvailabilityChanged _:
-                    InvokeDoProcessing(ev);
-                    break;
+                try
+                {
+                    switch (ev)
+                    {
+                        case DeviceAddressChanged _:
+                        case Cycle _:
+                        case NetworkAddressChanged _:
+                        case NetworkAvailabilityChanged _:
+                            InvokeDoProcessing(ev);
+                            break;
 
-                case Tick _:
-                    InvokeDoProcessing(ev);
-                    break;
+                        case Tick _:
+                            InvokeDoProcessing(ev);
+                            break;
 
-                case Stop stop:
-                    Transition(ConnectionState.End, ev);
-                    stop.MarkComplete();
-                    Debug.Assert(state.ConnectionState == ConnectionState.End);
-                    break;
+                        case Stop stop:
+                            Transition(ConnectionState.End, ev);
+                            stop.MarkComplete();
+                            Debug.Assert(state.ConnectionState == ConnectionState.End);
+                            break;
 
-                case null:
-                    InvokeDoProcessing(ev);
-                    break;
+                        case null:
+                            InvokeDoProcessing(ev);
+                            break;
 
-                default:
-                    throw new ArgumentException(
-                        $"Unexpected event type: {ev.GetType().Name}");
+                        default:
+                            throw new ArgumentException(
+                                $"Unexpected event type: {ev.GetType().Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var evType = ev?.GetType().Name ?? "(null)";
+                    Log.Error(
+                        "An error occurred while processing an event of type {eventType}: {message}",
+                        evType, ex.Message);
+                    throw;
+                }
             }
-
-            (ev as IDisposable)?.Dispose();
+            finally
+            {
+                (ev as IDisposable)?.Dispose();
+            }
         }
 
         private bool Transition(ConnectionState newState, IMachineEvent ev)
@@ -115,18 +131,27 @@ namespace SoundMetrics.Aris.Connection
 
         private void InvokeDoProcessing(IMachineEvent ev)
         {
-            if (stateHandlers[state.ConnectionState].DoProcessing is DoProcessingFn fn)
+            try
             {
-                var (requestedState, newData) = fn(state.Data, ev);
-                if (requestedState is ConnectionState newState)
+                if (stateHandlers[state.ConnectionState].DoProcessing is DoProcessingFn fn)
                 {
-                    state = new State(newState, newData);
-                    AllowMoreWork();
+                    var (requestedState, newData) = fn(state.Data, ev);
+                    if (requestedState is ConnectionState newState)
+                    {
+                        state = new State(newState, newData);
+                        AllowMoreWork();
+                    }
+                }
+                else
+                {
+                    // Nothing to do.
                 }
             }
-            else
+            catch (KeyNotFoundException ex)
             {
-                // Nothing to do.
+                var msg = $"Handler for state {state.ConnectionState} is not implemented";
+                Log.Error(msg);
+                throw new NotImplementedException(msg, ex);
             }
         }
 
