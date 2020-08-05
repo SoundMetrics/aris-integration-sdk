@@ -63,7 +63,7 @@ namespace SoundMetrics.Aris
         {
             if (notice.Beacon is ArisBeacon beacon)
             {
-                var isNew = notice.ChangeType == AvailabilityChangeType.BeginAvailability;
+                var isNew = lastObservedAddress is null;
                 var addressChanged =
                     !isNew && !Object.Equals(lastObservedAddress, beacon.IPAddress);
 

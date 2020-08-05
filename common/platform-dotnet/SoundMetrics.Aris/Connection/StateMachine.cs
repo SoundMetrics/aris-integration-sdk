@@ -32,6 +32,8 @@ namespace SoundMetrics.Aris.Connection
 
             NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
+
+            Transition(ConnectionState.WatchingForDevice, null);
         }
 
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
@@ -64,19 +66,26 @@ namespace SoundMetrics.Aris.Connection
             switch (ev)
             {
                 case DeviceAddressChanged _:
-                case Tick _:
                 case Cycle _:
                 case NetworkAddressChanged _:
                 case NetworkAvailabilityChanged _:
                     InvokeDoProcessing(ev);
                     break;
 
+                case Tick _:
+                    InvokeDoProcessing(ev);
+                    break;
+
                 case Stop stop:
-                    Transition(state.ConnectionState, ConnectionState.End);
+                    Transition(ConnectionState.End, ev);
                     InvokeDoProcessing(ev);
 
                     stop.MarkComplete();
                     Debug.Assert(state.ConnectionState == ConnectionState.End);
+                    break;
+
+                case null:
+                    InvokeDoProcessing(ev);
                     break;
 
                 default:
@@ -87,23 +96,28 @@ namespace SoundMetrics.Aris.Connection
             (ev as IDisposable)?.Dispose();
         }
 
-        private bool Transition(ConnectionState oldState, ConnectionState newState)
+        private bool Transition(ConnectionState newState, IMachineEvent ev)
         {
+            var oldState = state.ConnectionState;
             if (oldState == newState)
             {
                 Log.Debug("Ignoring transition to the same state ({newState})", newState);
                 return false;
             }
 
+            Log.Debug("State transition from {oldState} to {newState}", oldState, newState);
+
             stateHandlers[oldState].OnLeave?.Invoke(state.Data);
+            state = new State(newState, state.Data);
             stateHandlers[newState].OnEnter?.Invoke(state.Data);
+            stateHandlers[newState].DoProcessing?.Invoke(state.Data, ev);
 
             return true;
         }
 
         private void InvokeDoProcessing(IMachineEvent ev)
         {
-            if (stateHandlers[state.ConnectionState].DoProcessing is OnDoProcessingFn fn)
+            if (stateHandlers[state.ConnectionState].DoProcessing is DoProcessingFn fn)
             {
                 var (requestedState, newData) = fn(state.Data, ev);
                 if (requestedState is ConnectionState newState)
@@ -132,8 +146,12 @@ namespace SoundMetrics.Aris.Connection
                     new StateHandler(default, default, default)
                 },
                 {
+                    ConnectionState.WatchingForDevice,
+                    WatchingForDevice.StateHandler
+                },
+                {
                     ConnectionState.End,
-                    EndHandler.StateHandler
+                    End.StateHandler
                 }
             };
         }

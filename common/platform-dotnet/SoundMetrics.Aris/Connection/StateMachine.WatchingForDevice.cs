@@ -1,25 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SoundMetrics.Aris.Connection
 {
     internal sealed partial class StateMachine
     {
-        internal static class EndHandler
+        internal sealed class WatchingForDevice
         {
             public static (ConnectionState?, MachineData data)
-                OnDoProcessing(MachineData data, IMachineEvent _)
+                DoProcessing(MachineData data, IMachineEvent ev)
             {
-                throw new NotImplementedException();
-                data?.Dispose();
-                return (default, default);
+                if (ev is Tick _)
+                {
+                    return (default, data);
+                }
+                else
+                {
+                    return (default, data);
+                }
             }
 
             public static StateHandler StateHandler =>
                 new StateHandler(
                     onEnter: default,
-                    doProcessing: OnDoProcessing,
+                    doProcessing: DoProcessing,
                     onLeave: default);
         }
     }

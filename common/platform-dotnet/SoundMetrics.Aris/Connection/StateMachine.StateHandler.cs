@@ -8,13 +8,13 @@ namespace SoundMetrics.Aris.Connection
         internal delegate void OnLeaveFn(MachineData data);
 
         internal delegate (ConnectionState? newState, MachineData data)
-            OnDoProcessingFn(MachineData data, IMachineEvent ev);
+            DoProcessingFn(MachineData data, IMachineEvent ev);
 
         internal sealed class StateHandler
         {
             public StateHandler(
                 OnEnterFn onEnter,
-                OnDoProcessingFn doProcessing,
+                DoProcessingFn doProcessing,
                 OnLeaveFn onLeave)
             {
                 OnEnter = onEnter;
@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Connection
             }
 
             public OnEnterFn OnEnter { get; private set; }
-            public OnDoProcessingFn DoProcessing { get; private set; }
+            public DoProcessingFn DoProcessing { get; private set; }
             public OnLeaveFn OnLeave { get; private set; }
         }
     }

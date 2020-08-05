@@ -1,5 +1,6 @@
 ﻿using SoundMetrics.Aris.Network;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -12,9 +13,8 @@ namespace SoundMetrics.Aris.Availability
 
     public enum AvailabilityChangeType
     {
-        BeginAvailability,
-        UpdatedAvailability,
-        EndAvailability,
+        Available,
+        NotAvailable,
     };
 
     public struct AvailabilityChange
@@ -87,51 +87,20 @@ namespace SoundMetrics.Aris.Availability
             // on a single synchronization context.
 
             var key = beacon.SerialNumber;
-
-            if (IsNewDevice())
-            {
-                AddNewDevice();
-            }
-            else
-            {
-                UpdateDevice();
-            }
-
-            bool IsNewDevice() => !devices.ContainsKey(key);
-
-            void AddNewDevice()
-            {
-                devices[key] =
+            var value =
                     new DeviceState
                     {
                         LastHeard = now,
                         LatestBeacon = beacon,
                     };
-                changeSubject.OnNext(new AvailabilityChange
-                {
-                    ChangeType = AvailabilityChangeType.BeginAvailability,
-                    Beacon = beacon,
-                });
-            }
 
-            void UpdateDevice()
+            _ = devices.AddOrUpdate(key, _ => value, (_1,_2) => value);
+
+            changeSubject.OnNext(new AvailabilityChange
             {
-                var hasIPAddressChanged =
-                    beacon.IPAddress != devices[key].LatestBeacon.IPAddress;
-
-                devices[key] =
-                    new DeviceState
-                    {
-                        LastHeard = now,
-                        LatestBeacon = beacon
-                    };
-
-                changeSubject.OnNext(new AvailabilityChange
-                {
-                    ChangeType = AvailabilityChangeType.UpdatedAvailability,
-                    Beacon = beacon,
-                });
-            }
+                ChangeType = AvailabilityChangeType.Available,
+                Beacon = beacon,
+            });
         }
 
         private void OnTimer(DateTimeOffset now)
@@ -154,12 +123,14 @@ namespace SoundMetrics.Aris.Availability
 
             void RemoveDevice(SerialNumber key)
             {
-                devices.Remove(key);
-                changeSubject.OnNext(new AvailabilityChange
+                if (devices.TryRemove(key, out var _))
                 {
-                    ChangeType = AvailabilityChangeType.EndAvailability,
-                    Beacon = default,
-                });
+                    changeSubject.OnNext(new AvailabilityChange
+                    {
+                        ChangeType = AvailabilityChangeType.NotAvailable,
+                        Beacon = default,
+                    });
+                }
             }
         }
 
@@ -194,7 +165,8 @@ namespace SoundMetrics.Aris.Availability
             public ArisBeacon LatestBeacon;
         }
 
-        private readonly Dictionary<SerialNumber, DeviceState> devices = new Dictionary<SerialNumber, DeviceState>();
+        private readonly ConcurrentDictionary<SerialNumber, DeviceState> devices =
+            new ConcurrentDictionary<SerialNumber, DeviceState>();
         private readonly BeaconListener beaconListener;
         private readonly Subject<AvailabilityChange> changeSubject = new Subject<AvailabilityChange>();
         private readonly IDisposable observerSub;
