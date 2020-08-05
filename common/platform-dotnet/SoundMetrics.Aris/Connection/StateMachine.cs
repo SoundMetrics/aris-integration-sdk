@@ -99,8 +99,10 @@ namespace SoundMetrics.Aris.Connection
                 {
                     var evType = ev?.GetType().Name ?? "(null)";
                     Log.Error(
-                        "An error occurred while processing an event of type {eventType}: {message}",
-                        evType, ex.Message);
+                        "An error occurred while processing an event of type {eventType} "
+                        + "during state {state}: {message}\n"
+                        + "{stackTrace}",
+                        evType, state.ConnectionState, ex.Message, ex.StackTrace);
                     throw;
                 }
             }
@@ -171,6 +173,10 @@ namespace SoundMetrics.Aris.Connection
                 {
                     ConnectionState.WatchingForDevice,
                     WatchingForDevice.StateHandler
+                },
+                {
+                    ConnectionState.AttemptingConnection,
+                    AttemptingConnection.StateHandler
                 },
                 {
                     ConnectionState.End,
