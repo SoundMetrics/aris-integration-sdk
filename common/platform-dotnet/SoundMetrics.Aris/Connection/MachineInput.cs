@@ -51,14 +51,14 @@ namespace SoundMetrics.Aris.Connection
     /// Changing to null/unknown is not interesting and ignored;
     /// changing to a known address causes a new connection.
     /// </summary>
-    internal sealed class AddressChanged : IMachineEvent
+    internal sealed class DeviceAddressChanged : IMachineEvent
     {
-        public AddressChanged(IPAddress targetAddress)
+        public DeviceAddressChanged(IPAddress targetAddress)
         {
-            TargetAddress = targetAddress;
+            DeviceAddress = targetAddress;
         }
 
-        public IPAddress TargetAddress { get; private set; }
+        public IPAddress DeviceAddress { get; private set; }
     }
 
     /// <summary>

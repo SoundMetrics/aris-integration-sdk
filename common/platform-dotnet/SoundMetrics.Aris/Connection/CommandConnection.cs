@@ -66,7 +66,7 @@ namespace SoundMetrics.Aris.Connection
 
         public (bool success, string response) SendCommand(string command)
         {
-            return default;
+            throw new NotImplementedException();
         }
 
         private void Dispose(bool disposing)

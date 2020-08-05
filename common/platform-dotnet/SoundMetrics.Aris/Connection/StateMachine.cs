@@ -48,12 +48,12 @@ namespace SoundMetrics.Aris.Connection
         {
             if (!Object.Equals(this.targetAddress, targetAddress))
             {
-                Log.Debug("ARIS {serialNumber} address changing from {addr1} to {addr2}",
+                Log.Debug("ARIS {serialNumber} noting address changed from {addr1} to {addr2}",
                     serialNumber, this.targetAddress, targetAddress);
             }
 
             this.targetAddress = targetAddress;
-            events.Post(new AddressChanged(targetAddress));
+            events.Post(new DeviceAddressChanged(targetAddress));
         }
 
         private void OnTimerTick(object _) =>
@@ -63,7 +63,7 @@ namespace SoundMetrics.Aris.Connection
         {
             switch (ev)
             {
-                case AddressChanged _:
+                case DeviceAddressChanged _:
                 case Tick _:
                 case Cycle _:
                 case NetworkAddressChanged _:
