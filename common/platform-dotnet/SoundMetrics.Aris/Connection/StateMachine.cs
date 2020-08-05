@@ -33,7 +33,7 @@ namespace SoundMetrics.Aris.Connection
             NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
 
-            Transition(ConnectionState.WatchingForDevice, null);
+            Transition(ConnectionState.WatchingForDevice, newData: null, ev: null);
         }
 
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
@@ -81,7 +81,7 @@ namespace SoundMetrics.Aris.Connection
                             break;
 
                         case Stop stop:
-                            Transition(ConnectionState.End, ev);
+                            Transition(ConnectionState.End, state.Data, ev);
                             stop.MarkComplete();
                             Debug.Assert(state.ConnectionState == ConnectionState.End);
                             break;
@@ -112,7 +112,10 @@ namespace SoundMetrics.Aris.Connection
             }
         }
 
-        private bool Transition(ConnectionState newState, IMachineEvent ev)
+        private bool Transition(
+            ConnectionState newState,
+            MachineData newData,
+            IMachineEvent ev)
         {
             var oldState = state.ConnectionState;
             if (oldState == newState)
@@ -124,7 +127,7 @@ namespace SoundMetrics.Aris.Connection
             Log.Debug("State transition from {oldState} to {newState}", oldState, newState);
 
             stateHandlers[oldState].OnLeave?.Invoke(state.Data);
-            state = new State(newState, state.Data);
+            state = new State(newState, newData);
             stateHandlers[newState].OnEnter?.Invoke(state.Data);
             stateHandlers[newState].DoProcessing?.Invoke(state.Data, ev);
 
@@ -140,8 +143,7 @@ namespace SoundMetrics.Aris.Connection
                     var (requestedState, newData) = fn(state.Data, ev);
                     if (requestedState is ConnectionState newState)
                     {
-                        state = new State(newState, newData);
-                        AllowMoreWork();
+                        Transition(newState, newData, ev);
                     }
                 }
                 else
@@ -155,11 +157,6 @@ namespace SoundMetrics.Aris.Connection
                 Log.Error(msg);
                 throw new NotImplementedException(msg, ex);
             }
-        }
-
-        private void AllowMoreWork()
-        {
-            events.Post(Cycle.Singleton);
         }
 
         private static HandlerMap InitializeHandlerMap()

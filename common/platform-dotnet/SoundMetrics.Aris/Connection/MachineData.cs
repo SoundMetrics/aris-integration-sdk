@@ -19,7 +19,6 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (disposing)
                 {
-                    tcp.Dispose();
                 }
 
                 // no unmanaged resources
@@ -35,6 +34,5 @@ namespace SoundMetrics.Aris.Connection
         }
 
         private bool disposed;
-        private TcpClient tcp;
     }
 }
