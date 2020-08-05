@@ -9,32 +9,21 @@ namespace SoundMetrics.Aris.Connection
 {
     internal sealed class CommandConnection : IDisposable
     {
-        public static bool Create(IPAddress ipAddress, out CommandConnection connection)
+        public static CommandConnection Create(IPAddress ipAddress)
         {
             var tcp = new TcpClient();
-            try
-            {
-                tcp.Client.SetSocketOption(
-                    SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                tcp.Connect(
-                    ipAddress, NetworkConstants.ArisSonarTcpNOListenPort);
 
-                ControlTcpKeepAlives(
-                    tcp.Client,
-                    interval: TimeSpan.FromSeconds(5),
-                    retryInterval: TimeSpan.FromSeconds(1));
+            tcp.Client.SetSocketOption(
+                SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            tcp.Connect(
+                ipAddress, NetworkConstants.ArisSonarTcpNOListenPort);
 
-                connection = new CommandConnection(tcp);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Warning("Couldn't connect to {ipAddress}: {exMessage}",
-                    ipAddress, ex.Message);
+            ControlTcpKeepAlives(
+                tcp.Client,
+                interval: TimeSpan.FromSeconds(5),
+                retryInterval: TimeSpan.FromSeconds(1));
 
-                connection = null;
-                return false;
-            }
+            return new CommandConnection(tcp);
         }
 
         private static void ControlTcpKeepAlives(

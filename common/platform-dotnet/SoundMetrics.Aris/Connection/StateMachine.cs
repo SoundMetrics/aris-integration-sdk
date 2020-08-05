@@ -13,16 +13,12 @@ namespace SoundMetrics.Aris.Connection
 
     internal sealed partial class StateMachine : IDisposable
     {
-        static StateMachine()
-        {
-            stateHandlers = InitializeHandlerMap();
-        }
-
         public StateMachine(string serialNumber)
         {
             Log.Debug("ARIS {serialNumber} StateMachine.ctor", serialNumber);
 
             this.serialNumber = serialNumber;
+            stateHandlers = InitializeHandlerMap();
 
             events = new BufferedMessageQueue<IMachineEvent>(ProcessEvent);
 
@@ -159,7 +155,7 @@ namespace SoundMetrics.Aris.Connection
             }
         }
 
-        private static HandlerMap InitializeHandlerMap()
+        private HandlerMap InitializeHandlerMap()
         {
             return new HandlerMap
             {
@@ -173,7 +169,7 @@ namespace SoundMetrics.Aris.Connection
                 },
                 {
                     ConnectionState.AttemptingConnection,
-                    AttemptingConnection.StateHandler
+                    attemptingConnectionHandler.StateHandler
                 },
                 {
                     ConnectionState.End,
@@ -221,7 +217,9 @@ namespace SoundMetrics.Aris.Connection
             GC.SuppressFinalize(this);
         }
 
-        private static readonly HandlerMap stateHandlers;
+        private readonly HandlerMap stateHandlers;
+        private readonly AttemptingConnection attemptingConnectionHandler =
+            new AttemptingConnection();
         private readonly BufferedMessageQueue<IMachineEvent> events;
         private readonly Timer tickSource;
         private readonly string serialNumber;

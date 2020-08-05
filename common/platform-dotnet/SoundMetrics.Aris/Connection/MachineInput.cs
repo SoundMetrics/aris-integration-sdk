@@ -13,7 +13,12 @@ namespace SoundMetrics.Aris.Connection
     /// </summary>
     internal sealed class Cycle : IMachineEvent
     {
-        public static Cycle Singleton = new Cycle();
+        public Cycle(DateTimeOffset timestamp)
+        {
+            Timestamp = timestamp;
+        }
+
+        public DateTimeOffset Timestamp { get; }
     }
 
     /// <summary>
@@ -44,8 +49,8 @@ namespace SoundMetrics.Aris.Connection
             DeviceAddress = deviceAddress;
         }
 
-        public DateTimeOffset Timestamp { get; private set; }
-        public IPAddress DeviceAddress { get; private set; }
+        public DateTimeOffset Timestamp { get; }
+        public IPAddress DeviceAddress { get; }
     }
 
     /// <summary>
@@ -60,7 +65,7 @@ namespace SoundMetrics.Aris.Connection
             DeviceAddress = targetAddress;
         }
 
-        public IPAddress DeviceAddress { get; private set; }
+        public IPAddress DeviceAddress { get; }
     }
 
     /// <summary>

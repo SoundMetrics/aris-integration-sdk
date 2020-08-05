@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -11,7 +10,15 @@ namespace SoundMetrics.Aris.Connection
             DeviceAddress = deviceAddress;
         }
 
+        /// <summary>
+        /// The IPAddress of the connected device.
+        /// </summary>
         public IPAddress DeviceAddress { get; }
+
+        /// <summary>
+        /// The command connection; may be null when not connected.
+        /// </summary>
+        public CommandConnection CommandConnection { get; set; }
 
         private void Dispose(bool disposing)
         {
@@ -19,6 +26,7 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (disposing)
                 {
+                    CommandConnection?.Dispose();
                 }
 
                 // no unmanaged resources
