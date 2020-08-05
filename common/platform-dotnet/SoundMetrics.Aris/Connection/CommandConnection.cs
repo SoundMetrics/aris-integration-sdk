@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -13,17 +14,26 @@ namespace SoundMetrics.Aris.Connection
         {
             var tcp = new TcpClient();
 
-            tcp.Client.SetSocketOption(
-                SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            tcp.Connect(
-                ipAddress, NetworkConstants.ArisSonarTcpNOListenPort);
+            try
+            {
+                tcp.Client.SetSocketOption(
+                    SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                tcp.Connect(
+                    ipAddress, NetworkConstants.ArisSonarTcpNOListenPort);
 
-            ControlTcpKeepAlives(
-                tcp.Client,
-                interval: TimeSpan.FromSeconds(5),
-                retryInterval: TimeSpan.FromSeconds(1));
+                ControlTcpKeepAlives(
+                    tcp.Client,
+                    interval: TimeSpan.FromSeconds(5),
+                    retryInterval: TimeSpan.FromSeconds(1));
 
-            return new CommandConnection(tcp);
+                InitializeSimplifiedProtocol(tcp);
+                return new CommandConnection(tcp);
+            }
+            catch
+            {
+                tcp.Dispose();
+                throw;
+            }
         }
 
         private static void ControlTcpKeepAlives(
@@ -53,9 +63,54 @@ namespace SoundMetrics.Aris.Connection
             throw new NotImplementedException();
         }
 
-        public (bool success, string response) SendCommand(string command)
+        private static void InitializeSimplifiedProtocol(TcpClient tcp)
         {
-            throw new NotImplementedException();
+            if (SendCommand(tcp, "initialize", out var response, out var error))
+            {
+                Log.Debug("Initialize response=[{response}]", response);
+            }
+            else
+            {
+                throw new Exception("Protocl initialization failed: " + error);
+            }
+        }
+
+        private static bool SendCommand(
+            TcpClient tcp,
+            string command,
+            out string response,
+            out string error)
+        {
+            var octets = ASCIIEncoding.ASCII.GetBytes(command + "\n\n");
+            if (tcp.Client.Send(octets) == octets.Length)
+            {
+                var buffer = new byte[1024];
+                if (tcp.Client.Receive(buffer) > 0)
+                {
+                    response = ASCIIEncoding.ASCII.GetString(buffer);
+                    var splits = response.Split(new char[] { ' ', '\t', '\r', '\n' });
+                    if (splits[0] == "200")
+                    {
+                        error = "";
+                        return true;
+                    }
+                    else
+                    {
+                        error = response;
+                        response = "";
+                        return false;
+                    }
+                }
+            }
+
+            response = "";
+            error = "Network transaction failed";
+            return false;
+        }
+
+        public bool SendCommand(string command, out string response)
+        {
+            return SendCommand(command, out response);
         }
 
         private void Dispose(bool disposing)
