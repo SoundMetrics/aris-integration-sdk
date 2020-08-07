@@ -1,6 +1,8 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Network;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +15,7 @@ namespace SoundMetrics.Aris.Connection
         public static CommandConnection Create(IPAddress ipAddress)
         {
             var tcp = new TcpClient();
+            ConnectionIO io = null;
 
             try
             {
@@ -26,12 +29,16 @@ namespace SoundMetrics.Aris.Connection
                     interval: TimeSpan.FromSeconds(5),
                     retryInterval: TimeSpan.FromSeconds(1));
 
-                InitializeSimplifiedProtocol(tcp);
-                return new CommandConnection(tcp);
+                io = new ConnectionIO(tcp);
+                tcp = null;
+
+                InitializeSimplifiedProtocol(io);
+                return new CommandConnection(io);
             }
             catch
             {
-                tcp.Dispose();
+                tcp?.Dispose();
+                io?.Dispose();
                 throw;
             }
         }
@@ -54,63 +61,33 @@ namespace SoundMetrics.Aris.Connection
             _ = client.IOControl(IOControlCode.KeepAliveValues, payload, null);
         }
 
-        private CommandConnection(TcpClient tcp)
+        private CommandConnection(ConnectionIO io)
         {
-            if (tcp is null) throw new ArgumentNullException(nameof(tcp));
+            if (io is null) throw new ArgumentNullException(nameof(io));
 
-            this.tcp = tcp;
-            // Wire things up
-            throw new NotImplementedException();
+            this.io = io;
         }
 
-        private static void InitializeSimplifiedProtocol(TcpClient tcp)
+        private static string[] initializeCommand = new[] { "initialize" };
+
+        private static void InitializeSimplifiedProtocol(ConnectionIO io)
         {
-            if (SendCommand(tcp, "initialize", out var response, out var error))
+            var response = io.SendCommand(initializeCommand);
+            var joinedResponseText = string.Join("\n", response.ResponseText);
+
+            if (response.IsSuccessful)
             {
-                Log.Debug("Initialize response=[{response}]", response);
+                Log.Debug("Initialize response=[{response}]", joinedResponseText);
             }
             else
             {
-                throw new Exception("Protocl initialization failed: " + error);
+                throw new Exception("Protocol initialization failed: " + joinedResponseText);
             }
         }
 
-        private static bool SendCommand(
-            TcpClient tcp,
-            string command,
-            out string response,
-            out string error)
+        public CommandResponse SendCommand(IEnumerable<string> command)
         {
-            var octets = ASCIIEncoding.ASCII.GetBytes(command + "\n\n");
-            if (tcp.Client.Send(octets) == octets.Length)
-            {
-                var buffer = new byte[1024];
-                if (tcp.Client.Receive(buffer) > 0)
-                {
-                    response = ASCIIEncoding.ASCII.GetString(buffer);
-                    var splits = response.Split(new char[] { ' ', '\t', '\r', '\n' });
-                    if (splits[0] == "200")
-                    {
-                        error = "";
-                        return true;
-                    }
-                    else
-                    {
-                        error = response;
-                        response = "";
-                        return false;
-                    }
-                }
-            }
-
-            response = "";
-            error = "Network transaction failed";
-            return false;
-        }
-
-        public bool SendCommand(string command, out string response)
-        {
-            return SendCommand(command, out response);
+            return io.SendCommand(command);
         }
 
         private void Dispose(bool disposing)
@@ -119,7 +96,7 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (disposing)
                 {
-                    tcp.Dispose();
+                    io.Dispose();
                 }
 
                 // no unmanaged resources
@@ -134,7 +111,7 @@ namespace SoundMetrics.Aris.Connection
             GC.SuppressFinalize(this);
         }
 
-        private readonly TcpClient tcp;
+        private readonly ConnectionIO io;
 
         private bool disposed;
     }
