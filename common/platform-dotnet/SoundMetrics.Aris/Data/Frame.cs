@@ -3,7 +3,7 @@ using System;
 
 namespace SoundMetrics.Aris.Data
 {
-    public class Frame
+    public sealed class Frame
     {
         public Frame(in FrameHeader frameHeader, ByteBuffer samples)
         {
