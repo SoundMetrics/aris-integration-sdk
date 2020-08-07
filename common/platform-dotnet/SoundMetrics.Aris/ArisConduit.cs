@@ -1,9 +1,11 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Availability;
 using SoundMetrics.Aris.Connection;
+using SoundMetrics.Aris.Data;
 using System;
 using System.Net;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 
 namespace SoundMetrics.Aris
@@ -33,7 +35,6 @@ namespace SoundMetrics.Aris
             }
 
             this.serialNumber = serialNumber;
-            this.syncContext = syncContext;
 
             // Create the state machine before setting up the inputs
             // that drive it.
@@ -47,6 +48,8 @@ namespace SoundMetrics.Aris
                     .ObserveOn(syncContext)
                     .Subscribe(OnBeacon);
         }
+
+        public IObservable<Frame> Frames => frameSubject;
 
         private static SynchronizationContext ValidateSynchronizationContext(
             SynchronizationContext syncContext,
@@ -113,10 +116,10 @@ namespace SoundMetrics.Aris
         }
 
         private readonly string serialNumber;
-        private readonly SynchronizationContext syncContext;
         private readonly Availability.Availability availability;
         private readonly IDisposable availabilitySub;
         private readonly StateMachine stateMachine;
+        private readonly Subject<Frame> frameSubject = new Subject<Frame>();
 
         private IPAddress lastObservedAddress;
         private bool disposed;
