@@ -6,8 +6,8 @@ namespace SoundMetrics.Aris.Connection
     {
         internal static class End
         {
-            public static (ConnectionState?, MachineData data)
-                DoProcessing(MachineData data, IMachineEvent _)
+            public static (ConnectionState?, StateMachineData data)
+                DoProcessing(StateMachineData data, IMachineEvent _)
             {
                 data?.Dispose();
                 return (ConnectionState.End, null);

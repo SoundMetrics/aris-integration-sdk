@@ -19,7 +19,7 @@ namespace SoundMetrics.Aris.Connection
 
             public StateHandler StateHandler { get; }
 
-            private void OnEnter(MachineData data)
+            private void OnEnter(StateMachineData data)
             {
                 Log.Information(
                     "Attempting connection to {deviceAddress}",
@@ -31,8 +31,8 @@ namespace SoundMetrics.Aris.Connection
                 failureLogCountdown = 5;
             }
 
-            private (ConnectionState?, MachineData data)
-                DoProcessing(MachineData data, IMachineEvent ev)
+            private (ConnectionState?, StateMachineData data)
+                DoProcessing(StateMachineData data, IMachineEvent ev)
             {
                 switch (ev)
                 {
@@ -48,10 +48,10 @@ namespace SoundMetrics.Aris.Connection
 
                 return (default, data);
 
-                (ConnectionState?, MachineData data)
+                (ConnectionState?, StateMachineData data)
                     AttemptConnection(DateTimeOffset timestamp)
                 {
-                    if (data is MachineData d && data.CommandConnection is null)
+                    if (data is StateMachineData d && data.CommandConnection is null)
                     {
                         var hasAlreadyTried = !(mostRecentAttempt is null);
                         var tryNow =

@@ -4,11 +4,11 @@ namespace SoundMetrics.Aris.Connection
 {
     internal sealed partial class StateMachine
     {
-        internal delegate void OnEnterFn(MachineData data);
-        internal delegate void OnLeaveFn(MachineData data);
+        internal delegate void OnEnterFn(StateMachineData data);
+        internal delegate void OnLeaveFn(StateMachineData data);
 
-        internal delegate (ConnectionState? newState, MachineData data)
-            DoProcessingFn(MachineData data, IMachineEvent ev);
+        internal delegate (ConnectionState? newState, StateMachineData data)
+            DoProcessingFn(StateMachineData data, IMachineEvent ev);
 
         internal sealed class StateHandler
         {

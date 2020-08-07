@@ -110,7 +110,7 @@ namespace SoundMetrics.Aris.Connection
 
         private bool Transition(
             ConnectionState newState,
-            MachineData newData,
+            StateMachineData newData,
             IMachineEvent ev)
         {
             var oldState = state.ConnectionState;
@@ -231,14 +231,14 @@ namespace SoundMetrics.Aris.Connection
         {
             public State(
                 ConnectionState connectionState,
-                MachineData data)
+                StateMachineData data)
             {
                 ConnectionState = connectionState;
                 Data = data;
             }
 
             public ConnectionState ConnectionState { get; private set; }
-            public MachineData Data { get; private set; }
+            public StateMachineData Data { get; private set; }
         }
 
         private State state = new State(ConnectionState.Start, default);

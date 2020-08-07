@@ -3,9 +3,9 @@ using System.Net;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal sealed class MachineData : IDisposable
+    internal sealed class StateMachineData : IDisposable
     {
-        public MachineData(IPAddress deviceAddress)
+        public StateMachineData(IPAddress deviceAddress)
         {
             DeviceAddress = deviceAddress;
         }

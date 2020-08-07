@@ -8,8 +8,8 @@ namespace SoundMetrics.Aris.Connection
     {
         internal sealed class WatchingForDevice
         {
-            public static (ConnectionState?, MachineData data)
-                DoProcessing(MachineData data, IMachineEvent ev)
+            public static (ConnectionState?, StateMachineData data)
+                DoProcessing(StateMachineData data, IMachineEvent ev)
             {
                 if (ev is Tick tick && tick.DeviceAddress is IPAddress deviceAddress)
                 {
@@ -17,7 +17,7 @@ namespace SoundMetrics.Aris.Connection
                     Log.Debug("{state} notes device address {deviceAddress}",
                         nameof(WatchingForDevice), deviceAddress);
 
-                    var machineData = new MachineData(deviceAddress);
+                    var machineData = new StateMachineData(deviceAddress);
                     return (ConnectionState.AttemptingConnection, machineData);
                 }
 
