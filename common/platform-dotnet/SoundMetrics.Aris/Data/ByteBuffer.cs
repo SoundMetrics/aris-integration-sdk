@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.Data
@@ -33,6 +34,29 @@ namespace SoundMetrics.Aris.Data
                     new Span<byte>(DangerousGetHandle().ToPointer(), length);
                 initializeBuffer(writeableBuffer);
             }
+        }
+
+        public ByteBuffer(Memory<byte>[] buffers)
+            : this(SumBufferLengths(buffers), CreateInitializer(buffers))
+        {
+
+        }
+
+        private static int SumBufferLengths(Memory<byte>[] buffers) =>
+            buffers.Sum(buffer => buffer.Length);
+
+        private static InitializeBuffer CreateInitializer(Memory<byte>[] buffers)
+        {
+            return output =>
+            {
+                int offset = 0;
+                foreach (var buffer in buffers)
+                {
+                    var dest = output.Slice(offset, buffer.Length);
+                    buffer.Span.CopyTo(dest);
+                    offset += buffer.Length;
+                }
+            };
         }
 
         protected override bool ReleaseHandle()

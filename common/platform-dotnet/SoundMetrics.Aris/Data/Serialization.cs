@@ -18,6 +18,14 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
+        public static bool ReadStruct<T>(this Span<byte> buffer, out T t)
+            where T : unmanaged
+        {
+            var spanT = MemoryMarshal.Cast<byte, T>(buffer);
+            t = spanT[0];
+            return true;
+        }
+
         public static unsafe void WriteStruct<T>(this Stream stream, in T t)
             where T : unmanaged
         {

@@ -225,31 +225,33 @@ This table describes the header that starts the payload on each datagram. (All i
 | `frame_index` | `uint32_t` | 12 | Identifies this frame. There are generally multiple datagrams per frame. If `frame_index` changes before the complete frame is received, the previous frame is incomplete. |
 | `part_number` | `uint32_t` | 16 | A zero based index of the parts of the current frame. The first datagram's sequence number is 0. Frame's first datagram carries only the frame header (which is 1024 bytes), the second datagram's payload contains the first samples of the frame. |
 | `payload_size` | `uint32_t` | 20 | The number of octets in the payload. |
-| `payload` | `uint8_t[]` | `part_ header_ size` |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
+| `payload` | `uint8_t[]` | 24 |  Payload bytes. The length of this field is the &lsaquo;datagram length&rsaquo; &thinsp;&ndash; `part_header_size`. |
 
-Datagrams forming a very small frame could look those below, where there are 128 beams in the frame and 10 samples per beam. (10 is not a valid )
+Datagrams forming a very small frame could look those below, where there are 128 beams in the frame and 10 samples per beam. (10 is not a valid input.)
 
 The first datagram contains the frame header in `payload` followed by 460 of the 1280 sample bytes. (Total sample count is `beams` &times; `samples_per_beam`.)
 
 **Datagram 0** &mdash; 1500 bytes
 
-| Offset | Field | Value |
+| Field  | Offset | Value |
 |-|-|-|
-| 0 | `part_header_size` | 16 |
-| 4 | `frame_size` | 2304 *(1024 + [128 &times; 10])* |
-| 8 | `sequence_number` | 0 |
-| 12 | `frame_index` | 0 |
-| 16 | `payload` | &lsaquo;1024 bytes of frame header followed by 460 sample bytes&rsaquo; |
+| `signature` | 0 | `0x53495241` |
+| `header_size` | 4 | `20` |
+| `frame_size` | 8 | 2304 *(1024 + [128 &times; 10])* |
+| `frame_index` | 12 | `N` |
+| `part_number` | 16 | `0` |
+| `payload_size` | 20 | `1024` |
 
 **Datagram 1** &mdash; 836 bytes
 
-| Offset | Field | Value |
+| Field | Offset | Value |
 |-|-|-|
-| 0 | `part_header_size` | 16 |
-| 4 | `frame_size` | 2304 *(1024 + [128 &times; 10])* |
-| 8 | `sequence_number` | 1484 *(the previous datagram contained 1024 bytes of frame header and 460 bytes of sample data)* |
-| 12 | `frame_index` | 0 |
-| 16 | `payload` | &lsaquo;820 sample bytes&rsaquo;
+| `signature` | 0 | `0x53495241` |
+| `header_size` | 4 | `20` |
+| `frame_size` | 8 | 2304 *(1024 + [128 &times; 10])* |
+| `frame_index` | 12 | `N` |
+| `part_number` | 16 | `1` |
+| `payload_size` | 20 | `M` |
 
 > Note: frame indexes in ARIS and ARIS (`.aris`) recordings are numbered from 0, but are presented to users as if numbered from 1.
 
