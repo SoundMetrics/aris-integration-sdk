@@ -1,6 +1,7 @@
 ﻿using SoundMetrics.Aris.Device;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SoundMetrics.Aris.Data
 {
@@ -16,7 +17,7 @@ namespace SoundMetrics.Aris.Data
             expectedSampleCount = totalSampleCount;
         }
 
-        public bool AddFramePart(uint framePart, Memory<byte> samples)
+        public bool AddFramePart(uint framePart, ReadOnlyMemory<byte> samples)
         {
             if (framePart == expectedFramePart++)
             {
@@ -55,7 +56,7 @@ namespace SoundMetrics.Aris.Data
 
         private static Frame ConstructFrame(
             in FrameHeader frameHeader,
-            IEnumerable<Memory<byte>> sampleParts)
+            IEnumerable<ReadOnlyMemory<byte>> sampleParts)
         {
             // REORDER
             // TODO
@@ -63,10 +64,11 @@ namespace SoundMetrics.Aris.Data
         }
 
         private FrameHeader? frameHeader;
-        private List<Memory<byte>> sampleParts = new List<Memory<byte>>();
         private uint expectedFramePart;
         private int expectedSampleCount;
         private int accumulatedSamples;
         private uint frameIndex;
+        private List<ReadOnlyMemory<byte>> sampleParts =
+            new List<ReadOnlyMemory<byte>>();
     }
 }

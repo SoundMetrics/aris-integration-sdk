@@ -36,16 +36,15 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        public ByteBuffer(Memory<byte>[] buffers)
+        public ByteBuffer(ReadOnlyMemory<byte>[] buffers)
             : this(SumBufferLengths(buffers), CreateInitializer(buffers))
         {
-
         }
 
-        private static int SumBufferLengths(Memory<byte>[] buffers) =>
+        private static int SumBufferLengths(ReadOnlyMemory<byte>[] buffers) =>
             buffers.Sum(buffer => buffer.Length);
 
-        private static InitializeBuffer CreateInitializer(Memory<byte>[] buffers)
+        private static InitializeBuffer CreateInitializer(ReadOnlyMemory<byte>[] buffers)
         {
             return output =>
             {
