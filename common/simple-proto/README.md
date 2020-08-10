@@ -231,27 +231,30 @@ Datagrams forming a very small frame could look those below, where there are 128
 
 The first datagram contains the frame header in `payload` followed by 460 of the 1280 sample bytes. (Total sample count is `beams` &times; `samples_per_beam`.)
 
-**Datagram 0** &mdash; 1500 bytes
+**Datagram 0** &mdash; 1044 bytes (20 + 1024)
 
 | Field  | Offset | Value |
 |-|-|-|
 | `signature` | 0 | `0x53495241` |
 | `header_size` | 4 | `20` |
-| `frame_size` | 8 | 2304 *(1024 + [128 &times; 10])* |
+| `frame_size` | 8 | `2304` *(1024 + [128 &times; 10])* |
 | `frame_index` | 12 | `N` |
 | `part_number` | 16 | `0` |
 | `payload_size` | 20 | `1024` |
 
-**Datagram 1** &mdash; 836 bytes
+**Datagram 1** &mdash; 1300 bytes (20 + 1280)
 
 | Field | Offset | Value |
 |-|-|-|
 | `signature` | 0 | `0x53495241` |
 | `header_size` | 4 | `20` |
-| `frame_size` | 8 | 2304 *(1024 + [128 &times; 10])* |
+| `frame_size` | 8 | `2304` *(1024 + [128 &times; 10])* |
 | `frame_index` | 12 | `N` |
 | `part_number` | 16 | `1` |
-| `payload_size` | 20 | `M` |
+| `payload_size` | 20 | `1280` |
+
+Datagram size is variable and depends on internal settings as well, software version, and the number of samples returned.
+Payload size will never be zero.
 
 > Note: frame indexes in ARIS and ARIS (`.aris`) recordings are numbered from 0, but are presented to users as if numbered from 1.
 
