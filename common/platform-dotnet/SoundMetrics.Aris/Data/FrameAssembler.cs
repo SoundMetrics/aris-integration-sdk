@@ -56,11 +56,12 @@ namespace SoundMetrics.Aris.Data
 
         private static Frame ConstructFrame(
             in FrameHeader frameHeader,
-            IEnumerable<ReadOnlyMemory<byte>> sampleParts)
+            List<ReadOnlyMemory<byte>> sampleParts)
         {
-            // REORDER
-            // TODO
-            throw new NotImplementedException();
+            var samples = new ByteBuffer(sampleParts);
+            var newFrame = new Frame(frameHeader, samples);
+            var reorderedFrame = Reorder.ReorderFrame(newFrame);
+            return Reorder.ReorderFrame(reorderedFrame);
         }
 
         private FrameHeader? frameHeader;

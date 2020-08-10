@@ -1,17 +1,69 @@
 ﻿// Copyright 2014-2020 Sound Metrics Corp. All Rights Reserved.
 
+using Serilog;
+using SoundMetrics.Aris.Device;
 using System;
+using System.Runtime.InteropServices;
 
-namespace SoundMetrics.Aris.ReorderCS
+namespace SoundMetrics.Aris.Data
 {
-    /// <summary>
-    /// C# "unsafe" reorder based on the SDK C++ code.
-    /// </summary>
     internal static class Reorder
     {
         /// <summary>
+        /// Reorders the frame data from machine-order to usable order.
+        /// </summary>
+        /// <param name="frame">The frame to be reordered.</param>
+        /// <returns>A Frame instance with reordered data.</returns>
+        public static Frame ReorderFrame(Frame frame)
+        {
+            if (frame.FrameHeader.ReorderedSamples != 0)
+            {
+                // The frame is already reordered. Other than the code that
+                // initially creates the frame storage, virtually no code
+                // should be aware of reordering.
+                Log.Debug($"{nameof(ReorderFrame)}: frame data is already reordered");
+                return frame;
+            }
+
+            var pingMode = (int)frame.FrameHeader.PingMode;
+            var (beamCount, samplesPerBeam, totalSampleCount, pingsPerFrame)
+                = SonarConfig.GetSampleGeometry(frame.FrameHeader);
+
+            var outputLength = totalSampleCount;
+            var output = Marshal.AllocHGlobal(outputLength);
+
+            try
+            {
+                IntPtr input = frame.Samples.DangerousGetHandle();
+                UnsafeReorderFrame(
+                    pingMode,
+                    pingsPerFrame,
+                    beamCount,
+                    samplesPerBeam,
+                    input,
+                    output);
+
+                var orderedSamples = new ByteBuffer(output, outputLength);
+                return new Frame(UpdateFrameHeader(frame.FrameHeader), orderedSamples);
+            }
+            catch
+            {
+                Marshal.FreeHGlobal(output);
+                throw;
+            }
+
+            static FrameHeader UpdateFrameHeader(in FrameHeader frameHeader)
+            {
+                var header = frameHeader;
+                header.ReorderedSamples = 1;
+                return header;
+            }
+        }
+
+        /// <summary>
         /// Reorders samples in a frame. The signature of this function is dictated
         /// by SoundMetrics.NativeMemory.TransformFunction.
+        /// C# "unsafe" reorder based on the SDK C++ code.
         /// </summary>
         /// <param name="pingMode">ARIS ping mode</param>
         /// <param name="pingsPerFrame">Number of pings per frame acquisition</param>
@@ -19,7 +71,7 @@ namespace SoundMetrics.Aris.ReorderCS
         /// <param name="samplesPerBeam">Samples per beam</param>
         /// <param name="inputBuffer">The input samples</param>
         /// <param name="outputBuffer">Where to put the reordered samples (out param).</param>
-        public static unsafe void UnsafeReorderFrame(
+        private static unsafe void UnsafeReorderFrame(
             Int32 pingMode,
             Int32 pingsPerFrame,
             Int32 beamCount,
