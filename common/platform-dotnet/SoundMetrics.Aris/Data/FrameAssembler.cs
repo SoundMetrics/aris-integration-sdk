@@ -60,8 +60,8 @@ namespace SoundMetrics.Aris.Data
         {
             var samples = new ByteBuffer(sampleParts);
             var newFrame = new Frame(frameHeader, samples);
-            var reorderedFrame = Reorder.ReorderFrame(newFrame);
-            return Reorder.ReorderFrame(reorderedFrame);
+            var reorderedFrame = FrameSampleOrder.ReorderFrame(newFrame);
+            return FrameSampleOrder.ReorderFrame(reorderedFrame);
         }
 
         private FrameHeader? frameHeader;

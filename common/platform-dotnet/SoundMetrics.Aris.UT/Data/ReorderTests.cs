@@ -31,13 +31,13 @@ namespace SoundMetrics.Aris.UT
                         testCase.SamplesPerBeam,
                         inputSamples);
 
-                var outputFrame = Reorder.ReorderFrame(inputFrame);
+                var outputFrame = FrameSampleOrder.ReorderFrame(inputFrame);
 
                 Assert.IsTrue(
                     AreEqual(expectedSamples.Span, outputFrame.Samples),
                     testDescription);
 
-                var secondTime = Reorder.ReorderFrame(outputFrame);
+                var secondTime = FrameSampleOrder.ReorderFrame(outputFrame);
                 Assert.IsTrue(
                     AreEqual(expectedSamples.Span, secondTime.Samples),
                     testDescription + " (second time)");
