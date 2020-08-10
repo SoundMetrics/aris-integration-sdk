@@ -64,7 +64,10 @@ namespace SoundMetrics.Aris.Connection
                             try
                             {
                                 d.CommandConnection =
-                                    CommandConnection.Create(data.DeviceAddress);
+                                    CommandConnection.Create(
+                                        data.DeviceAddress,
+                                        data.ReceiverPort,
+                                        data.Salinity);
                                 return (ConnectionState.Connected, d);
                             }
                             catch (Exception ex)

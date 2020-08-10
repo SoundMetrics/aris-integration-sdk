@@ -1,18 +1,20 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Device;
 using SoundMetrics.Aris.Network;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace SoundMetrics.Aris.Connection
 {
     internal sealed class CommandConnection : IDisposable
     {
-        public static CommandConnection Create(IPAddress ipAddress)
+        public static CommandConnection Create(
+            IPAddress deviceAddress,
+            int receiverPort,
+            Salinity salinity)
         {
             var tcp = new TcpClient();
             ConnectionIO io = null;
@@ -22,7 +24,7 @@ namespace SoundMetrics.Aris.Connection
                 tcp.Client.SetSocketOption(
                     SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
                 tcp.Connect(
-                    ipAddress, NetworkConstants.ArisSonarTcpNOListenPort);
+                    deviceAddress, NetworkConstants.ArisSonarTcpNOListenPort);
 
                 ControlTcpKeepAlives(
                     tcp.Client,
@@ -32,7 +34,8 @@ namespace SoundMetrics.Aris.Connection
                 io = new ConnectionIO(tcp);
                 tcp = null;
 
-                InitializeSimplifiedProtocol(io);
+                InitializeSimplifiedProtocol(
+                    io, DateTimeOffset.Now, receiverPort, salinity);
                 return new CommandConnection(io);
             }
             catch
@@ -68,10 +71,20 @@ namespace SoundMetrics.Aris.Connection
             this.io = io;
         }
 
-        private static string[] initializeCommand = new[] { "initialize" };
-
-        private static void InitializeSimplifiedProtocol(ConnectionIO io)
+        private static void InitializeSimplifiedProtocol(
+            ConnectionIO io,
+            DateTimeOffset currentTime,
+            int receiverPort,
+            Salinity salinity)
         {
+            var initializeCommand = new[]
+            {
+                "initialize",
+                $"salinity {salinity.ToString().ToLower()}",
+                $"rcvr_port {receiverPort}",
+                $"datetime {FormatTimestamp(currentTime)}",
+            };
+
             var response = io.SendCommand(initializeCommand);
             var joinedResponseText = string.Join("\n", response.ResponseText);
 
@@ -84,6 +97,15 @@ namespace SoundMetrics.Aris.Connection
                 throw new Exception("Protocol initialization failed: " + joinedResponseText);
             }
         }
+
+        private static readonly string[] MonthAbbreviations = new[]
+        {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        };
+
+        private static string FormatTimestamp(DateTimeOffset timestamp) =>
+            $"{timestamp.Year}-{MonthAbbreviations[timestamp.Month - 1]}-{timestamp.Day:D02} "
+            + $"{timestamp.Hour:D02}:{timestamp.Minute:D02}:{timestamp.Second:D02}";
 
         public CommandResponse SendCommand(IEnumerable<string> command)
         {
