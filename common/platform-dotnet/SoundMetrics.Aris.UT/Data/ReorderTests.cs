@@ -36,6 +36,12 @@ namespace SoundMetrics.Aris.UT
                 Assert.IsTrue(
                     AreEqual(expectedSamples.Span, outputFrame.Samples),
                     testDescription);
+
+                var secondTime = Reorder.ReorderFrame(outputFrame);
+                Assert.IsTrue(
+                    AreEqual(expectedSamples.Span, secondTime.Samples),
+                    testDescription + " (second time)");
+                Assert.AreSame(outputFrame, secondTime);
             }
         }
 
