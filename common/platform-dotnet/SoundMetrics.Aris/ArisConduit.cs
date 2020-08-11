@@ -49,6 +49,11 @@ namespace SoundMetrics.Aris
                     .Subscribe(OnBeacon);
         }
 
+        public void ApplySettings(ISettings settings)
+        {
+            stateMachine.ApplySettings(settings);
+        }
+
         public IObservable<Frame> Frames => frameSubject;
 
         private static SynchronizationContext ValidateSynchronizationContext(

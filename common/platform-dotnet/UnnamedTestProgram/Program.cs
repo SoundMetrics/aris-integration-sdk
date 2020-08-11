@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SoundMetrics.Aris;
+using SoundMetrics.Aris.Connection;
 using SoundMetrics.Aris.Threading;
 using System.Threading;
 
@@ -18,6 +19,8 @@ namespace UnnamedTestProgram
             using (var conduit = new ArisConduit("24", syncContext))
             {
                 SynchronizationContext.SetSynchronizationContext(syncContext);
+
+                conduit.ApplySettings(new PassiveSettings());
 
                 const int MaxMillisecondSleep = int.MaxValue;
                 Thread.Sleep(MaxMillisecondSleep);

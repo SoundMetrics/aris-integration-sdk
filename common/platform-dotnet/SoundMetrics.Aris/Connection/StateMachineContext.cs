@@ -21,6 +21,8 @@ namespace SoundMetrics.Aris.Connection
         /// </summary>
         public Salinity Salinity { get; }
 
+        public ApplySettingsRequest? LatestSettingsRequest { get; set; }
+
         /// <summary>
         /// The command connection; may be null when not connected.
         /// </summary>

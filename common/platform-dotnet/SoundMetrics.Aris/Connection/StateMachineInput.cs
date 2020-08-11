@@ -38,6 +38,19 @@ namespace SoundMetrics.Aris.Connection
     }
 
     /// <summary>
+    /// Represents a request for new settings.
+    /// </summary>
+    internal sealed class ApplySettingsRequest : IMachineEvent
+    {
+        public ApplySettingsRequest(ISettings settings)
+        {
+            Settings = settings;
+        }
+
+        public ISettings Settings { get; }
+    }
+
+    /// <summary>
     /// Represents a clock tick. Some states need to observe
     /// the passage of time.
     /// </summary>

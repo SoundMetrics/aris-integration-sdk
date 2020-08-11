@@ -44,7 +44,11 @@ namespace SoundMetrics.Aris.Connection
             writer.WriteLine("");
             writer.Flush();
 
-            return ReceiveResponse();
+            var response = ReceiveResponse();
+            Log.Debug(
+                "Response: [{response}]",
+                string.Join("\n", response.ResponseText));
+            return response;
         }
 
         private CommandResponse ReceiveResponse()

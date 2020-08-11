@@ -34,6 +34,11 @@ namespace SoundMetrics.Aris.Connection
             Transition(ConnectionState.WatchingForDevice, context: context, ev: null);
         }
 
+        public void ApplySettings(ISettings settings)
+        {
+            events.Post(new ApplySettingsRequest(settings));
+        }
+
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
             events.Post(new NetworkAvailabilityChanged(e));
@@ -78,6 +83,11 @@ namespace SoundMetrics.Aris.Connection
                         case NetworkAddressChanged _:
                         case NetworkAvailabilityChanged _:
                             InvokeDoProcessing(ev);
+                            break;
+
+                        case ApplySettingsRequest request:
+                            InvokeDoProcessing(ev);
+                            context.LatestSettingsRequest = request;
                             break;
 
                         case Tick _:
@@ -130,10 +140,21 @@ namespace SoundMetrics.Aris.Connection
 
             Log.Debug("State transition from {oldState} to {newState}", oldState, newState);
 
-            stateHandlers[oldState].OnLeave?.Invoke(context);
-            state = newState;
-            stateHandlers[newState].OnEnter?.Invoke(context);
-            stateHandlers[newState].DoProcessing?.Invoke(context, ev);
+            ConnectionState? followOnState = null;
+
+            do
+            {
+                stateHandlers[oldState].OnLeave?.Invoke(context);
+                state = newState;
+                stateHandlers[newState].OnEnter?.Invoke(context);
+
+                followOnState = stateHandlers[newState].DoProcessing?.Invoke(context, ev);
+                if (followOnState is ConnectionState next)
+                {
+                    Log.Debug("followOnState is {followOnState}", next);
+                    newState = next;
+                }
+            } while (!(followOnState is null));
 
             return true;
         }
@@ -178,6 +199,10 @@ namespace SoundMetrics.Aris.Connection
                 {
                     ConnectionState.AttemptingConnection,
                     attemptingConnectionHandler.StateHandler
+                },
+                {
+                    ConnectionState.Connected,
+                    Connected.StateHandler
                 },
                 {
                     ConnectionState.End,
