@@ -6,19 +6,34 @@ namespace SoundMetrics.Aris.Availability
 {
     public abstract class ArisBeacon
     {
-        internal ArisBeacon(bool hasDepthReading)
+        internal ArisBeacon(
+            DateTimeOffset timestamp,
+            IPAddress ipAddress,
+            SystemType systemType,
+            string serialNumber,
+            OnboardSoftwareVersion softwareVersion,
+            ConnectionAvailability availability,
+            float cpuTemp,
+            bool hasDepthReading)
         {
+            Timestamp = timestamp;
+            IPAddress = ipAddress;
+            SystemType = systemType;
+            SerialNumber = serialNumber;
+            SoftwareVersion = softwareVersion;
+            Availability = availability;
+            CpuTemp = cpuTemp;
             this.hasDepthReading = hasDepthReading;
         }
 
 
-        public DateTimeOffset Timestamp { get; internal set; }
-        public IPAddress IPAddress { get; internal set; }
-        public SystemType SystemType { get; internal set; }
-        public string SerialNumber { get; internal set; }
-        public OnboardSoftwareVersion SoftwareVersion { get; internal set; }
-        public ConnectionAvailability Availability { get; internal set; }
-        public float CpuTemp { get; internal set; }
+        public DateTimeOffset Timestamp { get; }
+        public IPAddress IPAddress { get; }
+        public SystemType SystemType { get; }
+        public string SerialNumber { get; }
+        public OnboardSoftwareVersion SoftwareVersion { get; }
+        public ConnectionAvailability Availability { get; }
+        public float CpuTemp { get; }
 
         public bool HasDepthReading => hasDepthReading;
 

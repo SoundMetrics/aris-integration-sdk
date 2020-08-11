@@ -4,22 +4,17 @@ using System.Net;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal sealed class StateMachineData : IDisposable
+    internal sealed class StateMachineContext : IDisposable
     {
-        public StateMachineData(IPAddress deviceAddress)
-        {
-            DeviceAddress = deviceAddress;
-        }
-
         /// <summary>
         /// The IPAddress of the connected device.
         /// </summary>
-        public IPAddress DeviceAddress { get; }
+        public IPAddress? DeviceAddress { get; set; }
 
         /// <summary>
         /// The UDP port on which we wish to receive frames.
         /// </summary>
-        public int ReceiverPort { get; }
+        public int? ReceiverPort { get; set;  }
 
         /// <summary>
         /// The salinity of the surrounding water.
@@ -29,7 +24,7 @@ namespace SoundMetrics.Aris.Connection
         /// <summary>
         /// The command connection; may be null when not connected.
         /// </summary>
-        public CommandConnection CommandConnection { get; set; }
+        public CommandConnection? CommandConnection { get; set; }
 
         private void Dispose(bool disposing)
         {

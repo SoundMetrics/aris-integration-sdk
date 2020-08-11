@@ -13,9 +13,12 @@ namespace SoundMetrics.Aris.Network
     public sealed class BeaconListener : IDisposable
     {
         public BeaconListener()
-            : this(SynchronizationContext.Current)
+            : this(ValidateSyncContext(SynchronizationContext.Current))
         {
         }
+
+        private static SynchronizationContext ValidateSyncContext(SynchronizationContext? syncContext)
+            => syncContext ?? throw new ArgumentNullException(nameof(syncContext));
 
         public BeaconListener(SynchronizationContext syncContext)
         {
@@ -68,44 +71,44 @@ namespace SoundMetrics.Aris.Network
                         if (!beacon.IsDiverHeld)
                         {
                             var variants =
-                                (IEnumerable<string>)beacon.SystemVariants?.Enabled ?? new string[0];
+                                (IEnumerable<string>?)beacon.SystemVariants?.Enabled ?? new string[0];
                             bool isVoyager = variants.Contains(VariantFlags.VoyagerVariant);
 
                             if (isVoyager)
                             {
-                                beaconSubject.OnNext(new VoyagerBeacon
-                                {
-                                    Timestamp = udpReceived.Timestamp,
-                                    IPAddress = udpReceived.Received.RemoteEndPoint.Address,
-                                    SystemType = (Data.SystemType)beacon.SystemType,
-                                    SerialNumber = beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
-                                    SoftwareVersion = new OnboardSoftwareVersion
+                                beaconSubject.OnNext(
+                                    new VoyagerBeacon(
+                                    udpReceived.Timestamp,
+                                    udpReceived.Received.RemoteEndPoint.Address,
+                                    (Data.SystemType)beacon.SystemType,
+                                    beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
+                                    new OnboardSoftwareVersion
                                     {
                                         Major = beacon.SoftwareVersion.Major,
                                         Minor = beacon.SoftwareVersion.Minor,
                                         BuildNumber = beacon.SoftwareVersion.Buildnumber,
                                     },
-                                    Availability = (ConnectionAvailability)beacon.ConnectionState,
-                                    CpuTemp = beacon.CpuTemp,
-                                });
+                                    (ConnectionAvailability)beacon.ConnectionState,
+                                    beacon.CpuTemp)
+                                );
                             }
                             else
                             {
-                                beaconSubject.OnNext(new ExplorerBeacon
-                                {
-                                    Timestamp = udpReceived.Timestamp,
-                                    IPAddress = udpReceived.Received.RemoteEndPoint.Address,
-                                    SystemType = (Data.SystemType)beacon.SystemType,
-                                    SerialNumber = beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
-                                    SoftwareVersion = new OnboardSoftwareVersion
+                                beaconSubject.OnNext(
+                                    new ExplorerBeacon(
+                                    udpReceived.Timestamp,
+                                    udpReceived.Received.RemoteEndPoint.Address,
+                                    (Data.SystemType)beacon.SystemType,
+                                    beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
+                                    new OnboardSoftwareVersion
                                     {
                                         Major = beacon.SoftwareVersion.Major,
                                         Minor = beacon.SoftwareVersion.Minor,
                                         BuildNumber = beacon.SoftwareVersion.Buildnumber,
                                     },
-                                    Availability = (ConnectionAvailability)beacon.ConnectionState,
-                                    CpuTemp = beacon.CpuTemp,
-                                });
+                                    (ConnectionAvailability)beacon.ConnectionState,
+                                    beacon.CpuTemp)
+                                );
                             }
                         }
                     }

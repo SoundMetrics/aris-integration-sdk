@@ -17,7 +17,6 @@ namespace SoundMetrics.Aris.Connection
             Salinity salinity)
         {
             var tcp = new TcpClient();
-            ConnectionIO io = null;
 
             try
             {
@@ -31,17 +30,24 @@ namespace SoundMetrics.Aris.Connection
                     interval: TimeSpan.FromSeconds(5),
                     retryInterval: TimeSpan.FromSeconds(1));
 
-                io = new ConnectionIO(tcp);
-                tcp = null;
+                var io = new ConnectionIO(tcp);
+                try
+                {
+                    tcp = null;
 
-                InitializeSimplifiedProtocol(
-                    io, DateTimeOffset.Now, receiverPort, salinity);
-                return new CommandConnection(io);
+                    InitializeSimplifiedProtocol(
+                        io, DateTimeOffset.Now, receiverPort, salinity);
+                    return new CommandConnection(io);
+                }
+                catch
+                {
+                    io.Dispose();
+                    throw;
+                }
             }
             catch
             {
                 tcp?.Dispose();
-                io?.Dispose();
                 throw;
             }
         }

@@ -29,7 +29,7 @@ namespace SoundMetrics.Aris.Connection
             NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
 
-            Transition(ConnectionState.WatchingForDevice, newData: null, ev: null);
+            Transition(ConnectionState.WatchingForDevice, context: context, ev: null);
         }
 
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
@@ -42,7 +42,7 @@ namespace SoundMetrics.Aris.Connection
             events.Post(new NetworkAddressChanged());
         }
 
-        public void SetTargetAddress(IPAddress targetAddress)
+        public void SetTargetAddress(IPAddress? targetAddress)
         {
             if (!Object.Equals(this.targetAddress, targetAddress))
             {
@@ -54,7 +54,7 @@ namespace SoundMetrics.Aris.Connection
             events.Post(new DeviceAddressChanged(targetAddress));
         }
 
-        private void OnTimerTick(object _) =>
+        private void OnTimerTick(object? _) =>
             events.Post(new Tick(DateTimeOffset.Now, targetAddress));
 
         private void ProcessEvent(IMachineEvent ev)
@@ -77,9 +77,9 @@ namespace SoundMetrics.Aris.Connection
                             break;
 
                         case Stop stop:
-                            Transition(ConnectionState.End, state.Data, ev);
+                            Transition(ConnectionState.End, context, ev);
                             stop.MarkComplete();
-                            Debug.Assert(state.ConnectionState == ConnectionState.End);
+                            Debug.Assert(state == ConnectionState.End);
                             break;
 
                         case null:
@@ -98,7 +98,7 @@ namespace SoundMetrics.Aris.Connection
                         "An error occurred while processing an event of type {eventType} "
                         + "during state {state}: {message}\n"
                         + "{stackTrace}",
-                        evType, state.ConnectionState, ex.Message, ex.StackTrace);
+                        evType, state, ex.Message, ex.StackTrace);
                     throw;
                 }
             }
@@ -110,10 +110,10 @@ namespace SoundMetrics.Aris.Connection
 
         private bool Transition(
             ConnectionState newState,
-            StateMachineData newData,
-            IMachineEvent ev)
+            StateMachineContext context,
+            IMachineEvent? ev)
         {
-            var oldState = state.ConnectionState;
+            var oldState = state;
             if (oldState == newState)
             {
                 Log.Debug("Ignoring transition to the same state ({newState})", newState);
@@ -122,24 +122,24 @@ namespace SoundMetrics.Aris.Connection
 
             Log.Debug("State transition from {oldState} to {newState}", oldState, newState);
 
-            stateHandlers[oldState].OnLeave?.Invoke(state.Data);
-            state = new State(newState, newData);
-            stateHandlers[newState].OnEnter?.Invoke(state.Data);
-            stateHandlers[newState].DoProcessing?.Invoke(state.Data, ev);
+            stateHandlers[oldState].OnLeave?.Invoke(context);
+            state = newState;
+            stateHandlers[newState].OnEnter?.Invoke(context);
+            stateHandlers[newState].DoProcessing?.Invoke(context, ev);
 
             return true;
         }
 
-        private void InvokeDoProcessing(IMachineEvent ev)
+        private void InvokeDoProcessing(IMachineEvent? ev)
         {
             try
             {
-                if (stateHandlers[state.ConnectionState].DoProcessing is DoProcessingFn fn)
+                if (stateHandlers[state].DoProcessing is DoProcessingFn doProcessing)
                 {
-                    var (requestedState, newData) = fn(state.Data, ev);
+                    var requestedState = doProcessing(context, ev);
                     if (requestedState is ConnectionState newState)
                     {
-                        Transition(newState, newData, ev);
+                        Transition(newState, context, ev);
                     }
                 }
                 else
@@ -149,7 +149,7 @@ namespace SoundMetrics.Aris.Connection
             }
             catch (KeyNotFoundException ex)
             {
-                var msg = $"Handler for state {state.ConnectionState} is not implemented";
+                var msg = $"Handler for state {state} is not implemented";
                 Log.Error(msg);
                 throw new NotImplementedException(msg, ex);
             }
@@ -223,24 +223,13 @@ namespace SoundMetrics.Aris.Connection
         private readonly BufferedMessageQueue<IMachineEvent> events;
         private readonly Timer tickSource;
         private readonly string serialNumber;
+        private readonly StateMachineContext context =
+            new StateMachineContext() { ReceiverPort = 56999 }; // TODO remove hard-coded receiver port
 
         private bool disposed;
-        private IPAddress targetAddress;
+        private IPAddress? targetAddress;
 
-        internal struct State
-        {
-            public State(
-                ConnectionState connectionState,
-                StateMachineData data)
-            {
-                ConnectionState = connectionState;
-                Data = data;
-            }
 
-            public ConnectionState ConnectionState { get; private set; }
-            public StateMachineData Data { get; private set; }
-        }
-
-        private State state = new State(ConnectionState.Start, default);
+        private ConnectionState state = ConnectionState.Start;
     }
 }

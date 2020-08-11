@@ -31,7 +31,7 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        public bool GetFullFrame(out Frame frame)
+        public bool GetFullFrame(out Frame? frame)
         {
             if (frameHeader is FrameHeader fh
                 && accumulatedSamples == expectedSampleCount)
@@ -41,7 +41,7 @@ namespace SoundMetrics.Aris.Data
             }
             else
             {
-                frame = default;
+                frame = null;
                 return false;
             }
         }

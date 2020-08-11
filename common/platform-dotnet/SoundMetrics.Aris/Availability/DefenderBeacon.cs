@@ -1,4 +1,8 @@
-﻿namespace SoundMetrics.Aris.Availability
+﻿using SoundMetrics.Aris.Data;
+using System;
+using System.Net;
+
+namespace SoundMetrics.Aris.Availability
 {
     public enum DefenderRecordState
     {
@@ -34,8 +38,23 @@
 
     public sealed class DefenderBeacon : ArisBeacon
     {
-        internal DefenderBeacon()
-            : base(hasDepthReading: true)
+        internal DefenderBeacon(
+            DateTimeOffset timestamp,
+            IPAddress ipAddress,
+            SystemType systemType,
+            string serialNumber,
+            OnboardSoftwareVersion softwareVersion,
+            ConnectionAvailability availability,
+            float cpuTemp)
+            : base(
+                timestamp,
+                ipAddress,
+                systemType,
+                serialNumber,
+                softwareVersion,
+                availability,
+                cpuTemp,
+                hasDepthReading: true)
         {
 
         }

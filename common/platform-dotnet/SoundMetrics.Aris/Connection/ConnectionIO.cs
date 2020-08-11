@@ -48,7 +48,7 @@ namespace SoundMetrics.Aris.Connection
         private CommandResponse ReceiveResponse()
         {
             var lines = new List<string>();
-            string line;
+            string? line;
 
             while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
             {

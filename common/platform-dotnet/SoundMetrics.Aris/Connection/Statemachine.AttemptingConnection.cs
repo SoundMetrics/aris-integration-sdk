@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Diagnostics;
+using System.Net;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -19,20 +20,19 @@ namespace SoundMetrics.Aris.Connection
 
             public StateHandler StateHandler { get; }
 
-            private void OnEnter(StateMachineData data)
+            private void OnEnter(StateMachineContext context)
             {
                 Log.Information(
                     "Attempting connection to {deviceAddress}",
-                    data.DeviceAddress);
-                Debug.Assert(data.CommandConnection is null);
+                    context.DeviceAddress);
+                Debug.Assert(context.CommandConnection is null);
 
                 backoffPeriod = TimeSpan.Zero;
                 mostRecentAttempt = default;
                 failureLogCountdown = 5;
             }
 
-            private (ConnectionState?, StateMachineData data)
-                DoProcessing(StateMachineData data, IMachineEvent ev)
+            private ConnectionState? DoProcessing(StateMachineContext context, IMachineEvent? ev)
             {
                 switch (ev)
                 {
@@ -46,50 +46,65 @@ namespace SoundMetrics.Aris.Connection
                         break; // Nothing
                 }
 
-                return (default, data);
+                return default;
 
-                (ConnectionState?, StateMachineData data)
-                    AttemptConnection(DateTimeOffset timestamp)
+                ConnectionState? AttemptConnection(DateTimeOffset timestamp)
                 {
-                    if (data is StateMachineData d && data.CommandConnection is null)
+                    if (context.CommandConnection is null)
+                    {
+                        if (ShouldTryNow(timestamp))
+                        {
+
+                            if (context.DeviceAddress is IPAddress ipAddress)
+                            {
+                                if (context.ReceiverPort is int port)
+                                {
+                                    try
+                                    {
+                                        context.CommandConnection =
+                                            CommandConnection.Create(
+                                                ipAddress,
+                                                port,
+                                                context.Salinity);
+                                        return ConnectionState.Connected;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        if (failureLogCountdown > 0)
+                                        {
+                                            Log.Warning("Couldn't connect to {ipAddress}: {exMessage}",
+                                                context.DeviceAddress, ex.Message);
+                                        }
+                                    }
+
+                                    if (failureLogCountdown > 0 && --failureLogCountdown == 0)
+                                    {
+                                        Log.Information("Will continue trying to connect");
+                                    }
+
+                                    AdvanceBackoff();
+                                    mostRecentAttempt = timestamp;
+                                }
+                                else
+                                {
+                                    Log.Error(
+                                        $"{nameof(context.DeviceAddress)} is set but {nameof(context.ReceiverPort)} is not");
+                                }
+                            }
+                        }
+                    }
+
+                    return default;
+
+                    bool ShouldTryNow(DateTimeOffset timestamp)
                     {
                         var hasAlreadyTried = !(mostRecentAttempt is null);
                         var tryNow =
                             !hasAlreadyTried
                             || (mostRecentAttempt is DateTimeOffset latestAttempt
                                 && timestamp >= latestAttempt + backoffPeriod);
-
-                        if (tryNow)
-                        {
-                            try
-                            {
-                                d.CommandConnection =
-                                    CommandConnection.Create(
-                                        data.DeviceAddress,
-                                        data.ReceiverPort,
-                                        data.Salinity);
-                                return (ConnectionState.Connected, d);
-                            }
-                            catch (Exception ex)
-                            {
-                                if (failureLogCountdown > 0)
-                                {
-                                    Log.Warning("Couldn't connect to {ipAddress}: {exMessage}",
-                                        data.DeviceAddress, ex.Message);
-                                }
-                            }
-
-                            if (failureLogCountdown > 0 && --failureLogCountdown == 0)
-                            {
-                                Log.Information("Will continue trying to connect");
-                            }
-
-                            AdvanceBackoff();
-                            mostRecentAttempt = timestamp;
-                        }
+                        return tryNow;
                     }
-
-                    return (default, data);
                 }
             }
 

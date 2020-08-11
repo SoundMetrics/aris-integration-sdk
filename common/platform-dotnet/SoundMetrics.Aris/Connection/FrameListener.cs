@@ -1,6 +1,7 @@
 ﻿using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
@@ -37,7 +38,7 @@ namespace SoundMetrics.Aris.Connection
                 if (packetHeader.Signature != FramePacketHeader.FramePacketSignature
                     || packetHeader.HeaderSize != FramePacketHeaderSize)
                 {
-                    // ignore
+                    // Not a valid frame packet, ignore.
                     return;
                 }
 
@@ -59,12 +60,12 @@ namespace SoundMetrics.Aris.Connection
                         }
                         else
                         {
-                            // ignore
+                            // Can't get frame header, ignore.
                         }
                     }
                     else
                     {
-                        // ignore
+                        // Bad size, ignore.
                     }
                 }
                 else
@@ -72,21 +73,15 @@ namespace SoundMetrics.Aris.Connection
                     if (frameAssembler.AddFramePart(packetHeader.PartNumber, payload)
                         && frameAssembler.GetFullFrame(out var frame))
                     {
+                        Debug.Assert(!(frame is null));
                         frameSubject.OnNext(frame);
                     }
                 }
             }
             else
             {
-                // ignore
+                // Can't get the packet header, ignore.
             }
-
-            throw new NotImplementedException();
-        }
-
-        private void IngestFrameHeader(Span<byte> payload)
-        {
-
         }
 
         private void Dispose(bool disposing)

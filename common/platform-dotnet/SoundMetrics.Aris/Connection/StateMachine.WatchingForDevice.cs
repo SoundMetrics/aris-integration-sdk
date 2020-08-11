@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using System.Diagnostics;
 using System.Net;
 
 namespace SoundMetrics.Aris.Connection
@@ -8,20 +7,19 @@ namespace SoundMetrics.Aris.Connection
     {
         internal sealed class WatchingForDevice
         {
-            public static (ConnectionState?, StateMachineData data)
-                DoProcessing(StateMachineData data, IMachineEvent ev)
+            public static ConnectionState? DoProcessing(
+                StateMachineContext context, IMachineEvent? ev)
             {
                 if (ev is Tick tick && tick.DeviceAddress is IPAddress deviceAddress)
                 {
-                    Debug.Assert(data is null);
                     Log.Debug("{state} notes device address {deviceAddress}",
                         nameof(WatchingForDevice), deviceAddress);
 
-                    var machineData = new StateMachineData(deviceAddress);
-                    return (ConnectionState.AttemptingConnection, machineData);
+                    context.DeviceAddress = deviceAddress;
+                    return ConnectionState.AttemptingConnection;
                 }
 
-                return (default, data);
+                return default;
             }
 
             public static StateHandler StateHandler =>

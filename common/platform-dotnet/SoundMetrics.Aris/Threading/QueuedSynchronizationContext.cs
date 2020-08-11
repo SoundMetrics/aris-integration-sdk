@@ -3,12 +3,11 @@
 using Serilog;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 
 namespace SoundMetrics.Aris.Threading
 {
-    using WorkItem = ValueTuple<SendOrPostCallback, object>;
-
     /// A queued (ordered) synchronization context for use in services
     /// or command-line applications.
     /// Based on the implementation found here:
@@ -58,18 +57,18 @@ namespace SoundMetrics.Aris.Threading
             GC.SuppressFinalize(this);
         }
 
-        public override void Post(SendOrPostCallback d, object state)
+        public override void Post(SendOrPostCallback callback, object? state)
         {
-            if (d is null)
+            if (callback is null)
             {
-                throw new ArgumentNullException(nameof(d));
+                throw new ArgumentNullException(nameof(callback));
             }
 
             if (disposed) return;
 
             try
             {
-                var workItem = (d, state);
+                var workItem = new WorkItem { Callback = callback, State = state };
                 workQueue.Add(workItem);
             }
             catch (ObjectDisposedException)
@@ -79,9 +78,9 @@ namespace SoundMetrics.Aris.Threading
             }
         }
 
-        public override void Send(SendOrPostCallback _d, object _state)
+        public override void Send(SendOrPostCallback _callback, object? _state)
         {
-            throw new InvalidOperationException("Send is not supporte");
+            throw new InvalidOperationException("Send is not supported");
         }
 
         private void RunOnCurrentThread(CancellationToken ct)
@@ -90,9 +89,9 @@ namespace SoundMetrics.Aris.Threading
             {
                 try
                 {
-                    foreach (var (d, state) in workQueue.GetConsumingEnumerable(ct))
+                    foreach (var workItem in workQueue.GetConsumingEnumerable(ct))
                     {
-                        d.Invoke(state);
+                        workItem.Callback.Invoke(workItem.State);
                     }
                 }
                 catch (OperationCanceledException)
@@ -109,6 +108,12 @@ namespace SoundMetrics.Aris.Threading
             {
                 doneSignal.Set();
             }
+        }
+
+        private struct WorkItem
+        {
+            public SendOrPostCallback Callback;
+            public object? State;
         }
 
         private readonly ManualResetEventSlim doneSignal = new ManualResetEventSlim(false);

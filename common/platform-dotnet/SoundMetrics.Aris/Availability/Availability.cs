@@ -1,7 +1,6 @@
 ﻿using SoundMetrics.Aris.Network;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -15,12 +14,12 @@ namespace SoundMetrics.Aris.Availability
     {
         Available,
         NotAvailable,
-    };
+    }
 
     public struct AvailabilityChange
     {
         public AvailabilityChangeType ChangeType;
-        public ArisBeacon Beacon;
+        public ArisBeacon LatestBeacon;
     }
 
     public sealed class Availability : IDisposable
@@ -30,7 +29,7 @@ namespace SoundMetrics.Aris.Availability
         {
         }
 
-        public Availability(TimeSpan timeout, SynchronizationContext syncContext)
+        public Availability(TimeSpan timeout, SynchronizationContext? syncContext)
         {
             if (syncContext is null)
             {
@@ -58,17 +57,17 @@ namespace SoundMetrics.Aris.Availability
             beaconSource = new BeaconListener(syncContext);
 
             observerSub =
-                Observable.Merge<(DateTimeOffset, ArisBeacon)>(
+                Observable.Merge<(DateTimeOffset, ArisBeacon?)>(
                     Observable.Interval(TimeSpan.FromSeconds(1.0))
-                        .Select<long, (DateTimeOffset, ArisBeacon)>(
+                        .Select<long, (DateTimeOffset, ArisBeacon?)>(
                             _ => (DateTimeOffset.Now, null)),
                     beaconSource.Beacons
-                        .Select(beacon => (DateTimeOffset.Now, beacon))
+                        .Select((ArisBeacon? beacon) => (DateTimeOffset.Now, beacon)) // ack nullibility in timer input
                     )
                     .ObserveOn(syncContext)
                     .Subscribe(HandleTimestampOrBeacon);
 
-            void HandleTimestampOrBeacon((DateTimeOffset now, ArisBeacon beacon) input)
+            void HandleTimestampOrBeacon((DateTimeOffset now, ArisBeacon? beacon) input)
             {
                 if (input.beacon is null)
                 {
@@ -94,13 +93,14 @@ namespace SoundMetrics.Aris.Availability
                         LatestBeacon = beacon,
                     };
 
-            _ = devices.AddOrUpdate(key, _ => value, (_1,_2) => value);
+            _ = devices.AddOrUpdate(key, _ => value, (_1, _2) => value);
 
-            changeSubject.OnNext(new AvailabilityChange
-            {
-                ChangeType = AvailabilityChangeType.Available,
-                Beacon = beacon,
-            });
+            changeSubject.OnNext(
+                new AvailabilityChange
+                {
+                    ChangeType = AvailabilityChangeType.Available,
+                    LatestBeacon = beacon,
+                });
         }
 
         private void OnTimer(DateTimeOffset now)
@@ -123,13 +123,14 @@ namespace SoundMetrics.Aris.Availability
 
             void RemoveDevice(SerialNumber key)
             {
-                if (devices.TryRemove(key, out var _))
+                if (devices.TryRemove(key, out var deviceState))
                 {
-                    changeSubject.OnNext(new AvailabilityChange
-                    {
-                        ChangeType = AvailabilityChangeType.NotAvailable,
-                        Beacon = default,
-                    });
+                    changeSubject.OnNext(
+                        new AvailabilityChange
+                        {
+                            ChangeType = AvailabilityChangeType.NotAvailable,
+                            LatestBeacon = deviceState.LatestBeacon,
+                        });
                 }
             }
         }

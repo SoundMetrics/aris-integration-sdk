@@ -52,7 +52,7 @@ namespace SoundMetrics.Aris
         public IObservable<Frame> Frames => frameSubject;
 
         private static SynchronizationContext ValidateSynchronizationContext(
-            SynchronizationContext syncContext,
+            SynchronizationContext? syncContext,
             string errorMessage)
         {
             if (syncContext is null)
@@ -66,30 +66,38 @@ namespace SoundMetrics.Aris
 
         private void OnBeacon(AvailabilityChange notice)
         {
-            if (notice.Beacon is ArisBeacon beacon)
+            switch (notice.ChangeType)
             {
-                var isNew = lastObservedAddress is null;
-                var addressChanged =
-                    !isNew && !Object.Equals(lastObservedAddress, beacon.IPAddress);
+                case AvailabilityChangeType.Available:
+                    var beacon = notice.LatestBeacon;
+                    var isNew = lastObservedAddress is null;
+                    var addressChanged =
+                        !isNew && !Object.Equals(lastObservedAddress, beacon.IPAddress);
 
-                if (isNew || addressChanged)
-                {
-                    var fmt =
-                        addressChanged
-                            ? "ARIS {serialNumber} moved to {ipAddress}"
-                            : "ARIS {serialNumber} found at {ipAddress}";
-                    Log.Information(fmt, beacon.SerialNumber, beacon.IPAddress);
-                }
+                    if (isNew || addressChanged)
+                    {
+                        var fmt =
+                            addressChanged
+                                ? "ARIS {serialNumber} moved to {ipAddress}"
+                                : "ARIS {serialNumber} found at {ipAddress}";
+                        Log.Information(fmt, beacon.SerialNumber, beacon.IPAddress);
+                    }
 
-                lastObservedAddress = notice.Beacon.IPAddress;
-                stateMachine.SetTargetAddress(notice.Beacon.IPAddress);
-            }
-            else
-            {
-                Log.Information("ARIS {serialNumber} is no longer heard",
-                    this.serialNumber);
-                lastObservedAddress = default;
-                stateMachine.SetTargetAddress(default);
+                    lastObservedAddress = beacon.IPAddress;
+                    stateMachine.SetTargetAddress(beacon.IPAddress);
+                    break;
+
+                case AvailabilityChangeType.NotAvailable:
+                    Log.Information(
+                        "ARIS {serialNumber} ({ipAddress}) is no longer heard",
+                        serialNumber, notice.LatestBeacon.IPAddress);
+
+                    lastObservedAddress = null;
+                    stateMachine.SetTargetAddress(null);
+                    break;
+
+                default:
+                    throw new Exception($"Unhandled value: {notice.ChangeType}");
             }
         }
 
@@ -121,7 +129,7 @@ namespace SoundMetrics.Aris
         private readonly StateMachine stateMachine;
         private readonly Subject<Frame> frameSubject = new Subject<Frame>();
 
-        private IPAddress lastObservedAddress;
+        private IPAddress? lastObservedAddress;
         private bool disposed;
     }
 }

@@ -43,14 +43,14 @@ namespace SoundMetrics.Aris.Connection
     /// </summary>
     internal sealed class Tick : IMachineEvent
     {
-        public Tick(DateTimeOffset timestamp, IPAddress deviceAddress)
+        public Tick(DateTimeOffset timestamp, IPAddress? deviceAddress)
         {
             Timestamp = timestamp;
             DeviceAddress = deviceAddress;
         }
 
         public DateTimeOffset Timestamp { get; }
-        public IPAddress DeviceAddress { get; }
+        public IPAddress? DeviceAddress { get; }
     }
 
     /// <summary>
@@ -60,12 +60,12 @@ namespace SoundMetrics.Aris.Connection
     /// </summary>
     internal sealed class DeviceAddressChanged : IMachineEvent
     {
-        public DeviceAddressChanged(IPAddress targetAddress)
+        public DeviceAddressChanged(IPAddress? targetAddress)
         {
             DeviceAddress = targetAddress;
         }
 
-        public IPAddress DeviceAddress { get; }
+        public IPAddress? DeviceAddress { get; }
     }
 
     /// <summary>
