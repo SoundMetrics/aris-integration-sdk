@@ -204,4 +204,5 @@ FakesAssemblies/
 *.opt
 
 # Miscellaneous build output files
+launchSettings.json
 sample-code/vc-using-framestream/vc-using-framestream/output.aris
