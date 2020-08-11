@@ -21,7 +21,6 @@ namespace SoundMetrics.Aris.Data
                 // The frame is already reordered. Other than the code that
                 // initially creates the frame storage, virtually no code
                 // should be aware of reordering.
-                Log.Debug($"{nameof(ReorderFrame)}: frame data is already reordered");
                 return frame;
             }
 

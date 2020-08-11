@@ -1,4 +1,6 @@
-﻿namespace SoundMetrics.Aris.Connection
+﻿using Serilog;
+
+namespace SoundMetrics.Aris.Connection
 {
     internal sealed partial class StateMachine
     {
@@ -26,6 +28,9 @@
                 if (request is ApplySettingsRequest req
                     && context.CommandConnection is CommandConnection connection)
                 {
+                    Log.Debug("Sending settings type [{settingsType}]",
+                        req.Settings.GetType().Name);
+
                     var cmd = req.Settings.GenerateCommand();
                     connection.SendCommand(cmd);
                 }
