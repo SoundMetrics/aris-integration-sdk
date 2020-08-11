@@ -1,12 +1,11 @@
 ﻿using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.Network;
 using System;
 using System.Diagnostics;
 using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 
-namespace SoundMetrics.Aris.Connection
+namespace SoundMetrics.Aris.Network
 {
     internal sealed class FrameListener : IDisposable
     {
