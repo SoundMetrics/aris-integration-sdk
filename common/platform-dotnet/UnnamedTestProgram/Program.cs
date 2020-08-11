@@ -1,7 +1,9 @@
-﻿using Serilog;
+﻿using CommandLine;
+using Serilog;
 using SoundMetrics.Aris;
 using SoundMetrics.Aris.Connection;
 using SoundMetrics.Aris.Threading;
+using System;
 using System.Threading;
 
 namespace UnnamedTestProgram
@@ -12,21 +14,42 @@ namespace UnnamedTestProgram
         {
             ConfigureLogger();
 
-            Log.Information("Watching for beacons...");
+            Parser.Default.ParseArguments<ScriptOptions, TestOptions>(args)
+                .WithParsed<ScriptOptions>(RunScript)
+                .WithParsed<TestOptions>(RunTest)
+                .WithNotParsed(errors => { });
 
-            using (var cts = new CancellationTokenSource())
-            using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
-            using (var conduit = new ArisController("24", syncContext))
+        }
+
+        private static void RunScript(ScriptOptions options)
+        {
+
+        }
+
+        private static void RunTest(TestOptions options)
+        {
+            Log.Information($"Test duration, {options.Duration} minutes.");
+
+            if (options.Duration is uint minutesDuration)
             {
-                SynchronizationContext.SetSynchronizationContext(syncContext);
+                using (var cts = new CancellationTokenSource())
+                using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
+                using (var conduit = new ArisController("24", syncContext))
+                {
+                    SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                conduit.ApplySettings(new TestPatternSettings());
+                    conduit.ApplySettings(new TestPatternSettings());
 
-                const int MaxMillisecondSleep = int.MaxValue;
-                Thread.Sleep(MaxMillisecondSleep);
+                    var duration = TimeSpan.FromMinutes(minutesDuration);
+                    Thread.Sleep(duration);
+                }
+            }
+            else
+            {
+                Log.Error("No duration given");
             }
 
-            Log.Information("Exiting.");
+            Log.Information("Exiting test.");
         }
 
         private static void ConfigureLogger()
