@@ -16,7 +16,7 @@ namespace UnnamedTestProgram
 
             using (var cts = new CancellationTokenSource())
             using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
-            using (var conduit = new ArisConduit("24", syncContext))
+            using (var conduit = new ArisController("24", syncContext))
             {
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 

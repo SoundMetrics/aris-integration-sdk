@@ -7,7 +7,7 @@ namespace SoundMetrics.Aris.Connection
     {
         internal sealed class WatchingForDevice
         {
-            public static ConnectionState? DoProcessing(
+            private static ConnectionState? DoProcessing(
                 StateMachineContext context, IMachineEvent? ev)
             {
                 if (ev is Tick tick && tick.DeviceAddress is IPAddress deviceAddress)

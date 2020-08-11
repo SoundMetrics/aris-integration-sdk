@@ -6,12 +6,12 @@ namespace SoundMetrics.Aris.Connection
     {
         internal sealed class Connected
         {
-            internal static void OnEnter(StateMachineContext context)
+            private static void OnEnter(StateMachineContext context)
             {
                 ApplySettingsRequest(context, context.LatestSettingsRequest);
             }
 
-            internal static ConnectionState? DoProcessing(
+            private static ConnectionState? DoProcessing(
                 StateMachineContext context, IMachineEvent? ev)
             {
                 if (ev is ApplySettingsRequest request)

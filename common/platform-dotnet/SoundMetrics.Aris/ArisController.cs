@@ -10,9 +10,9 @@ using System.Threading;
 
 namespace SoundMetrics.Aris
 {
-    public sealed class ArisConduit : IDisposable
+    public sealed class ArisController : IDisposable
     {
-        public ArisConduit(string serialNumber)
+        public ArisController(string serialNumber)
             : this(serialNumber,
                    ValidateSynchronizationContext(
                       SynchronizationContext.Current,
@@ -20,7 +20,7 @@ namespace SoundMetrics.Aris
         {
         }
 
-        public ArisConduit(
+        public ArisController(
             string serialNumber,
             SynchronizationContext syncContext)
         {
