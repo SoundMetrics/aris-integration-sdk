@@ -70,7 +70,11 @@ namespace SoundMetrics.Aris.Network
                 }
                 else
                 {
-                    if (frameAssembler.AddFramePart(packetHeader.PartNumber, payload)
+                    // The frame part is zero-based, and starts in packet
+                    // part number 1.
+                    var framePart = packetHeader.PartNumber - 1;
+
+                    if (frameAssembler.AddFramePart(framePart, payload)
                         && frameAssembler.GetFullFrame(out var frame))
                     {
                         Debug.Assert(!(frame is null));
