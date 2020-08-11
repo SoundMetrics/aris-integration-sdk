@@ -9,16 +9,17 @@ namespace SoundMetrics.Aris.Network
 {
     internal sealed class FrameListener : IDisposable
     {
-        public FrameListener(IPAddress ipAddress)
+        public FrameListener(IPAddress ipAddress, Subject<Frame> frameSubject)
         {
+            this.frameSubject = frameSubject;
             udpListener = new UdpListener(
                 address: ipAddress,
-                port: -1,
+                port: 0,
                 reuseAddress: false);
             packetSub = udpListener.Packets.Subscribe(OnPacketReceived);
         }
 
-        public IObservable<Frame> Frames => frameSubject;
+        public IPEndPoint LocalEndPoint => udpListener.LocalEndPoint;
 
         private void OnPacketReceived(UdpReceived udpReceived)
         {
@@ -90,10 +91,7 @@ namespace SoundMetrics.Aris.Network
                 if (disposing)
                 {
                     udpListener.Dispose();
-
                     packetSub.Dispose();
-                    frameSubject.OnCompleted();
-                    frameSubject.Dispose();
                 }
 
                 // no unmanaged resources
@@ -112,7 +110,7 @@ namespace SoundMetrics.Aris.Network
         private static readonly int FrameHeaderSize = Marshal.SizeOf<FrameHeader>();
         private readonly UdpListener udpListener;
         private readonly IDisposable packetSub;
-        private readonly Subject<Frame> frameSubject = new Subject<Frame>();
+        private readonly Subject<Frame> frameSubject;
         private readonly FrameAssembler frameAssembler = new FrameAssembler();
 
         private bool disposed;

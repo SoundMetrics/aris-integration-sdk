@@ -1,10 +1,12 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Reactive.Subjects;
 using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
@@ -44,15 +46,21 @@ namespace SoundMetrics.Aris.Connection
 
         public void SetTargetAddress(IPAddress? targetAddress)
         {
-            if (!Object.Equals(this.targetAddress, targetAddress))
+            var oldTargetAddress = this.targetAddress;
+
+            if (!Object.Equals(oldTargetAddress, targetAddress))
             {
                 Log.Debug("ARIS {serialNumber} noting address changed from {addr1} to {addr2}",
                     serialNumber, this.targetAddress, targetAddress);
             }
 
             this.targetAddress = targetAddress;
+
+            SetFrameListener(oldTargetAddress, targetAddress);
             events.Post(new DeviceAddressChanged(targetAddress));
         }
+
+        public IObservable<Frame> Frames => frameSubject;
 
         private void OnTimerTick(object? _) =>
             events.Post(new Tick(DateTimeOffset.Now, targetAddress));
@@ -191,6 +199,9 @@ namespace SoundMetrics.Aris.Connection
 
                     ShutDown();
                     events.Dispose();
+
+                    frameSubject.OnCompleted();
+                    frameSubject.Dispose();
                 }
 
                 // no unmanaged resources
@@ -217,18 +228,37 @@ namespace SoundMetrics.Aris.Connection
             GC.SuppressFinalize(this);
         }
 
+        private void SetFrameListener(
+            IPAddress? oldTargetAddress,
+            IPAddress? newTargetAddress)
+        {
+            if (object.Equals(oldTargetAddress, newTargetAddress))
+            {
+                return;
+            }
+
+            frameListener?.Dispose();
+            frameListener = null;
+
+            if (!(newTargetAddress is null))
+            {
+                frameListener = new FrameListener(IPAddress.Any, frameSubject);
+                context.ReceiverPort = frameListener.LocalEndPoint.Port;
+            }
+        }
+
         private readonly HandlerMap stateHandlers;
         private readonly AttemptingConnection attemptingConnectionHandler =
             new AttemptingConnection();
         private readonly BufferedMessageQueue<IMachineEvent> events;
         private readonly Timer tickSource;
         private readonly string serialNumber;
-        private readonly StateMachineContext context =
-            new StateMachineContext() { ReceiverPort = 56999 }; // TODO remove hard-coded receiver port
+        private readonly Subject<Frame> frameSubject = new Subject<Frame>();
+        private readonly StateMachineContext context = new StateMachineContext();
 
         private bool disposed;
         private IPAddress? targetAddress;
-
+        private FrameListener? frameListener;
 
         private ConnectionState state = ConnectionState.Start;
     }

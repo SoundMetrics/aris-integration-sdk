@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
@@ -25,10 +26,23 @@ namespace SoundMetrics.Aris.Network
                 SocketOptionLevel.Socket,
                 SocketOptionName.ReuseAddress,
                 reuseAddress);
-            udp.Client.Bind(new IPEndPoint(address, port));
+
+            try
+            {
+                var localEndpoint = new IPEndPoint(address, port);
+                udp.Client.Bind(localEndpoint);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Binding failed on {address}:{port}; {message}",
+                    address, port, ex.Message);
+                throw;
+            }
 
             Task.Run(() => Listen(port));
         }
+
+        public IPEndPoint LocalEndPoint => (IPEndPoint)udp.Client.LocalEndPoint;
 
         public IObservable<UdpReceived> Packets => receivedSubject;
 

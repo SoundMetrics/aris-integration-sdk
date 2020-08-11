@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -35,6 +36,7 @@ namespace SoundMetrics.Aris.Connection
         {
             foreach (var line in lines)
             {
+                Log.Debug("Sending: [{commandSegment}]", line);
                 writer.WriteLine(line);
             }
 
