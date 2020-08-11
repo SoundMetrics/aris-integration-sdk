@@ -12,4 +12,12 @@
             return new[] { "passive" };
         }
     }
+
+    public sealed class TestPatternSettings : ISettings
+    {
+        public string[] GenerateCommand()
+        {
+            return new[] { "testpattern" };
+        }
+    }
 }

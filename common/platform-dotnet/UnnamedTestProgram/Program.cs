@@ -20,7 +20,7 @@ namespace UnnamedTestProgram
             {
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                conduit.ApplySettings(new PassiveSettings());
+                conduit.ApplySettings(new TestPatternSettings());
 
                 const int MaxMillisecondSleep = int.MaxValue;
                 Thread.Sleep(MaxMillisecondSleep);
