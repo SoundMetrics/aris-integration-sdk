@@ -1,7 +1,9 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Network;
 using System;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -67,6 +69,21 @@ namespace SoundMetrics.Aris.Connection
                                                 port,
                                                 context.Salinity);
                                         return ConnectionState.Connected;
+                                    }
+                                    catch (SocketException socketEx)
+                                    {
+                                        var errorMessage = socketEx.ErrorCode switch
+                                        {
+                                            SocketConstants.ECONNREFUSED =>
+                                                "Connection refused, device is in use or still booting up",
+                                            SocketConstants.ETIMEDOUT =>
+                                                "Attempt to connect timed out",
+
+                                            _ => $"Socket error {socketEx.ErrorCode}"
+                                        };
+
+                                        Log.Warning("Couldn't connect to {ipAddress}: {exMessage}",
+                                            context.DeviceAddress, errorMessage);
                                     }
                                     catch (Exception ex)
                                     {
