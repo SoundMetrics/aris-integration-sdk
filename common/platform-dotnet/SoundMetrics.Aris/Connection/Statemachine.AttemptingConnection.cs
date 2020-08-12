@@ -82,14 +82,14 @@ namespace SoundMetrics.Aris.Connection
                                             _ => $"Socket error {socketEx.ErrorCode}"
                                         };
 
-                                        Log.Warning("Couldn't connect to {ipAddress}: {exMessage}",
+                                        Log.Information("Couldn't connect to {ipAddress}: {exMessage}",
                                             context.DeviceAddress, errorMessage);
                                     }
                                     catch (Exception ex)
                                     {
                                         if (failureLogCountdown > 0)
                                         {
-                                            Log.Warning("Couldn't connect to {ipAddress}: {exMessage}",
+                                            Log.Information("Couldn't connect to {ipAddress}: {exMessage}",
                                                 context.DeviceAddress, ex.Message);
                                         }
                                     }
