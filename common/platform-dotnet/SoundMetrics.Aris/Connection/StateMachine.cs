@@ -53,16 +53,18 @@ namespace SoundMetrics.Aris.Connection
         {
             var oldTargetAddress = this.targetAddress;
 
-            if (!Object.Equals(oldTargetAddress, targetAddress))
+            if (Object.Equals(oldTargetAddress, targetAddress))
             {
-                Log.Debug("ARIS {serialNumber} noting address changed from {addr1} to {addr2}",
-                    serialNumber, this.targetAddress, targetAddress);
+                return;
             }
+
+            Log.Debug("ARIS {serialNumber} noting address changed from {addr1} to {addr2}",
+                serialNumber, this.targetAddress, targetAddress);
 
             this.targetAddress = targetAddress;
 
             SetFrameListener(oldTargetAddress, targetAddress);
-            events.Post(new DeviceAddressChanged(targetAddress));
+            events.Post(new DeviceAddressChanged(oldTargetAddress, targetAddress));
         }
 
         public IObservable<Frame> Frames => frameSubject;
@@ -138,23 +140,21 @@ namespace SoundMetrics.Aris.Connection
                 return false;
             }
 
-            Log.Debug("State transition from {oldState} to {newState}", oldState, newState);
+            ConnectionState? nextState = newState;
 
-            ConnectionState? followOnState = null;
-
-            do
+            while (nextState is ConnectionState next && oldState != next)
             {
-                stateHandlers[oldState].OnLeave?.Invoke(context);
-                state = newState;
-                stateHandlers[newState].OnEnter?.Invoke(context);
+                Log.Debug("State transition from {oldState} to {newState}",
+                    oldState, next);
 
-                followOnState = stateHandlers[newState].DoProcessing?.Invoke(context, ev);
-                if (followOnState is ConnectionState next)
-                {
-                    Log.Debug("followOnState is {followOnState}", next);
-                    newState = next;
-                }
-            } while (!(followOnState is null));
+                oldState = state;
+
+                stateHandlers[oldState].OnLeave?.Invoke(context);
+                state = next;
+                stateHandlers[next].OnEnter?.Invoke(context);
+
+                nextState = stateHandlers[next].DoProcessing?.Invoke(context, ev);
+            }
 
             return true;
         }
@@ -207,6 +207,10 @@ namespace SoundMetrics.Aris.Connection
                 {
                     ConnectionState.End,
                     End.StateHandler
+                },
+                {
+                    ConnectionState.ConnectionTerminated,
+                    ConnectionTerminated.StateHandler
                 }
             };
         }

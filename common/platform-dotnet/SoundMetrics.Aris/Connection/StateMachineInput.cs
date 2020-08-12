@@ -73,11 +73,18 @@ namespace SoundMetrics.Aris.Connection
     /// </summary>
     internal sealed class DeviceAddressChanged : IMachineEvent
     {
-        public DeviceAddressChanged(IPAddress? targetAddress)
+        public DeviceAddressChanged(IPAddress? oldAddress, IPAddress? targetAddress)
         {
+            if (!(oldAddress is null) && object.Equals(oldAddress, targetAddress))
+            {
+                throw new ArgumentException("Address has not changed");
+            }
+
+            OldAddress = oldAddress;
             DeviceAddress = targetAddress;
         }
 
+        public IPAddress? OldAddress { get; }
         public IPAddress? DeviceAddress { get; }
     }
 

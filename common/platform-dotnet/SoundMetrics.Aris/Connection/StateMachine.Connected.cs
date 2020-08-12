@@ -5,7 +5,7 @@ namespace SoundMetrics.Aris.Connection
 {
     internal sealed partial class StateMachine
     {
-        internal sealed class Connected
+        internal static class Connected
         {
             private static void OnEnter(StateMachineContext context)
             {
@@ -18,9 +18,14 @@ namespace SoundMetrics.Aris.Connection
             private static ConnectionState? DoProcessing(
                 StateMachineContext context, IMachineEvent? ev)
             {
-                if (ev is ApplySettingsRequest request)
+                switch (ev)
                 {
-                    ApplySettingsRequest(context, request);
+                    case ApplySettingsRequest request:
+                        ApplySettingsRequest(context, request);
+                        break;
+
+                    case DeviceAddressChanged addressChanged:
+                        return ConnectionState.ConnectionTerminated;
                 }
 
                 return default;

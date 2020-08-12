@@ -13,18 +13,12 @@
 
             AttemptingConnection
                 => Connected
-                => ConnectionAttemptFailed
+                => ConnectionTerminated
 
             Connected
                 => ConnectionTerminated
 
-            ConnectionAttemptFailed
-                => PrepForRetry
-
             ConnectionTerminated
-                => PrepForRetry
-
-            PrepForRetry
                 => WatchingForDevice
 
             * => End (disposed, no restart)
@@ -35,9 +29,7 @@
         WatchingForDevice,
         AttemptingConnection,
         Connected,
-        ConnectionAttemptFailed,
         ConnectionTerminated,
-        PrepForRetry,
         End,
     }
 }

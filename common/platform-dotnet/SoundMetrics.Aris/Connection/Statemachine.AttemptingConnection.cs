@@ -44,6 +44,9 @@ namespace SoundMetrics.Aris.Connection
                     case Tick tick:
                         return AttemptConnection(tick.Timestamp);
 
+                    case DeviceAddressChanged _:
+                        return ConnectionState.ConnectionTerminated;
+
                     default:
                         break; // Nothing
                 }

@@ -7,6 +7,11 @@ namespace SoundMetrics.Aris.Connection
     {
         internal sealed class WatchingForDevice
         {
+            private static void OnEnter(StateMachineContext _)
+            {
+                Log.Information("Watching for device");
+            }
+
             private static ConnectionState? DoProcessing(
                 StateMachineContext context, IMachineEvent? ev)
             {
@@ -24,7 +29,7 @@ namespace SoundMetrics.Aris.Connection
 
             public static StateHandler StateHandler =>
                 new StateHandler(
-                    onEnter: default,
+                    onEnter: OnEnter,
                     doProcessing: DoProcessing,
                     onLeave: default);
         }
