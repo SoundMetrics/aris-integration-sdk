@@ -28,7 +28,7 @@ namespace UnnamedTestProgram
 
         private static void RunTest(TestOptions options)
         {
-            Log.Information($"Test duration, {options.Duration} minutes.");
+            Log.Information($"Test duration, {options.Duration} minute(s).");
 
             if (options.Duration is uint minutesDuration)
             {
