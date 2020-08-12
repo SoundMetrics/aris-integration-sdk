@@ -89,14 +89,8 @@ namespace SoundMetrics.Aris.Connection
             int receiverPort,
             Salinity salinity)
         {
-            var initializeCommand = new[]
-            {
-                "initialize",
-                $"salinity {salinity.ToString().ToLower()}",
-                $"rcvr_port {receiverPort}",
-                $"datetime {FormatTimestamp(currentTime)}",
-            };
-
+            var initializeCommand =
+                new InitializeCommand(currentTime, receiverPort, salinity);
             var response = io.SendCommand(initializeCommand);
 
             if (!response.IsSuccessful)
@@ -106,16 +100,7 @@ namespace SoundMetrics.Aris.Connection
             }
         }
 
-        private static readonly string[] MonthAbbreviations = new[]
-        {
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        };
-
-        private static string FormatTimestamp(DateTimeOffset timestamp) =>
-            $"{timestamp.Year}-{MonthAbbreviations[timestamp.Month - 1]}-{timestamp.Day:D02} "
-            + $"{timestamp.Hour:D02}:{timestamp.Minute:D02}:{timestamp.Second:D02}";
-
-        public CommandResponse SendCommand(IEnumerable<string> command)
+        public CommandResponse SendCommand(ICommand command)
         {
             return io.SendCommand(command);
         }

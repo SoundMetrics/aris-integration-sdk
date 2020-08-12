@@ -2,15 +2,17 @@
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal sealed class CommandResponse
+    internal class CommandResponse
     {
-        public CommandResponse(bool isSuccessful, IEnumerable<string> response)
+        internal CommandResponse(bool isSuccessful, List<string> response)
         {
             IsSuccessful = isSuccessful;
-            ResponseText = response;
+            this.response = response;
         }
 
         public bool IsSuccessful { get; }
-        public IEnumerable<string> ResponseText { get; }
+        public IEnumerable<string> ResponseText => response;
+
+        private readonly List<string> response;
     }
 }

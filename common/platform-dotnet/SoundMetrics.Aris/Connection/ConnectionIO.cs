@@ -35,9 +35,9 @@ namespace SoundMetrics.Aris.Connection
 
         public IPEndPoint LocalEndpoint => (IPEndPoint)tcp.Client.LocalEndPoint;
 
-        public CommandResponse SendCommand(IEnumerable<string> lines)
+        public CommandResponse SendCommand(ICommand command)
         {
-            foreach (var line in lines)
+            foreach (var line in command.GenerateCommand())
             {
                 Log.Debug("Sending: [{commandSegment}]", line);
                 writer.WriteLine(line);
@@ -47,14 +47,14 @@ namespace SoundMetrics.Aris.Connection
             writer.WriteLine("");
             writer.Flush();
 
-            var response = ReceiveResponse();
+            var response = ReceiveResponse(command is ISettings);
             Log.Debug(
                 "Response: [{response}]",
                 string.Join("\n", response.ResponseText));
             return response;
         }
 
-        private CommandResponse ReceiveResponse()
+        private CommandResponse ReceiveResponse(bool isSettingsCommand)
         {
             var lines = new List<string>();
             string? line;
@@ -65,7 +65,10 @@ namespace SoundMetrics.Aris.Connection
             }
 
             var success = GetStatusCode() == "200";
-            return new CommandResponse(success, lines);
+            return
+                isSettingsCommand
+                    ? new SettingsCommandResponse(success, lines)
+                    : new CommandResponse(success, lines);
 
             string GetStatusCode()
             {

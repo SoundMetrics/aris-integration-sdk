@@ -2,10 +2,9 @@
 {
     public interface ISettings
     {
-        string[] GenerateCommand();
     }
 
-    public sealed class PassiveSettings : ISettings
+    public sealed class PassiveSettings : ISettings, ICommand
     {
         public string[] GenerateCommand()
         {
@@ -13,7 +12,7 @@
         }
     }
 
-    public sealed class TestPatternSettings : ISettings
+    public sealed class TestPatternSettings : ISettings, ICommand
     {
         public string[] GenerateCommand()
         {

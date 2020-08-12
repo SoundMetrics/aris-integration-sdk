@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -34,8 +35,15 @@ namespace SoundMetrics.Aris.Connection
                     Log.Debug("Sending settings type [{settingsType}]",
                         req.Settings.GetType().Name);
 
-                    var cmd = req.Settings.GenerateCommand();
-                    connection.SendCommand(cmd);
+                    if (req.Settings is ICommand cmd)
+                    {
+                        connection.SendCommand(cmd);
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            $"Settings object {req.Settings.GetType().Name} needs to implement {nameof(ICommand)}");
+                    }
                 }
             }
 
