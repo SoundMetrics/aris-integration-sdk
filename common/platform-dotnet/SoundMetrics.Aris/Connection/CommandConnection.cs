@@ -92,14 +92,10 @@ namespace SoundMetrics.Aris.Connection
             };
 
             var response = io.SendCommand(initializeCommand);
-            var joinedResponseText = string.Join("\n", response.ResponseText);
 
-            if (response.IsSuccessful)
+            if (!response.IsSuccessful)
             {
-                Log.Debug("Initialize response=[{response}]", joinedResponseText);
-            }
-            else
-            {
+                var joinedResponseText = string.Join("\n", response.ResponseText);
                 throw new Exception("Protocol initialization failed: " + joinedResponseText);
             }
         }
