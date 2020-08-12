@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -31,6 +32,8 @@ namespace SoundMetrics.Aris.Connection
                 throw;
             }
         }
+
+        public IPEndPoint LocalEndpoint => (IPEndPoint)tcp.Client.LocalEndPoint;
 
         public CommandResponse SendCommand(IEnumerable<string> lines)
         {

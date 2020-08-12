@@ -8,6 +8,9 @@ namespace SoundMetrics.Aris.Connection
         {
             private static void OnEnter(StateMachineContext context)
             {
+                Log.Information("Connected to device at {deviceAddress} from {localEndpoint}",
+                    context.DeviceAddress, context.CommandConnection?.LocalEndpoint);
+
                 ApplySettingsRequest(context, context.LatestSettingsRequest);
             }
 

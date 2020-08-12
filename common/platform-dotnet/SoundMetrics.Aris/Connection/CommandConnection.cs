@@ -1,5 +1,4 @@
-﻿using Serilog;
-using SoundMetrics.Aris.Device;
+﻿using SoundMetrics.Aris.Device;
 using SoundMetrics.Aris.Network;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,12 @@ namespace SoundMetrics.Aris.Connection
             int receiverPort,
             Salinity salinity)
         {
-            var tcp = new TcpClient();
+            // ARIS is currently IPv4 only. We don't need to specify this when
+            // constructing the TcpClient, but it keeps the local address from
+            // confusing the natives in-house--it will appear in logs as IPv4
+            // (169.254.31.178:51136) rather than IPv6
+            // ([::ffff:169.254.31.178%16]:51136).
+            var tcp = new TcpClient(AddressFamily.InterNetwork);
 
             try
             {
@@ -51,6 +55,8 @@ namespace SoundMetrics.Aris.Connection
                 throw;
             }
         }
+
+        public IPEndPoint LocalEndpoint => io.LocalEndpoint;
 
         private static void ControlTcpKeepAlives(
             Socket client,
