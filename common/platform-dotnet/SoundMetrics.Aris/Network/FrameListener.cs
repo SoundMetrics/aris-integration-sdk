@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace SoundMetrics.Aris.Network
 {
@@ -21,70 +22,104 @@ namespace SoundMetrics.Aris.Network
 
         public IPEndPoint LocalEndPoint => udpListener.LocalEndPoint;
 
+        public FrameListenerMetrics Metrics
+        {
+            get { lock (metricsGuard) { return metrics; }; }
+        }
+
         private void OnPacketReceived(UdpReceived udpReceived)
         {
-            var buffer = udpReceived.Received.Buffer;
+            bool isInvalidPacket = false;
+            bool startedFrame = false;
+            bool completedFrame = false;
 
-            if (buffer.Length <= FramePacketHeaderSize)
+            try
             {
-                // ignore
-                return;
-            }
+                var buffer = udpReceived.Received.Buffer;
 
-            var packetHeaderBytes =
-                (new Span<byte>(buffer)).Slice(0, FramePacketHeaderSize);
-            if (packetHeaderBytes.ReadStruct<FramePacketHeader>(out var packetHeader))
-            {
-                if (packetHeader.Signature != FramePacketHeader.FramePacketSignature
-                    || packetHeader.HeaderSize != FramePacketHeaderSize)
+                if (buffer.Length <= FramePacketHeaderSize)
                 {
-                    // Not a valid frame packet, ignore.
+                    // ignore
+                    isInvalidPacket = true;
                     return;
                 }
 
-                var payload =
-                    new Memory<byte>(
-                        buffer,
-                        FramePacketHeaderSize,
-                        buffer.Length - FramePacketHeaderSize);
-
-                if (packetHeader.PartNumber == 0)
+                var packetHeaderBytes =
+                    (new Span<byte>(buffer)).Slice(0, FramePacketHeaderSize);
+                if (packetHeaderBytes.ReadStruct<FramePacketHeader>(out var packetHeader))
                 {
-                    // The payload is the frame header
-                    if (packetHeader.PayloadSize == FrameHeaderSize
-                        && payload.Length == FrameHeaderSize)
+                    if (packetHeader.Signature != FramePacketHeader.FramePacketSignature
+                        || packetHeader.HeaderSize != FramePacketHeaderSize)
                     {
-                        if (payload.Span.ReadStruct<FrameHeader>(out var frameHeader))
+                        // Not a valid frame packet, ignore.
+                        isInvalidPacket = true;
+                        return;
+                    }
+
+                    var payload =
+                        new Memory<byte>(
+                            buffer,
+                            FramePacketHeaderSize,
+                            buffer.Length - FramePacketHeaderSize);
+
+                    if (packetHeader.PartNumber == 0)
+                    {
+                        // The payload is the frame header
+                        if (packetHeader.PayloadSize == FrameHeaderSize
+                            && payload.Length == FrameHeaderSize)
                         {
-                            frameAssembler.SetFrameHeader(frameHeader);
+                            if (payload.Span.ReadStruct<FrameHeader>(out var frameHeader))
+                            {
+                                frameAssembler.SetFrameHeader(frameHeader);
+                                startedFrame = true;
+                            }
+                            else
+                            {
+                                // Can't get frame header, ignore.
+                                isInvalidPacket = true;
+                            }
                         }
                         else
                         {
-                            // Can't get frame header, ignore.
+                            // Bad size, ignore.
+                            isInvalidPacket = true;
                         }
                     }
                     else
                     {
-                        // Bad size, ignore.
+                        // The frame part is zero-based, and starts in packet
+                        // part number 1.
+                        var framePart = packetHeader.PartNumber - 1;
+
+                        if (frameAssembler.AddFramePart(framePart, payload)
+                            && frameAssembler.GetFullFrame(out var frame))
+                        {
+                            Debug.Assert(!(frame is null));
+                            frameSubject.OnNext(frame);
+                            completedFrame = true;
+                        }
                     }
                 }
                 else
                 {
-                    // The frame part is zero-based, and starts in packet
-                    // part number 1.
-                    var framePart = packetHeader.PartNumber - 1;
-
-                    if (frameAssembler.AddFramePart(framePart, payload)
-                        && frameAssembler.GetFullFrame(out var frame))
-                    {
-                        Debug.Assert(!(frame is null));
-                        frameSubject.OnNext(frame);
-                    }
+                    // Can't get the packet header, ignore.
+                    isInvalidPacket = true;
                 }
             }
-            else
+            finally
             {
-                // Can't get the packet header, ignore.
+                var localMetrics = new FrameListenerMetrics
+                {
+                    PacketsReceived = 1,
+                    InvalidPacketsReceived = isInvalidPacket ? 1 : 0,
+                    FramesStarted = startedFrame ? 1 : 0,
+                    FramesCompleted = completedFrame ? 1 : 0,
+                };
+
+                lock (metricsGuard)
+                {
+                    metrics += localMetrics;
+                }
             }
         }
 
@@ -116,7 +151,9 @@ namespace SoundMetrics.Aris.Network
         private readonly IDisposable packetSub;
         private readonly Subject<Frame> frameSubject;
         private readonly FrameAssembler frameAssembler = new FrameAssembler();
+        private readonly Mutex metricsGuard = new Mutex();
 
         private bool disposed;
+        private FrameListenerMetrics metrics = new FrameListenerMetrics();
     }
 }

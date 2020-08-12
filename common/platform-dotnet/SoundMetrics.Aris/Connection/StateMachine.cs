@@ -248,6 +248,14 @@ namespace SoundMetrics.Aris.Connection
                     throw new Exception("ShutDown timed out");
                 }
             }
+
+            StopFrameListener();
+        }
+
+        public FrameListenerMetrics Stop()
+        {
+            ShutDown();
+            return frameListenerMetrics;
         }
 
         public void Dispose()
@@ -266,13 +274,23 @@ namespace SoundMetrics.Aris.Connection
                 return;
             }
 
-            frameListener?.Dispose();
-            frameListener = null;
+            StopFrameListener();
 
             if (!(newTargetAddress is null))
             {
                 frameListener = new FrameListener(IPAddress.Any, frameSubject);
                 context.ReceiverPort = frameListener.LocalEndPoint.Port;
+            }
+        }
+
+        private void StopFrameListener()
+        {
+            if (frameListener is FrameListener)
+            {
+                frameListenerMetrics += frameListener.Metrics;
+
+                frameListener.Dispose();
+                frameListener = null;
             }
         }
 
@@ -288,6 +306,7 @@ namespace SoundMetrics.Aris.Connection
         private bool disposed;
         private IPAddress? targetAddress;
         private FrameListener? frameListener;
+        private FrameListenerMetrics frameListenerMetrics = default;
 
         private ConnectionState state = ConnectionState.Start;
     }

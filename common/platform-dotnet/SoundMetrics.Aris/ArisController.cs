@@ -2,6 +2,7 @@
 using SoundMetrics.Aris.Availability;
 using SoundMetrics.Aris.Connection;
 using SoundMetrics.Aris.Data;
+using SoundMetrics.Aris.Network;
 using System;
 using System.Net;
 using System.Reactive.Linq;
@@ -55,6 +56,8 @@ namespace SoundMetrics.Aris
         }
 
         public IObservable<Frame> Frames => frameSubject;
+
+        public FrameListenerMetrics Stop() => stateMachine.Stop();
 
         private static SynchronizationContext ValidateSynchronizationContext(
             SynchronizationContext? syncContext,

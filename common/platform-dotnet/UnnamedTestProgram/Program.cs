@@ -34,14 +34,27 @@ namespace UnnamedTestProgram
             {
                 using (var cts = new CancellationTokenSource())
                 using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
-                using (var conduit = new ArisController("24", syncContext))
+                using (var controller = new ArisController("24", syncContext))
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    conduit.ApplySettings(new TestPatternSettings());
+                    controller.ApplySettings(new TestPatternSettings());
 
                     var duration = TimeSpan.FromMinutes(minutesDuration);
                     Thread.Sleep(duration);
+
+                    var metrics = controller.Stop();
+
+                    Log.Information(
+                        "Metrics: "
+                            + "framesStarted={framesStarted}; "
+                            + "framesCompleted={framesCompleted}; "
+                            + "packetsReceived={packetsReceived}; "
+                            + "invalidPacketsReceived={invalidPacketsReceived}",
+                        metrics.FramesStarted,
+                        metrics.FramesCompleted,
+                        metrics.PacketsReceived,
+                        metrics.InvalidPacketsReceived);
                 }
             }
             else
