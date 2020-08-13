@@ -9,15 +9,22 @@ namespace SoundMetrics.Aris.File
 
     public sealed class FileWriter : IDisposable
     {
-        public FileWriter CreateNew(in SampleGeometry sampleGeometry, string filePath)
+        public static FileWriter CreateNew(in SampleGeometry sampleGeometry, string filePath)
         {
             var stream = new FileStream(
                 filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             return new FileWriter(sampleGeometry, stream);
         }
 
+        public static FileWriter CreateNewWithFrame(Frame firstFrame, string filePath)
+        {
+            var writer = CreateNew(SonarConfig.GetSampleGeometry(firstFrame.FrameHeader), filePath);
+            writer.WriteFrame(firstFrame);
+            return writer;
+        }
+
         [Obsolete("Not yet implemented")]
-        public FileWriter Append(in SampleGeometry sampleGeometry, string filePath)
+        public static FileWriter Append(in SampleGeometry sampleGeometry, string filePath)
         {
             // Will need to position correctly after the last complete frame,
             // not assuming the file is not somehow truncated.
