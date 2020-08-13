@@ -9,41 +9,6 @@ namespace SoundMetrics.Aris.Device
         public InvalidSonarConfig(string message) : base(message) { }
     }
 
-    /// <summary>
-    /// Describes the &quot;shape&quot; of a frame's samples.
-    /// </summary>
-    public struct SampleGeometry
-    {
-        internal SampleGeometry(
-            int beamCount,
-            int samplesPerBeam,
-            int totalSampleCount,
-            int pingsPerFrame)
-        {
-            BeamCount = beamCount;
-            SamplesPerBeam = samplesPerBeam;
-            TotalSampleCount = totalSampleCount;
-            PingsPerFrame = pingsPerFrame;
-        }
-
-        public int BeamCount { get; private set; }
-        public int SamplesPerBeam { get; private set; }
-        public int TotalSampleCount { get; private set; }
-        public int PingsPerFrame { get; private set; }
-
-        public void Deconstruct(
-            out int beamCount,
-            out int samplesPerBeam,
-            out int totalSampleCount,
-            out int pingsPerFrame)
-        {
-            beamCount = BeamCount;
-            samplesPerBeam = SamplesPerBeam;
-            totalSampleCount = TotalSampleCount;
-            pingsPerFrame = PingsPerFrame;
-        }
-    }
-
     internal static class SonarConfig
     {
         // Min/max values per ARIS Engineering Test Command List
