@@ -4,6 +4,7 @@ using SoundMetrics.Aris;
 using SoundMetrics.Aris.Connection;
 using SoundMetrics.Aris.Threading;
 using System;
+using System.Linq;
 using System.Threading;
 
 namespace UnnamedTestProgram
@@ -45,13 +46,12 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    var rawSettings = new PassthroughSettings(
-                        new[]
-                        {
-                            "#raw",
-                        });
+                    var rawSettings = new RawSettings();
+                    var rawSettingsCommand = new PassthroughSettings(
+                        new[] { "#raw" }
+                            .Concat(rawSettings.Serialize()));
 
-                    var settingsCookie = controller.ApplySettings(rawSettings);
+                    var settingsCookie = controller.ApplySettings(rawSettingsCommand);
                     Log.Debug("settingsCookie = {settingsCookie}", settingsCookie);
 
                     var duration = TimeSpan.FromMinutes(minutesDuration);

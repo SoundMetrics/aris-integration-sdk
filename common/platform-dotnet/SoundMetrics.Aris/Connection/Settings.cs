@@ -1,4 +1,7 @@
-﻿namespace SoundMetrics.Aris.Connection
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace SoundMetrics.Aris.Connection
 {
     public interface ISettings
     {
@@ -14,9 +17,9 @@
 
     public sealed class PassthroughSettings : ISettings, ICommand
     {
-        public PassthroughSettings(string[] passthroughValues)
+        public PassthroughSettings(IEnumerable<string> passthroughValues)
         {
-            this.passthroughValues = passthroughValues;
+            this.passthroughValues = passthroughValues.ToArray();
         }
 
         public string[] GenerateCommand()
