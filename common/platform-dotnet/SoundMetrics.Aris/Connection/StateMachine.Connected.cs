@@ -37,18 +37,8 @@ namespace SoundMetrics.Aris.Connection
                 if (request is ApplySettingsRequest req
                     && context.CommandConnection is CommandConnection connection)
                 {
-                    Log.Debug("Sending settings type [{settingsType}]",
-                        req.Settings.GetType().Name);
-
-                    if (req.Settings is ICommand cmd)
-                    {
-                        connection.SendCommand(cmd);
-                    }
-                    else
-                    {
-                        throw new Exception(
-                            $"Settings object {req.Settings.GetType().Name} needs to implement {nameof(ICommand)}");
-                    }
+                    Log.Debug("Sending settings type [{settingsType}]", req.SettingsType.Name);
+                    connection.SendCommand(req);
                 }
             }
 

@@ -4,6 +4,7 @@ using SoundMetrics.Aris.Connection;
 using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -11,6 +12,7 @@ using System.Threading;
 
 namespace SoundMetrics.Aris
 {
+    [DebuggerDisplay("ArisController for {SerialNumber}")]
     public sealed class ArisController : IDisposable
     {
         public ArisController(string serialNumber)
@@ -46,14 +48,17 @@ namespace SoundMetrics.Aris
                 syncContext);
             availabilitySub =
                 availability.Changes
+                    .Where(change => change.LatestBeacon.SerialNumber == SerialNumber)
                     .ObserveOn(syncContext)
                     .Subscribe(OnBeacon);
         }
 
-        public void ApplySettings(ISettings settings)
+        public int ApplySettings(ISettings settings)
         {
-            stateMachine.ApplySettings(settings);
+            return stateMachine.ApplySettings(settings);
         }
+
+        public string SerialNumber => serialNumber;
 
         public IObservable<Frame> Frames => frameSubject;
 

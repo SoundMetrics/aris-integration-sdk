@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal class CommandResponse
+    public class CommandResponse
     {
         internal CommandResponse(bool isSuccessful, List<string> response)
         {

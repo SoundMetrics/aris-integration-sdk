@@ -1,9 +1,11 @@
 ﻿using SoundMetrics.Aris.Data;
 using System;
+using System.Diagnostics;
 using System.Net;
 
 namespace SoundMetrics.Aris.Availability
 {
+    [DebuggerDisplay("Beacon from ARIS {SerialNumber}")]
     public abstract class ArisBeacon
     {
         internal ArisBeacon(

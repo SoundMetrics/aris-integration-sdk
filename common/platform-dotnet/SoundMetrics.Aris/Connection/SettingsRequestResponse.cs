@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal sealed class SettingsCommandResponse : CommandResponse
+    public sealed class SettingsRequestResponse : CommandResponse
     {
-        internal SettingsCommandResponse(bool isSuccessful, List<string> response)
+        internal SettingsRequestResponse(bool isSuccessful, List<string> response)
             : base(isSuccessful, response)
         {
             SettingsCookie = isSuccessful ? GetSettingsCookie(response) : null;

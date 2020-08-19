@@ -28,17 +28,25 @@ namespace UnnamedTestProgram
 
         private static void RunTest(TestOptions options)
         {
+            if (options.SerialNumber is null)
+            {
+                Log.Error("No serial number given (--serial-number)");
+                return;
+            }
+
+            Log.Information($"Test drvice {options.SerialNumber}.");
             Log.Information($"Test duration, {options.Duration} minute(s).");
 
             if (options.Duration is uint minutesDuration)
             {
                 using (var cts = new CancellationTokenSource())
                 using (var syncContext = QueuedSynchronizationContext.RunOnAThread(cts))
-                using (var controller = new ArisController("24", syncContext))
+                using (var controller = new ArisController(options.SerialNumber, syncContext))
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    controller.ApplySettings(new TestPatternSettings());
+                    var settingsCookie = controller.ApplySettings(new TestPatternSettings());
+                    Log.Debug("settingsCookie = {settingsCookie}", settingsCookie);
 
                     var duration = TimeSpan.FromMinutes(minutesDuration);
                     Thread.Sleep(duration);
@@ -63,6 +71,11 @@ namespace UnnamedTestProgram
             }
 
             Log.Information("Exiting test.");
+
+            string DetermineRecordingFileName()
+            {
+                return "default.aris"; // TODO
+            }
         }
 
         private static void ConfigureLogger()

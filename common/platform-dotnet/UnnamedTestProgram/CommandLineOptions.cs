@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using System;
 
 namespace UnnamedTestProgram
 {
@@ -15,5 +14,8 @@ namespace UnnamedTestProgram
     {
         [Option("duration", HelpText = "The duration of the test, in minutes")]
         public uint? Duration { get; set; }
+
+        [Option("serial-number", HelpText = "Target ARIS serial number")]
+        public string? SerialNumber { get; set; }
     }
 }

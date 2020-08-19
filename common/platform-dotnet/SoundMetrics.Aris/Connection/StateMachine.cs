@@ -34,9 +34,11 @@ namespace SoundMetrics.Aris.Connection
             Transition(ConnectionState.WatchingForDevice, context: context, ev: null);
         }
 
-        public void ApplySettings(ISettings settings)
+        public int ApplySettings(ISettings settings)
         {
-            events.Post(new ApplySettingsRequest(settings));
+            var newSettingsCookie = Interlocked.Increment(ref settingsCookie);
+            events.Post(new ApplySettingsRequest(newSettingsCookie, settings));
+            return newSettingsCookie;
         }
 
         private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
@@ -307,6 +309,7 @@ namespace SoundMetrics.Aris.Connection
         private IPAddress? targetAddress;
         private FrameListener? frameListener;
         private FrameListenerMetrics frameListenerMetrics = default;
+        private int settingsCookie;
 
         private ConnectionState state = ConnectionState.Start;
     }

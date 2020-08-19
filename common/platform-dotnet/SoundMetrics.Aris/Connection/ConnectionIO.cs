@@ -67,7 +67,7 @@ namespace SoundMetrics.Aris.Connection
             var success = GetStatusCode() == "200";
             return
                 isSettingsCommand
-                    ? new SettingsCommandResponse(success, lines)
+                    ? new SettingsRequestResponse(success, lines)
                     : new CommandResponse(success, lines);
 
             string GetStatusCode()

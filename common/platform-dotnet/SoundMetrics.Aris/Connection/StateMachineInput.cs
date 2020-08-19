@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -40,14 +41,26 @@ namespace SoundMetrics.Aris.Connection
     /// <summary>
     /// Represents a request for new settings.
     /// </summary>
-    internal sealed class ApplySettingsRequest : IMachineEvent
+    internal sealed class ApplySettingsRequest : IMachineEvent, ICommand
     {
-        public ApplySettingsRequest(ISettings settings)
+        public ApplySettingsRequest(int settingsCookie, ISettings settings)
         {
-            Settings = settings;
+            SettingsCookie = settingsCookie;
+            this.settings = settings;
         }
 
-        public ISettings Settings { get; }
+        public int SettingsCookie { get; }
+
+        public Type SettingsType => settings.GetType();
+
+        public string[] GenerateCommand()
+        {
+            return ((ICommand)settings).GenerateCommand()
+                    .Concat(new[] { $"settings-cookie {SettingsCookie}" })
+                    .ToArray();
+        }
+
+        private readonly ISettings settings;
     }
 
     /// <summary>
