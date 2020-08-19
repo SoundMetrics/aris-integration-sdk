@@ -45,7 +45,13 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    var settingsCookie = controller.ApplySettings(new TestPatternSettings());
+                    var rawSettings = new PassthroughSettings(
+                        new[]
+                        {
+                            "#raw",
+                        });
+
+                    var settingsCookie = controller.ApplySettings(rawSettings);
                     Log.Debug("settingsCookie = {settingsCookie}", settingsCookie);
 
                     var duration = TimeSpan.FromMinutes(minutesDuration);
