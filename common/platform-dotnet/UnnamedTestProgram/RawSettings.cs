@@ -29,6 +29,13 @@ namespace UnnamedTestProgram
 
             try
             {
+                var frequency =
+                    Frequency == RawSettingsFrequency.High
+                        ? "high"
+                        : "low";
+                var enableTransmit = EnableTransmit ? "true" : "false";
+                var enable150V = Enable150Volts ? "true" : "false";
+
                 return new[]
                 {
                     $"frame_rate {FrameRate}",
@@ -38,9 +45,9 @@ namespace UnnamedTestProgram
                     $"sample_period {SamplePeriod}",
                     $"pulse_width {PulseWidth}",
                     $"ping_mode {PingMode}",
-                    $"enable_transmit {EnableTransmit}",
-                    $"frequency {Frequency}",
-                    $"enable_150V {Enable150Volts}",
+                    $"enable_transmit {enableTransmit}",
+                    $"frequency {frequency}",
+                    $"enable_150V {enable150V}",
                     $"receiver_gain {ReceiverGain}",
                 };
             }

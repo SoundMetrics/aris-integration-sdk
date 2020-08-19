@@ -35,7 +35,7 @@ namespace UnnamedTestProgram
                 return;
             }
 
-            Log.Information($"Test drvice {options.SerialNumber}.");
+            Log.Information($"Test device {options.SerialNumber}.");
             Log.Information($"Test duration, {options.Duration} minute(s).");
 
             if (options.Duration is uint minutesDuration)
@@ -46,7 +46,21 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    var rawSettings = new RawSettings();
+                    var rawSettings = new RawSettings
+                    {
+                        FrameRate = 1.0f,
+                        SamplesPerBeam = 400,
+                        SampleStartDelay = 930,
+                        CyclePeriod = 529 * 10,
+                        SamplePeriod = 4,
+                        PulseWidth = 15,
+                        PingMode = 1,
+                        EnableTransmit = true,
+                        Frequency = RawSettingsFrequency.High,
+                        Enable150Volts = true,
+                        ReceiverGain = 12.0f,
+                    };
+
                     var rawSettingsCommand = new PassthroughSettings(
                         new[] { "#raw" }
                             .Concat(rawSettings.Serialize()));
@@ -60,7 +74,7 @@ namespace UnnamedTestProgram
                     var metrics = controller.Stop();
 
                     Log.Information(
-                        "Metrics: "
+                        $"Metrics for ARIS {options.SerialNumber}: "
                             + "framesStarted={framesStarted}; "
                             + "framesCompleted={framesCompleted}; "
                             + "packetsReceived={packetsReceived}; "
