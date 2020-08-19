@@ -55,8 +55,9 @@ namespace SoundMetrics.Aris.Connection
 
         public string[] GenerateCommand()
         {
+            // Command verb is supplied by GenerateCommand()
             return ((ICommand)settings).GenerateCommand()
-                    .Concat(new[] { $"settings-cookie {SettingsCookie}" })
+                    .Concat(new[] { $"settings_cookie {SettingsCookie}" })
                     .ToArray();
         }
 
