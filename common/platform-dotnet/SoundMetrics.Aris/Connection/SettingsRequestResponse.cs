@@ -11,17 +11,17 @@ namespace SoundMetrics.Aris.Connection
             : base(isSuccessful, response)
         {
             SettingsCookie = isSuccessful ? GetSettingsCookie(response) : null;
-            Log.Debug("settings-cookie parsed as [{settingsCookie}]", SettingsCookie);
+            Log.Debug("settings_cookie parsed as [{settingsCookie}]", SettingsCookie);
         }
 
         public int? SettingsCookie { get; }
 
         private static int? GetSettingsCookie(IEnumerable<string> response) =>
             response
-                .Where(line => line.StartsWith("settings-cookie"))
+                .Where(line => line.StartsWith("settings_cookie"))
                 .Select(line =>
                 {
-                    // The shape of the line is "settings-cookie 42"
+                    // The shape of the line is "settings_cookie 42"
                     var splits = line.Split(
                                     new[] { ' ', '\t' },
                                     StringSplitOptions.RemoveEmptyEntries);
