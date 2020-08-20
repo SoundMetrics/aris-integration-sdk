@@ -46,14 +46,18 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
+                    // Apply acoustic settings: cookie = 16
+                    // frame_period = 0
+                    // samples_per_channel = 1000 sample_start_delay = 930 cycle_period = 2329
+                    // beam_sample_period = 22 pulse_width = 20 enable_xmit = 0 frequency_select = 1 system_type =
                     var rawSettings = new RawSettings
                     {
-                        FrameRate = 1.0f,
-                        SamplesPerBeam = 400,
+                        FrameRate = 13.9f,
+                        SamplesPerBeam = 1000,
                         SampleStartDelay = 930,
-                        CyclePeriod = 529 * 10,
-                        SamplePeriod = 4,
-                        PulseWidth = 15,
+                        CyclePeriod = 2329 * 10,
+                        SamplePeriod = 22,
+                        PulseWidth = 20,
                         PingMode = 1,
                         EnableTransmit = true,
                         Frequency = RawSettingsFrequency.High,
