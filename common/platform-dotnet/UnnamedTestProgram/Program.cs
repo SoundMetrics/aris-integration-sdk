@@ -68,6 +68,11 @@ namespace UnnamedTestProgram
                     var rawSettingsCommand = new PassthroughSettings(
                         new[] { "#raw" }
                             .Concat(rawSettings.Serialize()));
+                    Log.Information("Sending command:");
+                    foreach (var line in rawSettingsCommand.GenerateCommand())
+                    {
+                        Log.Information($"[{line}]");
+                    }
 
                     var settingsCookie = controller.ApplySettings(rawSettingsCommand);
                     Log.Debug("settingsCookie = {settingsCookie}", settingsCookie);
@@ -75,6 +80,7 @@ namespace UnnamedTestProgram
                     var duration = TimeSpan.FromMinutes(minutesDuration);
                     Thread.Sleep(duration);
 
+                    Log.Information("Stopping.");
                     var metrics = controller.Stop();
 
                     var percentFramesCompleted =
