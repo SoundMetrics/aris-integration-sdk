@@ -77,14 +77,17 @@ namespace UnnamedTestProgram
 
                     var metrics = controller.Stop();
 
+                    var percentFramesCompleted =
+                        100.0 * metrics.FramesCompleted / metrics.FramesStarted;
                     Log.Information(
                         $"Metrics for ARIS {options.SerialNumber}: "
                             + "framesStarted={framesStarted}; "
-                            + "framesCompleted={framesCompleted}; "
+                            + "framesCompleted={framesCompleted} ({percentFramesCompleted}%); "
                             + "packetsReceived={packetsReceived}; "
                             + "invalidPacketsReceived={invalidPacketsReceived}",
                         metrics.FramesStarted,
                         metrics.FramesCompleted,
+                        percentFramesCompleted.ToString("F0"),
                         metrics.PacketsReceived,
                         metrics.InvalidPacketsReceived);
                 }
