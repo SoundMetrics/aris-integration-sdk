@@ -46,6 +46,19 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
+                    bool cancelling = false;
+
+                    Console.CancelKeyPress += (s, e) =>
+                    {
+                        if (!cancelling)
+                        {
+                            cancelling = true;
+                            Log.Information("{cancelKey} received", e.SpecialKey);
+                            e.Cancel = true; // Cancel the Ctrl-C or Ctrl-Break default behavior.
+                            cts.Cancel(); // Wake up the sleeping thread.
+                        }
+                    };
+
                     // Apply acoustic settings: cookie = 16
                     // frame_period = 0
                     // samples_per_channel = 1000 sample_start_delay = 930 cycle_period = 2329
@@ -77,10 +90,10 @@ namespace UnnamedTestProgram
                     var settingsCookie = controller.ApplySettings(rawSettingsCommand);
                     Log.Debug("settingsCookie = {settingsCookie}", settingsCookie);
 
-                    var duration = TimeSpan.FromMinutes(minutesDuration);
-                    Thread.Sleep(duration);
+                    var testDuration = TimeSpan.FromMinutes(minutesDuration);
+                    cts.Token.WaitHandle.WaitOne(testDuration);
 
-                    Log.Information("Stopping.");
+                    Log.Information("Stopping...");
                     var metrics = controller.Stop();
 
                     var percentFramesCompleted =
