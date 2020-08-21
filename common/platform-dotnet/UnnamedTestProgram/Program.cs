@@ -101,14 +101,16 @@ namespace UnnamedTestProgram
                     Log.Information(
                         $"Metrics for ARIS {options.SerialNumber}: "
                             + "framesStarted={framesStarted}; "
-                            + "framesCompleted={framesCompleted} ({percentFramesCompleted}%); "
+                            + "framesCompleted={framesCompleted} ({percentFramesCompleted}); "
                             + "packetsReceived={packetsReceived}; "
                             + "invalidPacketsReceived={invalidPacketsReceived}",
-                        metrics.FramesStarted,
-                        metrics.FramesCompleted,
-                        percentFramesCompleted.ToString("F0"),
-                        metrics.PacketsReceived,
-                        metrics.InvalidPacketsReceived);
+                        metrics.FramesStarted.ToString("N0"),
+                        metrics.FramesCompleted.ToString("N0"),
+                        double.IsNaN(percentFramesCompleted)
+                            ? "n/a"
+                            : percentFramesCompleted.ToString("F0") + "%",
+                        metrics.PacketsReceived.ToString("N0"),
+                        metrics.InvalidPacketsReceived.ToString("N0"));
                 }
             }
             else
