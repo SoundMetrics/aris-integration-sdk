@@ -15,11 +15,8 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.9.0" />
+    <PackageReference Include="SoundMetrics.Aris.Messages" Version="1.0.47-alpha.470" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
   </ItemGroup>
 
 </Project>
