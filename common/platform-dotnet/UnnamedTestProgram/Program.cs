@@ -47,17 +47,11 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    bool cancelling = false;
+                    bool iscancelling = false;
 
                     Console.CancelKeyPress += (s, e) =>
                     {
-                        if (!cancelling)
-                        {
-                            cancelling = true;
-                            Log.Information("{cancelKey} received", e.SpecialKey);
-                            e.Cancel = true; // Cancel the Ctrl-C or Ctrl-Break default behavior.
-                            cts.Cancel(); // Wake up the sleeping thread.
-                        }
+                        iscancelling = OnCancel(e, cts, iscancelling);
                     };
 
                     // Apply acoustic settings: cookie = 16
@@ -128,6 +122,18 @@ namespace UnnamedTestProgram
             {
                 var testDuration = TimeSpan.FromMinutes(minutesDuration);
                 cts.Token.WaitHandle.WaitOne(testDuration);
+            }
+
+            static bool OnCancel(ConsoleCancelEventArgs e, CancellationTokenSource cts, bool isCancelling)
+            {
+                if (!isCancelling)
+                {
+                    Log.Information("{cancelKey} received", e.SpecialKey);
+                    e.Cancel = true; // Cancel the Ctrl-C or Ctrl-Break default behavior.
+                    cts.Cancel(); // Wake up the sleeping thread.
+                }
+
+                return true;
             }
         }
 
