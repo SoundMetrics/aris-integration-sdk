@@ -12,10 +12,20 @@ namespace UnnamedTestProgram
     [Verb("test", HelpText = "Runs a test")]
     public sealed class TestOptions
     {
-        [Option("duration", HelpText = "The duration of the test, in minutes")]
-        public uint? Duration { get; set; }
+        public TestOptions()
+        {
+            // Solely for non-nullable properties.
+            SerialNumber = "";
+            Settings = "";
+        }
 
-        [Option("serial-number", HelpText = "Target ARIS serial number")]
-        public string? SerialNumber { get; set; }
+        [Option("duration", Required = true, HelpText = "The duration of the test, in minutes")]
+        public uint Duration { get; set; }
+
+        [Option("serial-number", Required = true, HelpText = "Target ARIS serial number")]
+        public string SerialNumber { get; set; }
+
+        [Option("settings", Required = true, HelpText = "Settings to be sent to the sonar")]
+        public string Settings { get; set; }
     }
 }

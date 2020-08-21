@@ -58,6 +58,10 @@ namespace UnnamedTestProgram
                     // frame_period = 0
                     // samples_per_channel = 1000 sample_start_delay = 930 cycle_period = 2329
                     // beam_sample_period = 22 pulse_width = 20 enable_xmit = 0 frequency_select = 1 system_type =
+
+                    /*
+                        13.9, 1000, 930, 23290, 22, 20, 1, true, high, 1, 12.0
+                     */
                     var rawSettings = new RawSettings
                     {
                         FrameRate = 13.9f,
@@ -73,9 +77,12 @@ namespace UnnamedTestProgram
                         ReceiverGain = 12.0f,
                     };
 
+                    rawSettings = RawSettings.Deserialize("13.9, 1000, 930, 23290, 22, 20, 1, true, high, 1, 12.0");
+
                     var rawSettingsCommand = new PassthroughSettings(
                         new[] { "#raw" }
                             .Concat(rawSettings.Serialize()));
+
                     Log.Information("Sending command:");
                     foreach (var line in rawSettingsCommand.GenerateCommand())
                     {
