@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks.Dataflow;
 
-namespace SoundMetrics.Aris.Network
+namespace SoundMetrics.Aris.Data
 {
     internal sealed class BufferedMessageQueue<Message> : IDisposable
     {

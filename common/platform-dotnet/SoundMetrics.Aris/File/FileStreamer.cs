@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.File
     /// Observes a stream of files and conditionally writes desired frames
     /// to a file.
     /// </summary>
-    public sealed class FileStreamer : IDisposable
+    internal sealed class FileStreamer : IDisposable
     {
         public FileStreamer(
             IObservable<Frame> frames,
@@ -26,19 +26,22 @@ namespace SoundMetrics.Aris.File
 
             this.filePath = filePath;
 
+            incomingQueue = new BufferedMessageQueue<Frame>(HandleIncomingFrame);
+
             frameSub = frames
                 .Where(frame => frame.FrameHeader.AppliedSettings >= earliestAllowedCookie)
                 .ObserveOn(syncContext)
-                .Subscribe(OnCurrentFrame);
+                .Subscribe(frame => incomingQueue.Post(frame));
         }
 
-        private void OnCurrentFrame(Frame frame)
+        private void HandleIncomingFrame(Frame frame)
         {
             if (allowedGeometry is SampleGeometry expectedGeometry)
             {
+                Debug.Assert(!(fileWriter is null));
+
                 if (SonarConfig.GetSampleGeometry(frame.FrameHeader) == expectedGeometry)
                 {
-                    Debug.Assert(!(fileWriter is null));
                     fileWriter.WriteFrame(frame);
                 }
             }
@@ -56,6 +59,7 @@ namespace SoundMetrics.Aris.File
             {
                 if (disposing)
                 {
+                    incomingQueue.Dispose();
                     frameSub?.Dispose();
                     fileWriter?.Dispose();
                 }
@@ -74,6 +78,7 @@ namespace SoundMetrics.Aris.File
 
         private readonly string filePath;
         private readonly IDisposable frameSub;
+        private readonly BufferedMessageQueue<Frame> incomingQueue;
 
         private bool disposed;
         private FileWriter? fileWriter;
