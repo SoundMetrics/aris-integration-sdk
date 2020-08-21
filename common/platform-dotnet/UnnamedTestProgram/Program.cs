@@ -119,11 +119,6 @@ namespace UnnamedTestProgram
             }
 
             Log.Information("Exiting test.");
-
-            string DetermineRecordingFileName()
-            {
-                return "default.aris"; // TODO
-            }
         }
 
         private static void ConfigureLogger()
