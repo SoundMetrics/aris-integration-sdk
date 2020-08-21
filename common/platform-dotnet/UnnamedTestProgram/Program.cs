@@ -35,7 +35,7 @@ namespace UnnamedTestProgram
                 return;
             }
 
-            Log.Information($"Test drvice {options.SerialNumber}.");
+            Log.Information($"Test device {options.SerialNumber}.");
             Log.Information($"Test duration, {options.Duration} minute(s).");
 
             if (options.Duration is uint minutesDuration)
@@ -46,10 +46,33 @@ namespace UnnamedTestProgram
                 {
                     SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                    var rawSettings = new RawSettings();
+                    // Apply acoustic settings: cookie = 16
+                    // frame_period = 0
+                    // samples_per_channel = 1000 sample_start_delay = 930 cycle_period = 2329
+                    // beam_sample_period = 22 pulse_width = 20 enable_xmit = 0 frequency_select = 1 system_type =
+                    var rawSettings = new RawSettings
+                    {
+                        FrameRate = 13.9f,
+                        SamplesPerBeam = 1000,
+                        SampleStartDelay = 930,
+                        CyclePeriod = 2329 * 10,
+                        SamplePeriod = 22,
+                        PulseWidth = 20,
+                        PingMode = 1,
+                        EnableTransmit = true,
+                        Frequency = RawSettingsFrequency.High,
+                        Enable150Volts = true,
+                        ReceiverGain = 12.0f,
+                    };
+
                     var rawSettingsCommand = new PassthroughSettings(
                         new[] { "#raw" }
                             .Concat(rawSettings.Serialize()));
+                    Log.Information("Sending command:");
+                    foreach (var line in rawSettingsCommand.GenerateCommand())
+                    {
+                        Log.Information($"[{line}]");
+                    }
 
                     var settingsCookie = controller.ApplySettings(rawSettingsCommand);
                     Log.Debug("settingsCookie = {settingsCookie}", settingsCookie);
@@ -57,16 +80,20 @@ namespace UnnamedTestProgram
                     var duration = TimeSpan.FromMinutes(minutesDuration);
                     Thread.Sleep(duration);
 
+                    Log.Information("Stopping.");
                     var metrics = controller.Stop();
 
+                    var percentFramesCompleted =
+                        100.0 * metrics.FramesCompleted / metrics.FramesStarted;
                     Log.Information(
-                        "Metrics: "
+                        $"Metrics for ARIS {options.SerialNumber}: "
                             + "framesStarted={framesStarted}; "
-                            + "framesCompleted={framesCompleted}; "
+                            + "framesCompleted={framesCompleted} ({percentFramesCompleted}%); "
                             + "packetsReceived={packetsReceived}; "
                             + "invalidPacketsReceived={invalidPacketsReceived}",
                         metrics.FramesStarted,
                         metrics.FramesCompleted,
+                        percentFramesCompleted.ToString("F0"),
                         metrics.PacketsReceived,
                         metrics.InvalidPacketsReceived);
                 }

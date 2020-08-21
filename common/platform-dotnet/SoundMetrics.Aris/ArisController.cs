@@ -86,14 +86,15 @@ namespace SoundMetrics.Aris
                     var isNew = lastObservedAddress is null;
                     var addressChanged =
                         !isNew && !Object.Equals(lastObservedAddress, beacon.IPAddress);
+                    var version = beacon.SoftwareVersion;
 
                     if (isNew || addressChanged)
                     {
                         var fmt =
                             addressChanged
-                                ? "ARIS {serialNumber} moved to {ipAddress}"
-                                : "ARIS {serialNumber} found at {ipAddress}";
-                        Log.Information(fmt, beacon.SerialNumber, beacon.IPAddress);
+                                ? "ARIS {serialNumber} ({version}) moved to {ipAddress}"
+                                : "ARIS {serialNumber} ({version}) found at {ipAddress}";
+                        Log.Information(fmt, beacon.SerialNumber, version, beacon.IPAddress);
                     }
 
                     lastObservedAddress = beacon.IPAddress;
