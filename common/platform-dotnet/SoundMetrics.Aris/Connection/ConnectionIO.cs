@@ -48,7 +48,7 @@ namespace SoundMetrics.Aris.Connection
             writer.Flush();
 
             var response = ReceiveResponse(command is ISettings);
-            Log.Debug(
+            Log.Information(
                 "Response: [{response}]",
                 string.Join("\n", response.ResponseText));
             return response;
