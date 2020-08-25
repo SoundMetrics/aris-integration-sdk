@@ -73,7 +73,10 @@ namespace SoundMetrics.Aris.Connection
                     .Concat(BitConverter.GetBytes(intervalMillis))
                     .Concat(BitConverter.GetBytes(retryIntervalMillis))
                     .ToArray();
-            _ = client.IOControl(IOControlCode.KeepAliveValues, payload, null);
+
+            // Using this, not Socket.IOControl, for cross-platform use.
+            client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 5);
         }
 
         private CommandConnection(ConnectionIO io)
