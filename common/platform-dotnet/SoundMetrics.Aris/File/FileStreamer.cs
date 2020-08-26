@@ -3,21 +3,19 @@ using SoundMetrics.Aris.Device;
 using System;
 using System.Diagnostics;
 using System.Reactive.Linq;
-using System.Threading;
 
 namespace SoundMetrics.Aris.File
 {
     /// <summary>
-    /// Observes a stream of files and conditionally writes desired frames
+    /// Observes a stream of frames and conditionally writes desired frames
     /// to a file.
     /// </summary>
-    internal sealed class FileStreamer : IDisposable
+    public sealed class FileStreamer : IDisposable
     {
         public FileStreamer(
             IObservable<Frame> frames,
             string filePath,
-            int earliestAllowedCookie,
-            SynchronizationContext syncContext)
+            int earliestAllowedCookie)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -30,7 +28,6 @@ namespace SoundMetrics.Aris.File
 
             frameSub = frames
                 .Where(frame => frame.FrameHeader.AppliedSettings >= earliestAllowedCookie)
-                .ObserveOn(syncContext)
                 .Subscribe(frame => incomingQueue.Post(frame));
         }
 

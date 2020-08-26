@@ -60,7 +60,7 @@ namespace SoundMetrics.Aris
 
         public string SerialNumber => serialNumber;
 
-        public IObservable<Frame> Frames => frameSubject;
+        public IObservable<Frame> Frames => stateMachine.Frames;
 
         public FrameListenerMetrics Stop() => stateMachine.Stop();
 
@@ -141,7 +141,6 @@ namespace SoundMetrics.Aris
         private readonly Availability.Availability availability;
         private readonly IDisposable availabilitySub;
         private readonly StateMachine stateMachine;
-        private readonly Subject<Frame> frameSubject = new Subject<Frame>();
 
         private IPAddress? lastObservedAddress;
         private bool disposed;
