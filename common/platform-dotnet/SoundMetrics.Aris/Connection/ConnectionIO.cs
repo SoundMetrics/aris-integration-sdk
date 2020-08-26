@@ -64,6 +64,11 @@ namespace SoundMetrics.Aris.Connection
                 lines.Add(line);
             }
 
+            if (line is null)
+            {
+                throw new Exception("Connection failed");
+            }
+
             var success = GetStatusCode() == "200";
             return
                 isSettingsCommand
