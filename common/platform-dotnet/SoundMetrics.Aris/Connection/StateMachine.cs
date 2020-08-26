@@ -167,10 +167,19 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (stateHandlers[state].DoProcessing is DoProcessingFn doProcessing)
                 {
-                    var requestedState = doProcessing(context, ev);
-                    if (requestedState is ConnectionState newState)
+                    try
                     {
-                        Transition(newState, context, ev);
+                        var requestedState = doProcessing(context, ev);
+                        if (requestedState is ConnectionState newState)
+                        {
+                            Transition(newState, context, ev);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning($"Exception during state transition: [{ex.Message}]");
+                        Log.Warning("Terminating connection");
+                        Transition(ConnectionState.ConnectionTerminated, context, ev);
                     }
                 }
                 else
