@@ -27,7 +27,9 @@ namespace SoundMetrics.Aris.File
             incomingQueue = new BufferedMessageQueue<Frame>(HandleIncomingFrame);
 
             frameSub = frames
-                .Where(frame => frame.FrameHeader.AppliedSettings >= earliestAllowedCookie)
+                .Where(frame =>
+                    Math.Max(frame.FrameHeader.AppliedSettings, frame.FrameHeader.ConstrainedSettings)
+                        >= earliestAllowedCookie)
                 .Subscribe(frame => incomingQueue.Post(frame));
         }
 
