@@ -1,7 +1,6 @@
 ﻿using SoundMetrics.Aris.Device;
 using SoundMetrics.Aris.Network;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -20,7 +19,7 @@ namespace SoundMetrics.Aris.Connection
             // confusing the natives in-house--it will appear in logs as IPv4
             // (169.254.31.178:51136) rather than IPv6
             // ([::ffff:169.254.31.178%16]:51136).
-            var tcp = new TcpClient(AddressFamily.InterNetwork);
+            TcpClient? tcp = new TcpClient(AddressFamily.InterNetwork);
 
             try
             {
