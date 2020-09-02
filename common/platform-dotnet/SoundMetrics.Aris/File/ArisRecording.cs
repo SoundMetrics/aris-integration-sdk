@@ -71,9 +71,9 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        public static IEnumerable<Frame> EnumerateFrames(Stream stream)
+        public static IEnumerable<Frame> EnumerateFrames(FileStream stream)
         {
-            if (ReadFileHeader(stream, out var fileHeader, out var badReason))
+            if (ReadFileHeader(stream, out var fileHeader, out var issue))
             {
                 FrameHeader frameHeader;
 
@@ -92,7 +92,7 @@ namespace SoundMetrics.Aris.File
             }
             else
             {
-                throw new Data.FormatException(badReason);
+                throw new Data.FormatException(FileIssueDescriptions.GetFlagDescription(issue));
             }
 
             ByteBuffer ReadSamples(Stream stream, in FrameHeader frameHeader)
@@ -113,7 +113,7 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        public static int CheckFileForProblems()
+        public static FileTraits CheckFileForProblems()
         {
             throw new NotImplementedException();
         }
@@ -171,26 +171,32 @@ namespace SoundMetrics.Aris.File
         }
 
         internal static bool ReadFileHeader(
-            Stream stream,
+            FileStream stream,
             out FileHeader fileHeader,
-            out string reason)
+            out FileIssue issue)
         {
-            if (stream.ReadStruct(out fileHeader))
+            if (stream.Length == 0)
+            {
+                fileHeader = default;
+                issue = FileIssue.EmptyFile;
+                return false;
+            }
+            else if (stream.ReadStruct(out fileHeader))
             {
                 if (fileHeader.Version != FileHeader.ArisFileSignature)
                 {
                     fileHeader = default;
-                    reason = $"Invalid file signature";
+                    issue = FileIssue.InvalidFileHeader;
                     return false;
                 }
 
-                reason = "";
+                issue = FileIssue.None;
                 return true;
             }
             else
             {
                 fileHeader = default;
-                reason = $"Couldn't read the file header";
+                issue = FileIssue.IncompleteFileHeader;
                 return false;
             }
         }

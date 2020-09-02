@@ -1,27 +1,35 @@
 ﻿using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Device;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.File
 {
-    internal class FileTraits
+    public class FileTraits
     {
         public long FileLength;
         public SampleGeometry Geometry;
         public int SerializedFrameSize;
         public int FileHeaderFrameCount;
         public double CalculatedFrameCount;
-        public int RemainederBytes;
+        public FileIssue Issues;
 
-        public static bool GetFileTraits(string path, out FileTraits? fileTraits)
+        public bool HasIssues => Issues != 0;
+
+        public bool HasIssue(FileIssue issue) => ((int)Issues & (int)issue) != 0;
+
+        public IEnumerable<string> IssueDescriptions =>
+            FileIssueDescriptions.GetFlagDescriptions(Issues);
+
+        public static FileTraits GetFileTraits(string path)
         {
             using var stream = System.IO.File.OpenRead(path);
-            return GetFileTraits(stream, out fileTraits);
+            return GetFileTraits(stream);
         }
 
-        private static bool GetFileTraits(Stream stream, out FileTraits? fileTraits)
+        private static FileTraits GetFileTraits(FileStream stream)
         {
             var startingPosition = stream.Position;
             stream.Position = 0;
@@ -33,38 +41,50 @@ namespace SoundMetrics.Aris.File
                 if (ArisRecording.ReadFileHeader(
                         stream,
                         out var fileHeader,
-                        out var reason)
-                    && ArisRecording.ReadFrameHeader(
+                        out var issue))
+                {
+                    if (ArisRecording.ReadFrameHeader(
                         stream,
                         out var frameHeader))
-                {
-                    var fileHeaderSize = Marshal.SizeOf<FileHeader>();
-                    var frameHeaderSize = Marshal.SizeOf<FrameHeader>();
-
-                    var geometry = SonarConfig.GetSampleGeometry(frameHeader);
-                    var serializedFrameSize = geometry.TotalSampleCount + frameHeaderSize;
-                    var calculatedFrameCount =
-                        (double)(fileSize - fileHeaderSize) / serializedFrameSize;
-                    var remainderBytes = (int)
-                        (fileSize
-                            - fileHeaderSize
-                            - (serializedFrameSize * Math.Floor(calculatedFrameCount)));
-
-                    fileTraits = new FileTraits
                     {
-                        FileLength = fileSize,
-                        Geometry = geometry,
-                        SerializedFrameSize = serializedFrameSize,
-                        FileHeaderFrameCount = (int)fileHeader.FrameCount,
-                        CalculatedFrameCount = calculatedFrameCount,
-                        RemainederBytes = remainderBytes,
-                    };
-                    return true;
+                        var fileHeaderSize = Marshal.SizeOf<FileHeader>();
+                        var frameHeaderSize = Marshal.SizeOf<FrameHeader>();
+
+                        var geometry = SonarConfig.GetSampleGeometry(frameHeader);
+                        var serializedFrameSize = geometry.TotalSampleCount + frameHeaderSize;
+                        var calculatedFrameCount =
+                            (double)(fileSize - fileHeaderSize) / serializedFrameSize;
+                        var wholeFrames = Math.Floor(calculatedFrameCount);
+
+                        var issues =
+                            wholeFrames == 0 ? FileIssue.NoFrames : FileIssue.None;
+
+                        return new FileTraits
+                        {
+                            FileLength = fileSize,
+                            Geometry = geometry,
+                            SerializedFrameSize = serializedFrameSize,
+                            FileHeaderFrameCount = (int)fileHeader.FrameCount,
+                            CalculatedFrameCount = calculatedFrameCount,
+                            Issues = issues,
+                        };
+                    }
+                    else
+                    {
+                        return new FileTraits
+                        {
+                            FileLength = fileSize,
+                            Issues = FileIssue.InvalidFirstFrameHeader,
+                        };
+                    }
                 }
                 else
                 {
-                    fileTraits = null;
-                    return false;
+                    return new FileTraits
+                    {
+                        FileLength = fileSize,
+                        Issues = issue,
+                    };
                 }
             }
             finally
