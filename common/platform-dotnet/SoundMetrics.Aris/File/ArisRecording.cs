@@ -113,7 +113,12 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        private static bool ReadFrameHeader(Stream stream, out FrameHeader frameHeader)
+        public static int CheckFileForProblems()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static bool ReadFrameHeader(Stream stream, out FrameHeader frameHeader)
         {
             if (stream.ReadStruct(out frameHeader))
             {
