@@ -99,5 +99,15 @@ namespace SoundMetrics.Aris.File
                 }
             }
         }
+
+        public override string ToString()
+        {
+            var issues = string.Join("; ", IssueDescriptions);
+            return $"FileLength={FileLength}"
+                + $"; Geometry=[{Geometry}]"
+                + $"; SerializedFrameSize={SerializedFrameSize}"
+                + $"; CalculatedFrameCount={CalculatedFrameCount}"
+                + $"; Issues='{issues}'";
+        }
     }
 }

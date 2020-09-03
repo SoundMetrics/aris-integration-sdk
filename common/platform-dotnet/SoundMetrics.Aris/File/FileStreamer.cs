@@ -14,15 +14,15 @@ namespace SoundMetrics.Aris.File
     {
         public FileStreamer(
             IObservable<Frame> frames,
-            string filePath,
+            string outputPath,
             int earliestAllowedCookie)
         {
-            if (string.IsNullOrWhiteSpace(filePath))
+            if (string.IsNullOrWhiteSpace(outputPath))
             {
-                throw new ArgumentNullException(nameof(filePath));
+                throw new ArgumentNullException(nameof(outputPath));
             }
 
-            this.filePath = filePath;
+            this.outputPath = outputPath;
 
             incomingQueue = new BufferedMessageQueue<Frame>(HandleIncomingFrame);
 
@@ -32,6 +32,8 @@ namespace SoundMetrics.Aris.File
                         >= earliestAllowedCookie)
                 .Subscribe(frame => incomingQueue.Post(frame));
         }
+
+        public string OutputPath => outputPath;
 
         private void HandleIncomingFrame(Frame frame)
         {
@@ -48,7 +50,7 @@ namespace SoundMetrics.Aris.File
             {
                 Debug.Assert(fileWriter is null);
                 allowedGeometry = SonarConfig.GetSampleGeometry(frame.FrameHeader);
-                fileWriter = FileWriter.CreateNewWithFrame(frame, filePath);
+                fileWriter = FileWriter.CreateNewWithFrame(frame, outputPath);
             }
         }
 
@@ -75,7 +77,7 @@ namespace SoundMetrics.Aris.File
             GC.SuppressFinalize(this);
         }
 
-        private readonly string filePath;
+        private readonly string outputPath;
         private readonly IDisposable frameSub;
         private readonly BufferedMessageQueue<Frame> incomingQueue;
 
