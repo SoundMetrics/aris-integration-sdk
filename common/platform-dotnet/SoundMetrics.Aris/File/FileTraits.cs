@@ -14,6 +14,7 @@ namespace SoundMetrics.Aris.File
         public int SerializedFrameSize;
         public int FileHeaderFrameCount;
         public double CalculatedFrameCount;
+        public int? ValidFrameHeaderCount;
         public FileIssue Issues;
 
         public bool HasIssues => Issues != 0;
@@ -23,13 +24,13 @@ namespace SoundMetrics.Aris.File
         public IEnumerable<string> IssueDescriptions =>
             FileIssueDescriptions.GetFlagDescriptions(Issues);
 
-        public static FileTraits GetFileTraits(string path)
+        public static FileTraits GetFileTraits(string path, bool validateFrameHeaders)
         {
             using var stream = System.IO.File.OpenRead(path);
-            return GetFileTraits(stream);
+            return GetFileTraits(stream, validateFrameHeaders);
         }
 
-        private static FileTraits GetFileTraits(FileStream stream)
+        private static FileTraits GetFileTraits(FileStream stream, bool validateFrameHeaders)
         {
             var startingPosition = stream.Position;
             stream.Position = 0;
@@ -43,7 +44,9 @@ namespace SoundMetrics.Aris.File
                         out var fileHeader,
                         out var issue))
                 {
-                    if (ArisRecording.ReadFrameHeader(
+                    var firstFramePosition = stream.Position;
+
+                    if (ArisRecording.ReadFrameHeaderWithValidation(
                         stream,
                         out var frameHeader))
                     {
@@ -56,8 +59,15 @@ namespace SoundMetrics.Aris.File
                             (double)(fileSize - fileHeaderSize) / serializedFrameSize;
                         var wholeFrames = Math.Floor(calculatedFrameCount);
 
-                        var issues =
-                            wholeFrames == 0 ? FileIssue.NoFrames : FileIssue.None;
+                        var validFrameHeaderCount =
+                            ValidateFrameHeaders(stream, firstFramePosition, geometry, validateFrameHeaders);
+
+                        var issues = FileIssue.None;
+                        issues = wholeFrames == 0 ? issues | FileIssue.NoFrames : issues;
+                        issues =
+                            validFrameHeaderCount is null
+                                ? issues
+                                : issues | FileIssue.InvalidFrameHeaders;
 
                         return new FileTraits
                         {
@@ -66,6 +76,7 @@ namespace SoundMetrics.Aris.File
                             SerializedFrameSize = serializedFrameSize,
                             FileHeaderFrameCount = (int)fileHeader.FrameCount,
                             CalculatedFrameCount = calculatedFrameCount,
+                            ValidFrameHeaderCount = validFrameHeaderCount,
                             Issues = issues,
                         };
                     }
@@ -100,6 +111,52 @@ namespace SoundMetrics.Aris.File
             }
         }
 
+        private static int? ValidateFrameHeaders(
+            FileStream stream,
+            long frameStartPosition,
+            SampleGeometry geometry,
+            bool enabled)
+        {
+            if (!enabled)
+            {
+                return null;
+            }
+
+            var originalPosition = stream.Position;
+            try
+            {
+                int count = 0;
+
+                stream.Position = frameStartPosition;
+
+                while (ArisRecording.ReadFrameHeaderRaw(stream, out var frameHeader))
+                {
+                    if (ArisRecording.IsValidFrameHeader(frameHeader, out var _))
+                    {
+                        ++count;
+                        stream.Seek(geometry.TotalSampleCount, SeekOrigin.Current);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                return count;
+            }
+            finally
+            {
+                try
+                {
+                    stream.Position = originalPosition;
+                }
+                catch
+                {
+                    // Don't throw from the finally.
+                }
+            }
+        }
+
         public override string ToString()
         {
             var issues = string.Join("; ", IssueDescriptions);
@@ -107,6 +164,7 @@ namespace SoundMetrics.Aris.File
                 + $"; Geometry=[{Geometry}]"
                 + $"; SerializedFrameSize={SerializedFrameSize}"
                 + $"; CalculatedFrameCount={CalculatedFrameCount}"
+                + $"; ValidFrameHeaderCount={ValidFrameHeaderCount}"
                 + $"; Issues='{issues}'";
         }
     }

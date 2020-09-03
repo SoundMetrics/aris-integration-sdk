@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.File
 
                     while (true)
                     {
-                        if (ReadFrameHeader(file, out frameHeader))
+                        if (ReadFrameHeaderWithValidation(file, out frameHeader))
                         {
                             AdvancePastSamples(file, frameHeader);
                             yield return frameHeader;
@@ -79,7 +79,7 @@ namespace SoundMetrics.Aris.File
 
                 while (true)
                 {
-                    if (ReadFrameHeader(stream, out frameHeader))
+                    if (ReadFrameHeaderWithValidation(stream, out frameHeader))
                     {
                         var samples = ReadSamples(stream, frameHeader);
                         yield return new Frame(frameHeader, samples);
@@ -118,15 +118,20 @@ namespace SoundMetrics.Aris.File
             throw new NotImplementedException();
         }
 
-        internal static bool ReadFrameHeader(Stream stream, out FrameHeader frameHeader)
+        internal static bool ReadFrameHeaderWithValidation(Stream stream, out FrameHeader frameHeader)
         {
-            if (stream.ReadStruct(out frameHeader))
+            if (ReadFrameHeaderRaw(stream, out frameHeader))
             {
                 ValidateFrameHeader(frameHeader);
                 return true;
             }
 
             return false;
+        }
+
+        internal static bool ReadFrameHeaderRaw(Stream stream, out FrameHeader frameHeader)
+        {
+            return stream.ReadStruct(out frameHeader);
         }
 
         private static void AdvancePastFileHeader(Stream stream)

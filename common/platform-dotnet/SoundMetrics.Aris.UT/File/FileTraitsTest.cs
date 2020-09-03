@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.UT.File
         public void EmptyFile()
         {
             var path = CreateEmptyFile();
-            var fileTraits = FileTraits.GetFileTraits(path);
+            var fileTraits = FileTraits.GetFileTraits(path, validateFrameHeaders: false);
             Assert.IsTrue(fileTraits.HasIssues);
             Assert.IsTrue(fileTraits.HasIssue(FileIssue.EmptyFile));
         }
@@ -22,7 +22,7 @@ namespace SoundMetrics.Aris.UT.File
         public void IncompleteFileHeader()
         {
             var path = CreateFileWithPartialFileHeader();
-            var fileTraits = FileTraits.GetFileTraits(path);
+            var fileTraits = FileTraits.GetFileTraits(path, validateFrameHeaders: false);
             Assert.IsTrue(fileTraits.HasIssues);
             Assert.IsTrue(fileTraits.HasIssue(FileIssue.IncompleteFileHeader));
         }
@@ -31,7 +31,7 @@ namespace SoundMetrics.Aris.UT.File
         public void InvalidFileHeader()
         {
             var path = CreateFileWithInvalidFileHeader();
-            var fileTraits = FileTraits.GetFileTraits(path);
+            var fileTraits = FileTraits.GetFileTraits(path, validateFrameHeaders: false);
             Assert.IsTrue(fileTraits.HasIssues);
             Assert.IsTrue(fileTraits.HasIssue(FileIssue.InvalidFileHeader));
         }
@@ -44,7 +44,7 @@ namespace SoundMetrics.Aris.UT.File
             memStream.Write(AValidFrameHeader.Value);
 
             var path = CreateFileWithContents(memStream.ToArray());
-            var fileTraits = FileTraits.GetFileTraits(path);
+            var fileTraits = FileTraits.GetFileTraits(path, validateFrameHeaders: false);
             Assert.IsTrue(fileTraits.HasIssues);
             Assert.IsTrue(fileTraits.HasIssue(FileIssue.NoFrames));
         }
@@ -58,7 +58,7 @@ namespace SoundMetrics.Aris.UT.File
             memStream.Write(new byte[] { 1 });
 
             var path = CreateFileWithContents(memStream.ToArray());
-            var fileTraits = FileTraits.GetFileTraits(path);
+            var fileTraits = FileTraits.GetFileTraits(path, validateFrameHeaders: false);
             Assert.IsTrue(fileTraits.HasIssues);
             Assert.IsTrue(fileTraits.HasIssue(FileIssue.InvalidFirstFrameHeader));
         }

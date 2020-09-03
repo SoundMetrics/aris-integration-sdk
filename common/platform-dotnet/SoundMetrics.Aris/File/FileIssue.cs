@@ -7,11 +7,12 @@ namespace SoundMetrics.Aris.File
     public enum FileIssue : UInt16
     {
         None = 0,
-        EmptyFile = 0b00000000_00000001,
-        IncompleteFileHeader = 0b00000000_00000010,
-        InvalidFileHeader = 0b00000000_00000100,
-        NoFrames = 0b00000000_00001000,
-        InvalidFirstFrameHeader = 0b00000000_00010000,
+        EmptyFile =                 0b00000000_00000001,
+        IncompleteFileHeader =      0b00000000_00000010,
+        InvalidFileHeader =         0b00000000_00000100,
+        NoFrames =                  0b00000000_00001000,
+        InvalidFirstFrameHeader =   0b00000000_00010000,
+        InvalidFrameHeaders =       0b00000000_00100000,
     }
 
     internal static class FileIssueDescriptions
@@ -47,18 +48,17 @@ namespace SoundMetrics.Aris.File
 
         internal static IEnumerable<string> GetFlagDescriptions(FileIssue issues)
         {
-            const FileIssue LSB = (FileIssue)1;
+            UInt16 bit = 0b10000000_00000000;
+            UInt16 uIssues = (UInt16)issues;
 
-            while (issues != 0)
+            do
             {
-                var oneIssue = issues & LSB;
-                yield return issueDescriptions[oneIssue];
-
-                issues = ShiftRight(issues);
-            }
-
-            static FileIssue ShiftRight(FileIssue issues) =>
-                (FileIssue)((uint)issues >> 1);
+                if ((bit & uIssues) != 0)
+                {
+                    var oneIssue = (FileIssue)bit;
+                    yield return issueDescriptions[oneIssue];
+                }
+            } while ((bit >>= 1) != 0);
         }
 
         private static readonly Dictionary<FileIssue, string> issueDescriptions =
@@ -69,6 +69,7 @@ namespace SoundMetrics.Aris.File
                 { FileIssue.InvalidFileHeader, "The file header is invalid" },
                 { FileIssue.NoFrames, "The file contains no frames" },
                 { FileIssue.InvalidFirstFrameHeader, "The first frame header is invalid" },
+                { FileIssue.InvalidFrameHeaders, "There are one or more invalid frame headers" },
             };
     }
 }
