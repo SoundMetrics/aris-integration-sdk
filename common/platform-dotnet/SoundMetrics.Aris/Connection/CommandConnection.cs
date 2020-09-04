@@ -1,7 +1,6 @@
 ﻿using SoundMetrics.Aris.Device;
 using SoundMetrics.Aris.Network;
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -28,10 +27,7 @@ namespace SoundMetrics.Aris.Connection
                 tcp.Connect(
                     deviceAddress, NetworkConstants.ArisSonarTcpNOListenPort);
 
-                ControlTcpKeepAlives(
-                    tcp.Client,
-                    interval: TimeSpan.FromSeconds(5),
-                    retryInterval: TimeSpan.FromSeconds(1));
+                ControlTcpKeepAlive(tcp.Client);
 
                 var io = new ConnectionIO(tcp);
                 try
@@ -57,25 +53,15 @@ namespace SoundMetrics.Aris.Connection
 
         public IPEndPoint LocalEndpoint => io.LocalEndpoint;
 
-        private static void ControlTcpKeepAlives(
-            Socket client,
-            TimeSpan interval,
-            TimeSpan retryInterval)
+        // This is perhaps gold-plating, as the ARIS can have zombie connections.
+        // In other words, it will send keep-alives after the process is gone.
+        private static void ControlTcpKeepAlive(Socket client)
         {
-            // Rather than creating a packed struct here we'll just construct the byte array directly.
-            var enable = 1u;
-            var intervalMillis = (uint)interval.TotalMilliseconds;
-            var retryIntervalMillis = (uint)retryInterval.TotalMilliseconds;
-
-            var payload =
-                BitConverter.GetBytes(enable)
-                    .Concat(BitConverter.GetBytes(intervalMillis))
-                    .Concat(BitConverter.GetBytes(retryIntervalMillis))
-                    .ToArray();
-
-            // Using this, not Socket.IOControl, for cross-platform use.
+            // Using SetSocketOption, not Socket.IOControl, for cross-platform use.
             client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 5);
+            client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 2);
+            client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
+            client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 1);
         }
 
         private CommandConnection(ConnectionIO io)
