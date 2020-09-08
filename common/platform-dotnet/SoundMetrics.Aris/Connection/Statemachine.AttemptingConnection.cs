@@ -34,24 +34,18 @@ namespace SoundMetrics.Aris.Connection
                 failureLogCountdown = 5;
             }
 
-            private ConnectionState? DoProcessing(StateMachineContext context, ICompoundMachineEvent? ev)
+            private ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
             {
-                switch (ev)
+                return (ev.EventType, ev.CompoundEvent) switch
                 {
-                    case Cycle cycle:
-                        return AttemptConnection(cycle.Timestamp);
+                    (MachineEventType.Compound, DeviceAddressChanged _) =>
+                        ConnectionState.ConnectionTerminated,
 
-                    case Tick tick:
-                        return AttemptConnection(tick.Timestamp);
+                    (MachineEventType.Tick, _) =>
+                        AttemptConnection(ev.Timestamp),
 
-                    case DeviceAddressChanged _:
-                        return ConnectionState.ConnectionTerminated;
-
-                    default:
-                        break; // Nothing
-                }
-
-                return default;
+                    _ => default
+                };
 
                 ConnectionState? AttemptConnection(DateTimeOffset timestamp)
                 {
@@ -60,7 +54,7 @@ namespace SoundMetrics.Aris.Connection
                         if (ShouldTryNow(timestamp))
                         {
 
-                            if (context.DeviceAddress is IPAddress ipAddress)
+                            if (context.DeviceAddress != IPAddress.Any)
                             {
                                 if (context.ReceiverPort is int port)
                                 {
@@ -68,7 +62,7 @@ namespace SoundMetrics.Aris.Connection
                                     {
                                         context.CommandConnection =
                                             CommandConnection.Create(
-                                                ipAddress,
+                                                context.DeviceAddress,
                                                 port,
                                                 context.Salinity);
                                         return ConnectionState.Connected;

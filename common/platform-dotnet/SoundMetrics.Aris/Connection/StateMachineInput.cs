@@ -6,21 +6,52 @@ using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal interface ICompoundMachineEvent { }
-
-    /// <summary>
-    /// Inserted into the input queue in order to allow additional
-    /// processing.
-    /// </summary>
-    internal sealed class Cycle : ICompoundMachineEvent
+    internal enum MachineEventType
     {
-        public Cycle(DateTimeOffset timestamp)
+        /// <summary>
+        /// Represents a clock tick. Some states need to observe
+        /// the passage of time.
+        /// </summary>
+        Tick,
+
+        MarkFrameDataReceived,
+        NetworkAddressChanged,
+        NetworkAvailabilityChanged,
+        Compound,
+    }
+
+    // Simple events are stored within a struct, so no extra allocations.
+    internal struct MachineEvent
+    {
+        public MachineEvent(
+            MachineEventType eventType,
+            DateTimeOffset timestamp,
+            IPAddress? deviceAddress,
+            ICompoundMachineEvent? compoundEvent = null)
         {
+            EventType = eventType;
             Timestamp = timestamp;
+            DeviceAddress = deviceAddress;
+            CompoundEvent = compoundEvent;
         }
 
+        public MachineEventType EventType { get; set; }
         public DateTimeOffset Timestamp { get; }
+        public IPAddress? DeviceAddress { get; }
+        public ICompoundMachineEvent? CompoundEvent { get; }
+
+        private string CompoundName =>
+            CompoundEvent?.GetType().Name ?? "(null)";
+
+        public string EventName =>
+            EventType switch
+            {
+                MachineEventType.Compound => $"Compound '{CompoundName}'",
+                _ => $"{EventType}",
+            };
     }
+
+    internal interface ICompoundMachineEvent { }
 
     /// <summary>
     /// Requests shutdown of the state machine.
@@ -62,22 +93,6 @@ namespace SoundMetrics.Aris.Connection
         }
 
         private readonly ISettings settings;
-    }
-
-    /// <summary>
-    /// Represents a clock tick. Some states need to observe
-    /// the passage of time.
-    /// </summary>
-    internal sealed class Tick : ICompoundMachineEvent
-    {
-        public Tick(DateTimeOffset timestamp, IPAddress? deviceAddress)
-        {
-            Timestamp = timestamp;
-            DeviceAddress = deviceAddress;
-        }
-
-        public DateTimeOffset Timestamp { get; }
-        public IPAddress? DeviceAddress { get; }
     }
 
     /// <summary>

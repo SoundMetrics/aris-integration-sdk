@@ -7,7 +7,7 @@ namespace SoundMetrics.Aris.Connection
         internal delegate void OnEnterFn(StateMachineContext data);
         internal delegate void OnLeaveFn(StateMachineContext data);
 
-        internal delegate ConnectionState? DoProcessingFn(StateMachineContext data, ICompoundMachineEvent? ev);
+        internal delegate ConnectionState? DoProcessingFn(StateMachineContext data, in MachineEvent ev);
 
         internal sealed class StateHandler
         {

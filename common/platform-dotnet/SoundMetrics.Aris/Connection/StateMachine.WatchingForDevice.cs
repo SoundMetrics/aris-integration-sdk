@@ -13,18 +13,20 @@ namespace SoundMetrics.Aris.Connection
             }
 
             private static ConnectionState? DoProcessing(
-                StateMachineContext context, ICompoundMachineEvent? ev)
+                StateMachineContext context, in MachineEvent ev)
             {
-                if (ev is Tick tick && tick.DeviceAddress is IPAddress deviceAddress)
+                switch (ev.EventType, ev.DeviceAddress)
                 {
-                    Log.Debug("{state} notes device address {deviceAddress}",
-                        nameof(WatchingForDevice), deviceAddress);
+                    case (MachineEventType.Tick, IPAddress deviceAddress):
+                        Log.Debug("{state} notes device address {deviceAddress}",
+                            nameof(WatchingForDevice), deviceAddress);
 
-                    context.DeviceAddress = deviceAddress;
-                    return ConnectionState.AttemptingConnection;
+                        context.DeviceAddress = deviceAddress;
+                        return ConnectionState.AttemptingConnection;
+
+                    default:
+                        return default;
                 }
-
-                return default;
             }
 
             public static StateHandler StateHandler =>

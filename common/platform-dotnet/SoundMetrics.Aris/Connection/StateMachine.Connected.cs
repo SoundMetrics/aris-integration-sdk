@@ -18,28 +18,28 @@ namespace SoundMetrics.Aris.Connection
             }
 
             private static ConnectionState? DoProcessing(
-                StateMachineContext context, ICompoundMachineEvent? ev)
+                StateMachineContext context, in MachineEvent ev)
             {
-                switch (ev)
+                switch (ev.EventType, ev.CompoundEvent)
                 {
-                    case ApplySettingsRequest request:
+                    case (MachineEventType.Compound, ApplySettingsRequest request):
                         ApplySettingsRequest(context, request);
                         break;
 
-                    case DeviceAddressChanged _:
+                    case (MachineEventType.Compound, DeviceAddressChanged _):
                         return ConnectionState.ConnectionTerminated;
 
-                    case MarkFrameDataReceived mark:
-                        context.LatestFramePartTimestamp = mark.Timestamp;
+                    case (MachineEventType.MarkFrameDataReceived, _):
+                        context.LatestFramePartTimestamp = ev.Timestamp;
                         break;
 
-                    case Tick tick:
-                        if (tick.Timestamp >
+                    case (MachineEventType.Tick, _):
+                        if (ev.Timestamp >
                             context.LatestFramePartTimestamp + FramePartReceiptTimeout)
                         {
                             Log.Information(
                                 "Terminating, no frame parts received since {LatestFramePartTimestamp}",
-                                context.LatestFramePartTimestamp);
+                                context.LatestFramePartTimestamp.ToString("o"));
                             return ConnectionState.ConnectionTerminated;
                         }
                         break;
