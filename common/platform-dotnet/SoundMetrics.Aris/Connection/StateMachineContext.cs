@@ -23,6 +23,8 @@ namespace SoundMetrics.Aris.Connection
 
         public ApplySettingsRequest? LatestSettingsRequest { get; set; }
 
+        public DateTimeOffset LatestFramePartTimestamp { get; set; }
+
         /// <summary>
         /// The command connection; may be null when not connected.
         /// </summary>

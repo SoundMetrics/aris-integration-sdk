@@ -27,6 +27,8 @@ namespace SoundMetrics.Aris.Network
             get { lock (metricsGuard) { return metrics; }; }
         }
 
+        internal IObservable<DateTimeOffset> ValidPacketReceived => validPacketReceived;
+
         private void OnPacketReceived(UdpReceived udpReceived)
         {
             bool isInvalidPacket = false;
@@ -120,6 +122,11 @@ namespace SoundMetrics.Aris.Network
                 {
                     metrics += localMetrics;
                 }
+
+                if (!isInvalidPacket)
+                {
+                    validPacketReceived.OnNext(udpReceived.Timestamp);
+                }
             }
         }
 
@@ -129,6 +136,8 @@ namespace SoundMetrics.Aris.Network
             {
                 if (disposing)
                 {
+                    validPacketReceived.OnCompleted();
+                    validPacketReceived.Dispose();
                     udpListener.Dispose();
                     packetSub.Dispose();
                 }
@@ -151,6 +160,7 @@ namespace SoundMetrics.Aris.Network
         private readonly IDisposable packetSub;
         private readonly Subject<Frame> frameSubject;
         private readonly FrameAssembler frameAssembler = new FrameAssembler();
+        private readonly Subject<DateTimeOffset> validPacketReceived = new Subject<DateTimeOffset>();
         private readonly Mutex metricsGuard = new Mutex();
 
         private bool disposed;

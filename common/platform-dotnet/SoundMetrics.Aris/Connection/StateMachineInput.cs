@@ -81,6 +81,19 @@ namespace SoundMetrics.Aris.Connection
     }
 
     /// <summary>
+    /// Indicates that frame data was received.
+    /// </summary>
+    internal sealed class MarkFrameDataReceived : IMachineEvent
+    {
+        public MarkFrameDataReceived(DateTimeOffset timestamp)
+        {
+            Timestamp = timestamp;
+        }
+
+        public DateTimeOffset Timestamp { get; }
+    }
+
+    /// <summary>
     /// Indicates that the IP address of the target device changed.
     /// Changing to null/unknown is not interesting and ignored;
     /// changing to a known address causes a new connection.

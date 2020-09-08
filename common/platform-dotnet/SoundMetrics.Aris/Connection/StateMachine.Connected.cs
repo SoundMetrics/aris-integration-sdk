@@ -12,6 +12,8 @@ namespace SoundMetrics.Aris.Connection
                 Log.Information("Connected to device at {deviceAddress} from {localEndpoint}",
                     context.DeviceAddress, context.CommandConnection?.LocalEndpoint);
 
+                context.LatestFramePartTimestamp = DateTimeOffset.Now;
+
                 ApplySettingsRequest(context, context.LatestSettingsRequest);
             }
 
@@ -24,8 +26,20 @@ namespace SoundMetrics.Aris.Connection
                         ApplySettingsRequest(context, request);
                         break;
 
-                    case DeviceAddressChanged addressChanged:
+                    case DeviceAddressChanged _:
                         return ConnectionState.ConnectionTerminated;
+
+                    case MarkFrameDataReceived mark:
+                        // TODO context.LatestFramePartTimestamp = mark.Timestamp;
+                        break;
+
+                    case Tick tick:
+                        if (tick.Timestamp >
+                            context.LatestFramePartTimestamp + FramePartReceiptTimeout)
+                        {
+                            return ConnectionState.ConnectionTerminated;
+                        }
+                        break;
                 }
 
                 return default;
@@ -41,6 +55,9 @@ namespace SoundMetrics.Aris.Connection
                     connection.SendCommand(req);
                 }
             }
+
+            private static readonly TimeSpan FramePartReceiptTimeout =
+                TimeSpan.FromSeconds(5);
 
             public static StateHandler StateHandler =>
                 new StateHandler(

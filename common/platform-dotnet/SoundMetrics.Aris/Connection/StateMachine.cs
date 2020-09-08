@@ -86,6 +86,9 @@ namespace SoundMetrics.Aris.Connection
                         case Cycle _:
                         case NetworkAddressChanged _:
                         case NetworkAvailabilityChanged _:
+                        case MarkFrameDataReceived _:
+                        case Tick _:
+                        case null:
                             InvokeDoProcessing(ev);
                             break;
 
@@ -94,18 +97,10 @@ namespace SoundMetrics.Aris.Connection
                             context.LatestSettingsRequest = request;
                             break;
 
-                        case Tick _:
-                            InvokeDoProcessing(ev);
-                            break;
-
                         case Stop stop:
                             Transition(ConnectionState.End, context, ev);
                             stop.MarkComplete();
                             Debug.Assert(state == ConnectionState.End);
-                            break;
-
-                        case null:
-                            InvokeDoProcessing(ev);
                             break;
 
                         default:
@@ -235,6 +230,7 @@ namespace SoundMetrics.Aris.Connection
                     NetworkChange.NetworkAddressChanged -= NetworkChange_NetworkAddressChanged;
                     NetworkChange.NetworkAvailabilityChanged -= NetworkChange_NetworkAvailabilityChanged;
 
+                    validPacketSub?.Dispose();
                     tickSource.Dispose();
 
                     ShutDown();
@@ -290,6 +286,11 @@ namespace SoundMetrics.Aris.Connection
             if (!(newTargetAddress is null))
             {
                 frameListener = new FrameListener(IPAddress.Any, frameSubject);
+                validPacketSub =
+                    frameListener.ValidPacketReceived.Subscribe(timestamp =>
+                    // TODO need some filtering
+                        events.Post(new MarkFrameDataReceived(timestamp))
+                    );
                 context.ReceiverPort = frameListener.LocalEndPoint.Port;
             }
         }
@@ -298,6 +299,9 @@ namespace SoundMetrics.Aris.Connection
         {
             if (frameListener is FrameListener)
             {
+                validPacketSub?.Dispose();
+                validPacketSub = null;
+
                 frameListenerMetrics += frameListener.Metrics;
 
                 frameListener.Dispose();
@@ -315,6 +319,7 @@ namespace SoundMetrics.Aris.Connection
         private readonly StateMachineContext context = new StateMachineContext();
 
         private bool disposed;
+        private IDisposable? validPacketSub;
         private IPAddress? targetAddress;
         private FrameListener? frameListener;
         private FrameListenerMetrics frameListenerMetrics = default;
