@@ -65,6 +65,16 @@ namespace SoundMetrics.Aris.Network
                 }
                 catch (ObjectDisposedException)
                 {
+                    // Somebody disposed us.
+                    keepGoing = false;
+                }
+                catch (SocketException)
+                {
+                    // Socket was shut down.
+                    // SocketException (10058): A request to send or receive
+                    // data was disallowed because the socket had already
+                    // been shut down in that direction with a previous
+                    // shutdown call.
                     keepGoing = false;
                 }
             }
