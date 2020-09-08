@@ -82,6 +82,12 @@ namespace SoundMetrics.Aris.Connection
 
     /// <summary>
     /// Indicates that frame data was received.
+    /// This is used to detect when the ARIS has stopped sending frame packets.
+    /// The command connection uses keep-alives, but in limited scenarios--
+    /// such as killing the arisapp process during development--
+    /// a zombie socket is maintained and kept alive. This mechanism detects
+    /// when frames are no longer being sent and allows the connection to be
+    /// terminated & attempted again.
     /// </summary>
     internal sealed class MarkFrameDataReceived : IMachineEvent
     {

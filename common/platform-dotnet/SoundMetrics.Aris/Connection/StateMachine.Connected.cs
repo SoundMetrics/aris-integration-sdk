@@ -30,13 +30,16 @@ namespace SoundMetrics.Aris.Connection
                         return ConnectionState.ConnectionTerminated;
 
                     case MarkFrameDataReceived mark:
-                        // TODO context.LatestFramePartTimestamp = mark.Timestamp;
+                        context.LatestFramePartTimestamp = mark.Timestamp;
                         break;
 
                     case Tick tick:
                         if (tick.Timestamp >
                             context.LatestFramePartTimestamp + FramePartReceiptTimeout)
                         {
+                            Log.Information(
+                                "Terminating, no frame parts received since {LatestFramePartTimestamp}",
+                                context.LatestFramePartTimestamp);
                             return ConnectionState.ConnectionTerminated;
                         }
                         break;

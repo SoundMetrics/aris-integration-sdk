@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 
@@ -287,8 +288,12 @@ namespace SoundMetrics.Aris.Connection
             {
                 frameListener = new FrameListener(IPAddress.Any, frameSubject);
                 validPacketSub =
-                    frameListener.ValidPacketReceived.Subscribe(timestamp =>
-                    // TODO need some filtering
+                    frameListener.ValidPacketReceived
+                        // Sample every second for marking receipt; this
+                        // implies that timing out the connection must happen
+                        // at a period greater than the sample period.
+                        .Sample(TimeSpan.FromSeconds(1))
+                        .Subscribe(timestamp =>
                         events.Post(new MarkFrameDataReceived(timestamp))
                     );
                 context.ReceiverPort = frameListener.LocalEndPoint.Port;
