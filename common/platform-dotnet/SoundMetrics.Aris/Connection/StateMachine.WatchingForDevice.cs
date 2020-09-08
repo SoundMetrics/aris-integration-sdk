@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.Connection
             }
 
             private static ConnectionState? DoProcessing(
-                StateMachineContext context, IMachineEvent? ev)
+                StateMachineContext context, ICompoundMachineEvent? ev)
             {
                 if (ev is Tick tick && tick.DeviceAddress is IPAddress deviceAddress)
                 {

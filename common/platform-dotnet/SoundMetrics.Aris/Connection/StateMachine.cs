@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Connection
             this.serialNumber = serialNumber;
             stateHandlers = InitializeHandlerMap();
 
-            events = new BufferedMessageQueue<IMachineEvent>(ProcessEvent);
+            events = new BufferedMessageQueue<ICompoundMachineEvent>(ProcessEvent);
 
             var tickTimerPeriod = TimeSpan.FromSeconds(1);
             var nextDue = tickTimerPeriod;
@@ -75,7 +75,7 @@ namespace SoundMetrics.Aris.Connection
         private void OnTimerTick(object? _) =>
             events.Post(new Tick(DateTimeOffset.Now, targetAddress));
 
-        private void ProcessEvent(IMachineEvent ev)
+        private void ProcessEvent(ICompoundMachineEvent ev)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace SoundMetrics.Aris.Connection
         private bool Transition(
             ConnectionState newState,
             StateMachineContext context,
-            IMachineEvent? ev)
+            ICompoundMachineEvent? ev)
         {
             var oldState = state;
             if (oldState == newState)
@@ -157,7 +157,7 @@ namespace SoundMetrics.Aris.Connection
             return true;
         }
 
-        private void InvokeDoProcessing(IMachineEvent? ev)
+        private void InvokeDoProcessing(ICompoundMachineEvent? ev)
         {
             try
             {
@@ -317,7 +317,7 @@ namespace SoundMetrics.Aris.Connection
         private readonly HandlerMap stateHandlers;
         private readonly AttemptingConnection attemptingConnectionHandler =
             new AttemptingConnection();
-        private readonly BufferedMessageQueue<IMachineEvent> events;
+        private readonly BufferedMessageQueue<ICompoundMachineEvent> events;
         private readonly Timer tickSource;
         private readonly string serialNumber;
         private readonly Subject<Frame> frameSubject = new Subject<Frame>();

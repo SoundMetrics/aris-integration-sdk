@@ -6,13 +6,13 @@ using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal interface IMachineEvent { }
+    internal interface ICompoundMachineEvent { }
 
     /// <summary>
     /// Inserted into the input queue in order to allow additional
     /// processing.
     /// </summary>
-    internal sealed class Cycle : IMachineEvent
+    internal sealed class Cycle : ICompoundMachineEvent
     {
         public Cycle(DateTimeOffset timestamp)
         {
@@ -25,7 +25,7 @@ namespace SoundMetrics.Aris.Connection
     /// <summary>
     /// Requests shutdown of the state machine.
     /// </summary>
-    internal sealed class Stop : IMachineEvent
+    internal sealed class Stop : ICompoundMachineEvent
     {
         public Stop(ManualResetEventSlim completeSignal)
         {
@@ -41,7 +41,7 @@ namespace SoundMetrics.Aris.Connection
     /// <summary>
     /// Represents a request for new settings.
     /// </summary>
-    internal sealed class ApplySettingsRequest : IMachineEvent, ICommand
+    internal sealed class ApplySettingsRequest : ICompoundMachineEvent, ICommand
     {
         public ApplySettingsRequest(int settingsCookie, ISettings settings)
         {
@@ -68,7 +68,7 @@ namespace SoundMetrics.Aris.Connection
     /// Represents a clock tick. Some states need to observe
     /// the passage of time.
     /// </summary>
-    internal sealed class Tick : IMachineEvent
+    internal sealed class Tick : ICompoundMachineEvent
     {
         public Tick(DateTimeOffset timestamp, IPAddress? deviceAddress)
         {
@@ -89,7 +89,7 @@ namespace SoundMetrics.Aris.Connection
     /// when frames are no longer being sent and allows the connection to be
     /// terminated & attempted again.
     /// </summary>
-    internal sealed class MarkFrameDataReceived : IMachineEvent
+    internal sealed class MarkFrameDataReceived : ICompoundMachineEvent
     {
         public MarkFrameDataReceived(DateTimeOffset timestamp)
         {
@@ -104,7 +104,7 @@ namespace SoundMetrics.Aris.Connection
     /// Changing to null/unknown is not interesting and ignored;
     /// changing to a known address causes a new connection.
     /// </summary>
-    internal sealed class DeviceAddressChanged : IMachineEvent
+    internal sealed class DeviceAddressChanged : ICompoundMachineEvent
     {
         public DeviceAddressChanged(IPAddress? oldAddress, IPAddress? targetAddress)
         {
@@ -124,12 +124,12 @@ namespace SoundMetrics.Aris.Connection
     /// <summary>
     /// Indicates that the host's network configuration has changed.
     /// </summary>
-    internal sealed class NetworkAddressChanged : IMachineEvent { }
+    internal sealed class NetworkAddressChanged : ICompoundMachineEvent { }
 
     /// <summary>
     /// Indicates that the host's network availability has changed.
     /// </summary>
-    internal sealed class NetworkAvailabilityChanged : IMachineEvent
+    internal sealed class NetworkAvailabilityChanged : ICompoundMachineEvent
     {
         public NetworkAvailabilityChanged(NetworkAvailabilityEventArgs args)
         {

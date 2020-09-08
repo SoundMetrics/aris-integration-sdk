@@ -15,7 +15,7 @@ namespace SoundMetrics.Aris.Connection
             }
 
             private static ConnectionState? DoProcessing(
-                StateMachineContext context, IMachineEvent? ev)
+                StateMachineContext context, ICompoundMachineEvent? ev)
             {
                 return ConnectionState.WatchingForDevice;
             }

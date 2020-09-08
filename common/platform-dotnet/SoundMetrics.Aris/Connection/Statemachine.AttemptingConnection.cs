@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Connection
                 failureLogCountdown = 5;
             }
 
-            private ConnectionState? DoProcessing(StateMachineContext context, IMachineEvent? ev)
+            private ConnectionState? DoProcessing(StateMachineContext context, ICompoundMachineEvent? ev)
             {
                 switch (ev)
                 {

@@ -18,7 +18,7 @@ namespace SoundMetrics.Aris.Connection
             }
 
             private static ConnectionState? DoProcessing(
-                StateMachineContext context, IMachineEvent? ev)
+                StateMachineContext context, ICompoundMachineEvent? ev)
             {
                 switch (ev)
                 {
