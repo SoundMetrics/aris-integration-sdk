@@ -66,8 +66,8 @@ namespace SoundMetrics.Aris.File
                         issues = wholeFrames == 0 ? issues | FileIssue.NoFrames : issues;
                         issues =
                             validFrameHeaderCount is null
-                                ? issues
-                                : issues | FileIssue.InvalidFrameHeaders;
+                                ? issues | FileIssue.InvalidFrameHeaders
+                                : issues;
 
                         return new FileTraits
                         {

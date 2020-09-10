@@ -9,7 +9,7 @@ namespace SoundMetrics.Aris.Device
         public InvalidSonarConfig(string message) : base(message) { }
     }
 
-    internal static class SonarConfig
+    public static class SonarConfig
     {
         // Min/max values per ARIS Engineering Test Command List
 
@@ -32,13 +32,13 @@ namespace SoundMetrics.Aris.Device
             public static readonly int MinAntialiasing = 0;
         }
 
-        public struct UsableImagingRange
+        internal struct UsableImagingRange
         {
             public Dictionary<Frequency, ValueRange<double>> UsableRange;
             public double LowFrequencyCrossover;
         }
 
-        public struct OperationalRanges
+        internal struct OperationalRanges
         {
             public SystemType SystemType;
             public ValueRange<int> PulseWidthRange;

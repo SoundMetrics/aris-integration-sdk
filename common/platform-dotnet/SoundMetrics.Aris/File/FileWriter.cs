@@ -59,10 +59,10 @@ namespace SoundMetrics.Aris.File
         {
             try
             {
-                this.fileGeometry = sampleGeometry;
+                this.sampleGeometry = sampleGeometry;
                 this.fileStream = fileStream;
 
-                WriteNewFileHeader(fileStream);
+                WriteNewFileHeader(fileStream, sampleGeometry);
             }
             catch (Exception ex)
             {
@@ -79,7 +79,8 @@ namespace SoundMetrics.Aris.File
         /// must have the same geometry.
         /// </summary>
         /// <param name="frame">The frame to be written.</param>
-        public void WriteFrame(Frame frame)
+        /// <returns>The assigned frame index for the written frame.</returns>
+        public int WriteFrame(Frame frame)
         {
             var startPosition = fileStream.Position;
             var success = false;
@@ -89,17 +90,23 @@ namespace SoundMetrics.Aris.File
                 var frameGeometry =
                     SonarConfig.GetSampleGeometry(frame.FrameHeader);
 
-                if (frameGeometry != fileGeometry)
+                if (frameGeometry != sampleGeometry)
                 {
                     throw new InvalidOperationException(
                         "Cannot change the sample geometry within a recording");
                 }
 
-                fileStream.WriteStruct(frame.FrameHeader);
+                var frameIndex = frameCount;
+                var headerForUpdate = frame.FrameHeader;
+                headerForUpdate.FrameIndex = frameIndex;
+
+                fileStream.WriteStruct(headerForUpdate);
                 fileStream.Write(frame.Samples.Span);
 
                 ++frameCount;
                 success = true;
+
+                return (int)frameIndex;
             }
             finally
             {
@@ -134,12 +141,16 @@ namespace SoundMetrics.Aris.File
             GC.SuppressFinalize(this);
         }
 
-        private static void WriteNewFileHeader(FileStream stream)
+        private static void WriteNewFileHeader(
+            FileStream stream,
+            SampleGeometry geometry)
         {
             var fileHeader = new FileHeader
             {
                 Version = FileHeader.ArisFileSignature,
                 FrameCount = 0,
+                NumRawBeams = (uint)geometry.BeamCount,
+                SamplesPerChannel = (uint)geometry.SamplesPerBeam,
             };
 
             stream.WriteStruct(fileHeader);
@@ -194,7 +205,7 @@ namespace SoundMetrics.Aris.File
         /// <summary>
         /// The one and only frame geometry allowed throughout the file.
         /// </summary>
-        private readonly SampleGeometry fileGeometry;
+        private readonly SampleGeometry sampleGeometry;
 
         private uint frameCount;
         private bool disposed;
