@@ -54,7 +54,7 @@ namespace SoundMetrics.Aris.Connection
                         if (ShouldTryNow(timestamp))
                         {
 
-                            if (context.DeviceAddress != IPAddress.Any)
+                            if (!(context.DeviceAddress is null))
                             {
                                 if (context.ReceiverPort is int port)
                                 {
