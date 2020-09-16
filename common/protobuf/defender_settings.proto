@@ -2,10 +2,6 @@ syntax = "proto3";
 
 package defender;
 
-// Commands and reports for communicating with an ARIS Defender.
-// Note that little is available to control via this interface, as
-// the diver is intended to have primary control.
-
 message DefenderSet {
   string dateTime = 1;
   Frequency frequency = 2;
@@ -13,7 +9,7 @@ message DefenderSet {
   Units units = 4;
   uint32 antialiasing = 5;
   FrameStreamReceiver receiver = 6;
-  FieldUpdate fieldsUsed = 7;
+  uint32 fieldsUsed = 7;
 }
 
 message DefenderReport {
@@ -23,6 +19,7 @@ message DefenderReport {
   Units units = 4;
   uint32 antialiasing = 5;
   FrameStreamReceiver receiver = 6;
+  uint32 fieldsUsed = 7;
 }
 
 enum Frequency {
@@ -57,3 +54,4 @@ enum FieldUpdate {
   ANTIALIASING  = 0x10; // Not currently implemented.
   RECEIVER      = 0x20;
 }
+
