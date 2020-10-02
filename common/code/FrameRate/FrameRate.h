@@ -7,12 +7,6 @@
 namespace Aris {
     namespace AcousticMath {
 
-        double CalculateMaxFrameRate(const Aris::Common::SystemType systemType,
-                                     const uint32_t samplePeriod,
-                                     const uint32_t samplesPerBeam,
-                                     const uint32_t cyclePeriod,
-                                     const uint32_t pingsPerFrame);
-
         // Effective as of ARIScope/ArisApp 2.8.y.z.
         double CalculateMaxFrameRate(
             Aris::Common::SystemType systemType,
