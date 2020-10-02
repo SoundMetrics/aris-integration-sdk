@@ -94,7 +94,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
-      <AdditionalIncludeDirectories>../.;../../.</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../submodules/aris-file-sdk/type-definitions/C;../.;../../.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
-      <AdditionalIncludeDirectories>../.;../../.</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../submodules/aris-file-sdk/type-definitions/C;../.;../../.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,7 +122,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
-      <AdditionalIncludeDirectories>../.;../../.</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../submodules/aris-file-sdk/type-definitions/C;../.;../../.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,7 +139,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
-      <AdditionalIncludeDirectories>../.;../../.</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../../submodules/aris-file-sdk/type-definitions/C;../.;../../.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,10 +148,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Reordering\Reorder.h" />
     <ClInclude Include="..\FrameRate.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Reordering\Reorder.cpp" />
     <ClCompile Include="..\FrameRate.cpp" />
     <ClCompile Include="unittests.cpp" />
   </ItemGroup>

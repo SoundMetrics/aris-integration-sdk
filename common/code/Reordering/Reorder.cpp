@@ -10,7 +10,7 @@
 
 namespace Aris {
 
-inline uint32_t PingModeToPingsPerFrame(uint32_t pingMode) {
+uint32_t PingModeToPingsPerFrame(uint32_t pingMode) {
     if (pingMode == 1) {
         return 3;
     } else if (pingMode == 3) {

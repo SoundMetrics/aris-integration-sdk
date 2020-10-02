@@ -13,5 +13,15 @@ namespace Aris {
                                      const uint32_t cyclePeriod,
                                      const uint32_t pingsPerFrame);
 
+        // Effective as of ARIScope/ArisApp 2.8.y.z.
+        double CalculateMaxFrameRate(
+            Aris::Common::SystemType systemType,
+            uint32_t pingMode,
+            int samplesPerBeam,
+            uint32_t sampleStartDelayUs,
+            uint32_t samplePeriodUs,
+            uint32_t antiAliasingUs,
+            bool enableInterpacketDelay,
+            uint32_t interpacketDelayUs);
     }
 }
