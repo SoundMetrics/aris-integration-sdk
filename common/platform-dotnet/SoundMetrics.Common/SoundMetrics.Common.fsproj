@@ -27,17 +27,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Logging.fs" />
+    <Compile Include="TraceActivity.fs" />
     <Compile Include="BuildInfo.fs" />
     <Compile Include="QueuedSynchronizationContext.fs" />
+    <Compile Include="NetworkInterfaceInfo.fs" />
     <Compile Include="Devices.fs" />
     <Compile Include="NetworkConstants.fs" />
     <Compile Include="BeaconListener.fs" />
     <Compile Include="BeaconObserver.fs" />
+    <Compile Include="BeaconObserver2.fs" />
     <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.7.1" />
+    <PackageReference Include="Serilog" Version="2.8.0" />
   </ItemGroup>
 
   <ItemGroup>

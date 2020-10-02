@@ -23,8 +23,10 @@ module private SsdpClientDetails =
         udp.Client.Bind(IPEndPoint(addr, 0))
         udp.JoinMulticastGroup(SsdpConstants.SsdpEndPointIPv4.Address, addr)
         udp.MulticastLoopback <- multicastLoopback
-        Log.Debug("configUdp: SSDP client on {localEP}; MulticastLoopback={multicastLoopback}",
-            udp.Client.LocalEndPoint, udp.MulticastLoopback)
+        if Log.IsEnabled(Serilog.Events.LogEventLevel.Debug) then
+            use _ctx = Logging.pushModuleName "SsdpClientDetails." "multicastLoopback"
+            Log.Debug("configUdp: SSDP client on {localEP}; MulticastLoopback={multicastLoopback}",
+                udp.Client.LocalEndPoint, udp.MulticastLoopback)
         udp
 
 open SsdpClientDetails
@@ -42,6 +44,7 @@ module SsdpClient =
 
         async {
 
+            use _ctx = Logging.pushModuleName "" "searchAsync"
             // Funnel all responses into a single-threaded queue.
             let queue = BufferBlock<_>()
             let processor =

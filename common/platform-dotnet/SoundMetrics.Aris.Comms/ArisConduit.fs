@@ -29,7 +29,8 @@ type RequestedSettings =
     | SettingsDeclined of string
 
 
-type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
+type ArisConduit private (synchronizationContext : SynchronizationContext,
+                          initialAcousticSettings : AcousticSettingsRaw,
                           targetSonar : string,
                           matchBeacon : ArisBeacon -> bool,
                           frameStreamReliabilityPolicy : FrameStreamReliabilityPolicy,
@@ -37,10 +38,11 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
 
     let disposed = ref false
     let disposingSignal = new ManualResetEventSlim()
-    let available = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(15.0))
+    let available = BeaconListener.CreateForArisExplorerAndVoyager(
+                        synchronizationContext, TimeSpan.FromSeconds(15.0))
     let mutable serialNumber: Nullable<ArisSerialNumber> = Nullable<ArisSerialNumber>()
     let mutable snListener: IDisposable = null
-    let mutable setSalinity: (Frame -> unit) = fun _ -> ()
+    let mutable setSalinity: (RawFrame -> unit) = fun _ -> ()
     let systemType: ArisSystemType option ref = ref None
     let cts = new CancellationTokenSource()
     let cxnMgrDone = new ManualResetEventSlim()
@@ -69,7 +71,7 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
 
     let buildFrameStreamSubscription () =
         let rateTracker = RateTracker()
-        let trackFrameInfo (frame: Frame) =
+        let trackFrameInfo (frame: RawFrame) =
             match !systemType with
             | Some st -> if st <> (enum (int frame.Header.TheSystemType)) then
                             systemType := Some (enum (int frame.Header.TheSystemType))
@@ -121,7 +123,8 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
                 // don't constrain. System type is gleaned in ArisConduit.buildFrameStreamSubscription.
                 let struct (constrainedSettings, constrained) =
                     match !systemType with
-                    | Some systemType -> AcousticMath.constrainAcousticSettings systemType settings antiAliasing
+                    | Some systemType ->
+                        AcousticMath.ConstrainAcousticSettings(systemType, settings, antiAliasing)
                     | None -> struct (settings, false)
 
                 let settings = if constrained then constrainedSettings else settings
@@ -143,27 +146,46 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
         logNewArisConduit targetSonar initialAcousticSettings
 
     /// Find the sonar by its serial number.
-    new(initialAcousticSettings, sn, frameStreamReliabilityPolicy) =
-            new ArisConduit(initialAcousticSettings,
-                            sn.ToString(),
-                            (fun beacon -> beacon.SerialNumber = sn),
-                            frameStreamReliabilityPolicy,
-                            ConduitPerfSink.None)
+    new(
+        synchronizationContext,
+        initialAcousticSettings,
+        sn,
+        frameStreamReliabilityPolicy) =
+            new ArisConduit(
+                synchronizationContext,
+                initialAcousticSettings,
+                sn.ToString(),
+                (fun beacon -> beacon.SerialNumber = sn),
+                frameStreamReliabilityPolicy,
+                ConduitPerfSink.None)
 
     /// Find the sonar by its IP address
-    new(initialAcousticSettings, ipAddress, frameStreamReliabilityPolicy) =
-            new ArisConduit(initialAcousticSettings,
-                            ipAddress.ToString(),
-                            (fun beacon -> beacon.IPAddress = ipAddress),
-                            frameStreamReliabilityPolicy,
-                            ConduitPerfSink.None)
+    new(
+        synchronizationContext,
+        initialAcousticSettings,
+        ipAddress,
+        frameStreamReliabilityPolicy) =
+            new ArisConduit(
+                synchronizationContext,
+                initialAcousticSettings,
+                ipAddress.ToString(),
+                (fun beacon -> beacon.IPAddress = ipAddress),
+                frameStreamReliabilityPolicy,
+                ConduitPerfSink.None)
 
-    internal new(initialAcousticSettings, sn, frameStreamReliabilityPolicy, perfSink) =
-            new ArisConduit(initialAcousticSettings,
-                            sn.ToString(),
-                            (fun beacon -> beacon.SerialNumber = sn),
-                            frameStreamReliabilityPolicy,
-                            perfSink)
+    internal new(
+                    synchronizationContext,
+                    initialAcousticSettings,
+                    sn,
+                    frameStreamReliabilityPolicy,
+                    perfSink) =
+            new ArisConduit(
+                synchronizationContext,
+                initialAcousticSettings,
+                sn.ToString(),
+                (fun beacon -> beacon.SerialNumber = sn),
+                frameStreamReliabilityPolicy,
+                perfSink)
 
     interface IDisposable with
         member __.Dispose() =
@@ -208,9 +230,9 @@ type ArisConduit private (initialAcousticSettings : AcousticSettingsRaw,
                 let requested = !lastRequestedAcoustingSettings
                 let hasExistingSettings = not (requested.Cookie = AcousticSettingsVersioned.InvalidAcousticSettingsCookie)
                 if hasExistingSettings
-                    then Log.Information("sending existing settings: {setings}", requested.Settings.ToString())
+                    then Log.Information("sending existing settings: {settings}", requested.Settings.ToShortString())
                          requested.Settings
-                    else Log.Information("sending initial settings: {settings}", initialAcousticSettings.ToString())
+                    else Log.Information("sending initial settings: {settings}", initialAcousticSettings.ToShortString())
                          initialAcousticSettings
             let requestResult = requestAcousticSettings settings
             match requestResult with

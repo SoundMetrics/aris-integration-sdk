@@ -1,0 +1,132 @@
+﻿using Microsoft.Win32.SafeHandles;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+
+namespace SoundMetrics.Aris.Data
+{
+    /// <summary>
+    /// Implements a buffer in native heap so it doesn't live
+    /// on the Large Object Heap (LOH). Most frames' sample size
+    /// dictates that it would need to live in LOH if it were
+    /// allocated as managed memory. Allocating on the native heap
+    /// instead avoids the overhead of thrashing the LOH.
+    /// </summary>
+    public sealed class ByteBuffer : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public delegate void InitializeBuffer(Span<byte> buffer);
+        public delegate void TransformBuffer(
+            ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
+
+        internal ByteBuffer(int length, InitializeBuffer initializeBuffer)
+            : base(ownsHandle: true)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(length),
+                    $"{nameof(length)} must be greater than zero");
+            }
+
+            this.length = length;
+            base.SetHandle(Marshal.AllocHGlobal(length));
+
+            unsafe
+            {
+                var writeableBuffer =
+                    new Span<byte>(DangerousGetHandle().ToPointer(), length);
+                initializeBuffer(writeableBuffer);
+            }
+        }
+
+        /// <summary>
+        /// Construct from existing memory.
+        /// </summary>
+        internal ByteBuffer(ReadOnlyMemory<byte> source)
+            : this(source.Length, CreateInitializer(source))
+        {
+        }
+
+        /// <summary>
+        /// Build from an existing buffer. Generally not prefered.
+        /// </summary>
+        internal ByteBuffer(IntPtr buffer, int bufferLength)
+            : base(ownsHandle: true)
+        {
+            if (bufferLength < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(bufferLength),
+                    $"{nameof(bufferLength)} must be greater than zero");
+            }
+
+            this.length = bufferLength;
+            this.SetHandle(buffer);
+        }
+
+        /// <summary>
+        /// Construct from a list of buffers.
+        /// </summary>
+        internal ByteBuffer(List<ReadOnlyMemory<byte>> sourceBuffers)
+            : this(SumBufferLengths(sourceBuffers), CreateInitializer(sourceBuffers))
+        {
+        }
+
+        private static int SumBufferLengths(List<ReadOnlyMemory<byte>> buffers) =>
+            buffers.Sum(buffer => buffer.Length);
+
+        private static InitializeBuffer CreateInitializer(ReadOnlyMemory<byte> source)
+        {
+            return output =>
+            {
+                source.Span.CopyTo(output);
+            };
+        }
+
+        private static InitializeBuffer CreateInitializer(
+            List<ReadOnlyMemory<byte>> sourceBuffers)
+        {
+            return output =>
+            {
+                int offset = 0;
+                foreach (var buffer in sourceBuffers)
+                {
+                    var dest = output.Slice(offset, buffer.Length);
+                    buffer.Span.CopyTo(dest);
+                    offset += buffer.Length;
+                }
+            };
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            Marshal.FreeHGlobal(DangerousGetHandle());
+            return true;
+        }
+
+        public int Length => length;
+
+        public ReadOnlySpan<byte> Span
+        {
+            get
+            {
+                unsafe
+                {
+                    return new ReadOnlySpan<byte>(
+                        DangerousGetHandle().ToPointer(), length);
+                }
+            }
+        }
+
+        public ByteBuffer Transform(TransformBuffer transformBuffer)
+        {
+            void initialize(Span<byte> output) => transformBuffer(this.Span, output);
+
+            var newBuffer = new ByteBuffer(length, initialize);
+            return newBuffer;
+        }
+
+        private readonly int length;
+    }
+}

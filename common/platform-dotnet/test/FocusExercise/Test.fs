@@ -79,7 +79,8 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
     SynchronizationContext.SetSynchronizationContext(DispatcherSynchronizationContext())
     assert (SynchronizationContext.Current <> null)
 
-    use availables = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(15.0))
+    use availables = BeaconListener.CreateForArisExplorerAndVoyager(
+                        SynchronizationContext.Current, TimeSpan.FromSeconds(15.0))
 
     let targetSN = 24u
     let beacon = getArisBeacon availables targetSN
@@ -89,6 +90,7 @@ let testRawFocusUnits (eventSource : IObservable<SyslogMessage>) =
         Log.Information("Traget sonar beacon={beacon}", beacon)
         use conduit =
             new ArisConduit(
+                        SynchronizationContext.Current,
                         AcousticSettingsRaw.DefaultAcousticSettingsFor(beacon.SystemType),
                         targetSN,
                         FrameStreamReliabilityPolicy.DropPartialFrames)

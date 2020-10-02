@@ -4,6 +4,3 @@ namespace SoundMetrics.Aris.Comms
 
 /// Milliseconds
 [<Measure>] type ms
-
-/// Degrees Celsius
-[<Measure>] type degC

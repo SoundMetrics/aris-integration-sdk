@@ -11,7 +11,7 @@ type Model (syncContext : SynchronizationContext) =
     let mutable disposed = false
 
     let beaconListener =
-            BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(30.0))
+            BeaconListener.CreateForArisExplorerAndVoyager(syncContext, TimeSpan.FromSeconds(30.0))
     let dispose () =    if not disposed then
                             beaconListener.Dispose()
                             disposed <- true

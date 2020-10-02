@@ -40,7 +40,7 @@
       <HintPath>..\..\packages\FSharp.Core.4.7.2\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Serilog.2.7.1\lib\net46\Serilog.dll</HintPath>
+      <HintPath>..\..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Sinks.Trace, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Serilog.Sinks.Trace.2.1.0\lib\net45\Serilog.Sinks.Trace.dll</HintPath>
@@ -106,7 +106,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj">
+    <ProjectReference Include="..\..\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj">
       <Project>{be7e1388-706e-44d7-96f6-d5cebf2317f6}</Project>
       <Name>SoundMetrics.DataVisualization</Name>
     </ProjectReference>

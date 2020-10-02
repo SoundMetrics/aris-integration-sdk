@@ -9,11 +9,11 @@ namespace SoundMetrics.HID.Windows
     // Helper types
     //-------------------------------------------------------------------------
 
-    public struct JoystickPositionReport
+    public struct JoystickReport
     {
         public uint JoystickId;
         public JoyInfoEx JoyInfoEx;
-        public Joystick.JoystickInfo JoystickInfo;
+        public JoystickInfo JoystickInfo;
     }
 
     /// <summary>
@@ -90,21 +90,55 @@ namespace SoundMetrics.HID.Windows
     // Observable joystick events
     //-------------------------------------------------------------------------
 
-    public delegate bool ButtonFilter(JoystickPositionReport report);
+    public delegate bool ButtonFilter(JoystickReport report);
 
     public sealed class ObservableJoystick : IDisposable
     {
         private readonly uint joystickId;
         private readonly MillisecondTimer timer;
-        private readonly Joystick.JoystickInfo joystickInfo;
+        private readonly JoystickInfo joystickInfo;
 
-        private readonly Subject<JoystickPositionReport> posSubject = new Subject<JoystickPositionReport>();
+        private readonly Subject<JoystickReport> posSubject = new Subject<JoystickReport>();
 
+        /// <summary>
+        /// Tries to create an ObservableJoystick for the specified joystick.
+        /// Does not throw.
+        /// </summary>
+        /// <param name="joystickId"></param>
+        /// <param name="pollingPeriodMs"></param>
+        /// <returns></returns>
+        public static (bool success, ObservableJoystick joystick)
+            TryGet(uint joystickId, int pollingPeriodMs)
+        {
+            // We try to avoid an exception.
+            if (!Joystick.GetJoystickInfo(joystickId, out var joystickInfo))
+            {
+                return (false, null);
+            }
+
+            try
+            {
+                return (true, new ObservableJoystick(joystickId, pollingPeriodMs));
+            }
+            catch
+            {
+                // We can't protect against a race condition, so at least live up
+                // to the API design.
+                return (false, null);
+            }
+        }
+
+        /// <summary>
+        /// Constructs an instance with the specified joystick.
+        /// Throws if the joystick is not found.
+        /// </summary>
+        /// <param name="joystickId">Identifies the joystick.</param>
+        /// <param name="pollingPeriodMs">The polling period in milliseconds.</param>
         public ObservableJoystick(uint joystickId, int pollingPeriodMs)
         {
             if (!Joystick.GetJoystickInfo(joystickId, out joystickInfo))
             {
-                throw new InvalidOperationException($"Couldnt find joystick id={joystickId}");
+                throw new InvalidOperationException($"Couldn't find joystick id={joystickId}");
             }
 
             this.joystickId = joystickId;
@@ -175,7 +209,7 @@ namespace SoundMetrics.HID.Windows
                 if (Joystick.GetJoystickPosition(joystickId, out var posInfo))
                 {
                     var (joystickId, joyInfoEx) = posInfo;
-                    var report = new JoystickPositionReport
+                    var report = new JoystickReport
                     {
                         JoystickId = joystickId,
                         JoyInfoEx = joyInfoEx,
@@ -210,6 +244,6 @@ namespace SoundMetrics.HID.Windows
             // Free up unmanaged resources
         }
 
-        public IObservable<JoystickPositionReport> JoystickPositionReports => posSubject;
+        public IObservable<JoystickReport> JoystickReports => posSubject;
     }
 }

@@ -9,7 +9,6 @@ open System
 
 module internal LegacyAcousticProjectionDetails =
     open SoundMetrics.Aris.AcousticSettings
-    open SoundMetrics.Aris.AcousticSettings.AcousticMath
     open SoundMetrics.Data
     open SoundMetrics.Data.Range
 
@@ -73,12 +72,13 @@ module internal LegacyAcousticProjectionDetails =
                     | CustomSamplePeriod samplePeriod -> samplePeriod
                     | AutoSamplePeriod -> deriveAutoSamplePeriod projection
 
-                calculateMaximumFrameRate systemContext.SystemType
-                                          projection.PingMode
-                                          projection.SampleStartDelay
-                                          projection.SampleCount.Count
-                                          samplePeriod
-                                          projection.AntialiasingPeriod
+                AcousticMath.CalculateMaximumFrameRate(
+                    systemContext.SystemType,
+                    projection.PingMode,
+                    projection.SampleStartDelay,
+                    projection.SampleCount.Count,
+                    samplePeriod,
+                    projection.AntialiasingPeriod)
 
             range SonarConfig.FrameRateRange.Min maxDynamicFrameRate
 

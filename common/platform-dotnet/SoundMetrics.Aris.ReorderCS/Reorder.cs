@@ -20,10 +20,10 @@ namespace SoundMetrics.Aris.ReorderCS
         /// <param name="inputBuffer">The input samples</param>
         /// <param name="outputBuffer">Where to put the reordered samples (out param).</param>
         public static unsafe void ReorderFrame(
-            UInt32 pingMode,
-            UInt32 pingsPerFrame,
-            UInt32 beamCount,
-            UInt32 samplesPerBeam,
+            Int32 pingMode,
+            Int32 pingsPerFrame,
+            Int32 beamCount,
+            Int32 samplesPerBeam,
             IntPtr inputBuffer,
             IntPtr outputBuffer)
         {
@@ -45,11 +45,11 @@ namespace SoundMetrics.Aris.ReorderCS
             byte* inputByte = (byte*)inputBuffer.ToPointer();
             byte* outputBuf = (byte*)outputBuffer.ToPointer();
 
-            for (uint pingIdx = 0; pingIdx < pingsPerFrame; ++pingIdx)
+            for (int pingIdx = 0; pingIdx < pingsPerFrame; ++pingIdx)
             {
-                for (uint sampleIdx = 0; sampleIdx < samplesPerBeam; ++sampleIdx)
+                for (int sampleIdx = 0; sampleIdx < samplesPerBeam; ++sampleIdx)
                 {
-                    uint composed = sampleIdx * beamCount + pingIdx;
+                    int composed = sampleIdx * beamCount + pingIdx;
                     outputBuf[composed + chRvMultMap[0]] = inputByte[0];
                     outputBuf[composed + chRvMultMap[1]] = inputByte[1];
                     outputBuf[composed + chRvMultMap[2]] = inputByte[2];
@@ -68,31 +68,6 @@ namespace SoundMetrics.Aris.ReorderCS
                     outputBuf[composed + chRvMultMap[15]] = inputByte[15];
                     inputByte += beamsPerPing;
                 }
-            }
-        }
-
-        private static uint PingModeToPingsPerFrame(uint pingMode)
-        {
-            switch (pingMode)
-            {
-                case 1: return 3;
-                case 3: return 6;
-                case 6: return 4;
-                case 9: return 8;
-                default: return 0;
-            }
-        }
-
-        private static uint PingModeToNumBeams(uint pingMode)
-        {
-            switch (pingMode)
-            {
-
-                case 1: return 48;
-                case 3: return 96;
-                case 6: return 64;
-                case 9: return 128;
-                default: return 0;
             }
         }
     }

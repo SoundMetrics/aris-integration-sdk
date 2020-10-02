@@ -33,9 +33,10 @@ module private NativeBufferDetails =
         static member private EmptyBuffer = lazy (new NativeBufferHandle(Marshal.AllocHGlobal(0), 0))
         static member Empty = NativeBufferHandle.EmptyBuffer.Value
 
-    let copyMemory(destination : nativeptr<byte>,
-                   source : nativeptr<byte>,
-                   length : int) : unit =
+    let copyMemory (destination : nativeptr<byte>)
+                   (source : nativeptr<byte>)
+                   (length : int)
+                   : unit =
         // Class `Marshal` does not provide a native-to-native Copy function, so
         // for the moment do the copy manually. The intent here is to provide a
         // portable "copy memory" function that does not require writing C or C++
@@ -68,7 +69,7 @@ module private NativeBufferDetails =
 
     // Mutates `buffer`
     let copyByteArraysToBuffer (arrays : (int * byte array) seq) (buffer : NativeBufferHandle) =
-        
+
         // Here we can use `Marshal` to do the work.
         let buffer' = NativePtr.ofNativeInt<byte> buffer.IntPtr
         for (offset, source) in arrays do
@@ -104,10 +105,6 @@ module private NativeBufferDetails =
         arr
 
 
-type TransformFunction =
-    // PrimitivePingMode * PingsPerFrame * BeamCount * SamplesPerBeam * nativeint * nativeint
-    delegate of (uint32 * uint32 * uint32 * uint32 * nativeint * nativeint) -> unit
-
 open NativeBufferDetails
 
 /// Immutable buffer, backed by native memory in order to avoid the LOH.
@@ -126,7 +123,6 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
             // Clean up managed resources
             checkDisposed()
             disposed <- true
-            GC.SuppressFinalize(self)
 
         // Clean up native resources
         buffer.Dispose()
@@ -135,23 +131,44 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
     interface IDisposable with
         member s.Dispose() = dispose true
 
-    member __.Dispose() = dispose true
+    member __.Dispose() =
+        dispose true
+        GC.SuppressFinalize(self)
+
     override __.Finalize() = dispose false
 
     member __.Length = buffer.Length
 
-    member __.TransformFrame(txf : TransformFunction,
-                             pingMode : uint32,
-                             pingsPerFrame : uint32,
-                             beamCount : uint32,
-                             samplesPerBeam : uint32) : NativeBuffer =
+    member __.Transform(txf : Action<nativeint,nativeint>) : NativeBuffer =
 
         let destination = NativeBufferHandle.Create buffer.Length
         let source = buffer
-        txf.Invoke(pingMode, pingsPerFrame, beamCount, samplesPerBeam, source.IntPtr, destination.IntPtr)
+        txf.Invoke(source.IntPtr, destination.IntPtr)
         new NativeBuffer(destination)
 
-    member __.Map<'Result>(f : (nativeptr<byte> * int) -> 'Result) : 'Result = f(buffer.NativePtr, buffer.Length)
+    member __.UpscaleTransformToBuffer(txf : Action<nativeint,nativeint>,
+                                       destination : nativeint) : unit =
+
+        txf.Invoke(buffer.IntPtr, destination)
+
+    member me.UpscaleTransform(txf : Action<nativeint,nativeint>, scale : int) : NativeBuffer =
+
+        let newBufferSize = buffer.Length * scale
+        let destination = NativeBufferHandle.Create newBufferSize
+        me.UpscaleTransformToBuffer(txf, destination.IntPtr)
+        new NativeBuffer(destination)
+
+    member __.CopyTo(destination : nativeint, length : int) =
+        if length <> buffer.Length then
+            invalidArg "length" "Invalid length specified"
+
+        let destination' = NativePtr.ofNativeInt<byte> destination
+        let source = buffer.NativePtr
+        copyMemory destination' source length
+
+    member __.Map<'Result>(f : Func<nativeptr<byte>,int,'Result>) : 'Result =
+
+        f.Invoke(buffer.NativePtr, buffer.Length)
 
     member __.ToArray() = bufferToByteArray buffer
 
@@ -167,17 +184,15 @@ type NativeBuffer private (buffer : NativeBufferHandle) as self =
 
         new NativeBuffer(byteArraysToNative fragments)
 
-module NativeBuffer = 
+module NativeBuffer =
 
     /// Transforms into a new copy; assumes the output is the same size as the source.
-    let transformFrame txf
-                       pingMode
-                       pingsPerFrame
-                       beamCount
-                       samplesPerBeam
-                       (source : NativeBuffer)
-                       : NativeBuffer =
-        source.TransformFrame(txf, pingMode, pingsPerFrame, beamCount, samplesPerBeam)
+    let transform (txf : nativeint -> nativeint -> unit) (source : NativeBuffer)
+        : NativeBuffer =
 
-    let map<'Result> (f : (nativeptr<byte> * int) -> 'Result) (source : NativeBuffer) : 'Result =
-            source.Map(f)
+        let txf' = Action<nativeint,nativeint>(txf)
+        source.Transform(txf')
+
+    let map<'Result> (f : (nativeptr<byte> -> int -> 'Result)) (source : NativeBuffer) : 'Result =
+            let f' = Func<nativeptr<byte>,int,'Result>(f)
+            source.Map(f')

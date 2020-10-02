@@ -11,11 +11,13 @@ open System
 open System.Net
 open System.Net.Sockets
 open System.Reactive.Subjects
+open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open System.Threading
 
 type UdpReceived = { UdpResult: UdpReceiveResult; Timestamp: DateTime }
 
-type UdpListener (addr : IPAddress, port, reuseAddr : bool) =
+type UdpListener (addr : IPAddress, port, reuseAddr : bool) as self =
 
     // Shutdown
     let cts = new CancellationTokenSource ()
@@ -38,11 +40,13 @@ type UdpListener (addr : IPAddress, port, reuseAddr : bool) =
                 packetSubject.OnNext { UdpResult = task.Result; Timestamp = now }
                 listen()
             else
+                use _ctx = self.PushModuleName()
                 Log.Debug("UdpListener: done")
                 doneSignal.Set() )
         task.ContinueWith(action) |> ignore
 
     do
+        use _ctx = self.PushModuleName("do-block")
         udp.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, reuseAddr)
         udp.Client.Bind (new IPEndPoint(addr, port))
         Log.Debug("UdpListener: opened on {ipAddr}", udp.Client.LocalEndPoint)
@@ -63,5 +67,11 @@ type UdpListener (addr : IPAddress, port, reuseAddr : bool) =
             otherDisposables |> List.iter (fun d -> if d <> null then d.Dispose())
 
     member ul.Dispose() = (ul :> IDisposable).Dispose()
+
+    member private __.PushModuleName
+            ([<CallerMemberName; Optional; DefaultParameterValue("")>]
+                memberName : string) =
+        let logPrefix = "UdpListener."
+        Logging.pushModuleName logPrefix memberName
 
     member __.Packets : IObservable<UdpReceived> = packetSubject :> IObservable<_>

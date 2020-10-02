@@ -13,7 +13,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <StackPanel MinHeight="16"/>
-        <dv:SimpleVisualizationControl Grid.Row="1" Background="BlanchedAlmond"/>
+        <dv:ArisImageControl Grid.Row="1" Background="BlanchedAlmond"/>
 
     </Grid>
 </Window>

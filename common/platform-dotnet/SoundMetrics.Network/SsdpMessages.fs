@@ -141,7 +141,9 @@ module SsdpMessages =
                 | Ok (name, value) ->
                     let name' = name.ToUpperInvariant()
                     map <- map |> Map.add name' value
-                | Error msg -> Log.Information("Invalid NVP: {line}", line)
+                | Error msg ->
+                    use _ctx = Logging.pushModuleName "SsdpMsgDeserialize." "getHeaderValueMap"
+                    Log.Information("Invalid NVP: {line}", line)
 
             map
 
