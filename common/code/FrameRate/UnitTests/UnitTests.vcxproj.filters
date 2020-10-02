@@ -24,6 +24,9 @@
     <ClInclude Include="..\FrameRate.h">
       <Filter>common/code/FrameRate</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Reordering\Reorder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="unittests.cpp">
@@ -31,6 +34,9 @@
     </ClCompile>
     <ClCompile Include="..\FrameRate.cpp">
       <Filter>common/code/FrameRate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Reordering\Reorder.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

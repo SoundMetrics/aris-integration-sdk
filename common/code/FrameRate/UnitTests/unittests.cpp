@@ -1,82 +1,83 @@
 #include "CppUnitTest.h"
 #include "FrameRate.h"
+#include <algorithm>
+#include <string>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Aris::AcousticMath;
 
 namespace UnitTests
-{		
+{
+    using SystemType = Aris::Common::SystemType;
+    using FineDuration = unsigned;
+    using uint = unsigned;
+
+    struct TestCase
+    {
+        SystemType      systemType;
+        FineDuration    sampleStartDelay;
+        FineDuration    samplePeriod;
+        int             samplesPerBeam;
+        uint            pingMode;
+        FineDuration    antialiasing;
+        FineDuration    interpacketDelay;
+
+        double          expectedFrameRate;
+    };
+
+    constexpr double kDelta = 0.05;
+    constexpr double kMaxArisFrameRate = 15.0;
+
+    // From internal "ARIS Max Frame Rate Test Cases docx"
+    static const TestCase testInputs[] = {
+        // System, SSD, SP, SPB, pingMode, NumBeams, Frame Rate
+        { SystemType::Aris3000, 930, 4, 1750, 9, 0, 0, 13.92 },
+        { SystemType::Aris3000, 930, 4, 4000, 9, 0, 0, 6.7 },
+        { SystemType::Aris3000, 930, 5, 4000, 9, 0, 0, 5.71 },
+        { SystemType::Aris3000, 930, 6, 4000, 9, 0, 0, 4.81 },
+        { SystemType::Aris1800, 930, 4, 4000, 3, 0, 0, 9.13 },
+        { SystemType::Aris1800, 930, 5, 4000, 3, 0, 0, 7.61 },
+        { SystemType::Aris1800, 930, 6, 4000, 3, 0, 0, 6.41 },
+        { SystemType::Aris1200, 930, 4, 4000, 1, 0, 0, 15 },
+        { SystemType::Aris1200, 930, 5, 4000, 1, 0, 0, 15.46 },
+    };
+
     TEST_CLASS(FrameRateTests)
     {
-    private:
-
-        const double kDelta = 0.01;
-
     public:
 
-        // lower slope cycle period adjustment
-        TEST_METHOD(SamplesPerBeamLessThan2000FrameRateTest)
+        TEST_METHOD(MaxFrameRateTest)
         {
-            const double expected = 6.04;
-            const double actual = CalculateMaxFrameRate(Aris::Common::SystemType::Aris3000,
-                9,      // samplePeriod
-                1999,   // samplesPerBeam
-                19281,  // cyclePeriod
-                8);     // pingsPerFrame
+            int idxTestCase = 1;
 
-            Assert::AreEqual(expected, actual, kDelta);
-        }
+            std::for_each(
+                std::begin(testInputs),
+                std::end(testInputs),
+                [&idxTestCase](const auto& testCase) {
+                    bool enableInterpacketDelay = testCase.interpacketDelay != 0;
 
-        // higher slope cycle period adjustment
-        TEST_METHOD(SamplesPerBeamGreaterThan2000FrameRateTest)
-        {
-            const double expected = 5.03;
-            const double actual = CalculateMaxFrameRate(Aris::Common::SystemType::Aris3000,
-                9,      // samplePeriod
-                2400,   // samplesPerBeam
-                22890,  // cyclePeriod
-                8);     // pingsPerFrame
+                    auto actual =
+                        CalculateMaxFrameRate(
+                            testCase.systemType,
+                            testCase.pingMode,
+                            testCase.samplesPerBeam,
+                            testCase.sampleStartDelay,
+                            testCase.samplePeriod,
+                            testCase.antialiasing,
+                            enableInterpacketDelay,
+                            testCase.interpacketDelay);
 
-            Assert::AreEqual(expected, actual, kDelta);
-        }
+                    auto expected =
+                        std::min(testCase.expectedFrameRate, kMaxArisFrameRate);
 
-        // no cycle period delay
-        TEST_METHOD(SamplePeriod7FrameRateTest)
-        {
-            const double expected = 14.84;
-            const double actual = CalculateMaxFrameRate(Aris::Common::SystemType::Aris3000,
-                7,     // samplePeriod
-                1518,  // samplesPerBeam
-                7362,  // cyclePeriod
-                8);    // pingsPerFrame
+                    wchar_t message[1024];
+                    swprintf(message, sizeof message / sizeof message[0],
+                        L"Test case %d", idxTestCase);
 
-            Assert::AreEqual(expected, actual, kDelta);
-        }
+                    Assert::AreEqual(expected, actual, kDelta, message);
 
-        // some cycle period delay
-        TEST_METHOD(SamplePeriod6FrameRateTest)
-        {
-            const double expected = 14.01;
-            const double actual = CalculateMaxFrameRate(Aris::Common::SystemType::Aris3000,
-                6,     // samplePeriod
-                1518,  // samplesPerBeam
-                7362,  // cyclePeriod
-                8);    // pingsPerFrame
-
-            Assert::AreEqual(expected, actual, kDelta);
-        }
-
-        // most cycle period delay
-        TEST_METHOD(SamplePeriod4FrameRateTest)
-        {
-            const double expected = 13.055;
-            const double actual = CalculateMaxFrameRate(Aris::Common::SystemType::Aris3000,
-                4,     // samplePeriod
-                1518,  // samplesPerBeam
-                7362,  // cyclePeriod
-                8);    // pingsPerFrame
-
-            Assert::AreEqual(expected, actual, kDelta);
+                    ++idxTestCase;
+                });
         }
     };
 }
