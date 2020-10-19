@@ -158,7 +158,10 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
 
   // NOTE: we're always acking each packet for now; this should change when we
   // develop strategies for retrying packets.
+#define DISABLE_PACKET_ACK
+#ifndef DISABLE_PACKET_ACK
   sendAck(incomingFrameIndex, expectedDataOffset);
+#endif
 
   if (expectedDataOffset == framePart.total_data_size())
     Flush();
