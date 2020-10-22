@@ -25,7 +25,7 @@ namespace SoundMetrics.Aris.File
         /// <returns></returns>
         public static FileWriter CreateNewWithFrame(Frame firstFrame, string filePath)
         {
-            var writer = CreateNew(SonarConfig.GetSampleGeometry(firstFrame.FrameHeader), filePath);
+            var writer = CreateNew(firstFrame.FrameHeader, filePath);
 
             try
             {
@@ -40,11 +40,11 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        internal static FileWriter CreateNew(in SampleGeometry sampleGeometry, string filePath)
+        internal static FileWriter CreateNew(in FrameHeader firstFrameHeader, string filePath)
         {
             var stream = new FileStream(
                 filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-            return new FileWriter(sampleGeometry, stream);
+            return new FileWriter(firstFrameHeader, stream);
         }
 
         [Obsolete("Not yet implemented")]
@@ -55,14 +55,18 @@ namespace SoundMetrics.Aris.File
             throw new NotImplementedException();
         }
 
-        private FileWriter(in SampleGeometry sampleGeometry, FileStream fileStream)
+        private FileWriter(
+            in FrameHeader firstFrameHeader,
+            FileStream fileStream)
         {
             try
             {
+                var sampleGeometry = SonarConfig.GetSampleGeometry(firstFrameHeader);
+
                 this.sampleGeometry = sampleGeometry;
                 this.fileStream = fileStream;
 
-                WriteNewFileHeader(fileStream, sampleGeometry);
+                WriteNewFileHeader(fileStream, firstFrameHeader, sampleGeometry);
             }
             catch (Exception ex)
             {
@@ -143,10 +147,12 @@ namespace SoundMetrics.Aris.File
 
         private static void WriteNewFileHeader(
             FileStream stream,
+            in FrameHeader firstFrameHeader,
             SampleGeometry geometry)
         {
             var fileHeader = new FileHeader
             {
+                SN = firstFrameHeader.SonarSerialNumber,
                 Version = FileHeader.ArisFileSignature,
                 FrameCount = 0,
                 NumRawBeams = (uint)geometry.BeamCount,
