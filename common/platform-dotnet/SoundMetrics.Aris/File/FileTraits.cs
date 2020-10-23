@@ -24,10 +24,22 @@ namespace SoundMetrics.Aris.File
         public IEnumerable<string> IssueDescriptions =>
             FileIssueDescriptions.GetFlagDescriptions(Issues);
 
-        public static FileTraits GetFileTraits(string path, bool validateFrameHeaders)
+        public static bool GetFileTraits(
+            string path,
+            bool validateFrameHeaders,
+            out FileTraits? fileTraits)
         {
-            using var stream = System.IO.File.OpenRead(path);
-            return GetFileTraits(stream, validateFrameHeaders);
+            try
+            {
+                using var stream = System.IO.File.OpenRead(path);
+                fileTraits = GetFileTraits(stream, validateFrameHeaders);
+                return true;
+            }
+            catch (FileNotFoundException)
+            {
+                fileTraits = default;
+                return false;
+            }
         }
 
         private static FileTraits GetFileTraits(FileStream stream, bool validateFrameHeaders)
