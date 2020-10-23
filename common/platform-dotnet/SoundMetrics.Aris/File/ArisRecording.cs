@@ -208,6 +208,12 @@ namespace SoundMetrics.Aris.File
 
         internal static bool IsValidFrameHeader(in FrameHeader frameHeader, out string reason)
         {
+            if (frameHeader.SonarSerialNumber < 1)
+            {
+                reason = "Invalid serial number";
+                return false;
+            }
+
             if (frameHeader.Version != FrameHeader.ArisFrameSignature)
             {
                 reason = "Invalid frame signature";
