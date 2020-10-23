@@ -172,11 +172,11 @@ namespace SoundMetrics.Aris.File
         public override string ToString()
         {
             var issues = string.Join("; ", IssueDescriptions);
-            return $"FileLength={FileLength}"
+            return $"FileLength={FileLength:N0}"
                 + $"; Geometry=[{Geometry}]"
-                + $"; SerializedFrameSize={SerializedFrameSize}"
-                + $"; CalculatedFrameCount={CalculatedFrameCount}"
-                + $"; ValidFrameHeaderCount={ValidFrameHeaderCount}"
+                + $"; SerializedFrameSize={SerializedFrameSize:N0}"
+                + $"; CalculatedFrameCount={CalculatedFrameCount:N0}"
+                + $"; ValidFrameHeaderCount={ValidFrameHeaderCount:N0}"
                 + $"; Issues='{issues}'";
         }
     }

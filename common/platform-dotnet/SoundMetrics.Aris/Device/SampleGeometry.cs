@@ -23,8 +23,8 @@
         public int PingsPerFrame { get; private set; }
 
         public override string ToString() =>
-            $"BeamCount={BeamCount}; SamplesPerBeam={SamplesPerBeam}; "
-                + $"TotalSampleCount={TotalSampleCount}; PingsPerFrame={PingsPerFrame}";
+            $"BeamCount={BeamCount}; SamplesPerBeam={SamplesPerBeam:N0}; "
+                + $"TotalSampleCount={TotalSampleCount:N0}; PingsPerFrame={PingsPerFrame}";
 
         public void Deconstruct(
             out int beamCount,
