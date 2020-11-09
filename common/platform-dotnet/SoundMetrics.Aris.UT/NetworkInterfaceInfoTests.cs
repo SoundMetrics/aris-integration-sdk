@@ -61,7 +61,7 @@ namespace SoundMetrics.Aris.UT
             byte[] ToBytes(int i) => BitConverter.GetBytes(i);
 
             var numberedCases =
-                Enumerable.Range(1, testCases.Length).Zip(testCases);
+                System.Linq.Enumerable.Range(1, testCases.Length).Zip(testCases);
 
             foreach (var (i, (a, b, expected)) in numberedCases)
             {
@@ -84,7 +84,7 @@ namespace SoundMetrics.Aris.UT
             };
 
             var numberedCases =
-                Enumerable.Range(1, testCases.Length).Zip(testCases);
+                System.Linq.Enumerable.Range(1, testCases.Length).Zip(testCases);
 
             foreach (var (i, (a, mask, expected)) in numberedCases)
             {
@@ -120,7 +120,7 @@ namespace SoundMetrics.Aris.UT
 
 
             var numberedCases =
-                Enumerable.Range(1, testCases.Length).Zip(testCases);
+                System.Linq.Enumerable.Range(1, testCases.Length).Zip(testCases);
 
             foreach (var (i, (addr, subnet, mask, expected)) in numberedCases)
             {
