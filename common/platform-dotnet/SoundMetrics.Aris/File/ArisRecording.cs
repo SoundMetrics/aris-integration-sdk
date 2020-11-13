@@ -175,7 +175,18 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        internal static bool ReadFileHeader(
+        public static bool ReadFileHeader(
+            string path,
+            out FileHeader fileHeader,
+            out FileIssue issue)
+        {
+            using (var stream = System.IO.File.OpenRead(path))
+            {
+                return ReadFileHeader(stream, out fileHeader, out issue);
+            }
+        }
+
+        public static bool ReadFileHeader(
             FileStream stream,
             out FileHeader fileHeader,
             out FileIssue issue)

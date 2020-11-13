@@ -15,6 +15,17 @@ namespace SoundMetrics.Aris.File
     public sealed class FileWriter : IDisposable
     {
         /// <summary>
+        /// Creates a new <see cref="FileWriter"/> and associated empty file.
+        /// All frames in the file must have the same <see cref="SampleGeometry"/>
+        /// as the first frame.
+        /// </summary>
+        /// <param name="frameHeader">The frame header used to derive the file header.</param>
+        /// <param name="filePath">The path of the file to be created.</param>
+        /// <returns></returns>
+        public static FileWriter CreateEmpty(in FrameHeader frameHeader, string filePath) =>
+            CreateNew(frameHeader, filePath);
+
+        /// <summary>
         /// Creates a new <see cref="FileWriter"/> and writes its first frame to
         /// a new file.
         /// All frames in the file must have the same <see cref="SampleGeometry"/>

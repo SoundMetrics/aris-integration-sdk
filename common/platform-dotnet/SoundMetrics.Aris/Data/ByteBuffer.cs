@@ -15,11 +15,11 @@ namespace SoundMetrics.Aris.Data
     /// </summary>
     public sealed class ByteBuffer : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public delegate void InitializeBuffer(Span<byte> buffer);
-        public delegate void TransformBuffer(
+        public delegate void InitializeBufferFn(Span<byte> buffer);
+        public delegate void TransformBufferFn(
             ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
 
-        internal ByteBuffer(int length, InitializeBuffer initializeBuffer)
+        internal ByteBuffer(int length, InitializeBufferFn initializeBuffer)
             : base(ownsHandle: true)
         {
             if (length < 0)
@@ -43,7 +43,7 @@ namespace SoundMetrics.Aris.Data
         /// <summary>
         /// Construct from existing memory.
         /// </summary>
-        internal ByteBuffer(ReadOnlyMemory<byte> source)
+        public ByteBuffer(ReadOnlyMemory<byte> source)
             : this(source.Length, CreateInitializer(source))
         {
         }
@@ -76,7 +76,7 @@ namespace SoundMetrics.Aris.Data
         private static int SumBufferLengths(List<ReadOnlyMemory<byte>> buffers) =>
             buffers.Sum(buffer => buffer.Length);
 
-        private static InitializeBuffer CreateInitializer(ReadOnlyMemory<byte> source)
+        private static InitializeBufferFn CreateInitializer(ReadOnlyMemory<byte> source)
         {
             return output =>
             {
@@ -84,7 +84,7 @@ namespace SoundMetrics.Aris.Data
             };
         }
 
-        private static InitializeBuffer CreateInitializer(
+        private static InitializeBufferFn CreateInitializer(
             List<ReadOnlyMemory<byte>> sourceBuffers)
         {
             return output =>
@@ -119,7 +119,7 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        public ByteBuffer Transform(TransformBuffer transformBuffer)
+        public ByteBuffer Transform(TransformBufferFn transformBuffer)
         {
             void initialize(Span<byte> output) => transformBuffer(this.Span, output);
 
