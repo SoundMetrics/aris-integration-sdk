@@ -133,7 +133,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollectRecordingStats", "Sa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowBeacons", "ShowBeacons\ShowBeacons.csproj", "{1CBD762E-FEDC-45E0-A146-8E2CA36909D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnnamedTestProgram", "UnnamedTestProgram\UnnamedTestProgram.csproj", "{54328139-3467-4231-BE06-9410A03168FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnnamedTestProgram", "UnnamedTestProgram\UnnamedTestProgram.csproj", "{54328139-3467-4231-BE06-9410A03168FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.Core", "SoundMetrics.Aris.Core\SoundMetrics.Aris.Core.csproj", "{F17FF0D4-B6EA-42C8-90D1-E696827B1017}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -285,6 +287,10 @@ Global
 		{54328139-3467-4231-BE06-9410A03168FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54328139-3467-4231-BE06-9410A03168FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54328139-3467-4231-BE06-9410A03168FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F17FF0D4-B6EA-42C8-90D1-E696827B1017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F17FF0D4-B6EA-42C8-90D1-E696827B1017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F17FF0D4-B6EA-42C8-90D1-E696827B1017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F17FF0D4-B6EA-42C8-90D1-E696827B1017}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
