@@ -1,4 +1,4 @@
-﻿using SoundMetrics.Aris.Device;
+﻿using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Network;
 using System;
 using System.Net;

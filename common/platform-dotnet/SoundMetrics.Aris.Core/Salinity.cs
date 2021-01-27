@@ -1,4 +1,6 @@
-﻿namespace SoundMetrics.Aris.Device
+﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+
+namespace SoundMetrics.Aris.Core
 {
     public enum Salinity
     {

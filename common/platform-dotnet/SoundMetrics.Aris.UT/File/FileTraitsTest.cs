@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.File;
 using System;

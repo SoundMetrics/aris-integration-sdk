@@ -1,4 +1,5 @@
 ﻿using SoundMetrics.Aris.Availability;
+using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
 using System;
 using System.Collections.Generic;
@@ -69,48 +70,57 @@ namespace SoundMetrics.Aris.Network
                         var beacon =
                             global::Aris.Availability.Parser.ParseFrom(udpReceived.Received.Buffer);
 
-                        if (!beacon.IsDiverHeld)
+                        if (SystemType.TryGetFromIntegralValue(
+                            (int)beacon.SystemType,
+                            out var systemType))
                         {
-                            var variants =
-                                (IEnumerable<string>?)beacon.SystemVariants?.Enabled ?? new string[0];
-                            bool isVoyager = variants.Contains(VariantFlags.VoyagerVariant);
+                            if (!beacon.IsDiverHeld)
+                            {
+                                var variants =
+                                    (IEnumerable<string>?)beacon.SystemVariants?.Enabled ?? new string[0];
+                                bool isVoyager = variants.Contains(VariantFlags.VoyagerVariant);
 
-                            if (isVoyager)
-                            {
-                                beaconSubject.OnNext(
-                                    new VoyagerBeacon(
-                                    udpReceived.Timestamp,
-                                    udpReceived.Received.RemoteEndPoint.Address,
-                                    (Data.SystemType)beacon.SystemType,
-                                    beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
-                                    new OnboardSoftwareVersion
-                                    {
-                                        Major = beacon.SoftwareVersion.Major,
-                                        Minor = beacon.SoftwareVersion.Minor,
-                                        BuildNumber = beacon.SoftwareVersion.Buildnumber,
-                                    },
-                                    (ConnectionAvailability)beacon.ConnectionState,
-                                    beacon.CpuTemp)
-                                );
+                                if (isVoyager)
+                                {
+                                    beaconSubject.OnNext(
+                                        new VoyagerBeacon(
+                                            udpReceived.Timestamp,
+                                            udpReceived.Received.RemoteEndPoint.Address,
+                                            systemType,
+                                            beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
+                                            new OnboardSoftwareVersion
+                                            {
+                                                Major = beacon.SoftwareVersion.Major,
+                                                Minor = beacon.SoftwareVersion.Minor,
+                                                BuildNumber = beacon.SoftwareVersion.Buildnumber,
+                                            },
+                                            (ConnectionAvailability)beacon.ConnectionState,
+                                            beacon.CpuTemp)
+                                    );
+                                }
+                                else
+                                {
+                                    beaconSubject.OnNext(
+                                        new ExplorerBeacon(
+                                            udpReceived.Timestamp,
+                                            udpReceived.Received.RemoteEndPoint.Address,
+                                            systemType,
+                                            beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
+                                            new OnboardSoftwareVersion
+                                            {
+                                                Major = beacon.SoftwareVersion.Major,
+                                                Minor = beacon.SoftwareVersion.Minor,
+                                                BuildNumber = beacon.SoftwareVersion.Buildnumber,
+                                            },
+                                            (ConnectionAvailability)beacon.ConnectionState,
+                                            beacon.CpuTemp)
+                                    );
+                                }
                             }
-                            else
-                            {
-                                beaconSubject.OnNext(
-                                    new ExplorerBeacon(
-                                    udpReceived.Timestamp,
-                                    udpReceived.Received.RemoteEndPoint.Address,
-                                    (Data.SystemType)beacon.SystemType,
-                                    beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
-                                    new OnboardSoftwareVersion
-                                    {
-                                        Major = beacon.SoftwareVersion.Major,
-                                        Minor = beacon.SoftwareVersion.Minor,
-                                        BuildNumber = beacon.SoftwareVersion.Buildnumber,
-                                    },
-                                    (ConnectionAvailability)beacon.ConnectionState,
-                                    beacon.CpuTemp)
-                                );
-                            }
+                        }
+                        else
+                        {
+                            // Unrecognizable beacon or packet from another source
                         }
                     }
                     catch

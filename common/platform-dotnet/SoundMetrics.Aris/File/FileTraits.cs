@@ -1,5 +1,5 @@
-﻿using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.Device;
+﻿using SoundMetrics.Aris.Core;
+using SoundMetrics.Aris.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,32 +65,42 @@ namespace SoundMetrics.Aris.File
                         var fileHeaderSize = Marshal.SizeOf<FileHeader>();
                         var frameHeaderSize = Marshal.SizeOf<FrameHeader>();
 
-                        var geometry = SonarConfig.GetSampleGeometry(frameHeader);
-                        var serializedFrameSize = geometry.TotalSampleCount + frameHeaderSize;
-                        var calculatedFrameCount =
-                            (double)(fileSize - fileHeaderSize) / serializedFrameSize;
-                        var wholeFrames = Math.Floor(calculatedFrameCount);
-
-                        var validFrameHeaderCount =
-                            ValidateFrameHeaders(stream, firstFramePosition, geometry, validateFrameHeaders);
-
-                        var issues = FileIssue.None;
-                        issues = wholeFrames == 0 ? issues | FileIssue.NoFrames : issues;
-                        issues =
-                            validFrameHeaderCount is null
-                                ? issues | FileIssue.InvalidFrameHeaders
-                                : issues;
-
-                        return new FileTraits
+                        if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var geometry))
                         {
-                            FileLength = fileSize,
-                            Geometry = geometry,
-                            SerializedFrameSize = serializedFrameSize,
-                            FileHeaderFrameCount = (int)fileHeader.FrameCount,
-                            CalculatedFrameCount = calculatedFrameCount,
-                            ValidFrameHeaderCount = validFrameHeaderCount,
-                            Issues = issues,
-                        };
+                            var serializedFrameSize = geometry.TotalSampleCount + frameHeaderSize;
+                            var calculatedFrameCount =
+                                (double)(fileSize - fileHeaderSize) / serializedFrameSize;
+                            var wholeFrames = Math.Floor(calculatedFrameCount);
+
+                            var validFrameHeaderCount =
+                                ValidateFrameHeaders(stream, firstFramePosition, geometry, validateFrameHeaders);
+
+                            var issues = FileIssue.None;
+                            issues = wholeFrames == 0 ? issues | FileIssue.NoFrames : issues;
+                            issues =
+                                validFrameHeaderCount is null
+                                    ? issues | FileIssue.InvalidFrameHeaders
+                                    : issues;
+
+                            return new FileTraits
+                            {
+                                FileLength = fileSize,
+                                Geometry = geometry,
+                                SerializedFrameSize = serializedFrameSize,
+                                FileHeaderFrameCount = (int)fileHeader.FrameCount,
+                                CalculatedFrameCount = calculatedFrameCount,
+                                ValidFrameHeaderCount = validFrameHeaderCount,
+                                Issues = issues,
+                            };
+                        }
+                        else
+                        {
+                            return new FileTraits
+                            {
+                                FileLength = fileSize,
+                                Issues = FileIssue.InvalidFirstFrameHeader,
+                            };
+                        }
                     }
                     else
                     {

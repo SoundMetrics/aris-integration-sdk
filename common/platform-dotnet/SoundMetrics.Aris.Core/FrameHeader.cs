@@ -1,9 +1,9 @@
-﻿// ArisFrameHeader.cs
+﻿// FrameHeader.cs
 
 // Disable CS1591 so we don't get a huge number of xmldoc warnings in projects that use it.
 #pragma warning disable CS1591
 
-namespace SoundMetrics.Aris.Data
+namespace SoundMetrics.Aris.Core
 {
 
     using System;

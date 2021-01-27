@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
 using System;
 using System.IO;
@@ -31,17 +32,28 @@ namespace SoundMetrics.Aris.UT
                         testCase.SamplesPerBeam,
                         inputSamples);
 
-                var outputFrame = FrameSampleOrder.ReorderFrame(inputFrame);
+                if (FrameSampleOrder.TryReorderFrame(inputFrame, out var outputFrame))
+                {
+                    Assert.IsTrue(
+                        AreEqual(expectedSamples.Span, outputFrame.Samples),
+                        testDescription);
 
-                Assert.IsTrue(
-                    AreEqual(expectedSamples.Span, outputFrame.Samples),
-                    testDescription);
-
-                var secondTime = FrameSampleOrder.ReorderFrame(outputFrame);
-                Assert.IsTrue(
-                    AreEqual(expectedSamples.Span, secondTime.Samples),
-                    testDescription + " (second time)");
-                Assert.AreSame(outputFrame, secondTime);
+                    if (FrameSampleOrder.TryReorderFrame(outputFrame, out var secondTime))
+                    {
+                        Assert.IsTrue(
+                            AreEqual(expectedSamples.Span, secondTime.Samples),
+                            testDescription + " (second time)");
+                        Assert.AreSame(outputFrame, secondTime);
+                    }
+                    else
+                    {
+                        Assert.Fail("Second reorder failed");
+                    }
+                }
+                else
+                {
+                    Assert.Fail("First reorder failed");
+                }
             }
         }
 
@@ -56,7 +68,14 @@ namespace SoundMetrics.Aris.UT
                 SamplesPerBeam = (uint)samplesPerBeam,
             };
 
-            return new Frame(frameHeader, new ByteBuffer(samples));
+            if (Frame.TryCreate(frameHeader, new ByteBuffer(samples), out var frame))
+            {
+                return frame;
+            }
+            else
+            {
+                throw new Exception("Couldn't create test frame");
+            }
         }
 
         private static bool AreEqual(ReadOnlySpan<byte> a, ByteBuffer b)

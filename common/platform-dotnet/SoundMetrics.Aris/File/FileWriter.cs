@@ -1,6 +1,6 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.Device;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -72,12 +72,17 @@ namespace SoundMetrics.Aris.File
         {
             try
             {
-                var sampleGeometry = SonarConfig.GetSampleGeometry(firstFrameHeader);
+                if (SystemConfiguration.TryGetSampleGeometry(firstFrameHeader, out var sampleGeometry))
+                {
+                    this.sampleGeometry = sampleGeometry;
+                    this.fileStream = fileStream;
 
-                this.sampleGeometry = sampleGeometry;
-                this.fileStream = fileStream;
-
-                WriteNewFileHeader(fileStream, firstFrameHeader, sampleGeometry);
+                    WriteNewFileHeader(fileStream, firstFrameHeader, sampleGeometry);
+                }
+                else
+                {
+                    throw new Exception("Couldn't determine sample geometry");
+                }
             }
             catch (Exception ex)
             {
@@ -102,26 +107,30 @@ namespace SoundMetrics.Aris.File
 
             try
             {
-                var frameGeometry =
-                    SonarConfig.GetSampleGeometry(frame.FrameHeader);
-
-                if (frameGeometry != sampleGeometry)
+                if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var geometry))
                 {
-                    throw new InvalidOperationException(
-                        "Cannot change the sample geometry within a recording");
+                    if (geometry != sampleGeometry)
+                    {
+                        throw new InvalidOperationException(
+                            "Cannot change the sample geometry within a recording");
+                    }
+
+                    var frameIndex = frameCount;
+                    var headerForUpdate = frame.FrameHeader;
+                    headerForUpdate.FrameIndex = frameIndex;
+
+                    fileStream.WriteStruct(headerForUpdate);
+                    fileStream.Write(frame.Samples.Span);
+
+                    ++frameCount;
+                    success = true;
+
+                    return (int)frameIndex;
                 }
-
-                var frameIndex = frameCount;
-                var headerForUpdate = frame.FrameHeader;
-                headerForUpdate.FrameIndex = frameIndex;
-
-                fileStream.WriteStruct(headerForUpdate);
-                fileStream.Write(frame.Samples.Span);
-
-                ++frameCount;
-                success = true;
-
-                return (int)frameIndex;
+                else
+                {
+                    throw new Exception("Couldn't determine sample geometry");
+                }
             }
             finally
             {

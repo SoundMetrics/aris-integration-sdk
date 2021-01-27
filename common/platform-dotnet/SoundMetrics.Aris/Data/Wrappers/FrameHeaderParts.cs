@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SoundMetrics.Aris.Core;
+using System;
 
 namespace SoundMetrics.Aris.Data.Wrappers
 {
@@ -9,7 +10,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
             this.frameHeader = frameHeader;
         }
 
-        public bool HasValidSignature { get => frameHeader[0].Version == Data.FrameHeader.ArisFrameSignature; }
+        public bool HasValidSignature { get => frameHeader[0].Version == Core.FrameHeader.ArisFrameSignature; }
 
         public ArisFrameHeaderIdentity Identity { get => new ArisFrameHeaderIdentity(this); }
         public ArisFrameHeaderTime Time { get => new ArisFrameHeaderTime(this); }
@@ -47,7 +48,20 @@ namespace SoundMetrics.Aris.Data.Wrappers
             this.parts = parts;
         }
 
-        public SystemType SystemType { get => (SystemType)parts.FrameHeader[0].TheSystemType; }
+        public SystemType SystemType
+        {
+            get
+            {
+                if (SystemType.TryGetFromIntegralValue(
+                    (int)parts.FrameHeader[0].TheSystemType,
+                    out var systemType))
+                {
+                    return systemType;
+                }
+
+                throw new Exception($"Invalid system type: [{parts.FrameHeader[0].TheSystemType}]");
+            }
+        }
 
         /// Sonar serial number as labeled on housing.
         public uint SerialNumber { get => parts.FrameHeader[0].SonarSerialNumber; }

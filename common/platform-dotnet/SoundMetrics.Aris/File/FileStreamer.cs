@@ -1,5 +1,5 @@
-﻿using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.Device;
+﻿using SoundMetrics.Aris.Core;
+using SoundMetrics.Aris.Data;
 using System;
 using System.Diagnostics;
 using System.Reactive.Linq;
@@ -37,11 +37,14 @@ namespace SoundMetrics.Aris.File
 
         private void HandleIncomingFrame(Frame frame)
         {
+            bool foundGeometry =
+                SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry);
+
             if (allowedGeometry is SampleGeometry expectedGeometry)
             {
                 Debug.Assert(!(fileWriter is null));
 
-                if (SonarConfig.GetSampleGeometry(frame.FrameHeader) == expectedGeometry)
+                if (foundGeometry && sampleGeometry == expectedGeometry)
                 {
                     fileWriter.WriteFrame(frame);
                 }
@@ -49,8 +52,11 @@ namespace SoundMetrics.Aris.File
             else
             {
                 Debug.Assert(fileWriter is null);
-                allowedGeometry = SonarConfig.GetSampleGeometry(frame.FrameHeader);
-                fileWriter = FileWriter.CreateNewWithFrame(frame, outputPath);
+                if (foundGeometry)
+                {
+                    allowedGeometry = sampleGeometry;
+                    fileWriter = FileWriter.CreateNewWithFrame(frame, outputPath);
+                }
             }
         }
 

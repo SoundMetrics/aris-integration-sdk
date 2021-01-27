@@ -1,4 +1,5 @@
-﻿using SoundMetrics.Aris.Data;
+﻿using SoundMetrics.Aris.Core;
+using SoundMetrics.Aris.Data;
 using System;
 using System.Diagnostics;
 using System.Net;

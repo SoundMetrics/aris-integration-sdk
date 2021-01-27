@@ -1,7 +1,6 @@
 ﻿// Copyright 2014-2020 Sound Metrics Corp. All Rights Reserved.
 
-using Serilog;
-using SoundMetrics.Aris.Device;
+using SoundMetrics.Aris.Core;
 using System;
 using System.Runtime.InteropServices;
 
@@ -14,41 +13,47 @@ namespace SoundMetrics.Aris.Data
         /// </summary>
         /// <param name="frame">The frame to be reordered.</param>
         /// <returns>A Frame instance with reordered data.</returns>
-        public static Frame ReorderFrame(Frame frame)
+        public static bool TryReorderFrame(Frame frame, out Frame? reorderedFrame)
         {
             if (frame.FrameHeader.ReorderedSamples != 0)
             {
                 // The frame is already reordered. Other than the code that
                 // initially creates the frame storage, virtually no code
                 // should be aware of reordering.
-                return frame;
+                reorderedFrame = frame;
+                return true;
             }
 
-            var pingMode = (int)frame.FrameHeader.PingMode;
-            var (beamCount, samplesPerBeam, totalSampleCount, pingsPerFrame)
-                = SonarConfig.GetSampleGeometry(frame.FrameHeader);
-
-            var outputLength = totalSampleCount;
-            var output = Marshal.AllocHGlobal(outputLength);
-
-            try
+            if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry))
             {
-                IntPtr input = frame.Samples.DangerousGetHandle();
-                UnsafeReorderFrame(
-                    pingMode,
-                    pingsPerFrame,
-                    beamCount,
-                    samplesPerBeam,
-                    input,
-                    output);
+                var pingMode = (int)frame.FrameHeader.PingMode;
+                var outputLength = sampleGeometry.TotalSampleCount;
+                var output = Marshal.AllocHGlobal(outputLength);
 
-                var orderedSamples = new ByteBuffer(output, outputLength);
-                return new Frame(UpdateFrameHeader(frame.FrameHeader), orderedSamples);
+                try
+                {
+                    IntPtr input = frame.Samples.DangerousGetHandle();
+                    UnsafeReorderFrame(
+                        pingMode,
+                        sampleGeometry.PingsPerFrame,
+                        sampleGeometry.BeamCount,
+                        sampleGeometry.SamplesPerBeam,
+                        input,
+                        output);
+
+                    var orderedSamples = new ByteBuffer(output, outputLength);
+                    return Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame);
+                }
+                catch
+                {
+                    Marshal.FreeHGlobal(output);
+                    throw;
+                }
             }
-            catch
+            else
             {
-                Marshal.FreeHGlobal(output);
-                throw;
+                reorderedFrame = default;
+                return false;
             }
 
             static FrameHeader UpdateFrameHeader(in FrameHeader frameHeader)

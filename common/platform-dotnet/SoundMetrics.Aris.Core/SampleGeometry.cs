@@ -1,4 +1,6 @@
-﻿namespace SoundMetrics.Aris.Device
+﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+
+namespace SoundMetrics.Aris.Core
 {
     /// <summary>
     /// Describes the &quot;shape&quot; of a frame's samples.
@@ -40,7 +42,7 @@
 
         // Equality -----------------------------------------------------
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj is SampleGeometry other)
             {

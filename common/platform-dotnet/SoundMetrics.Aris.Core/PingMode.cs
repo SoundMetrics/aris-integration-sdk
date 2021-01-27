@@ -1,64 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+
+using System;
 
 namespace SoundMetrics.Aris.Core
 {
     public struct PingMode
     {
-        private PingMode(int integralValue, bool isValid)
+        private PingMode(
+            int integralValue,
+            int beamCount,
+            int pingsPerFrame)
         {
             this.integralValue = integralValue;
-            this.isValid = isValid;
+            this.beamCount = beamCount;
+            this.pingsPerFrame = pingsPerFrame;
         }
 
-        internal int IntegralValue
+        internal int IntegralValue => integralValue;
+
+        public int BeamCount => beamCount;
+
+        public int PingsPerFrame => pingsPerFrame;
+
+        public static readonly PingMode PingMode1 = new PingMode(1, 48, 3);
+        public static readonly PingMode PingMode3 = new PingMode(3, 96, 6);
+        public static readonly PingMode PingMode6 = new PingMode(6, 64, 4);
+        public static readonly PingMode PingMode9 = new PingMode(9, 128, 8);
+
+        public static bool TryGet(int integralValue, out PingMode pingMode)
         {
-            get
+            switch (integralValue)
             {
-                if (isValid)
-                {
-                    return integralValue;
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(
-                        "Invalid integral ping mode",
-                        nameof(IntegralValue));
-                }
-            }
-        }
+                case 1:
+                    pingMode = PingMode1;
+                    break;
+                case 3:
+                    pingMode = PingMode3;
+                    break;
+                case 6:
+                    pingMode = PingMode6;
+                    break;
+                case 9:
+                    pingMode = PingMode9;
+                    break;
 
-        public static readonly PingMode PingMode1 = new PingMode(1, isValid: true);
-        public static readonly PingMode PingMode3 = new PingMode(3, isValid: true);
-        public static readonly PingMode PingMode6 = new PingMode(6, isValid: true);
-        public static readonly PingMode PingMode9 = new PingMode(9, isValid: true);
-
-        public static PingMode From(int integralValue)
-        {
-            // Parsing invalid integral values as a valid value allows us to
-            // manipulate headers with invalid values.
-            var isValid = IsValidIntegralValue(integralValue);
-            return new PingMode(integralValue, isValid);
-        }
-
-        public static PingMode Invalid(int integralValue)
-        {
-            if (IsValidIntegralValue(integralValue))
-            {
-                throw new ArgumentOutOfRangeException($"{integralValue} is a valid integral value");
+                default:
+                    pingMode = default;
+                    return false;
             }
 
-            return new PingMode(integralValue, isValid: false);
+            return true;
         }
-
-        internal bool IsValid => IsValidIntegralValue(this.integralValue);
-
-        private static bool IsValidIntegralValue(int integralValue) =>
-            ValidIntegralValues.Contains(integralValue);
 
         private readonly int integralValue;
-        private readonly bool isValid;
-
-        private static readonly HashSet<int> ValidIntegralValues = new HashSet<int>(new[] { 1, 3, 6, 9 });
+        private readonly int beamCount;
+        private readonly int pingsPerFrame;
     }
 }

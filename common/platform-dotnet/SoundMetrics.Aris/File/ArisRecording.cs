@@ -1,5 +1,5 @@
-﻿using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.Device;
+﻿using SoundMetrics.Aris.Core;
+using SoundMetrics.Aris.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,10 +45,11 @@ namespace SoundMetrics.Aris.File
 
             static void AdvancePastSamples(FileStream file, in FrameHeader frameHeader)
             {
-                var (_, _, totalSampleCount, _) = Device.SonarConfig.GetSampleGeometry(frameHeader);
-
+                if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
                 {
+                    var totalSampleCount = sampleGeometry.TotalSampleCount;
                     var pos = file.Position;
+
                     if (file.Seek(totalSampleCount, SeekOrigin.Current) == pos + totalSampleCount)
                     {
                         // Successful.
@@ -59,6 +60,10 @@ namespace SoundMetrics.Aris.File
                         // of the file. Ignore this condition and let the next frame
                         // header read fail to get a frame header.
                     }
+                }
+                else
+                {
+                    throw new Exception("Couldn't determine sample geometry");
                 }
             }
         }
@@ -79,10 +84,12 @@ namespace SoundMetrics.Aris.File
 
                 while (true)
                 {
-                    if (ReadFrameHeaderWithValidation(stream, out frameHeader))
+                    if (ReadFrameHeaderWithValidation(stream, out frameHeader)
+                        && TryReadSamples(stream, frameHeader, out var samples)
+                        && Frame.TryCreate(frameHeader, samples, out var frame)
+                        && !(frame is null))
                     {
-                        var samples = ReadSamples(stream, frameHeader);
-                        yield return new Frame(frameHeader, samples);
+                        yield return frame;
                     }
                     else
                     {
@@ -95,21 +102,28 @@ namespace SoundMetrics.Aris.File
                 throw new Data.FormatException(FileIssueDescriptions.GetFlagDescription(issue));
             }
 
-            ByteBuffer ReadSamples(Stream stream, in FrameHeader frameHeader)
+            bool TryReadSamples(Stream stream, in FrameHeader frameHeader, out ByteBuffer? samples)
             {
-                var (_, _, totalSampleCount, _) = SonarConfig.GetSampleGeometry(frameHeader);
-                var sampleBuffer =
-                    new ByteBuffer(
-                        length: totalSampleCount,
-                        initializeBuffer: (Span<byte> buffer) =>
-                        {
-                            var bytesRead = stream.Read(buffer);
-                            if (bytesRead != totalSampleCount)
+                if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
+                {
+                    samples =
+                        new ByteBuffer(
+                            length: sampleGeometry.TotalSampleCount,
+                            initializeBuffer: (Span<byte> buffer) =>
                             {
-                                throw new Data.FormatException("Couldn't read all frame samples");
-                            }
-                        });
-                return sampleBuffer;
+                                var bytesRead = stream.Read(buffer);
+                                if (bytesRead != sampleGeometry.TotalSampleCount)
+                                {
+                                    throw new Data.FormatException("Couldn't read all frame samples");
+                                }
+                            });
+                    return true;
+                }
+                else
+                {
+                    samples = default;
+                    return false;
+                }
             }
         }
 
@@ -231,15 +245,16 @@ namespace SoundMetrics.Aris.File
                 return false;
             }
 
-            var pingMode = Device.PingMode.From((int)frameHeader.PingMode);
-            if (!pingMode.IsValid)
+            if (PingMode.TryGet((int)frameHeader.PingMode, out var pingMode))
+            {
+                reason = "";
+                return true;
+            }
+            else
             {
                 reason = $"Invalid ping mode '{frameHeader.PingMode}'";
                 return false;
             }
-
-            reason = "";
-            return true;
         }
     }
 }

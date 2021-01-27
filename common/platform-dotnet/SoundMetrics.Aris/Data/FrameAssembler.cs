@@ -1,4 +1,4 @@
-﻿using SoundMetrics.Aris.Device;
+﻿using SoundMetrics.Aris.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +13,14 @@ namespace SoundMetrics.Aris.Data
             this.frameHeader = frameHeader;
             frameIndex = frameHeader.FrameIndex;
 
-            var (_, _, totalSampleCount, _) = SonarConfig.GetSampleGeometry(frameHeader);
-            expectedSampleCount = totalSampleCount;
+            if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
+            {
+                expectedSampleCount = sampleGeometry.TotalSampleCount;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid frame header provided: sample geometry");
+            }
         }
 
         public bool AddFramePart(uint framePart, ReadOnlyMemory<byte> samples)
@@ -33,17 +39,11 @@ namespace SoundMetrics.Aris.Data
 
         public bool GetFullFrame(out Frame? frame)
         {
-            if (frameHeader is FrameHeader fh
-                && accumulatedSamples == expectedSampleCount)
-            {
-                frame = ConstructFrame(fh, sampleParts);
-                return true;
-            }
-            else
-            {
-                frame = null;
-                return false;
-            }
+            frame = default;
+
+            return frameHeader is FrameHeader fh
+                && accumulatedSamples == expectedSampleCount
+                && TryConstructFrame(fh, sampleParts, out frame);
         }
 
         private void Reset()
@@ -54,14 +54,18 @@ namespace SoundMetrics.Aris.Data
             sampleParts.Clear();
         }
 
-        private static Frame ConstructFrame(
+        private static bool TryConstructFrame(
             in FrameHeader frameHeader,
-            List<ReadOnlyMemory<byte>> sampleParts)
+            List<ReadOnlyMemory<byte>> sampleParts,
+            out Frame? frame)
         {
+            frame = default;
+
             var samples = new ByteBuffer(sampleParts);
-            var newFrame = new Frame(frameHeader, samples);
-            var reorderedFrame = FrameSampleOrder.ReorderFrame(newFrame);
-            return FrameSampleOrder.ReorderFrame(reorderedFrame);
+
+            return Frame.TryCreate(frameHeader, samples, out var newFrame)
+                        && !(newFrame is null)
+                        && FrameSampleOrder.TryReorderFrame(newFrame, out frame);
         }
 
         private FrameHeader? frameHeader;
