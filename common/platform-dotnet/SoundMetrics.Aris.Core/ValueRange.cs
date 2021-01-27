@@ -67,6 +67,12 @@ namespace SoundMetrics.Aris.Core
             =>
                 @this.ConstrainTo(that.Minimum, that.Maximum);
 
+        public static T ConstrainTo<T>(this T t, in ValueRange<T> range)
+            where T : struct, IComparable<T>
+            => Greater(
+                range.Minimum,
+                Lesser(range.Maximum, t));
+
         public static ValueRange<T> Intersect<T>(
             this ValueRange<T> @this,
             in ValueRange<T> that)
@@ -88,22 +94,24 @@ namespace SoundMetrics.Aris.Core
             throw new NotImplementedException();
         }
 
-        internal static T Lesser<T>(in T t, T? other)
+        internal static T Lesser<T>(in T t, in T? other)
             where T : struct, IComparable<T>
-        {
-            return
-                other.HasValue
-                    ? (t.CompareTo(other.Value) < 0 ? t : other.Value)
-                    : t;
-        }
+            =>
+                other.HasValue ? Lesser(t, other.Value) : t;
 
-        internal static T Greater<T>(in T t, T? other)
+        internal static T Lesser<T>(in T t, in T other)
             where T : struct, IComparable<T>
-        {
-            return
-                other.HasValue
-                    ? (t.CompareTo(other.Value) > 0 ? t : other.Value)
-                    : t;
-        }
+            =>
+                t.CompareTo(other) < 0 ? t : other;
+
+        internal static T Greater<T>(in T t, in T? other)
+            where T : struct, IComparable<T>
+            =>
+                other.HasValue ? Greater(t, other.Value) : t;
+
+        internal static T Greater<T>(in T t, in T other)
+            where T : struct, IComparable<T>
+            =>
+                t.CompareTo(other) > 0 ? t : other;
     }
 }

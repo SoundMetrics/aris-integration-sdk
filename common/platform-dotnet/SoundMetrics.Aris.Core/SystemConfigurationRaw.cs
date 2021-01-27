@@ -12,8 +12,8 @@ namespace SoundMetrics.Aris.Core
         public ValueRange<FineDuration> SamplePeriodRange { get; internal set; }
         public ValueRange<FineDuration> PulseWidthRange { get; internal set; }
 
-        public int CyclePeriodMargin => 420;
-        public int MinAntialiasing => 0;
+        public static readonly FineDuration CyclePeriodMargin = FineDuration.FromMicroseconds(420);
+        public const int MinAntialiasing = 0;
 
         public static readonly ValueRange<int> MaxSampleCountRange = new ValueRange<int>(200, 4000);
         public static readonly ValueRange<int> MaxFocusPositionRange = new ValueRange<int>(0, 1000);
