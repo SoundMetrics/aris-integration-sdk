@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Core
             this.pingsPerFrame = pingsPerFrame;
         }
 
-        internal int IntegralValue => integralValue;
+        public int IntegralValue => integralValue;
 
         public int BeamCount => beamCount;
 

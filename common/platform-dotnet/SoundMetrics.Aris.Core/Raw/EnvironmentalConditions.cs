@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Core.Raw
         private readonly Velocity _speedOfSound;
         private static Lazy<EnvironmentalConditions> _default = new Lazy<EnvironmentalConditions>(CreateDefaultValue);
 
-        internal EnvironmentalConditions(double waterTemp, double salinity, Velocity speedOfSound)
+        public EnvironmentalConditions(double waterTemp, double salinity, Velocity speedOfSound)
         {
             _waterTemp = waterTemp;
             _salinity = salinity;
@@ -42,7 +42,7 @@ namespace SoundMetrics.Aris.Core.Raw
         /// <summary>
         /// Handy for debugging whether we have valid environment data yet.
         /// </summary>
-        internal static EnvironmentalConditions Default { get { return _default.Value; } }
+        public static EnvironmentalConditions Default { get { return _default.Value; } }
 
         private static EnvironmentalConditions CreateDefaultValue()
         {

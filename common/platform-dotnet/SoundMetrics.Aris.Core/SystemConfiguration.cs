@@ -9,8 +9,9 @@ namespace SoundMetrics.Aris.Core
 
     public sealed partial class SystemConfiguration
     {
-        public static SystemConfiguration GetConfiguration(SystemType systemType) =>
-            throw new NotImplementedException();
+        public static SystemConfiguration GetConfiguration(SystemType systemType)
+            =>
+                configurations[systemType.IntegralValue];
 
         public IReadOnlyCollection<PingMode> PingModes { get; internal set; }
 
@@ -74,7 +75,7 @@ namespace SoundMetrics.Aris.Core
             }
         }
 
-        internal SystemConfigurationRaw RawConfiguration { get; set; }
+        public SystemConfigurationRaw RawConfiguration { get; set; }
 
         private static ValueRange<FineDuration> RangeOfDuration(double a, double b)
             => new ValueRange<FineDuration>(

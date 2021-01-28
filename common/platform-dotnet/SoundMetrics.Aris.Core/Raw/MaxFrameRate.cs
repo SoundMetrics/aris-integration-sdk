@@ -7,9 +7,9 @@ namespace SoundMetrics.Aris.Core.Raw
     // This all came from Bill's documents, in the section labeled
     // Calculations for Maximum Frame Rate. See
     // \\soundserv\Engineering\Test\Results & Reports\ARIS Max Frame Rates
-    internal static class MaxFrameRate
+    public static class MaxFrameRate
     {
-        internal static Rate FindMaximumFrameRate(
+        public static Rate FindMaximumFrameRate(
             SystemType systemType,
             PingMode pingMode,
             int samplesPerBeam,

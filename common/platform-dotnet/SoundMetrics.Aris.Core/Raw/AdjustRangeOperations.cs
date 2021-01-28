@@ -157,65 +157,58 @@ namespace SoundMetrics.Aris.Core.Raw
                 FineDuration antiAliasing,
                 InterpacketDelaySettings interpacketDelay)
         {
-            if (PingMode.TryGet((int)original.PingMode, out var pingMode))
+            var frameRate =
+                Rate.Min(
+                    original.FrameRate,
+                    MaxFrameRate.FindMaximumFrameRate(
+                        original.SystemType,
+                        original.PingMode,
+                        original.SamplesPerBeam,
+                        sampleStartDelay,
+                        samplePeriod,
+                        antiAliasing,
+                        interpacketDelay));
+
+            var pingsPerFrame = original.PingMode.PingsPerFrame;
+            var framePeriod = 1 / frameRate;
+            var cyclePeriod = framePeriod / pingsPerFrame;
+
+            // ### Leaving these as-is for now.
+            var pulseWidth = original.PulseWidth;
+            var frequency = original.Frequency;
+            var receiverGain = original.ReceiverGain;
+
+            var speedOfSound = original.SonarEnvironment.SpeedOfSound;
+            var windowStart = AcousticSettingsRaw.CalculateWindowStart(sampleStartDelay, speedOfSound);
+            var windowLength = AcousticSettingsRaw.CalculateWindowLength(original.SamplesPerBeam, samplePeriod, speedOfSound);
+            var midRangeFocus = windowStart + (windowLength / 2);
+
+            var newSettings =
+                new AcousticSettingsRaw(
+                    systemType: original.SystemType,
+                    frameRate: frameRate,
+                    samplesPerBeam: original.SamplesPerBeam,
+                    sampleStartDelay: sampleStartDelay,
+                    cyclePeriod: cyclePeriod,
+                    samplePeriod: samplePeriod,
+                    pulseWidth: pulseWidth,
+                    pingMode: original.PingMode,
+                    enableTransmit: original.EnableTransmit,
+                    frequency: frequency,
+                    enable150Volts: original.Enable150Volts,
+                    receiverGain: receiverGain,
+                    focusPosition: midRangeFocus,
+                    antiAliasing: antiAliasing,
+                    interpacketDelay: interpacketDelay,
+                    sonarEnvironment: original.SonarEnvironment);
+
+            if (original.SamplesPerBeam != newSettings.SamplesPerBeam)
             {
-                var frameRate =
-                    Rate.Min(
-                        original.FrameRate,
-                        MaxFrameRate.FindMaximumFrameRate(
-                            original.SystemType,
-                            pingMode,
-                            original.SamplesPerBeam,
-                            sampleStartDelay,
-                            samplePeriod,
-                            antiAliasing,
-                            interpacketDelay));
-
-                var pingsPerFrame = pingMode.PingsPerFrame;
-                var framePeriod = 1 / frameRate;
-                var cyclePeriod = framePeriod / pingsPerFrame;
-
-                // ### Leaving these as-is for now.
-                var pulseWidth = original.PulseWidth;
-                var frequency = original.Frequency;
-                var receiverGain = original.ReceiverGain;
-
-                var speedOfSound = original.SonarEnvironment.SpeedOfSound;
-                var windowStart = AcousticSettingsRaw.CalculateWindowStart(sampleStartDelay, speedOfSound);
-                var windowLength = AcousticSettingsRaw.CalculateWindowLength(original.SamplesPerBeam, samplePeriod, speedOfSound);
-                var midRangeFocus = windowStart + (windowLength / 2);
-
-                var newSettings =
-                    new AcousticSettingsRaw(
-                        systemType: original.SystemType,
-                        frameRate: frameRate,
-                        samplesPerBeam: original.SamplesPerBeam,
-                        sampleStartDelay: sampleStartDelay,
-                        cyclePeriod: cyclePeriod,
-                        samplePeriod: samplePeriod,
-                        pulseWidth: pulseWidth,
-                        pingMode: original.PingMode,
-                        enableTransmit: original.EnableTransmit,
-                        frequency: frequency,
-                        enable150Volts: original.Enable150Volts,
-                        receiverGain: receiverGain,
-                        focusPosition: midRangeFocus,
-                        antiAliasing: antiAliasing,
-                        interpacketDelay: interpacketDelay,
-                        sonarEnvironment: original.SonarEnvironment);
-
-                if (original.SamplesPerBeam != newSettings.SamplesPerBeam)
-                {
-                    throw new ApplicationException(
-                        $"sample count changed from [{original.SamplesPerBeam}] to [{newSettings.SamplesPerBeam}]");
-                }
-
-                return newSettings;
+                throw new ApplicationException(
+                    $"sample count changed from [{original.SamplesPerBeam}] to [{newSettings.SamplesPerBeam}]");
             }
-            else
-            {
-                throw new ArgumentException($"Invalid ping mode: {original.PingMode}");
-            }
+
+            return newSettings;
         }
 
         private static readonly FineDuration WindowTerminusAdjustment = FineDuration.FromMicroseconds(2);

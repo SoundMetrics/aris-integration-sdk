@@ -19,7 +19,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public FineDuration CyclePeriod { get; private set; }
         public FineDuration SamplePeriod { get; private set; }
         public FineDuration PulseWidth { get; private set; }
-        public uint PingMode { get; private set; }
+        public PingMode PingMode { get; private set; }
         public bool EnableTransmit { get; private set; }
         public FrequencySelection Frequency { get; private set; }
         public bool Enable150Volts { get; private set; }
@@ -47,7 +47,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public static FineDuration CalculateSampleStartDelay(Distance windowStart, Velocity speedOfSound)
             => 2 * (windowStart / speedOfSound);
 
-        internal AcousticSettingsRaw(
+        public AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
             int samplesPerBeam,
@@ -55,7 +55,7 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration cyclePeriod,
             FineDuration samplePeriod,
             FineDuration pulseWidth,
-            uint pingMode,
+            PingMode pingMode,
             bool enableTransmit,
             FrequencySelection frequency,
             bool enable150Volts,
