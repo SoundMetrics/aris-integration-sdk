@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace SoundMetrics.Aris.Core.Raw
+namespace SoundMetrics.Aris.Core
 {
     [DebuggerDisplay("{Description}")]
     public sealed class EnvironmentalConditions
