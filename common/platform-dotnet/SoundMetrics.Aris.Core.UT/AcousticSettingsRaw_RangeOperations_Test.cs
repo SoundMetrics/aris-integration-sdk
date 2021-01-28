@@ -8,7 +8,7 @@ namespace SoundMetrics.Aris.Core.UT
     [TestClass]
     public class AcousticSettingsRaw_RangeOperations_Test
     {
-        private static readonly EnvironmentalConditions TestEnvironment = EnvironmentalConditions.Default;
+        private static readonly EnvironmentalContext TestEnvironment = EnvironmentalContext.Default;
         private static readonly SystemType SystemType = SystemType.Aris3000;
         private static readonly SystemConfiguration sysCfg;
 

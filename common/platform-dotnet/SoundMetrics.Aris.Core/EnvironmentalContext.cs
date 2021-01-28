@@ -4,14 +4,14 @@ using System.Diagnostics;
 namespace SoundMetrics.Aris.Core
 {
     [DebuggerDisplay("{Description}")]
-    public sealed class EnvironmentalConditions
+    public sealed class EnvironmentalContext
     {
         private readonly double _waterTemp;
         private readonly double _salinity;
         private readonly Velocity _speedOfSound;
-        private static Lazy<EnvironmentalConditions> _default = new Lazy<EnvironmentalConditions>(CreateDefaultValue);
+        private static Lazy<EnvironmentalContext> _default = new Lazy<EnvironmentalContext>(CreateDefaultValue);
 
-        public EnvironmentalConditions(double waterTemp, double salinity, Velocity speedOfSound)
+        public EnvironmentalContext(double waterTemp, double salinity, Velocity speedOfSound)
         {
             _waterTemp = waterTemp;
             _salinity = salinity;
@@ -42,11 +42,11 @@ namespace SoundMetrics.Aris.Core
         /// <summary>
         /// Handy for debugging whether we have valid environment data yet.
         /// </summary>
-        public static EnvironmentalConditions Default { get { return _default.Value; } }
+        public static EnvironmentalContext Default { get { return _default.Value; } }
 
-        private static EnvironmentalConditions CreateDefaultValue()
+        private static EnvironmentalContext CreateDefaultValue()
         {
-            return new EnvironmentalConditions(
+            return new EnvironmentalContext(
                 waterTemp: 15,
                 salinity: 15,
                 speedOfSound: Velocity.FromMetersPerSecond(1450))

@@ -33,7 +33,7 @@ namespace SoundMetrics.Aris.Core.Raw
         /// <summary>
         /// Environmental status when the settings were created.
         /// </summary>
-        public EnvironmentalConditions SonarEnvironment { get; private set; }
+        public EnvironmentalContext SonarEnvironment { get; private set; }
 
         public Distance WindowStart => CalculateWindowStart(SampleStartDelay, SonarEnvironment.SpeedOfSound);
         public Distance WindowEnd => WindowStart + WindowLength;
@@ -63,7 +63,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
-            EnvironmentalConditions sonarEnvironment)
+            EnvironmentalContext sonarEnvironment)
         {
             SystemType = systemType;
             FrameRate = frameRate;
