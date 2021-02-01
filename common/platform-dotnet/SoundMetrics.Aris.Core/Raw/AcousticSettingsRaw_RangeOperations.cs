@@ -7,7 +7,7 @@ namespace SoundMetrics.Aris.Core.Raw
 {
     public sealed partial class AcousticSettingsRaw
     {
-        public AcousticSettingsRaw AdjustRange(AcousticSettingsRaw currentSettings, AdjustRangeOperation operation)
+        public AcousticSettingsRaw AdjustRange(AcousticSettingsRaw currentSettings, WindowOperation operation)
         {
             if (rangeOperationMap.TryGetValue(operation, out var adjustFn))
             {
@@ -19,23 +19,23 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        private static readonly Dictionary<AdjustRangeOperation, AdjustRangeFn>
+        private static readonly Dictionary<WindowOperation, AdjustRangeFn>
             rangeOperationMap = BuildRangeOperationMap();
 
-        private static Dictionary<AdjustRangeOperation, AdjustRangeFn> BuildRangeOperationMap()
+        private static Dictionary<WindowOperation, AdjustRangeFn> BuildRangeOperationMap()
         {
-            return new Dictionary<AdjustRangeOperation, AdjustRangeFn>
+            return new Dictionary<WindowOperation, AdjustRangeFn>
             {
-                { AdjustRangeOperation.ShortWindow, AdjustRangeOperations.ToShortWindow },
-                { AdjustRangeOperation.MediumWindow, AdjustRangeOperations.ToMediumWindow },
-                { AdjustRangeOperation.LongWindow, AdjustRangeOperations.ToLongWindow },
+                { WindowOperation.ShortWindow, WindowOperations.ToShortWindow },
+                { WindowOperation.MediumWindow, WindowOperations.ToMediumWindow },
+                { WindowOperation.LongWindow, WindowOperations.ToLongWindow },
 
-                { AdjustRangeOperation.WindowStartIn, AdjustRangeOperations.MoveWindowStartIn },
-                { AdjustRangeOperation.WindowStartOut, AdjustRangeOperations.MoveWindowStartOut },
-                { AdjustRangeOperation.WindowEndIn, AdjustRangeOperations.MoveWindowEndIn },
-                { AdjustRangeOperation.WindowEndOut, AdjustRangeOperations.MoveWindowEndOut },
-                { AdjustRangeOperation.SlideRangeIn, AdjustRangeOperations.SlideRangeIn },
-                { AdjustRangeOperation.SlideRangeOut, AdjustRangeOperations.SlideRangeOut },
+                { WindowOperation.WindowStartIn, WindowOperations.MoveWindowStartIn },
+                { WindowOperation.WindowStartOut, WindowOperations.MoveWindowStartOut },
+                { WindowOperation.WindowEndIn, WindowOperations.MoveWindowEndIn },
+                { WindowOperation.WindowEndOut, WindowOperations.MoveWindowEndOut },
+                { WindowOperation.SlideRangeIn, WindowOperations.SlideRangeIn },
+                { WindowOperation.SlideRangeOut, WindowOperations.SlideRangeOut },
             };
         }
     }
