@@ -35,10 +35,7 @@ namespace SoundMetrics.Aris.Core.UT
             var pingsPerFrame = pingMode.PingsPerFrame;
             var framePeriod = 1 / frameRate;
             var cyclePeriod = framePeriod / pingsPerFrame;
-
-            var windowStart = CalculateWindowStart(sampleStartDelay, TestEnvironment);
-            var windowLength = CalculateWindowLength(samplesPerBeam, samplePeriod, TestEnvironment);
-            var focusPosition = FocusPosition.At((windowStart + windowLength) / 2);
+            var focusPosition = FocusPosition.Automatic;
 
             return new AcousticSettingsRaw(
                 SystemType,
