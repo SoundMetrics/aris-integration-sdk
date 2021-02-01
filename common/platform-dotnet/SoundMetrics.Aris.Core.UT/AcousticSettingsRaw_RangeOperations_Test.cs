@@ -92,5 +92,29 @@ namespace SoundMetrics.Aris.Core.UT
             Assert.AreEqual(expectedWindowStart, result.WindowStart, "unexpected window start");
             Assert.AreEqual(startSettings.SamplesPerBeam, result.SamplesPerBeam, "sample count should not change");
         }
+
+        [TestMethod]
+        public void UseAutomaticFocusWithShortRange()
+        {
+            var original = GetNearRange(1000, FineDuration.Zero);
+            var settings = AdjustRangeOperations.ToShortWindow(original);
+            Assert.IsTrue(settings.FocusPosition is FocusPositionAutomatic);
+        }
+
+        [TestMethod]
+        public void UseAutomaticFocusWithMediumRange()
+        {
+            var original = GetNearRange(1000, FineDuration.Zero);
+            var settings = AdjustRangeOperations.ToLongWindow(original);
+            Assert.IsTrue(settings.FocusPosition is FocusPositionAutomatic);
+        }
+
+        [TestMethod]
+        public void UseAutomaticFocusWithLongRange()
+        {
+            var original = GetNearRange(1000, FineDuration.Zero);
+            var settings = AdjustRangeOperations.ToLongWindow(original);
+            Assert.IsTrue(settings.FocusPosition is FocusPositionAutomatic);
+        }
     }
 }
