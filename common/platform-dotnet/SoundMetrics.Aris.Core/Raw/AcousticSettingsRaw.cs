@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public int ReceiverGain { get; private set; }
 
         // There are not directly an acoustic setting, but part of the package.
-        public Distance FocusPosition { get; private set; }
+        public FocusPosition FocusPosition { get; private set; }
         public FineDuration AntiAliasing { get; private set; }
         public InterpacketDelaySettings InterpacketDelay { get; private set; }
 
@@ -35,24 +35,11 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         public EnvironmentalContext SonarEnvironment { get; private set; }
 
-        public Distance WindowStart => CalculateWindowStart(SampleStartDelay, SonarEnvironment.SpeedOfSound);
+        public Distance WindowStart => this.CalculateWindowStart();
         public Distance WindowEnd => WindowStart + WindowLength;
-        public Distance WindowLength => CalculateWindowLength(SamplesPerBeam, SamplePeriod, SonarEnvironment.SpeedOfSound);
+        public Distance WindowLength => this.CalculateWindowLength();
 
-        internal static Distance CalculateWindowStart(FineDuration sampleStartDelay, Velocity speedOfSound)
-            => sampleStartDelay * speedOfSound / 2;
-        internal static Distance CalculateWindowLength(int samplesPerBeam, FineDuration samplePeriod, Velocity speedOfSound)
-            => samplesPerBeam * samplePeriod * speedOfSound / 2;
-
-        internal static FineDuration CalculateSampleStartDelay(Distance windowStart, Velocity speedOfSound)
-            => 2 * (windowStart / speedOfSound);
-
-        /// <summary>
-        /// This public constructor exists only to allow a one-time initialization.
-        /// Subsequent updates to the settings are done via setter functions which may
-        /// use constrained inputs upon evaluation.
-        /// </summary>
-        public AcousticSettingsRaw(
+        internal AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
             int samplesPerBeam,
@@ -65,7 +52,7 @@ namespace SoundMetrics.Aris.Core.Raw
             FrequencySelection frequency,
             bool enable150Volts,
             int receiverGain,
-            Distance focusPosition,
+            FocusPosition focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
             EnvironmentalContext sonarEnvironment)

@@ -4,6 +4,7 @@ using SoundMetrics.Aris.Core.Raw;
 namespace SoundMetrics.Aris.Core.UT
 {
     using static AcousticSettingsRaw;
+    using static AcousticSettingsRawCalculations;
 
     [TestClass]
     public class AcousticSettingsRaw_RangeOperations_Test
@@ -22,8 +23,6 @@ namespace SoundMetrics.Aris.Core.UT
 
         private static AcousticSettingsRaw GetNearRange(int samplesPerBeam, FineDuration addStartDelay)
         {
-            var speedOfSound = TestEnvironment.SpeedOfSound;
-
             var sampleStartDelay = sysCfg.RawConfiguration.SampleStartDelayRange.Minimum + addStartDelay;
             var samplePeriod = sysCfg.RawConfiguration.SamplePeriodRange.Minimum;
             var pulseWidth = sysCfg.RawConfiguration.PulseWidthRange.Minimum;
@@ -37,9 +36,9 @@ namespace SoundMetrics.Aris.Core.UT
             var framePeriod = 1 / frameRate;
             var cyclePeriod = framePeriod / pingsPerFrame;
 
-            var windowStart = CalculateWindowStart(sampleStartDelay, speedOfSound);
-            var windowLength = CalculateWindowLength(samplesPerBeam, samplePeriod, speedOfSound);
-            var focusPosition = (windowStart + windowLength) / 2;
+            var windowStart = CalculateWindowStart(sampleStartDelay, TestEnvironment);
+            var windowLength = CalculateWindowLength(samplesPerBeam, samplePeriod, TestEnvironment);
+            var focusPosition = FocusPosition.At((windowStart + windowLength) / 2);
 
             return new AcousticSettingsRaw(
                 SystemType,

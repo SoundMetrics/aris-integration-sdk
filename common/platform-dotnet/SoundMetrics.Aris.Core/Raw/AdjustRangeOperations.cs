@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    using static AcousticSettingsRawCalculations;
+
     public delegate AcousticSettingsRaw AdjustRangeFn(AcousticSettingsRaw currentSettings);
 
     public static class AdjustRangeOperations
@@ -110,7 +112,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var original = currentSettings;
 
             var sampleStartDelay =
-                AcousticSettingsRaw.CalculateSampleStartDelay(windowSize.WindowStart, sspd)
+                currentSettings.CalculateSampleStartDelay()
                     .ConstrainTo(systemConfiguration.RawConfiguration.SampleStartDelayRange);
 
             var actualWindowStart = TimeToDistance(sampleStartDelay, sspd) / 2;
@@ -178,10 +180,26 @@ namespace SoundMetrics.Aris.Core.Raw
             var frequency = original.Frequency;
             var receiverGain = original.ReceiverGain;
 
-            var speedOfSound = original.SonarEnvironment.SpeedOfSound;
-            var windowStart = AcousticSettingsRaw.CalculateWindowStart(sampleStartDelay, speedOfSound);
-            var windowLength = AcousticSettingsRaw.CalculateWindowLength(original.SamplesPerBeam, samplePeriod, speedOfSound);
-            var midRangeFocus = windowStart + (windowLength / 2);
+            var windowStart = CalculateWindowStart(sampleStartDelay, original.SonarEnvironment);
+            var windowLength = CalculateWindowLength(original.SamplesPerBeam, samplePeriod, original.SonarEnvironment);
+
+            FocusPosition focusPosition;
+            if (original.FocusPosition is FocusPositionAutomatic)
+            {
+                focusPosition = original.FocusPosition;
+            }
+            else if (original.FocusPosition is FocusPositionManual position)
+            {
+                var maxFocusPosition = windowStart + windowLength;
+                focusPosition =
+                    (position.Value > maxFocusPosition)
+                        ? FocusPosition.At(maxFocusPosition)
+                        : position;
+            }
+            else
+            {
+                throw new Exception($"Unhandled focus position type: {original.FocusPosition.GetType().Name}");
+            }
 
             var newSettings =
                 new AcousticSettingsRaw(
@@ -197,7 +215,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     frequency: frequency,
                     enable150Volts: original.Enable150Volts,
                     receiverGain: receiverGain,
-                    focusPosition: midRangeFocus,
+                    focusPosition: focusPosition,
                     antiAliasing: antiAliasing,
                     interpacketDelay: interpacketDelay,
                     sonarEnvironment: original.SonarEnvironment);
