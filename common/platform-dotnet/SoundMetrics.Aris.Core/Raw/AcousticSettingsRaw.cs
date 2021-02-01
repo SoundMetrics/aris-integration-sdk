@@ -39,14 +39,19 @@ namespace SoundMetrics.Aris.Core.Raw
         public Distance WindowEnd => WindowStart + WindowLength;
         public Distance WindowLength => CalculateWindowLength(SamplesPerBeam, SamplePeriod, SonarEnvironment.SpeedOfSound);
 
-        public static Distance CalculateWindowStart(FineDuration sampleStartDelay, Velocity speedOfSound)
+        internal static Distance CalculateWindowStart(FineDuration sampleStartDelay, Velocity speedOfSound)
             => sampleStartDelay * speedOfSound / 2;
-        public static Distance CalculateWindowLength(int samplesPerBeam, FineDuration samplePeriod, Velocity speedOfSound)
+        internal static Distance CalculateWindowLength(int samplesPerBeam, FineDuration samplePeriod, Velocity speedOfSound)
             => samplesPerBeam * samplePeriod * speedOfSound / 2;
 
-        public static FineDuration CalculateSampleStartDelay(Distance windowStart, Velocity speedOfSound)
+        internal static FineDuration CalculateSampleStartDelay(Distance windowStart, Velocity speedOfSound)
             => 2 * (windowStart / speedOfSound);
 
+        /// <summary>
+        /// This public constructor exists only to allow a one-time initialization.
+        /// Subsequent updates to the settings are done via setter functions which may
+        /// use constrained inputs upon evaluation.
+        /// </summary>
         public AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
