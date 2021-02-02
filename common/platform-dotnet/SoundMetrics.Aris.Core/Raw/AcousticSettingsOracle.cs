@@ -41,7 +41,7 @@ namespace SoundMetrics.Aris.Core.Raw
             InterpacketDelaySettings interpacketDelay,
             EnvironmentalContext sonarEnvironment)
         {
-            // This method is the only route to a new instance of AcousticSettingsRaw.
+            // This method is the only public route to a new instance of AcousticSettingsRaw.
             // This promotes strong control over the values in AcousticSettingsRaw.
 
             var requested = new AcousticSettingsRaw(
@@ -68,11 +68,61 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw requested)
         {
-            throw new NotImplementedException();
+            var settings = requested;
+            // ### TODO much else
+            settings = UpdateFrameRate(
+                settings,
+                ConstrainFrameRate(settings, settings.FrameRate));
+            return settings;
         }
 
-        public static AcousticSettingsRequest SetFrameRate(Rate frameRate)
-            => throw new NotImplementedException();
+        public static AcousticSettingsRequest SetFrameRate(
+            this AcousticSettingsRaw settings,
+            Rate requestedFrameRate)
+        {
+            var allowedFrameRate = ConstrainFrameRate(settings, requestedFrameRate);
+
+            return new AcousticSettingsRequest(
+                requested: UpdateFrameRate(settings, requestedFrameRate),
+                allowed: UpdateFrameRate(settings, allowedFrameRate));
+        }
+
+        private static AcousticSettingsRaw UpdateFrameRate(
+            AcousticSettingsRaw settings, Rate newFrameRate)
+                => new AcousticSettingsRaw(
+                    settings.SystemType,
+                    newFrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.CyclePeriod,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusPosition,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.SonarEnvironment);
+
+        private static Rate ConstrainFrameRate(AcousticSettingsRaw settings, Rate requestedFrameRate)
+        {
+            var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
+            var min = sysCfg.FrameRateRange.Minimum;
+            var max = MaxFrameRate.DetermineMaximumFrameRate(
+                        settings.SystemType,
+                        settings.PingMode,
+                        settings.SampleCount,
+                        settings.SampleStartDelay,
+                        settings.SamplePeriod,
+                        settings.AntiAliasing,
+                        settings.InterpacketDelay);
+
+            var allowedFrameRate = Rate.Max(min, Rate.Min(max, requestedFrameRate));
+            return allowedFrameRate;
+        }
 
         public static AcousticSettingsRequest SetSampleCount(int sampleCount)
             => throw new NotImplementedException();
