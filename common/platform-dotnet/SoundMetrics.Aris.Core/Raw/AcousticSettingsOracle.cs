@@ -4,6 +4,8 @@ using System;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    using static AcousticSettingsConstraints;
+
     public struct AcousticSettingsRequest
     {
         internal AcousticSettingsRequest(
@@ -68,11 +70,20 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw requested)
         {
+            var sysCfg = SystemConfiguration.GetConfiguration(requested.SystemType);
             var settings = requested;
             // ### TODO much else
             settings = UpdateFrameRate(
                 settings,
-                ConstrainFrameRate(settings, settings.FrameRate));
+                ConstrainFrameRate(
+                    settings.FrameRate,
+                    sysCfg,
+                    settings.PingMode,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay));
             return settings;
         }
 
@@ -80,7 +91,17 @@ namespace SoundMetrics.Aris.Core.Raw
             this AcousticSettingsRaw settings,
             Rate requestedFrameRate)
         {
-            var allowedFrameRate = ConstrainFrameRate(settings, requestedFrameRate);
+            var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
+            var allowedFrameRate =
+                ConstrainFrameRate(
+                    settings.FrameRate,
+                    sysCfg,
+                    settings.PingMode,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay);
 
             return new AcousticSettingsRequest(
                 requested: UpdateFrameRate(settings, requestedFrameRate),
@@ -107,22 +128,24 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
 
-        private static Rate ConstrainFrameRate(AcousticSettingsRaw settings, Rate requestedFrameRate)
-        {
-            var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-            var min = sysCfg.FrameRateRange.Minimum;
-            var max = MaxFrameRate.DetermineMaximumFrameRate(
-                        settings.SystemType,
-                        settings.PingMode,
-                        settings.SampleCount,
-                        settings.SampleStartDelay,
-                        settings.SamplePeriod,
-                        settings.AntiAliasing,
-                        settings.InterpacketDelay);
+        //private static Rate ConstrainFrameRate(
+        //    Rate requestedFrameRate,
+        //    AcousticSettingsRaw settings)
+        //{
+        //    var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
+        //    var min = sysCfg.FrameRateRange.Minimum;
+        //    var max = MaxFrameRate.DetermineMaximumFrameRate(
+        //                settings.SystemType,
+        //                settings.PingMode,
+        //                settings.SampleCount,
+        //                settings.SampleStartDelay,
+        //                settings.SamplePeriod,
+        //                settings.AntiAliasing,
+        //                settings.InterpacketDelay);
 
-            var allowedFrameRate = Rate.Max(min, Rate.Min(max, requestedFrameRate));
-            return allowedFrameRate;
-        }
+        //    var allowedFrameRate = Rate.Max(min, Rate.Min(max, requestedFrameRate));
+        //    return allowedFrameRate;
+        //}
 
         public static AcousticSettingsRequest SetSampleCount(int sampleCount)
             => throw new NotImplementedException();

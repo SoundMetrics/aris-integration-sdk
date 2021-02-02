@@ -159,11 +159,12 @@ namespace SoundMetrics.Aris.Core.Raw
                 FineDuration antiAliasing,
                 InterpacketDelaySettings interpacketDelay)
         {
+            var sysCfg = SystemConfiguration.GetConfiguration(original.SystemType);
             var frameRate =
                 Rate.Min(
                     original.FrameRate,
                     MaxFrameRate.DetermineMaximumFrameRate(
-                        original.SystemType,
+                        sysCfg,
                         original.PingMode,
                         original.SampleCount,
                         sampleStartDelay,

@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.Core.Raw
     public static class MaxFrameRate
     {
         public static Rate DetermineMaximumFrameRate(
-            SystemType systemType,
+            SystemConfiguration sysCfg,
             PingMode pingMode,
             int sampleCount,
             FineDuration sampleStartDelay,
@@ -18,8 +18,6 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay)
         {
-            var cfg = SystemConfiguration.GetConfiguration(systemType);
-
             // Aliases to match bill's doc; the function interface shouldn't use these.
 
             var ssd = sampleStartDelay;
@@ -34,7 +32,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var mcp = ssd + (sp * sc) + CyclePeriodMargin;
 
             var cpaFactor =
-                DetermineCyclePeriodAdjustmentFactor(systemType, sp);
+                DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
             var cpa = mcp * cpaFactor;
             var cpa1 = cpa + aa;
 
@@ -46,8 +44,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var maxFramePeriod = mfp;
 
             var maximumFrameRate = 1 / maxFramePeriod;
-            var trueMin = cfg.FrameRateRange.Minimum;
-            var trueMax = cfg.FrameRateRange.Maximum;
+            var trueMin = sysCfg.FrameRateRange.Minimum;
+            var trueMax = sysCfg.FrameRateRange.Maximum;
             var limitedRate = Rate.Max(trueMin, Rate.Min(maximumFrameRate, trueMax));
 
             return limitedRate;
@@ -67,27 +65,11 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         private static double DetermineCyclePeriodAdjustmentFactor(
-            SystemType systemType,
-            FineDuration samplePeriod)
+            FineDuration samplePeriod,
+            SystemConfiguration sysCfg)
         {
             var isSmallSamplePeriod = samplePeriod <= FineDuration.FromMicroseconds(4);
-
-            if (systemType == SystemType.Aris3000)
-            {
-                return isSmallSamplePeriod ? 0.18 : 0.03;
-            }
-            else if (systemType == SystemType.Aris1800)
-            {
-                return isSmallSamplePeriod ? 0.18 : 0.03;
-            }
-            else if (systemType == SystemType.Aris1200)
-            {
-                return 0.02;
-            }
-            else
-            {
-                throw new Exception("Unexpected systemtype: use and instance from SystemType statics");
-            }
+            return isSmallSamplePeriod ? sysCfg.SmallPeriodAdjustmentFactor : sysCfg.LargePeriodAdjustmentFactor;
         }
 
         private static readonly FineDuration CyclePeriodMargin = SystemConfigurationRaw.CyclePeriodMargin;

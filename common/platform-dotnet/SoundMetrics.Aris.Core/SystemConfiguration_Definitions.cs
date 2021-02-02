@@ -35,6 +35,9 @@ namespace SoundMetrics.Aris.Core
                         FocusPositionRange = new ValueRange<int>(0, 1000),
                         CyclePeriodRange = RangeOfDuration(1802, 80_000),
                     },
+
+                    SmallPeriodAdjustmentFactor = 0.18,
+                    LargePeriodAdjustmentFactor = 0.03,
                 };
 
             configurations[SystemType.Aris3000.IntegralValue] =
@@ -60,6 +63,9 @@ namespace SoundMetrics.Aris.Core
                         FocusPositionRange = new ValueRange<int>(0, 1000),
                         CyclePeriodRange = RangeOfDuration(1802, 40_000),
                     },
+
+                    SmallPeriodAdjustmentFactor = 0.18,
+                    LargePeriodAdjustmentFactor = 0.03,
                 };
 
             configurations[SystemType.Aris1200.IntegralValue] =
@@ -85,6 +91,9 @@ namespace SoundMetrics.Aris.Core
                         FocusPositionRange = new ValueRange<int>(0, 1000),
                         CyclePeriodRange = RangeOfDuration(1802, 150_000),
                     },
+
+                    SmallPeriodAdjustmentFactor = 0.02,
+                    LargePeriodAdjustmentFactor = 0.02,
                 };
 
             return configurations;

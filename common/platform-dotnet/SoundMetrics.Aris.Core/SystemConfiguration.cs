@@ -77,6 +77,9 @@ namespace SoundMetrics.Aris.Core
 
         public SystemConfigurationRaw RawConfiguration { get; set; }
 
+        internal double SmallPeriodAdjustmentFactor { get; set; }
+        internal double LargePeriodAdjustmentFactor { get; set; }
+
         private static ValueRange<FineDuration> RangeOfDuration(double a, double b)
             => new ValueRange<FineDuration>(
                     FineDuration.FromMicroseconds(a),
