@@ -12,7 +12,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public static Rate FindMaximumFrameRate(
             SystemType systemType,
             PingMode pingMode,
-            int samplesPerBeam,
+            int sampleCount,
             FineDuration sampleStartDelay,
             FineDuration samplePeriod,
             FineDuration antiAliasing,
@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // Aliases to match bill's doc; the function interface shouldn't use these.
 
             var ssd = sampleStartDelay;
-            var spb = samplesPerBeam;
+            var sc = sampleCount;
             var sp = samplePeriod;
             var ppf = pingMode.PingsPerFrame;
             var aa = antiAliasing;
@@ -31,7 +31,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             // from the document
 
-            var mcp = ssd + (sp * spb) + CyclePeriodMargin;
+            var mcp = ssd + (sp * sc) + CyclePeriodMargin;
 
             var cpaFactor =
                 DetermineCyclePeriodAdjustmentFactor(systemType, sp);
@@ -62,7 +62,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
                 return
                     ppf * (mcp + cpa1)
-                        + (((nob * spb) + 1024) / 1392) * (headroom + id);
+                        + (((nob * sc) + 1024) / 1392) * (headroom + id);
             }
         }
 

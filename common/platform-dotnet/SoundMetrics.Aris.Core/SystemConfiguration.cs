@@ -63,7 +63,7 @@ namespace SoundMetrics.Aris.Core
                 sampleGeometry =
                     new SampleGeometry(
                         beamCount: beamCount,
-                        samplesPerBeam: (int)frameHeader.SamplesPerBeam,
+                        sampleCount: (int)frameHeader.SamplesPerBeam,
                         totalSampleCount: totalSampleCount,
                         pingsPerFrame: pingMode.PingsPerFrame);
                 return true;

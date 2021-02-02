@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRequest Initialize(
             SystemType systemType,
             Rate frameRate,
-            int samplesPerBeam,
+            int sampleCount,
             FineDuration sampleStartDelay,
             FineDuration cyclePeriod,
             FineDuration samplePeriod,
@@ -47,7 +47,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var requested = new AcousticSettingsRaw(
                 systemType,
                 frameRate,
-                samplesPerBeam,
+                sampleCount,
                 sampleStartDelay,
                 cyclePeriod,
                 samplePeriod,
@@ -61,14 +61,20 @@ namespace SoundMetrics.Aris.Core.Raw
                 antiAliasing,
                 interpacketDelay,
                 sonarEnvironment);
-            var allowed = ApplyConstraints(requested);
+            var allowed = ApplyAllConstraints(requested);
 
             return new AcousticSettingsRequest(requested, allowed);
         }
 
-        private static AcousticSettingsRaw ApplyConstraints(AcousticSettingsRaw requested)
+        private static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw requested)
         {
             throw new NotImplementedException();
         }
+
+        public static AcousticSettingsRequest SetFrameRate(Rate frameRate)
+            => throw new NotImplementedException();
+
+        public static AcousticSettingsRequest SetSampleCount(int sampleCount)
+            => throw new NotImplementedException();
     }
 }

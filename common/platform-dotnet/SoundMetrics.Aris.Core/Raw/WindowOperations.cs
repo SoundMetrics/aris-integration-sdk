@@ -118,7 +118,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var actualWindowStart = TimeToDistance(sampleStartDelay, sspd) / 2;
 
             var samplePeriod =
-                CalculateSamplePeriod(actualWindowStart, windowSize.WindowEnd, original.SamplesPerBeam, sspd)
+                CalculateSamplePeriod(actualWindowStart, windowSize.WindowEnd, original.SampleCount, sspd)
                     .ConstrainTo(systemConfiguration.RawConfiguration.SamplePeriodRange);
 
             return
@@ -165,7 +165,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     MaxFrameRate.FindMaximumFrameRate(
                         original.SystemType,
                         original.PingMode,
-                        original.SamplesPerBeam,
+                        original.SampleCount,
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
@@ -181,7 +181,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var receiverGain = original.ReceiverGain;
 
             var windowStart = CalculateWindowStart(sampleStartDelay, original.SonarEnvironment);
-            var windowLength = CalculateWindowLength(original.SamplesPerBeam, samplePeriod, original.SonarEnvironment);
+            var windowLength = CalculateWindowLength(original.SampleCount, samplePeriod, original.SonarEnvironment);
 
             FocusPosition focusPosition;
             if (original.FocusPosition is FocusPositionAutomatic)
@@ -205,7 +205,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 new AcousticSettingsRaw(
                     systemType: original.SystemType,
                     frameRate: frameRate,
-                    samplesPerBeam: original.SamplesPerBeam,
+                    sampleCount: original.SampleCount,
                     sampleStartDelay: sampleStartDelay,
                     cyclePeriod: cyclePeriod,
                     samplePeriod: samplePeriod,
@@ -220,10 +220,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     interpacketDelay: interpacketDelay,
                     sonarEnvironment: original.SonarEnvironment);
 
-            if (original.SamplesPerBeam != newSettings.SamplesPerBeam)
+            if (original.SampleCount != newSettings.SampleCount)
             {
                 throw new ApplicationException(
-                    $"sample count changed from [{original.SamplesPerBeam}] to [{newSettings.SamplesPerBeam}]");
+                    $"sample count changed from [{original.SampleCount}] to [{newSettings.SampleCount}]");
             }
 
             return newSettings;
@@ -250,7 +250,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var newSamplePeriod = original.SamplePeriod + WindowTerminusAdjustment;
-            var additionalSampleTime = WindowTerminusAdjustment * original.SamplesPerBeam;
+            var additionalSampleTime = WindowTerminusAdjustment * original.SampleCount;
             var newSampleStartDelay =
                 (original.SampleStartDelay - additionalSampleTime)
                     .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
@@ -263,10 +263,10 @@ namespace SoundMetrics.Aris.Core.Raw
                 original.InterpacketDelay);
         }
 
-        public static FineDuration GetSamplePeriodToCover(Distance windowLength, int samplesPerBeam, Velocity speedOfSound)
+        private static FineDuration GetSamplePeriodToCover(Distance windowLength, int sampleCount, Velocity speedOfSound)
         {
             var duration = windowLength / speedOfSound;
-            return 2 * (duration / samplesPerBeam);
+            return 2 * (duration / sampleCount);
         }
 
         public static AcousticSettingsRaw MoveWindowStartOut(AcousticSettingsRaw original)
@@ -288,7 +288,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var newSamplePeriod = original.SamplePeriod - WindowTerminusAdjustment;
-            var sampleTimeReduction = WindowTerminusAdjustment * original.SamplesPerBeam;
+            var sampleTimeReduction = WindowTerminusAdjustment * original.SampleCount;
             var newSampleStartDelay =
                 (original.SampleStartDelay + sampleTimeReduction)
                     .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
@@ -360,7 +360,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return original;
             }
 
-            var decrement = (original.SamplesPerBeam * original.SamplePeriod) / 3;
+            var decrement = (original.SampleCount * original.SamplePeriod) / 3;
             var newSampleStartDelay = (original.SampleStartDelay - decrement)
                 .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
 
@@ -385,7 +385,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return original;
             }
 
-            var increment = (original.SamplesPerBeam * original.SamplePeriod) / 3;
+            var increment = (original.SampleCount * original.SamplePeriod) / 3;
             var newSampleStartDelay = (original.SampleStartDelay + increment)
                 .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
 

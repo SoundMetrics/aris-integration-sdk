@@ -18,10 +18,10 @@ namespace SoundMetrics.Aris.Core.UT
             sysCfg = SystemConfiguration.GetConfiguration(SystemType);
         }
 
-        private static AcousticSettingsRaw GetClosestRange(int samplesPerBeam)
-            => GetNearRange(samplesPerBeam,  addStartDelay: FineDuration.Zero);
+        private static AcousticSettingsRaw GetClosestRange(int sampleCount)
+            => GetNearRange(sampleCount,  addStartDelay: FineDuration.Zero);
 
-        private static AcousticSettingsRaw GetNearRange(int samplesPerBeam, FineDuration addStartDelay)
+        private static AcousticSettingsRaw GetNearRange(int sampleCount, FineDuration addStartDelay)
         {
             var sampleStartDelay = sysCfg.RawConfiguration.SampleStartDelayRange.Minimum + addStartDelay;
             var samplePeriod = sysCfg.RawConfiguration.SamplePeriodRange.Minimum;
@@ -40,7 +40,7 @@ namespace SoundMetrics.Aris.Core.UT
             return new AcousticSettingsRaw(
                 SystemType,
                 Rate.PerSecond(1),
-                samplesPerBeam,
+                sampleCount,
                 sampleStartDelay,
                 cyclePeriod,
                 samplePeriod,
@@ -59,9 +59,9 @@ namespace SoundMetrics.Aris.Core.UT
         [TestMethod]
         public void MoveWindowStartIn_FromMinDistance()
         {
-            const int SamplesPerBeam = 1200;
+            const int SampleCount = 1200;
 
-            var startSettings = GetClosestRange(SamplesPerBeam);
+            var startSettings = GetClosestRange(SampleCount);
             var result = WindowOperations.MoveWindowStartIn(startSettings);
             var expectedSampleStartDelay = startSettings.SampleStartDelay;
             var expectedWindowStart = startSettings.WindowStart;
@@ -70,16 +70,16 @@ namespace SoundMetrics.Aris.Core.UT
             Assert.AreEqual(expectedSampleStartDelay, result.SampleStartDelay);
             Assert.AreEqual(expectedWindowStart, result.WindowStart);
             Assert.AreEqual(expectedWindowEnd, result.WindowEnd);
-            Assert.AreEqual(startSettings.SamplesPerBeam, result.SamplesPerBeam);
+            Assert.AreEqual(startSettings.SampleCount, result.SampleCount);
         }
 
         [TestMethod]
         public void MoveWindowStartIn_FromNearMinDistance()
         {
-            const int SamplesPerBeam = 1200;
+            const int SampleCount = 1200;
 
-            var closestRange = GetClosestRange(SamplesPerBeam);
-            var startSettings = GetNearRange(SamplesPerBeam, addStartDelay: FineDuration.FromMicroseconds(20));
+            var closestRange = GetClosestRange(SampleCount);
+            var startSettings = GetNearRange(SampleCount, addStartDelay: FineDuration.FromMicroseconds(20));
 
             Assert.AreNotEqual(closestRange.SampleStartDelay, startSettings.SampleStartDelay);
             Assert.AreNotEqual(closestRange.WindowStart, startSettings.WindowStart);
@@ -90,7 +90,7 @@ namespace SoundMetrics.Aris.Core.UT
 
             Assert.AreEqual(expectedSampleStartDelay, result.SampleStartDelay, "unexpected sample start delay");
             Assert.AreEqual(expectedWindowStart, result.WindowStart, "unexpected window start");
-            Assert.AreEqual(startSettings.SamplesPerBeam, result.SamplesPerBeam, "sample count should not change");
+            Assert.AreEqual(startSettings.SampleCount, result.SampleCount, "sample count should not change");
         }
 
         [TestMethod]

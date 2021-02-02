@@ -14,7 +14,7 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         public SystemType SystemType { get; private set; }
         public Rate FrameRate { get; private set; }
-        public int SamplesPerBeam { get; private set; }
+        public int SampleCount { get; private set; }
         public FineDuration SampleStartDelay { get; private set; }
         public FineDuration CyclePeriod { get; private set; }
         public FineDuration SamplePeriod { get; private set; }
@@ -42,7 +42,7 @@ namespace SoundMetrics.Aris.Core.Raw
         internal AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
-            int samplesPerBeam,
+            int sampleCount,
             FineDuration sampleStartDelay,
             FineDuration cyclePeriod,
             FineDuration samplePeriod,
@@ -59,7 +59,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             SystemType = systemType;
             FrameRate = frameRate;
-            SamplesPerBeam = samplesPerBeam;
+            SampleCount = sampleCount;
             SampleStartDelay = sampleStartDelay;
             CyclePeriod = cyclePeriod;
             SamplePeriod = samplePeriod;
@@ -76,7 +76,7 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public override string ToString()
-            => $"systemType={SystemType}; frameRate={FrameRate}; sampleCount={SamplesPerBeam}; sampleStartDelay={SampleStartDelay}; "
+            => $"systemType={SystemType}; frameRate={FrameRate}; sampleCount={SampleCount}; sampleStartDelay={SampleStartDelay}; "
                 + $"cyclePeriod={CyclePeriod}; samplePeriod={SamplePeriod}; pulseWidth={PulseWidth}; "
                 + $"pingMode={PingMode}; enableTransmit={EnableTransmit}; frequency={Frequency}; enable150Volts={Enable150Volts}; "
                 + $"receiverGain={ReceiverGain}; FocusPosition={FocusPosition}; AntiAliasing={AntiAliasing}; "

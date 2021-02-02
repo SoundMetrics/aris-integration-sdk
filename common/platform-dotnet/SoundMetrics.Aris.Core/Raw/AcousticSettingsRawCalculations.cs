@@ -10,10 +10,10 @@ namespace SoundMetrics.Aris.Core.Raw
             => sampleStartDelay * sonarEnvironment.SpeedOfSound / 2;
 
         internal static Distance CalculateWindowLength(
-            int samplesPerBeam,
+            int sampleCount,
             FineDuration samplePeriod,
             EnvironmentalContext sonarEnvironment)
-            => samplesPerBeam * samplePeriod * sonarEnvironment.SpeedOfSound / 2;
+            => sampleCount * samplePeriod * sonarEnvironment.SpeedOfSound / 2;
 
         internal static FineDuration CalculateSampleStartDelay(
             Distance windowStart,

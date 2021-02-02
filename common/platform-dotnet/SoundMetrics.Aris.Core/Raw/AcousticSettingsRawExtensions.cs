@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static Distance CalculateWindowLength(
             this AcousticSettingsRaw acousticSettings)
-            => acousticSettings.SamplesPerBeam * acousticSettings.SamplePeriod
+            => acousticSettings.SampleCount * acousticSettings.SamplePeriod
                 * acousticSettings.SonarEnvironment.SpeedOfSound / 2;
 
         internal static FineDuration CalculateSampleStartDelay(

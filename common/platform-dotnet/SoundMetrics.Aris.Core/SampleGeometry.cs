@@ -9,33 +9,33 @@ namespace SoundMetrics.Aris.Core
     {
         internal SampleGeometry(
             int beamCount,
-            int samplesPerBeam,
+            int sampleCount,
             int totalSampleCount,
             int pingsPerFrame)
         {
             BeamCount = beamCount;
-            SamplesPerBeam = samplesPerBeam;
+            SampleCount = sampleCount;
             TotalSampleCount = totalSampleCount;
             PingsPerFrame = pingsPerFrame;
         }
 
         public int BeamCount { get; private set; }
-        public int SamplesPerBeam { get; private set; }
+        public int SampleCount { get; private set; }
         public int TotalSampleCount { get; private set; }
         public int PingsPerFrame { get; private set; }
 
         public override string ToString() =>
-            $"BeamCount={BeamCount}; SamplesPerBeam={SamplesPerBeam:N0}; "
+            $"BeamCount={BeamCount}; SampleCount={SampleCount:N0}; "
                 + $"TotalSampleCount={TotalSampleCount:N0}; PingsPerFrame={PingsPerFrame}";
 
         public void Deconstruct(
             out int beamCount,
-            out int samplesPerBeam,
+            out int sampleCount,
             out int totalSampleCount,
             out int pingsPerFrame)
         {
             beamCount = BeamCount;
-            samplesPerBeam = SamplesPerBeam;
+            sampleCount = SampleCount;
             totalSampleCount = TotalSampleCount;
             pingsPerFrame = PingsPerFrame;
         }
@@ -56,14 +56,14 @@ namespace SoundMetrics.Aris.Core
         {
             return
                 BeamCount == other.BeamCount
-                && SamplesPerBeam == other.SamplesPerBeam
+                && SampleCount == other.SampleCount
                 && TotalSampleCount == other.TotalSampleCount
                 && PingsPerFrame == other.PingsPerFrame;
         }
 
         public override int GetHashCode()
         {
-            return BeamCount ^ SamplesPerBeam ^ PingsPerFrame;
+            return BeamCount ^ SampleCount ^ PingsPerFrame;
         }
 
         public static bool operator ==(SampleGeometry lhs, SampleGeometry rhs)
