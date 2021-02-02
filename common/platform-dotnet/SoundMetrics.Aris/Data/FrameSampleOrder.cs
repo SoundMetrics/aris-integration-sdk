@@ -37,7 +37,7 @@ namespace SoundMetrics.Aris.Data
                         pingMode,
                         sampleGeometry.PingsPerFrame,
                         sampleGeometry.BeamCount,
-                        sampleGeometry.SamplesPerBeam,
+                        sampleGeometry.SampleCount,
                         input,
                         output);
 

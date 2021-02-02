@@ -176,7 +176,7 @@ namespace SoundMetrics.Aris.File
                 Version = FileHeader.ArisFileSignature,
                 FrameCount = 0,
                 NumRawBeams = (uint)geometry.BeamCount,
-                SamplesPerChannel = (uint)geometry.SamplesPerBeam,
+                SamplesPerChannel = (uint)geometry.SampleCount,
             };
 
             stream.WriteStruct(fileHeader);
