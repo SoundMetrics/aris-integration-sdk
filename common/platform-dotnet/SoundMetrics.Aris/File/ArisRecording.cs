@@ -86,6 +86,7 @@ namespace SoundMetrics.Aris.File
                 {
                     if (ReadFrameHeaderWithValidation(stream, out frameHeader)
                         && TryReadSamples(stream, frameHeader, out var samples)
+                        && !(samples is null)
                         && Frame.TryCreate(frameHeader, samples, out var frame)
                         && !(frame is null))
                     {
