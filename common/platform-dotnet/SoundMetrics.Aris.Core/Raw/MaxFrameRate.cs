@@ -18,6 +18,30 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay)
         {
+            return
+                DetermineMaximumFrameRate(
+                    sysCfg,
+                    pingMode,
+                    sampleCount,
+                    sampleStartDelay,
+                    samplePeriod,
+                    antiAliasing,
+                    interpacketDelay,
+                    out var _);
+        }
+
+        // This variant allows us to return the value for cyclePeriod, which is required for
+        // sending raw settings to ARIS.
+        internal static Rate DetermineMaximumFrameRate(
+            SystemConfiguration sysCfg,
+            PingMode pingMode,
+            int sampleCount,
+            FineDuration sampleStartDelay,
+            FineDuration samplePeriod,
+            FineDuration antiAliasing,
+            InterpacketDelaySettings interpacketDelay,
+            out FineDuration cyclePeriod)
+        {
             // Aliases to match bill's doc; the function interface shouldn't use these.
 
             var ssd = sampleStartDelay;
@@ -35,6 +59,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
             var cpa = mcp * cpaFactor;
             var cpa1 = cpa + aa;
+
+            cyclePeriod = mcp + cpa1;
 
             var mfp = interpacketDelay.Enable
                 ? CalculateMinimumFramePeriodWithDelay()

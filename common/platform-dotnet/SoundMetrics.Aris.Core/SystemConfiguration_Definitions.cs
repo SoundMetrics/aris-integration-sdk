@@ -1,5 +1,8 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using SoundMetrics.Aris.Core.Raw;
+using System;
+
 namespace SoundMetrics.Aris.Core
 {
     public sealed partial class SystemConfiguration
@@ -38,6 +41,8 @@ namespace SoundMetrics.Aris.Core
 
                     SmallPeriodAdjustmentFactor = 0.18,
                     LargePeriodAdjustmentFactor = 0.03,
+
+                    MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1800),
                 };
 
             configurations[SystemType.Aris3000.IntegralValue] =
@@ -66,6 +71,8 @@ namespace SoundMetrics.Aris.Core
 
                     SmallPeriodAdjustmentFactor = 0.18,
                     LargePeriodAdjustmentFactor = 0.03,
+
+                    MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings3000),
                 };
 
             configurations[SystemType.Aris1200.IntegralValue] =
@@ -94,9 +101,131 @@ namespace SoundMetrics.Aris.Core
 
                     SmallPeriodAdjustmentFactor = 0.02,
                     LargePeriodAdjustmentFactor = 0.02,
+
+                    MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1200),
                 };
 
             return configurations;
+
+            Func<EnvironmentalContext, AcousticSettingsRaw>
+                CreateSettingsBuilder(Func<EnvironmentalContext, AcousticSettingsRaw> makeDefaultSettings)
+            {
+                return MakeSettings;
+
+                AcousticSettingsRaw MakeSettings(EnvironmentalContext environmentalContext)
+                {
+                    var defaultSettings = makeDefaultSettings(environmentalContext);
+                    return WindowOperations.ToMediumWindow(defaultSettings);
+                }
+            }
+
+            AcousticSettingsRaw MakeDefaultSettings1800(EnvironmentalContext sonarEnvironment)
+            {
+                var systemType = SystemType.Aris1800;
+                var pingMode = PingMode.PingMode3;
+                var frequency = FrequencySelection.High;
+                var sampleCount = 1250;
+                var sampleStartDelay = FineDuration.FromMicroseconds(2000);
+                var samplePeriod = FineDuration.FromMicroseconds(17);
+                var pulseWidth = FineDuration.FromMicroseconds(14);
+                var receiverGain = 18;
+                var antiAliasing = FineDuration.Zero;
+                var interpacketDelay = new InterpacketDelaySettings { Enable = false };
+                var enableTransmit = true;
+                var enable150Volts = true;
+                var focusPosition = FocusPosition.Automatic;
+
+                // We get away with referencing the system configuration here (while we're
+                // defining system configurations) as we're returning this function via
+                // `CreateSettingsBuilder` above for later invocation.
+                var maxFrameRate =
+                    MaxFrameRate.DetermineMaximumFrameRate(
+                        SystemConfiguration.GetConfiguration(systemType),
+                        pingMode,
+                        sampleCount,
+                        sampleStartDelay,
+                        samplePeriod,
+                        antiAliasing,
+                        interpacketDelay,
+                        out FineDuration cyclePeriod);
+
+                return new AcousticSettingsRaw(
+                    systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
+                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
+                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment);
+            }
+
+            AcousticSettingsRaw MakeDefaultSettings3000(EnvironmentalContext sonarEnvironment)
+            {
+                var systemType = SystemType.Aris3000;
+                var pingMode = PingMode.PingMode9;
+                var frequency = FrequencySelection.High;
+                var sampleCount = 1250;
+                var sampleStartDelay = FineDuration.FromMicroseconds(1300);
+                var samplePeriod = FineDuration.FromMicroseconds(5);
+                var pulseWidth = FineDuration.FromMicroseconds(5);
+                var receiverGain = 12;
+                var antiAliasing = FineDuration.Zero;
+                var interpacketDelay = new InterpacketDelaySettings { Enable = false };
+                var enableTransmit = true;
+                var enable150Volts = true;
+                var focusPosition = FocusPosition.Automatic;
+
+                // We get away with referencing the system configuration here (while we're
+                // defining system configurations) as we're returning this function via
+                // `CreateSettingsBuilder` above for later invocation.
+                var maxFrameRate =
+                    MaxFrameRate.DetermineMaximumFrameRate(
+                        SystemConfiguration.GetConfiguration(systemType),
+                        pingMode,
+                        sampleCount,
+                        sampleStartDelay,
+                        samplePeriod,
+                        antiAliasing,
+                        interpacketDelay,
+                        out FineDuration cyclePeriod);
+
+                return new AcousticSettingsRaw(
+                    systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
+                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
+                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment);
+            }
+
+            AcousticSettingsRaw MakeDefaultSettings1200(EnvironmentalContext sonarEnvironment)
+            {
+                var systemType = SystemType.Aris1200;
+                var pingMode = PingMode.PingMode1;
+                var frequency = FrequencySelection.High;
+                var sampleCount = 1250;
+                var sampleStartDelay = FineDuration.FromMicroseconds(4000);
+                var samplePeriod = FineDuration.FromMicroseconds(28);
+                var pulseWidth = FineDuration.FromMicroseconds(24);
+                var receiverGain = 20;
+                var antiAliasing = FineDuration.Zero;
+                var interpacketDelay = new InterpacketDelaySettings { Enable = false };
+                var enableTransmit = true;
+                var enable150Volts = true;
+                var focusPosition = FocusPosition.Automatic;
+
+                // We get away with referencing the system configuration here (while we're
+                // defining system configurations) as we're returning this function via
+                // `CreateSettingsBuilder` above for later invocation.
+                var maxFrameRate =
+                    MaxFrameRate.DetermineMaximumFrameRate(
+                        SystemConfiguration.GetConfiguration(systemType),
+                        pingMode,
+                        sampleCount,
+                        sampleStartDelay,
+                        samplePeriod,
+                        antiAliasing,
+                        interpacketDelay,
+                        out FineDuration cyclePeriod);
+
+                return new AcousticSettingsRaw(
+                    systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
+                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
+                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Collections.Generic;
 
@@ -36,7 +37,10 @@ namespace SoundMetrics.Aris.Core
         public ValueRange<Distance> CombinedUsefulImagingRange
             => UsefulHighFrequencyImagingRange.Union(UsefulLowFrequencyImagingRange);
 
-        public ValueRange<Distance> GetUsefulImagingRange(Frequency frequency)
+        public ValueRange<Distance> UsefulImagingRange
+            => UsefulHighFrequencyImagingRange.Union(UsefulLowFrequencyImagingRange);
+
+        public ValueRange<Distance> GetUsefulImagingRangeFor(Frequency frequency)
         {
             switch (frequency)
             {
@@ -79,6 +83,11 @@ namespace SoundMetrics.Aris.Core
 
         internal double SmallPeriodAdjustmentFactor { get; set; }
         internal double LargePeriodAdjustmentFactor { get; set; }
+
+        internal AcousticSettingsRaw GetDefaultSettings(EnvironmentalContext sonarEnvironment)
+            => MakeDefaultSettings(sonarEnvironment);
+
+        private Func<EnvironmentalContext, AcousticSettingsRaw> MakeDefaultSettings { get; set; }
 
         private static ValueRange<FineDuration> RangeOfDuration(double a, double b)
             => new ValueRange<FineDuration>(
