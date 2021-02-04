@@ -35,7 +35,7 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration pulseWidth,
             PingMode pingMode,
             bool enableTransmit,
-            FrequencySelection frequency,
+            Frequency frequency,
             bool enable150Volts,
             int receiverGain,
             FocusPosition focusPosition,
@@ -110,7 +110,10 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static AcousticSettingsRaw UpdateFrameRate(
             AcousticSettingsRaw settings, Rate newFrameRate)
-                => new AcousticSettingsRaw(
+        {
+            return settings.FrameRate.Equals(newFrameRate)
+                ? settings
+                : new AcousticSettingsRaw(
                     settings.SystemType,
                     newFrameRate,
                     settings.SampleCount,
@@ -127,6 +130,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
+        }
 
         //private static Rate ConstrainFrameRate(
         //    Rate requestedFrameRate,

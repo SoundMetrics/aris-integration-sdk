@@ -21,7 +21,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public FineDuration PulseWidth { get; private set; }
         public PingMode PingMode { get; private set; }
         public bool EnableTransmit { get; private set; }
-        public FrequencySelection Frequency { get; private set; }
+        public Frequency Frequency { get; private set; }
         public bool Enable150Volts { get; private set; }
         public int ReceiverGain { get; private set; }
 
@@ -49,7 +49,7 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration pulseWidth,
             PingMode pingMode,
             bool enableTransmit,
-            FrequencySelection frequency,
+            Frequency frequency,
             bool enable150Volts,
             int receiverGain,
             FocusPosition focusPosition,

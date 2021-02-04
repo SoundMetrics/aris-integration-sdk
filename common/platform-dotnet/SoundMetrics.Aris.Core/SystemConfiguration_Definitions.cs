@@ -37,6 +37,10 @@ namespace SoundMetrics.Aris.Core
                         SamplePeriodRange = RangeOfDuration(4, 32),
                         FocusPositionRange = new ValueRange<int>(0, 1000),
                         CyclePeriodRange = RangeOfDuration(1802, 80_000),
+
+                        MaxPulseWidthLowFrequency = FineDuration.FromMicroseconds(40),
+                        MaxPulseWidthHighFrequency = FineDuration.FromMicroseconds(30),
+                        MaxCumulativePulsePerSecond = FineDuration.FromMicroseconds(300),
                     },
 
                     SmallPeriodAdjustmentFactor = 0.18,
@@ -67,6 +71,10 @@ namespace SoundMetrics.Aris.Core
                         SamplePeriodRange = RangeOfDuration(4, 26),
                         FocusPositionRange = new ValueRange<int>(0, 1000),
                         CyclePeriodRange = RangeOfDuration(1802, 40_000),
+
+                        MaxPulseWidthLowFrequency = FineDuration.FromMicroseconds(24),
+                        MaxPulseWidthHighFrequency = FineDuration.FromMicroseconds(16),
+                        MaxCumulativePulsePerSecond = FineDuration.FromMicroseconds(240),
                     },
 
                     SmallPeriodAdjustmentFactor = 0.18,
@@ -97,6 +105,10 @@ namespace SoundMetrics.Aris.Core
                         SamplePeriodRange = RangeOfDuration(4, 40),
                         FocusPositionRange = new ValueRange<int>(0, 1000),
                         CyclePeriodRange = RangeOfDuration(1802, 150_000),
+
+                        MaxPulseWidthLowFrequency = FineDuration.FromMicroseconds(80),
+                        MaxPulseWidthHighFrequency = FineDuration.FromMicroseconds(60),
+                        MaxCumulativePulsePerSecond = FineDuration.FromMicroseconds(400),
                     },
 
                     SmallPeriodAdjustmentFactor = 0.02,
@@ -123,7 +135,7 @@ namespace SoundMetrics.Aris.Core
             {
                 var systemType = SystemType.Aris1800;
                 var pingMode = PingMode.PingMode3;
-                var frequency = FrequencySelection.High;
+                var frequency = Frequency.High;
                 var sampleCount = 1250;
                 var sampleStartDelay = FineDuration.FromMicroseconds(2000);
                 var samplePeriod = FineDuration.FromMicroseconds(17);
@@ -159,7 +171,7 @@ namespace SoundMetrics.Aris.Core
             {
                 var systemType = SystemType.Aris3000;
                 var pingMode = PingMode.PingMode9;
-                var frequency = FrequencySelection.High;
+                var frequency = Frequency.High;
                 var sampleCount = 1250;
                 var sampleStartDelay = FineDuration.FromMicroseconds(1300);
                 var samplePeriod = FineDuration.FromMicroseconds(5);
@@ -195,7 +207,7 @@ namespace SoundMetrics.Aris.Core
             {
                 var systemType = SystemType.Aris1200;
                 var pingMode = PingMode.PingMode1;
-                var frequency = FrequencySelection.High;
+                var frequency = Frequency.High;
                 var sampleCount = 1250;
                 var sampleStartDelay = FineDuration.FromMicroseconds(4000);
                 var samplePeriod = FineDuration.FromMicroseconds(28);

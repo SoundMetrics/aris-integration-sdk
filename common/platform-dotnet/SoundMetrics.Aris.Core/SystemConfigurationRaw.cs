@@ -2,6 +2,9 @@
 
 namespace SoundMetrics.Aris.Core
 {
+    using static FineDuration;
+    using static Rate;
+
     public sealed class SystemConfigurationRaw
     {
         internal SystemConfigurationRaw() {}
@@ -11,6 +14,30 @@ namespace SoundMetrics.Aris.Core
         public ValueRange<FineDuration> CyclePeriodRange { get; internal set; }
         public ValueRange<FineDuration> SamplePeriodRange { get; internal set; }
         public ValueRange<FineDuration> PulseWidthRange { get; internal set; }
+
+        internal FineDuration MaxPulseWidthLowFrequency { get; set; }
+        internal FineDuration MaxPulseWidthHighFrequency { get; set; }
+        internal FineDuration MaxCumulativePulsePerSecond { get; set; }
+
+        public FineDuration LimitPulseWidthEnergy(Frequency frequency, FineDuration pulseWidth, Rate frameRate)
+        {
+            var maxPulseWidthForFrequency = frequency == Frequency.Low ? MaxPulseWidthLowFrequency : MaxPulseWidthHighFrequency;
+            var maxEnergyAllowedPulseWidth = MaxCumulativePulsePerSecond / frameRate.RatePerSecond;
+
+
+            var limitedPulseWidth =
+                Min(Min(pulseWidth, maxPulseWidthForFrequency), maxEnergyAllowedPulseWidth);
+
+            return limitedPulseWidth;
+        }
+
+        public Rate LimitFrameRateEnergy(Frequency frequency, FineDuration pulseWidth, Rate frameRate)
+        {
+            var maxEnergyAllowedFrameRate = (Rate)(MaxCumulativePulsePerSecond.TotalMicroseconds / pulseWidth.TotalMicroseconds);
+
+            var limitedFrameRate = Min(maxEnergyAllowedFrameRate, frameRate);
+            return limitedFrameRate;
+        }
 
         public static readonly FineDuration CyclePeriodMargin = FineDuration.FromMicroseconds(420);
         public const int MinAntialiasing = 0;
