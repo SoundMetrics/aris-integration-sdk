@@ -24,7 +24,10 @@ namespace SoundMetrics.Aris.Core
         }
 
         public double TotalMicroseconds { get { return _microseconds; } }
+        public double TotalMilliseconds { get { return _microseconds / 1000.0; } }
         public double TotalSeconds { get { return _microseconds / (1000.0 * 1000.0); } }
+
+        public TimeSpan ToTimeSpan() => TimeSpan.FromMilliseconds(TotalMilliseconds);
 
         public static FineDuration FromNanosecond(long nanoseconds)
         {
