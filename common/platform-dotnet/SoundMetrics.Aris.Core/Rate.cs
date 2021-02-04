@@ -17,20 +17,28 @@ namespace SoundMetrics.Aris.Core
             _duration = duration;
         }
 
+        public static explicit operator Rate(double count) => Rate.PerSecond(count);
+
         public double RatePerSecond
         {
             get { return _count / _duration.TotalSeconds; }
         }
 
+        public FineDuration Period => _duration / _count;
+
         public static Rate PerSecond(double count)
-        {
-            return new Rate(count, FineDuration.FromSeconds(1.0));
-        }
+            => new Rate(count, FineDuration.FromSeconds(1.0));
+
+        public static Rate Hertz(double count) => PerSecond(count);
 
         public static Rate PerMillisecond(double count)
         {
             return new Rate(count, FineDuration.FromMilliseconds(1.0));
         }
+
+        public static readonly Rate Zero = Hertz(0);
+
+        public static readonly Rate OneHertz = Hertz(1);
 
         public static FineDuration operator /(double count, Rate rate)
         {
