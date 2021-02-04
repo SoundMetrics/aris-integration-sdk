@@ -1,5 +1,7 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using System;
+
 namespace SoundMetrics.Aris.Core
 {
     /// <summary>
@@ -35,6 +37,16 @@ namespace SoundMetrics.Aris.Core
                 systemType = default;
                 return false;
             }
+        }
+
+        public static SystemType GetFromIntegralValue(int integralValue)
+        {
+            if (TryGetFromIntegralValue(integralValue, out var systemType))
+            {
+                return systemType;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(integralValue), "Unrecognized system type");
         }
 
         internal SystemType(int integralValue, string humanReadableString)

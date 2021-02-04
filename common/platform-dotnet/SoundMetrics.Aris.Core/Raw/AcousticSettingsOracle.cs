@@ -151,6 +151,13 @@ namespace SoundMetrics.Aris.Core.Raw
         //    return allowedFrameRate;
         //}
 
+        public static AcousticSettingsRequest SetReceiverGain(
+            this AcousticSettingsRaw settings,
+            int gain)
+        {
+            throw new NotImplementedException();
+        }
+
         public static AcousticSettingsRequest SetSampleCount(int sampleCount)
             => throw new NotImplementedException();
     }

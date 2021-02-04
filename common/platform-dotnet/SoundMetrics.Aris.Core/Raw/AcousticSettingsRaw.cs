@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public bool EnableTransmit { get; private set; }
         public Frequency Frequency { get; private set; }
         public bool Enable150Volts { get; private set; }
-        public int ReceiverGain { get; private set; }
+        public float ReceiverGain { get; private set; }
 
         // There are not directly an acoustic setting, but part of the package.
         public FocusPosition FocusPosition { get; private set; }
@@ -51,7 +51,7 @@ namespace SoundMetrics.Aris.Core.Raw
             bool enableTransmit,
             Frequency frequency,
             bool enable150Volts,
-            int receiverGain,
+            float receiverGain,
             FocusPosition focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,

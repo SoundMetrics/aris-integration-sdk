@@ -28,7 +28,7 @@ namespace SoundMetrics.Aris.Core.UT
             var pulseWidth = sysCfg.RawConfiguration.PulseWidthRange.Minimum;
             var pingMode = sysCfg.DefaultPingMode;
             var enableTransmit = true;
-            var frequency = FrequencySelection.High;
+            var frequency = Frequency.High;
             var enable150Volts = true;
             var receiverGain = sysCfg.ReceiverGainRange.Minimum;
             var frameRate = Rate.PerSecond(1);
