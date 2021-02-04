@@ -60,20 +60,11 @@ namespace SoundMetrics.Aris.Core
         public FineDuration Ceiling => FineDuration.FromMicroseconds(Math.Ceiling(TotalMicroseconds));
 
         public override bool Equals(object obj)
-        {
-            FineDuration? other = obj as FineDuration?;
-            if (!other.HasValue)
-                return false;
-
-            return this._microseconds == other.Value._microseconds;
-        }
+            => (obj is FineDuration) ? Equals((FineDuration)obj) : false;
 
         public bool Equals(FineDuration other) => this._microseconds == other._microseconds;
 
-        public override int GetHashCode()
-        {
-            return _microseconds.GetHashCode();
-        }
+        public override int GetHashCode() => _microseconds.GetHashCode();
 
         public static FineDuration operator /(FineDuration a, double b)
         {

@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.Core.Raw
     /// This type is ported over from some legacy ARIS Integration SDK work,
     /// and will continue in new ARIS Integration SDK work.
     /// </summary>
-    public sealed partial class AcousticSettingsRaw
+    public sealed partial class AcousticSettingsRaw : IEquatable<AcousticSettingsRaw>
     {
         public SystemType SystemType { get; private set; }
         public Rate FrameRate { get; private set; }
@@ -73,6 +73,43 @@ namespace SoundMetrics.Aris.Core.Raw
             AntiAliasing = antiAliasing;
             InterpacketDelay = interpacketDelay;
             SonarEnvironment = sonarEnvironment;
+        }
+
+        public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);
+
+        public bool Equals(AcousticSettingsRaw other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (this.GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            return this.SystemType == other.SystemType
+                && this.FrameRate == other.FrameRate
+                && this.SampleCount == other.SampleCount
+                && this.SampleStartDelay == other.SampleStartDelay
+                && this.CyclePeriod == other.CyclePeriod
+                && this.SamplePeriod == other.SamplePeriod
+                && this.PulseWidth == other.PulseWidth
+                && this.PingMode == other.PingMode
+                && this.EnableTransmit == other.EnableTransmit
+                && this.Frequency == other.Frequency
+                && this.Enable150Volts == other.Enable150Volts
+                && this.ReceiverGain == other.ReceiverGain
+                && this.FocusPosition == other.FocusPosition
+                && this.AntiAliasing == other.AntiAliasing
+                && this.InterpacketDelay == other.InterpacketDelay
+                && this.SonarEnvironment == other.SonarEnvironment;
         }
 
         public override string ToString()

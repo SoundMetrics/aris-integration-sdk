@@ -4,7 +4,7 @@ using System;
 
 namespace SoundMetrics.Aris.Core
 {
-    public struct PingMode
+    public struct PingMode : IEquatable<PingMode>
     {
         private PingMode(
             int integralValue,
@@ -51,6 +51,16 @@ namespace SoundMetrics.Aris.Core
 
             return true;
         }
+
+        public override bool Equals(object obj)
+            => (obj is PingMode) ? Equals((PingMode)obj) : false;
+
+        public bool Equals(PingMode other) => this.IntegralValue == other.IntegralValue;
+
+        public static bool operator ==(PingMode a, PingMode b) => a.Equals(b);
+        public static bool operator !=(PingMode a, PingMode b) => !a.Equals(b);
+
+        public override int GetHashCode() => IntegralValue;
 
         private readonly int integralValue;
         private readonly int beamCount;

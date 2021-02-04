@@ -4,14 +4,14 @@ using System.Diagnostics;
 namespace SoundMetrics.Aris.Core
 {
     [DebuggerDisplay("{Description}")]
-    public sealed class EnvironmentalContext
+    public sealed class EnvironmentalContext : IEquatable<EnvironmentalContext>
     {
         private readonly double _waterTemp;
-        private readonly double _salinity;
+        private readonly Salinity _salinity;
         private readonly Velocity _speedOfSound;
         private static Lazy<EnvironmentalContext> _default = new Lazy<EnvironmentalContext>(CreateDefaultValue);
 
-        public EnvironmentalContext(double waterTemp, double salinity, Velocity speedOfSound)
+        public EnvironmentalContext(double waterTemp, Salinity salinity, Velocity speedOfSound)
         {
             _waterTemp = waterTemp;
             _salinity = salinity;
@@ -20,10 +20,37 @@ namespace SoundMetrics.Aris.Core
         }
 
         public double WaterTemp { get { return _waterTemp; } }
-        public double Salinity { get { return _salinity; } }
+        public Salinity Salinity { get { return _salinity; } }
         public Velocity SpeedOfSound { get { return _speedOfSound; } }
 
         public bool IsDefault { get; private set; }
+
+        public override bool Equals(object obj) => Equals(obj as EnvironmentalContext);
+
+        public bool Equals(EnvironmentalContext other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (this.GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            return this._waterTemp == other._waterTemp
+                && this._salinity == other._salinity
+                && this._speedOfSound == other._speedOfSound;
+        }
+
+        public override int GetHashCode()
+            => _waterTemp.GetHashCode() ^ _salinity.GetHashCode() ^ _speedOfSound.GetHashCode();
 
         public override string ToString()
         {
@@ -48,7 +75,7 @@ namespace SoundMetrics.Aris.Core
         {
             return new EnvironmentalContext(
                 waterTemp: 15,
-                salinity: 15,
+                salinity: Salinity.Brackish,
                 speedOfSound: Velocity.FromMetersPerSecond(1450))
             {
                 IsDefault = true

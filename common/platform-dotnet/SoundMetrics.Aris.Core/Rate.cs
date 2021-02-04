@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace SoundMetrics.Aris.Core
 {
     [DebuggerDisplay("{RatePerSecond}/s")]
-    public struct Rate : IComparable<Rate>
+    public struct Rate : IComparable<Rate>, IEquatable<Rate>
     {
         private readonly double _count;
         private readonly FineDuration _duration;
@@ -56,24 +56,14 @@ namespace SoundMetrics.Aris.Core
         public static Rate Max(Rate a, Rate b) => a > b ? a : b;
 
         public override bool Equals(object obj)
-        {
-            if (obj is Rate other)
-            {
-                return this == other;
-            }
+            => (obj is Rate) ? Equals((Rate)obj) : false;
 
-            return false;
-        }
+        public bool Equals(Rate other) => this.RatePerSecond == other.RatePerSecond;
 
-        public override int GetHashCode()
-        {
-            return RatePerSecond.GetHashCode();
-        }
+        public override int GetHashCode() => RatePerSecond.GetHashCode();
 
         public override string ToString()
-        {
-            return string.Format("{0}/s", this.RatePerSecond);
-        }
+            => string.Format("{0}/s", this.RatePerSecond);
 
         public int CompareTo(Rate other)
             => RatePerSecond.CompareTo(other.RatePerSecond);

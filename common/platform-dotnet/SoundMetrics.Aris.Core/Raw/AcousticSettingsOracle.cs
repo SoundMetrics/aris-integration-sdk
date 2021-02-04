@@ -153,7 +153,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         public static AcousticSettingsRequest SetReceiverGain(
             this AcousticSettingsRaw settings,
-            int gain)
+            float gain)
         {
             throw new NotImplementedException();
         }

@@ -9,7 +9,7 @@ namespace SoundMetrics.Aris.Core
     /// System types span across ARIS models, so an Explorer, a Defender, and
     /// a Voyager may all be an ARIS 3000.
     /// </summary>
-    public sealed class SystemType
+    public sealed class SystemType : IEquatable<SystemType>
     {
         public static readonly SystemType Aris1200 = new SystemType(2, "ARIS 1200");
         public static readonly SystemType Aris1800 = new SystemType(0, "ARIS 1800");
@@ -49,11 +49,27 @@ namespace SoundMetrics.Aris.Core
             throw new ArgumentOutOfRangeException(nameof(integralValue), "Unrecognized system type");
         }
 
-        internal SystemType(int integralValue, string humanReadableString)
+        private SystemType(int integralValue, string humanReadableString)
         {
             this.integralValue = integralValue;
             this.humanReadableString = humanReadableString;
         }
+
+        public override bool Equals(object obj) => Equals(obj as SystemType);
+
+        public bool Equals(SystemType other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            // There are only 3 instances of SystemType, nobody else may create them.
+            // So just do a reference check.
+            return Object.ReferenceEquals(this, other);
+        }
+
+        public override int GetHashCode() => integralValue;
 
         internal int IntegralValue => integralValue;
 

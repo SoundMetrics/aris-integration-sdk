@@ -9,7 +9,7 @@ namespace SoundMetrics.Aris.Core
     /// Distance in meters.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay} m")]
-    public struct Distance : IComparable<Distance>, IConvertible
+    public struct Distance : IComparable<Distance>, IEquatable<Distance>, IConvertible
     {
         private readonly double _meters;
 
@@ -45,12 +45,15 @@ namespace SoundMetrics.Aris.Core
 
         public override bool Equals(object obj)
         {
-            Distance? other = obj as Distance?;
-            if (!other.HasValue)
-                return false;
+            if (obj is Distance)
+            {
+                return Equals((Distance)obj);
+            }
 
-            return this._meters == other.Value._meters;
+            return false;
         }
+
+        public bool Equals(Distance other) => this._meters == other._meters;
 
         public override int GetHashCode()
         {
