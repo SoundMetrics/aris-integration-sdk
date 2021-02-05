@@ -112,6 +112,26 @@ namespace SoundMetrics.Aris.Core.Raw
                 && this.SonarEnvironment == other.SonarEnvironment;
         }
 
+        public override int GetHashCode()
+        {
+            return SystemType.GetHashCode()
+                ^ FrameRate.GetHashCode()
+                ^ SampleCount.GetHashCode()
+                ^ SampleStartDelay.GetHashCode()
+                ^ CyclePeriod.GetHashCode()
+                ^ SamplePeriod.GetHashCode()
+                ^ PulseWidth.GetHashCode()
+                ^ PingMode.GetHashCode()
+                ^ EnableTransmit.GetHashCode()
+                ^ Frequency.GetHashCode()
+                ^ Enable150Volts.GetHashCode()
+                ^ ReceiverGain.GetHashCode()
+                ^ FocusPosition.GetHashCode()
+                ^ AntiAliasing.GetHashCode()
+                ^ InterpacketDelay.GetHashCode()
+                ^ SonarEnvironment.GetHashCode();
+        }
+
         public override string ToString()
             => $"systemType={SystemType}; frameRate={FrameRate}; sampleCount={SampleCount}; sampleStartDelay={SampleStartDelay}; "
                 + $"cyclePeriod={CyclePeriod}; samplePeriod={SamplePeriod}; pulseWidth={PulseWidth}; "
