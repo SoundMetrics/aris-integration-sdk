@@ -15,28 +15,21 @@ namespace SoundMetrics.Aris.Core
         public static readonly SystemType Aris1800 = new SystemType(0, "ARIS 1800");
         public static readonly SystemType Aris3000 = new SystemType(1, "ARIS 3000");
 
+        private static readonly SystemType[] CandidateLookups = new[] { Aris3000, Aris1800, Aris1200 };
+
         public static bool TryGetFromIntegralValue(int integralValue, out SystemType systemType)
         {
-            if (integralValue == Aris1200.IntegralValue)
+            foreach (var candidate in CandidateLookups)
             {
-                systemType = Aris1200;
-                return true;
+                if (integralValue == candidate.IntegralValue)
+                {
+                    systemType = candidate;
+                    return true;
+                }
             }
-            else if (integralValue == Aris1800.IntegralValue)
-            {
-                systemType = Aris1800;
-                return true;
-            }
-            else if (integralValue == Aris3000.IntegralValue)
-            {
-                systemType = Aris1800;
-                return true;
-            }
-            else
-            {
-                systemType = default;
-                return false;
-            }
+
+            systemType = default;
+            return false;
         }
 
         public static SystemType GetFromIntegralValue(int integralValue)
@@ -54,6 +47,8 @@ namespace SoundMetrics.Aris.Core
             this.integralValue = integralValue;
             this.humanReadableString = humanReadableString;
         }
+
+        public override string ToString() => $"{humanReadableString} ({integralValue})";
 
         public override bool Equals(object obj) => Equals(obj as SystemType);
 

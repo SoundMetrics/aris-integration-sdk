@@ -158,7 +158,48 @@ namespace SoundMetrics.Aris.Core.Raw
             throw new NotImplementedException();
         }
 
-        public static AcousticSettingsRequest SetSampleCount(int sampleCount)
+        public static AcousticSettingsRequest SetTransmitEnable(
+            this AcousticSettingsRaw settings,
+            bool enable)
             => throw new NotImplementedException();
+
+        public static AcousticSettingsRequest Set150VoltsEnable(
+            this AcousticSettingsRaw settings,
+            bool enable)
+            => throw new NotImplementedException();
+
+        public static AcousticSettingsRequest SetSampleCount(
+            this AcousticSettingsRaw settings,
+            int sampleCount)
+            => throw new NotImplementedException();
+
+        public static AcousticSettingsRequest SetFrequency(
+            this AcousticSettingsRaw settings,
+            Frequency frequency)
+            => throw new NotImplementedException();
+
+        public static AcousticSettingsRequest SetPulseWidth(
+            this AcousticSettingsRaw settings,
+            FineDuration pulseWidth)
+        {
+            throw new NotImplementedException();
+
+            /*
+                    var systemType = SoundMetrics.Aris.Core.SystemType.GetFromIntegralValue((int)connection.SystemType);
+                    var pulseWidth = FineDuration.FromMicroseconds(pulseWidthUsec);
+                    var frequency = (SoundMetrics.Aris.Core.Frequency)settings.frequency;
+                    var frameRate = (Rate)settings.frameRate;
+
+                    safePulseWidth =
+                        (uint)MakeSafePulseWidth(
+                                systemType,
+                                pulseWidth,
+                                frequency,
+                                frameRate)
+                                .Floor
+                                .TotalMicroseconds;
+                    settings.pulseWidth = safePulseWidth;
+             */
+        }
     }
 }

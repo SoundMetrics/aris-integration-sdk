@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Core
         {
             var commonSampleCountRange = new ValueRange<int>(200, 4000);
             var commonReceiverGainRange = new ValueRange<int>(0, 24);
-            var commonFrameRateRange = new ValueRange<Rate>(Rate.PerSecond(1), Rate.PerSecond(15));
+            var commonFrameRateRange = new ValueRange<Rate>(Rate.FromHertz(1), Rate.FromHertz(15));
 
             var configurations = new SystemConfiguration[3];
 
@@ -47,6 +47,9 @@ namespace SoundMetrics.Aris.Core
                     LargePeriodAdjustmentFactor = 0.03,
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1800),
+
+                    FrequencyHigh = Rate.FromHertz(1_800_000),
+                    FrequencyLow = Rate.FromHertz(1_100_000),
                 };
 
             configurations[SystemType.Aris3000.IntegralValue] =
@@ -81,6 +84,9 @@ namespace SoundMetrics.Aris.Core
                     LargePeriodAdjustmentFactor = 0.03,
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings3000),
+
+                    FrequencyHigh = Rate.FromHertz(3_000_000),
+                    FrequencyLow = Rate.FromHertz(1_800_000),
                 };
 
             configurations[SystemType.Aris1200.IntegralValue] =
@@ -115,6 +121,9 @@ namespace SoundMetrics.Aris.Core
                     LargePeriodAdjustmentFactor = 0.02,
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1200),
+
+                    FrequencyHigh = Rate.FromHertz(1_200_000),
+                    FrequencyLow = Rate.FromHertz(700_000),
                 };
 
             return configurations;

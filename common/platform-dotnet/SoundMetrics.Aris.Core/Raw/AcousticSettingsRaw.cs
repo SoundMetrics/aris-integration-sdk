@@ -29,6 +29,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public FocusPosition FocusPosition { get; private set; }
         public FineDuration AntiAliasing { get; private set; }
         public InterpacketDelaySettings InterpacketDelay { get; private set; }
+        public Rate MaximumFrameRate { get; private set; }
 
         /// <summary>
         /// Environmental status when the settings were created.
@@ -73,6 +74,8 @@ namespace SoundMetrics.Aris.Core.Raw
             AntiAliasing = antiAliasing;
             InterpacketDelay = interpacketDelay;
             SonarEnvironment = sonarEnvironment;
+
+            MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
         }
 
         public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);

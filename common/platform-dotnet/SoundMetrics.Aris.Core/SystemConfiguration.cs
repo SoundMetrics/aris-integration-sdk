@@ -6,7 +6,11 @@ using System.Collections.Generic;
 
 namespace SoundMetrics.Aris.Core
 {
-    using static SystemConfigurationRaw;
+    public static class SystemConfigurationExtensions
+    {
+        public static SystemConfiguration GetConfiguration(this SystemType systemType)
+            => SystemConfiguration.GetConfiguration(systemType);
+    }
 
     public sealed partial class SystemConfiguration
     {
@@ -79,7 +83,13 @@ namespace SoundMetrics.Aris.Core
             }
         }
 
-        public SystemConfigurationRaw RawConfiguration { get; set; }
+        public SystemConfigurationRaw RawConfiguration { get; private set; }
+
+        public Rate FrequencyLow { get; private set; }
+        public Rate FrequencyHigh { get; private set; }
+
+        public Rate GetFrequency(Frequency frequency)
+            => frequency == Frequency.High ? FrequencyHigh : FrequencyLow;
 
         internal double SmallPeriodAdjustmentFactor { get; set; }
         internal double LargePeriodAdjustmentFactor { get; set; }

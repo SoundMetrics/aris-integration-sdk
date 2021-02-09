@@ -52,6 +52,16 @@ namespace SoundMetrics.Aris.Core
             return true;
         }
 
+        public static PingMode GetFrom(int integralValue)
+        {
+            if (TryGet(integralValue, out var pingMode))
+            {
+                return pingMode;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(integralValue));
+        }
+
         public override bool Equals(object obj)
             => (obj is PingMode) ? Equals((PingMode)obj) : false;
 

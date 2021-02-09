@@ -9,6 +9,18 @@ namespace SoundMetrics.Aris.Core.Raw
     // \\soundserv\Engineering\Test\Results & Reports\ARIS Max Frame Rates
     public static class MaxFrameRate
     {
+        public static Rate DetermineMaximumFrameRate(AcousticSettingsRaw settings)
+        {
+            return DetermineMaximumFrameRate(
+                settings.SystemType.GetConfiguration(),
+                settings.PingMode,
+                settings.SampleCount,
+                settings.SampleStartDelay,
+                settings.SamplePeriod,
+                settings.AntiAliasing,
+                settings.InterpacketDelay);
+        }
+
         public static Rate DetermineMaximumFrameRate(
             SystemConfiguration sysCfg,
             PingMode pingMode,

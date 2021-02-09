@@ -73,7 +73,7 @@ namespace SoundMetrics.Aris.Core
 
         public static double operator /(FineDuration a, Rate b)
         {
-            return (a._microseconds / b.RatePerSecond);
+            return (a._microseconds / b.Hz);
         }
 
         public static FineDuration operator +(FineDuration a)

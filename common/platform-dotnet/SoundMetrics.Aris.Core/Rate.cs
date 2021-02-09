@@ -1,11 +1,12 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core
 {
-    [DebuggerDisplay("{RatePerSecond}/s")]
+    [DebuggerDisplay("{Hz}/s"), TypeConverter(typeof(Converters.RateConverter))]
     public struct Rate : IComparable<Rate>, IEquatable<Rate>
     {
         private readonly double _count;
@@ -17,40 +18,39 @@ namespace SoundMetrics.Aris.Core
             _duration = duration;
         }
 
-        public static explicit operator Rate(double count) => Rate.PerSecond(count);
+        public static explicit operator Rate(double count) => Rate.FromHertz(count);
 
-        public double RatePerSecond
-        {
-            get { return _count / _duration.TotalSeconds; }
-        }
+        public double Hz => _count / _duration.TotalSeconds;
+
+        public double KHz => Hz / 1_000;
+
+        public double MHz => Hz / 1_000_000;
 
         public FineDuration Period => _duration / _count;
 
-        public static Rate PerSecond(double count)
+        public static Rate FromHertz(double count)
             => new Rate(count, FineDuration.FromSeconds(1.0));
-
-        public static Rate Hertz(double count) => PerSecond(count);
 
         public static Rate PerMillisecond(double count)
         {
             return new Rate(count, FineDuration.FromMilliseconds(1.0));
         }
 
-        public static readonly Rate Zero = Hertz(0);
+        public static readonly Rate Zero = FromHertz(0);
 
-        public static readonly Rate OneHertz = Hertz(1);
+        public static readonly Rate OneHertz = FromHertz(1);
 
         public static FineDuration operator /(double count, Rate rate)
         {
             return (count / rate._count) * rate._duration;
         }
 
-        public static bool operator <(Rate a, Rate b) => a.RatePerSecond < b.RatePerSecond;
-        public static bool operator <=(Rate a, Rate b) => a.RatePerSecond <= b.RatePerSecond;
-        public static bool operator >(Rate a, Rate b) => a.RatePerSecond > b.RatePerSecond;
-        public static bool operator >=(Rate a, Rate b) => a.RatePerSecond >= b.RatePerSecond;
-        public static bool operator ==(Rate a, Rate b) => a.RatePerSecond == b.RatePerSecond;
-        public static bool operator !=(Rate a, Rate b) => !(a.RatePerSecond == b.RatePerSecond);
+        public static bool operator <(Rate a, Rate b) => a.Hz < b.Hz;
+        public static bool operator <=(Rate a, Rate b) => a.Hz <= b.Hz;
+        public static bool operator >(Rate a, Rate b) => a.Hz > b.Hz;
+        public static bool operator >=(Rate a, Rate b) => a.Hz >= b.Hz;
+        public static bool operator ==(Rate a, Rate b) => a.Hz == b.Hz;
+        public static bool operator !=(Rate a, Rate b) => !(a.Hz == b.Hz);
 
         public static Rate Min(Rate a, Rate b) => a < b ? a : b;
         public static Rate Max(Rate a, Rate b) => a > b ? a : b;
@@ -58,14 +58,14 @@ namespace SoundMetrics.Aris.Core
         public override bool Equals(object obj)
             => (obj is Rate) ? Equals((Rate)obj) : false;
 
-        public bool Equals(Rate other) => this.RatePerSecond == other.RatePerSecond;
+        public bool Equals(Rate other) => this.Hz == other.Hz;
 
-        public override int GetHashCode() => RatePerSecond.GetHashCode();
+        public override int GetHashCode() => Hz.GetHashCode();
 
         public override string ToString()
-            => string.Format("{0}/s", this.RatePerSecond);
+            => string.Format("{0}/s", this.Hz);
 
         public int CompareTo(Rate other)
-            => RatePerSecond.CompareTo(other.RatePerSecond);
+            => Hz.CompareTo(other.Hz);
     }
 }

@@ -22,7 +22,7 @@ namespace SoundMetrics.Aris.Core
         public FineDuration LimitPulseWidthEnergy(Frequency frequency, FineDuration pulseWidth, Rate frameRate)
         {
             var maxPulseWidthForFrequency = frequency == Frequency.Low ? MaxPulseWidthLowFrequency : MaxPulseWidthHighFrequency;
-            var maxEnergyAllowedPulseWidth = MaxCumulativePulsePerSecond / frameRate.RatePerSecond;
+            var maxEnergyAllowedPulseWidth = MaxCumulativePulsePerSecond / frameRate.Hz;
 
 
             var limitedPulseWidth =
