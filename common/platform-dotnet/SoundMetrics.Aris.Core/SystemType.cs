@@ -42,6 +42,9 @@ namespace SoundMetrics.Aris.Core
             throw new ArgumentOutOfRangeException(nameof(integralValue), "Unrecognized system type");
         }
 
+        // Parameterless ctor for serialization.
+        private SystemType() { }
+
         private SystemType(int integralValue, string humanReadableString)
         {
             this.integralValue = integralValue;

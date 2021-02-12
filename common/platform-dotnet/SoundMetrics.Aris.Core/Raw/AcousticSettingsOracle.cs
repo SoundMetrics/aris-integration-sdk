@@ -94,7 +94,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
             var allowedFrameRate =
                 ConstrainFrameRate(
-                    settings.FrameRate,
+                    requestedFrameRate,
                     sysCfg,
                     settings.PingMode,
                     settings.SampleCount,
@@ -107,6 +107,10 @@ namespace SoundMetrics.Aris.Core.Raw
                 requested: UpdateFrameRate(settings, requestedFrameRate),
                 allowed: UpdateFrameRate(settings, allowedFrameRate));
         }
+
+        public static AcousticSettingsRequest SetMaxFrameRate(
+            this AcousticSettingsRaw settings)
+            => settings.SetFrameRate(settings.MaximumFrameRate);
 
         private static AcousticSettingsRaw UpdateFrameRate(
             AcousticSettingsRaw settings, Rate newFrameRate)
@@ -150,6 +154,34 @@ namespace SoundMetrics.Aris.Core.Raw
         //    var allowedFrameRate = Rate.Max(min, Rate.Min(max, requestedFrameRate));
         //    return allowedFrameRate;
         //}
+
+        public static AcousticSettingsRequest SetInterpacketDelay(
+            this AcousticSettingsRaw settings,
+            InterpacketDelaySettings newInterpacketDelay,
+            bool useMaxFrameRate)
+        {
+            var newSettings =
+                new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.CyclePeriod,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusPosition,
+                    settings.AntiAliasing,
+                    newInterpacketDelay,
+                    settings.SonarEnvironment);
+            var result =
+                useMaxFrameRate ? newSettings.SetMaxFrameRate().Allowed : newSettings;
+            return new AcousticSettingsRequest(result, result);
+        }
 
         public static AcousticSettingsRequest SetReceiverGain(
             this AcousticSettingsRaw settings,

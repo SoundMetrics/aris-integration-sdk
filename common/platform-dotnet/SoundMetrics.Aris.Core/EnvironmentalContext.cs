@@ -11,6 +11,9 @@ namespace SoundMetrics.Aris.Core
         private readonly Velocity _speedOfSound;
         private static Lazy<EnvironmentalContext> _default = new Lazy<EnvironmentalContext>(CreateDefaultValue);
 
+        // Parameterless ctor for serialization.
+        private EnvironmentalContext() { }
+
         public EnvironmentalContext(double waterTemp, Salinity salinity, Velocity speedOfSound)
         {
             _waterTemp = waterTemp;

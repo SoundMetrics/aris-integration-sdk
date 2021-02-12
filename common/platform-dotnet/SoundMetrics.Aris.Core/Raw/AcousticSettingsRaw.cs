@@ -40,6 +40,9 @@ namespace SoundMetrics.Aris.Core.Raw
         public Distance WindowEnd => WindowStart + WindowLength;
         public Distance WindowLength => this.CalculateWindowLength();
 
+        // Parameterless ctor for serialization.
+        private AcousticSettingsRaw() { }
+
         internal AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
