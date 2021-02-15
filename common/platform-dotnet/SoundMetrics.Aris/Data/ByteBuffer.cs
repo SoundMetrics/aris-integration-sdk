@@ -26,7 +26,9 @@ namespace SoundMetrics.Aris.Data
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(length),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     $"{nameof(length)} must be greater than zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             this.length = length;
@@ -58,7 +60,9 @@ namespace SoundMetrics.Aris.Data
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(bufferLength),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     $"{nameof(bufferLength)} must be greater than zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             this.length = bufferLength;

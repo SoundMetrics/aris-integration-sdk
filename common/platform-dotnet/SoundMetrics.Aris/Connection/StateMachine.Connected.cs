@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using System;
+using System.Globalization;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -39,7 +40,7 @@ namespace SoundMetrics.Aris.Connection
                         {
                             Log.Information(
                                 "Terminating, no frame parts received since {LatestFramePartTimestamp}",
-                                context.LatestFramePartTimestamp.ToString("o"));
+                                context.LatestFramePartTimestamp.ToString("o", CultureInfo.InvariantCulture));
                             return ConnectionState.ConnectionTerminated;
                         }
                         break;

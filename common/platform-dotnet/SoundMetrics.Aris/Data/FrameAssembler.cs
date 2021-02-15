@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace SoundMetrics.Aris.Data
 {
@@ -19,7 +20,9 @@ namespace SoundMetrics.Aris.Data
             }
             else
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Invalid frame header provided: sample geometry");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
         }
 
@@ -61,11 +64,21 @@ namespace SoundMetrics.Aris.Data
         {
             frame = default;
 
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            // Ownership of `samples` is given away.
             var samples = new ByteBuffer(sampleParts);
-
-            return Frame.TryCreate(frameHeader, samples, out var newFrame)
-                        && !(newFrame is null)
-                        && FrameSampleOrder.TryReorderFrame(newFrame, out frame);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+            try
+            {
+                return Frame.TryCreate(frameHeader, samples, out var newFrame)
+                            && !(newFrame is null)
+                            && FrameSampleOrder.TryReorderFrame(newFrame, out frame);
+            }
+            catch
+            {
+                samples.Dispose();
+                throw;
+            }
         }
 
         private FrameHeader? frameHeader;

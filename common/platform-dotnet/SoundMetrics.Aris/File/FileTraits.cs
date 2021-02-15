@@ -9,17 +9,17 @@ namespace SoundMetrics.Aris.File
 {
     public class FileTraits
     {
-        public long FileLength;
-        public SampleGeometry Geometry;
-        public int SerializedFrameSize;
-        public int FileHeaderFrameCount;
-        public double CalculatedFrameCount;
-        public int? ValidFrameHeaderCount;
-        public FileIssue Issues;
+        public long FileLength { get; private set; }
+        public SampleGeometry Geometry { get; private set; }
+        public int SerializedFrameSize { get; private set; }
+        public int FileHeaderFrameCount { get; private set; }
+        public double CalculatedFrameCount { get; private set; }
+        public int? ValidFrameHeaderCount { get; private set; }
+        public FileIssues Issues { get; private set; }
 
         public bool HasIssues => Issues != 0;
 
-        public bool HasIssue(FileIssue issue) => ((int)Issues & (int)issue) != 0;
+        public bool HasIssue(FileIssues issue) => ((int)Issues & (int)issue) != 0;
 
         public IEnumerable<string> IssueDescriptions =>
             FileIssueDescriptions.GetFlagDescriptions(Issues);
@@ -75,11 +75,11 @@ namespace SoundMetrics.Aris.File
                             var validFrameHeaderCount =
                                 ValidateFrameHeaders(stream, firstFramePosition, geometry, validateFrameHeaders);
 
-                            var issues = FileIssue.None;
-                            issues = wholeFrames == 0 ? issues | FileIssue.NoFrames : issues;
+                            var issues = FileIssues.None;
+                            issues = wholeFrames == 0 ? issues | FileIssues.NoFrames : issues;
                             issues =
                                 validFrameHeaderCount is null
-                                    ? issues | FileIssue.InvalidFrameHeaders
+                                    ? issues | FileIssues.InvalidFrameHeaders
                                     : issues;
 
                             return new FileTraits
@@ -98,7 +98,7 @@ namespace SoundMetrics.Aris.File
                             return new FileTraits
                             {
                                 FileLength = fileSize,
-                                Issues = FileIssue.InvalidFirstFrameHeader,
+                                Issues = FileIssues.InvalidFirstFrameHeader,
                             };
                         }
                     }
@@ -107,7 +107,7 @@ namespace SoundMetrics.Aris.File
                         return new FileTraits
                         {
                             FileLength = fileSize,
-                            Issues = FileIssue.InvalidFirstFrameHeader,
+                            Issues = FileIssues.InvalidFirstFrameHeader,
                         };
                     }
                 }
@@ -126,7 +126,9 @@ namespace SoundMetrics.Aris.File
                 {
                     stream.Position = startingPosition;
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // Don't throw from the finally.
                 }
@@ -172,7 +174,9 @@ namespace SoundMetrics.Aris.File
                 {
                     stream.Position = originalPosition;
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // Don't throw from the finally.
                 }

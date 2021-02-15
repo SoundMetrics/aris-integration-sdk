@@ -5,6 +5,8 @@
 
 namespace SoundMetrics.Aris.Data
 {
+#pragma warning disable CA1815 // Override equals and operator equals on value types
+#pragma warning disable CA1051 // Do not declare visible instance fields
 
     using System;
     using System.Runtime.InteropServices;
@@ -161,4 +163,6 @@ namespace SoundMetrics.Aris.Data
 
     }
 
+#pragma warning restore CA1051 // Do not declare visible instance fields
+#pragma warning restore CA1815 // Override equals and operator equals on value types
 }

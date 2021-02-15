@@ -82,7 +82,9 @@ namespace SoundMetrics.Aris.Connection
                                         Log.Information("Couldn't connect to {ipAddress}: {exMessage}",
                                             context.DeviceAddress, errorMessage);
                                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                                     catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                                     {
                                         if (failureLogCountdown > 0)
                                         {

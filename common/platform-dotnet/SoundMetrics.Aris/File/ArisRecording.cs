@@ -22,11 +22,9 @@ namespace SoundMetrics.Aris.File
                 {
                     AdvancePastFileHeader(file);
 
-                    FrameHeader frameHeader;
-
                     while (true)
                     {
-                        if (ReadFrameHeaderWithValidation(file, out frameHeader))
+                        if (ReadFrameHeaderWithValidation(file, out var frameHeader))
                         {
                             AdvancePastSamples(file, frameHeader);
                             yield return frameHeader;
@@ -70,22 +68,20 @@ namespace SoundMetrics.Aris.File
 
         public static IEnumerable<Frame> EnumerateFrames(string arisFilePath)
         {
-            using (var file = System.IO.File.OpenRead(arisFilePath))
-            {
-                return EnumerateFrames(file);
-            }
+            using var file = System.IO.File.OpenRead(arisFilePath);
+            return EnumerateFrames(file);
         }
 
         public static IEnumerable<Frame> EnumerateFrames(FileStream stream)
         {
             if (ReadFileHeader(stream, out var fileHeader, out var issue))
             {
-                FrameHeader frameHeader;
-
                 while (true)
                 {
-                    if (ReadFrameHeaderWithValidation(stream, out frameHeader)
+                    if (ReadFrameHeaderWithValidation(stream, out var frameHeader)
+#pragma warning disable CA2000 // Dispose objects before losing scope
                         && TryReadSamples(stream, frameHeader, out var samples)
+#pragma warning restore CA2000 // Dispose objects before losing scope
                         && !(samples is null)
                         && Frame.TryCreate(frameHeader, samples, out var frame)
                         && !(frame is null))
@@ -155,7 +151,9 @@ namespace SoundMetrics.Aris.File
             var pos = stream.Seek(fileHeaderSize, SeekOrigin.Begin);
             if (pos != fileHeaderSize)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new Exception("Incomplete file header");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
         }
 
@@ -169,47 +167,47 @@ namespace SoundMetrics.Aris.File
 
         internal static bool IsValidFileHeader(string arisFilePath, out string reason)
         {
-            using (var file = System.IO.File.OpenRead(arisFilePath))
+            using var file = System.IO.File.OpenRead(arisFilePath);
+            if (ReadFileHeader(file, out var fileHeader, out var badReason))
             {
-                if (ReadFileHeader(file, out var fileHeader, out var badReason))
+                if (fileHeader.Version != FileHeader.ArisFileSignature)
                 {
-                    if (fileHeader.Version != FileHeader.ArisFileSignature)
-                    {
-                        reason = $"Invalid file signature in '{arisFilePath}'";
-                        return false;
-                    }
-
-                    reason = "";
-                    return true;
-                }
-                else
-                {
-                    reason = $"{badReason} in '{arisFilePath}'";
+                    reason = $"Invalid file signature in '{arisFilePath}'";
                     return false;
                 }
+
+                reason = "";
+                return true;
+            }
+            else
+            {
+                reason = $"{badReason} in '{arisFilePath}'";
+                return false;
             }
         }
 
         public static bool ReadFileHeader(
             string path,
             out FileHeader fileHeader,
-            out FileIssue issue)
+            out FileIssues issue)
         {
-            using (var stream = System.IO.File.OpenRead(path))
-            {
-                return ReadFileHeader(stream, out fileHeader, out issue);
-            }
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
+
+            using var stream = System.IO.File.OpenRead(path);
+            return ReadFileHeader(stream, out fileHeader, out issue);
         }
 
         public static bool ReadFileHeader(
             FileStream stream,
             out FileHeader fileHeader,
-            out FileIssue issue)
+            out FileIssues issue)
         {
+            if (stream is null) throw new ArgumentNullException(nameof(stream));
+
             if (stream.Length == 0)
             {
                 fileHeader = default;
-                issue = FileIssue.EmptyFile;
+                issue = FileIssues.EmptyFile;
                 return false;
             }
             else if (stream.ReadStruct(out fileHeader))
@@ -217,17 +215,17 @@ namespace SoundMetrics.Aris.File
                 if (fileHeader.Version != FileHeader.ArisFileSignature)
                 {
                     fileHeader = default;
-                    issue = FileIssue.InvalidFileHeader;
+                    issue = FileIssues.InvalidFileHeader;
                     return false;
                 }
 
-                issue = FileIssue.None;
+                issue = FileIssues.None;
                 return true;
             }
             else
             {
                 fileHeader = default;
-                issue = FileIssue.IncompleteFileHeader;
+                issue = FileIssues.IncompleteFileHeader;
                 return false;
             }
         }

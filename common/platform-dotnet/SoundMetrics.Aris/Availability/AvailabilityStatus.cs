@@ -16,20 +16,28 @@ namespace SoundMetrics.Aris.Availability
         NotAvailable,
     }
 
-    public struct AvailabilityChange
+    public class AvailabilityChange
     {
-        public AvailabilityChangeType ChangeType;
-        public ArisBeacon LatestBeacon;
+        public AvailabilityChange(
+            AvailabilityChangeType changeType,
+            ArisBeacon latestBeacon)
+        {
+            ChangeType = changeType;
+            LatestBeacon = latestBeacon;
+        }
+
+        public AvailabilityChangeType ChangeType { get; private set; }
+        public ArisBeacon LatestBeacon { get; private set; }
     }
 
-    public sealed class Availability : IDisposable
+    public sealed class AvailabilityStatus : IDisposable
     {
-        public Availability(TimeSpan timeout)
+        public AvailabilityStatus(TimeSpan timeout)
             : this(timeout, SynchronizationContext.Current)
         {
         }
 
-        public Availability(TimeSpan timeout, SynchronizationContext? syncContext)
+        public AvailabilityStatus(TimeSpan timeout, SynchronizationContext? syncContext)
         {
             if (syncContext is null)
             {
@@ -40,7 +48,9 @@ namespace SoundMetrics.Aris.Availability
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(timeout),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     $"{nameof(timeout)} cannot be zero or less");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             this.timeout = timeout;
@@ -96,11 +106,7 @@ namespace SoundMetrics.Aris.Availability
             _ = devices.AddOrUpdate(key, _ => value, (_1, _2) => value);
 
             changeSubject.OnNext(
-                new AvailabilityChange
-                {
-                    ChangeType = AvailabilityChangeType.Available,
-                    LatestBeacon = beacon,
-                });
+                new AvailabilityChange(AvailabilityChangeType.Available, beacon));
         }
 
         private void OnTimer(DateTimeOffset now)
@@ -126,11 +132,7 @@ namespace SoundMetrics.Aris.Availability
                 if (devices.TryRemove(key, out var deviceState))
                 {
                     changeSubject.OnNext(
-                        new AvailabilityChange
-                        {
-                            ChangeType = AvailabilityChangeType.NotAvailable,
-                            LatestBeacon = deviceState.LatestBeacon,
-                        });
+                        new AvailabilityChange(AvailabilityChangeType.NotAvailable, deviceState.LatestBeacon));
                 }
             }
         }

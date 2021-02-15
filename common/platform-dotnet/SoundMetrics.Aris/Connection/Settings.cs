@@ -5,6 +5,7 @@ namespace SoundMetrics.Aris.Connection
 {
     public interface ISettings
     {
+        string[] GenerateCommand();
     }
 
     public sealed class TestPatternSettings : ISettings, ICommand

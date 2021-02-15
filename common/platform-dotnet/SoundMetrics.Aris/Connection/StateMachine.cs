@@ -178,7 +178,9 @@ namespace SoundMetrics.Aris.Connection
                             Transition(newState, context, ev);
                         }
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                     {
                         Log.Warning($"Exception during state transition: [{ex.Message}]");
                         Log.Warning("Terminating connection");
@@ -246,6 +248,8 @@ namespace SoundMetrics.Aris.Connection
 
                     frameSubject.OnCompleted();
                     frameSubject.Dispose();
+
+                    context.Dispose();
                 }
 
                 // no unmanaged resources
@@ -260,7 +264,9 @@ namespace SoundMetrics.Aris.Connection
                 events.Post(MakeEvent(new Stop(doneSignal)));
                 if (!doneSignal.Wait(TimeSpan.FromSeconds(30)))
                 {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     throw new Exception("ShutDown timed out");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
                 }
             }
 

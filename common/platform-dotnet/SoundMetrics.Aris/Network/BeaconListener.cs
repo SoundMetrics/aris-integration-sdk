@@ -77,7 +77,13 @@ namespace SoundMetrics.Aris.Network
                             if (!beacon.IsDiverHeld)
                             {
                                 var variants =
-                                    (IEnumerable<string>?)beacon.SystemVariants?.Enabled ?? new string[0];
+                                    (IEnumerable<string>?)beacon.SystemVariants?.Enabled ?? Array.Empty<string>();
+                                var onboardVersion =
+                                    new OnboardSoftwareVersion(
+                                        beacon.SoftwareVersion.Major,
+                                        beacon.SoftwareVersion.Minor,
+                                        beacon.SoftwareVersion.Buildnumber);
+
                                 bool isVoyager = variants.Contains(VariantFlags.VoyagerVariant);
 
                                 if (isVoyager)
@@ -88,12 +94,7 @@ namespace SoundMetrics.Aris.Network
                                             udpReceived.Received.RemoteEndPoint.Address,
                                             systemType,
                                             beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
-                                            new OnboardSoftwareVersion
-                                            {
-                                                Major = beacon.SoftwareVersion.Major,
-                                                Minor = beacon.SoftwareVersion.Minor,
-                                                BuildNumber = beacon.SoftwareVersion.Buildnumber,
-                                            },
+                                            onboardVersion,
                                             (ConnectionAvailability)beacon.ConnectionState,
                                             beacon.CpuTemp)
                                     );
@@ -106,12 +107,7 @@ namespace SoundMetrics.Aris.Network
                                             udpReceived.Received.RemoteEndPoint.Address,
                                             systemType,
                                             beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
-                                            new OnboardSoftwareVersion
-                                            {
-                                                Major = beacon.SoftwareVersion.Major,
-                                                Minor = beacon.SoftwareVersion.Minor,
-                                                BuildNumber = beacon.SoftwareVersion.Buildnumber,
-                                            },
+                                            onboardVersion,
                                             (ConnectionAvailability)beacon.ConnectionState,
                                             beacon.CpuTemp)
                                     );
@@ -123,7 +119,9 @@ namespace SoundMetrics.Aris.Network
                             // Unrecognizable beacon or packet from another source
                         }
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch
+#pragma warning restore CA1031 // Do not catch general exception types
                     {
                         // Unrecognizable beacon or packet from another source
                     }

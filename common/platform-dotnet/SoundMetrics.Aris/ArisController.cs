@@ -7,7 +7,6 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading;
 
 namespace SoundMetrics.Aris
@@ -29,7 +28,9 @@ namespace SoundMetrics.Aris
         {
             if (!uint.TryParse(serialNumber, out var _))
             {
-                throw new ArgumentException(nameof(serialNumber));
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentException("Cannot parse", nameof(serialNumber));
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             if (syncContext is null)
@@ -43,7 +44,7 @@ namespace SoundMetrics.Aris
             // that drive it.
             stateMachine = new StateMachine(serialNumber);
 
-            availability = new Availability.Availability(
+            availability = new Availability.AvailabilityStatus(
                 TimeSpan.FromSeconds(5),
                 syncContext);
             availabilitySub =
@@ -123,6 +124,8 @@ namespace SoundMetrics.Aris
                 {
                     availabilitySub.Dispose();
                     availability.Dispose();
+
+                    stateMachine?.Dispose();
                 }
 
                 // no unmanaged resources
@@ -138,7 +141,7 @@ namespace SoundMetrics.Aris
         }
 
         private readonly string serialNumber;
-        private readonly Availability.Availability availability;
+        private readonly AvailabilityStatus availability;
         private readonly IDisposable availabilitySub;
         private readonly StateMachine stateMachine;
 

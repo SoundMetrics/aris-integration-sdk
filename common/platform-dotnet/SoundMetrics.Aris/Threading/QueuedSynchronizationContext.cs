@@ -80,7 +80,9 @@ namespace SoundMetrics.Aris.Threading
 
         public override void Send(SendOrPostCallback _callback, object? _state)
         {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
             throw new InvalidOperationException("Send is not supported");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
         }
 
         private void RunOnCurrentThread(CancellationToken ct)
@@ -98,7 +100,9 @@ namespace SoundMetrics.Aris.Threading
                 {
                     // This is thrown when GetConsumingEnumerable is canceled.
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     Log.Error("QueuedSynchronizationContext observed a {exceptionType} exception {exceptionMessage}: {stackTrace}",
                         ex.GetType().Name, ex.Message, ex.StackTrace);

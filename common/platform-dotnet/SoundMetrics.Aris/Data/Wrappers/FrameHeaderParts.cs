@@ -3,7 +3,9 @@ using System;
 
 namespace SoundMetrics.Aris.Data.Wrappers
 {
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public ref struct FrameHeaderParts
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
         public FrameHeaderParts(Span<FrameHeader> frameHeader)
         {
@@ -31,6 +33,8 @@ namespace SoundMetrics.Aris.Data.Wrappers
             this in FrameHeader frameHeader,
             WrapperAction<T> withParts)
         {
+            if (withParts is null) throw new ArgumentNullException(nameof(withParts));
+
             fixed (FrameHeader* pfh = &frameHeader)
             {
                 var hdr = new Span<FrameHeader>(pfh, 1);
@@ -41,27 +45,18 @@ namespace SoundMetrics.Aris.Data.Wrappers
 
     //--------------------------------------------------------------------------
 
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public ref struct ArisFrameHeaderIdentity
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
         public ArisFrameHeaderIdentity(FrameHeaderParts parts)
         {
             this.parts = parts;
+            this.SystemType =
+                SystemType.GetFromIntegralValue((int)parts.FrameHeader[0].TheSystemType);
         }
 
-        public SystemType SystemType
-        {
-            get
-            {
-                if (SystemType.TryGetFromIntegralValue(
-                    (int)parts.FrameHeader[0].TheSystemType,
-                    out var systemType))
-                {
-                    return systemType;
-                }
-
-                throw new Exception($"Invalid system type: [{parts.FrameHeader[0].TheSystemType}]");
-            }
-        }
+        public SystemType SystemType { get; private set; }
 
         /// Sonar serial number as labeled on housing.
         public uint SerialNumber { get => parts.FrameHeader[0].SonarSerialNumber; }
@@ -73,7 +68,9 @@ namespace SoundMetrics.Aris.Data.Wrappers
 
     //--------------------------------------------------------------------------
 
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public ref struct ArisFrameHeaderTime
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
         public ArisFrameHeaderTime(FrameHeaderParts parts)
         {
@@ -129,7 +126,9 @@ namespace SoundMetrics.Aris.Data.Wrappers
 
     //--------------------------------------------------------------------------
 
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public ref struct ArisFrameHeaderEnvironment
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
         public ArisFrameHeaderEnvironment(FrameHeaderParts parts)
         {

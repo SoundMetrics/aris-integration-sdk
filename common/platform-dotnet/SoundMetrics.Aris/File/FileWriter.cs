@@ -36,6 +36,9 @@ namespace SoundMetrics.Aris.File
         /// <returns></returns>
         public static FileWriter CreateNewWithFrame(Frame firstFrame, string filePath)
         {
+            if (firstFrame is null) throw new ArgumentNullException(nameof(firstFrame));
+            if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentNullException(nameof(filePath));
+
             var writer = CreateNew(firstFrame.FrameHeader, filePath);
 
             try
@@ -81,7 +84,9 @@ namespace SoundMetrics.Aris.File
                 }
                 else
                 {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     throw new Exception("Couldn't determine sample geometry");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
                 }
             }
             catch (Exception ex)
@@ -102,6 +107,8 @@ namespace SoundMetrics.Aris.File
         /// <returns>The assigned frame index for the written frame.</returns>
         public int WriteFrame(Frame frame)
         {
+            if (frame is null) throw new ArgumentNullException(nameof(frame));
+
             var startPosition = fileStream.Position;
             var success = false;
 
@@ -112,7 +119,9 @@ namespace SoundMetrics.Aris.File
                     if (geometry != sampleGeometry)
                     {
                         throw new InvalidOperationException(
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                             "Cannot change the sample geometry within a recording");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
                     }
 
                     var frameIndex = frameCount;
@@ -129,7 +138,9 @@ namespace SoundMetrics.Aris.File
                 }
                 else
                 {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     throw new Exception("Couldn't determine sample geometry");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
                 }
             }
             finally
@@ -219,7 +230,9 @@ namespace SoundMetrics.Aris.File
                     fileStream.SetLength(0);
                 }
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 // Don't propagate additional issues on shutdown, just log it.
                 Log.Error("Could not clean up file: '{message}'", ex.Message);

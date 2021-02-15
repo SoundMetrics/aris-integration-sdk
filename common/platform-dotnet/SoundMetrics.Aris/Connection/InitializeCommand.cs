@@ -1,5 +1,6 @@
 ﻿using SoundMetrics.Aris.Core;
 using System;
+using System.Globalization;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -23,7 +24,7 @@ namespace SoundMetrics.Aris.Connection
             new[]
             {
                 "initialize",
-                $"salinity {Salinity.ToString().ToLower()}",
+                $"salinity {Salinity.ToString().ToLower(CultureInfo.CurrentCulture)}",
                 $"rcvr_port {ReceiverPort}",
                 $"datetime {FormatTimestamp(Timestamp)}",
             };

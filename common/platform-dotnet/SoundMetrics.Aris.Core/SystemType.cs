@@ -19,6 +19,11 @@ namespace SoundMetrics.Aris.Core
 
         private static readonly SystemType[] CandidateLookups = new[] { Aris3000, Aris1800, Aris1200 };
 
+        internal static void Validate(int integralValue)
+        {
+            var _ = GetFromIntegralValue(integralValue);
+        }
+
         internal static bool TryGetFromIntegralValue(int integralValue, out SystemType systemType)
         {
             foreach (var candidate in CandidateLookups)

@@ -111,13 +111,11 @@ namespace SoundMetrics.Aris.Network
             }
             finally
             {
-                var localMetrics = new FrameListenerMetrics
-                {
-                    PacketsReceived = 1,
-                    InvalidPacketsReceived = isInvalidPacket ? 1 : 0,
-                    FramesStarted = startedFrame ? 1 : 0,
-                    FramesCompleted = completedFrame ? 1 : 0,
-                };
+                var localMetrics = new FrameListenerMetrics(
+                    1,
+                    isInvalidPacket ? 1 : 0,
+                    startedFrame ? 1 : 0,
+                    completedFrame ? 1 : 0);
 
                 lock (metricsGuard)
                 {
@@ -162,7 +160,7 @@ namespace SoundMetrics.Aris.Network
         private readonly Subject<Frame> frameSubject;
         private readonly FrameAssembler frameAssembler = new FrameAssembler();
         private readonly Subject<DateTimeOffset> validPacketReceived = new Subject<DateTimeOffset>();
-        private readonly Mutex metricsGuard = new Mutex();
+        private readonly object metricsGuard = new object();
 
         private bool disposed;
         private FrameListenerMetrics metrics = new FrameListenerMetrics();

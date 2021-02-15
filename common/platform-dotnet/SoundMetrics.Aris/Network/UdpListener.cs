@@ -8,11 +8,25 @@ using System.Threading.Tasks;
 
 namespace SoundMetrics.Aris.Network
 {
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public struct UdpReceived
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
-        public DateTimeOffset Timestamp;
-        public UdpReceiveResult Received;
-        public int LocalPort;
+        public UdpReceived(
+            DateTimeOffset timestamp,
+            UdpReceiveResult received,
+            int localPort)
+        {
+            Timestamp = timestamp;
+            Received = received;
+            LocalPort = localPort;
+        }
+
+#pragma warning disable CA1051 // Do not declare visible instance fields
+        public readonly DateTimeOffset Timestamp;
+        public readonly UdpReceiveResult Received;
+        public readonly int LocalPort;
+#pragma warning restore CA1051 // Do not declare visible instance fields
     }
 
     internal sealed class UdpListener : IDisposable
@@ -54,14 +68,9 @@ namespace SoundMetrics.Aris.Network
             {
                 try
                 {
-                    var received = await udp.ReceiveAsync();
+                    var received = await udp.ReceiveAsync().ConfigureAwait(true);
                     var timestamp = DateTimeOffset.Now;
-                    ReceivePacket(new UdpReceived
-                    {
-                        Timestamp = timestamp,
-                        Received = received,
-                        LocalPort = localPort,
-                    });
+                    ReceivePacket(new UdpReceived(timestamp, received, localPort));
                 }
                 catch (ObjectDisposedException)
                 {

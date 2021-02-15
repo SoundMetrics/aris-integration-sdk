@@ -8,16 +8,27 @@ using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Network
 {
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public struct NetworkInterfaceInfo
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
+        private NetworkInterfaceInfo(int index, string name, NetworkInterface ifc)
+        {
+            Index = index;
+            Name = name;
+            Interface = ifc;
+        }
+
+#pragma warning disable CA1051 // Do not declare visible instance fields
         /// The interface "index" as retrieved via
         /// ifc.GetIPProperties().GetIPv*Properties().Index
-        public int Index;
+        public readonly int Index;
 
-        public string Name;
-        public NetworkInterface Interface;
+        public readonly string Name;
+        public readonly NetworkInterface Interface;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
-        public static int NoIndex = -1;
+        public static readonly int NoIndex = -1;
 
         public static NetworkInterfaceInfo FromNetworkInterface(NetworkInterface ifc)
         {
@@ -40,20 +51,16 @@ namespace SoundMetrics.Aris.Network
                 index = v6.Index;
             }
 
-            return new NetworkInterfaceInfo
-            {
-                Index = index,
-                Name = name,
-                Interface = ifc,
-
-            };
+            return new NetworkInterfaceInfo(index, name, ifc);
         }
 
         internal static byte[] Mask(byte[] a, byte[] mask)
         {
             if (a.Length != mask.Length)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Mismatched argument lengths", nameof(a));
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var output = new byte[a.Length];

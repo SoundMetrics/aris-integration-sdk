@@ -125,7 +125,9 @@ namespace SoundMetrics.Aris.Connection
         {
             if (!(oldAddress is null) && object.Equals(oldAddress, targetAddress))
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Address has not changed");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             OldAddress = oldAddress;

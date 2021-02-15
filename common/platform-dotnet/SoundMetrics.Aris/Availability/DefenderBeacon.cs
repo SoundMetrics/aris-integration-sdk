@@ -27,13 +27,13 @@ namespace SoundMetrics.Aris.Availability
         OnTetherPower = 4,
     }
 
-    public struct DefenderState
+    public class DefenderState
     {
-        public DefenderRecordState RecordState;
-        public DefenderStorageState StorageState;
-        public float StorageLevel;
-        public DefenderBatteryState BatteryState;
-        public float BatteryLevel;
+        public DefenderRecordState RecordState { get; set; }
+        public DefenderStorageState StorageState { get; set; }
+        public float StorageLevel { get; set; }
+        public DefenderBatteryState BatteryState { get; set; }
+        public float BatteryLevel { get; set; }
     }
 
     public sealed class DefenderBeacon : ArisBeacon
@@ -45,7 +45,8 @@ namespace SoundMetrics.Aris.Availability
             string serialNumber,
             OnboardSoftwareVersion softwareVersion,
             ConnectionAvailability availability,
-            float cpuTemp)
+            float cpuTemp,
+            DefenderState state)
             : base(
                 timestamp,
                 ipAddress,
@@ -56,9 +57,9 @@ namespace SoundMetrics.Aris.Availability
                 cpuTemp,
                 hasDepthReading: true)
         {
-
+            State = state;
         }
 
-        public DefenderState State { get; }
+        public DefenderState State { get; private set; }
     }
 }

@@ -34,15 +34,25 @@ namespace SoundMetrics.Aris.Data
                 {
                     IntPtr input = frame.Samples.DangerousGetHandle();
                     UnsafeReorderFrame(
-                        pingMode,
                         sampleGeometry.PingsPerFrame,
                         sampleGeometry.BeamCount,
                         sampleGeometry.SampleCount,
                         input,
                         output);
 
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                    // Ownership of `orderedSamples` is given away.
                     var orderedSamples = new ByteBuffer(output, outputLength);
-                    return Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                    if (Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        orderedSamples.Dispose();
+                        return false;
+                    }
                 }
                 catch
                 {
@@ -69,14 +79,13 @@ namespace SoundMetrics.Aris.Data
         /// by SoundMetrics.NativeMemory.TransformFunction.
         /// C# "unsafe" reorder based on the SDK C++ code.
         /// </summary>
-        /// <param name="pingMode">ARIS ping mode</param>
         /// <param name="pingsPerFrame">Number of pings per frame acquisition</param>
         /// <param name="beamCount">Number of beams</param>
         /// <param name="samplesPerBeam">Samples per beam</param>
         /// <param name="inputBuffer">The input samples</param>
         /// <param name="outputBuffer">Where to put the reordered samples (out param).</param>
+        ///
         private static unsafe void UnsafeReorderFrame(
-            Int32 pingMode,
             Int32 pingsPerFrame,
             Int32 beamCount,
             Int32 samplesPerBeam,

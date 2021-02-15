@@ -39,12 +39,20 @@ namespace SoundMetrics.Aris.EnumerableHelpers
             }
 
             public (T, T) Current =>
-                hasCurrentPair ? currentPair[0] : throw new Exception("No current value");
+                hasCurrentPair
+                    ? currentPair[0]
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                    : throw new Exception("No current value");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
 
             object? IEnumerator.Current =>
-                hasCurrentPair ? currentPair[0] : throw new Exception("No current value");
+                hasCurrentPair
+                    ? currentPair[0]
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                    : throw new Exception("No current value");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
 
-            public void Dispose() { }
+            public void Dispose() => ets.Dispose();
 
             public bool MoveNext()
             {
@@ -78,7 +86,9 @@ namespace SoundMetrics.Aris.EnumerableHelpers
                     }
                     else
                     {
+#pragma warning disable CS8601 // Possible null reference assignment.
                         value = default;
+#pragma warning restore CS8601 // Possible null reference assignment.
                         return false;
                     }
                 }
@@ -89,8 +99,11 @@ namespace SoundMetrics.Aris.EnumerableHelpers
             private readonly IEnumerator<T> ets;
 
             private bool hasSavedValue, hasCurrentPair;
-            private T savedValue = default;
             private (T, T)[] currentPair = new (T, T)[1];
+
+#pragma warning disable CS8601 // Possible null reference assignment.
+            private T savedValue = default;
+#pragma warning restore CS8601 // Possible null reference assignment.
         }
     }
 }

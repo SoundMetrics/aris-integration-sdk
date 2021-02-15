@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Data
 {
-    public struct ValueRange<T>
+    public struct ValueRange<T> : IEquatable<ValueRange<T>>
         where T : struct, IComparable<T>
     {
         public ValueRange(T min, T max)
@@ -11,8 +11,10 @@ namespace SoundMetrics.Aris.Data
             Max = max;
         }
 
-        public T Min;
-        public T Max;
+#pragma warning disable CA1051 // Do not declare visible instance fields
+        public readonly T Min;
+        public readonly T Max;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
         public bool IsReverseRange => Min.CompareTo(Max) > 0;
 
@@ -20,19 +22,36 @@ namespace SoundMetrics.Aris.Data
         {
             return $"{Min}-{Max}";
         }
+
+        public override bool Equals(object? obj)
+            => obj is ValueRange<T> other && this.Equals(other);
+
+        public bool Equals(ValueRange<T> other)
+            => this.Min.Equals(other.Min) && this.Max.Equals(other.Max);
+
+        public override int GetHashCode()
+            => Min.GetHashCode() ^ Max.GetHashCode();
+
+        public static bool operator ==(ValueRange<T> left, ValueRange<T> right)
+            => left.Equals(right);
+
+        public static bool operator !=(ValueRange<T> left, ValueRange<T> right)
+            => !(left == right);
     }
 
     public static class RangeExtensions
     {
-        public static bool Contains<T>(this ValueRange<T> @this, T value)
+        public static bool Contains<T>(this ValueRange<T> me, T value)
             where T : struct, IComparable<T>
         {
-            if (@this.IsReverseRange)
+            if (me.IsReverseRange)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new InvalidOperationException("Negative range is not allowed.");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            return @this.Min.CompareTo(value) <= 0 && value.CompareTo(@this.Max) <= 0;
+            return me.Min.CompareTo(value) <= 0 && value.CompareTo(me.Max) <= 0;
         }
 
         public static bool IsSubrangeOf<T>(this ValueRange<T> @this, ValueRange<T> other)
@@ -49,7 +68,9 @@ namespace SoundMetrics.Aris.Data
         {
             if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException($"{nameof(min)} may not be greater than {nameof(max)}");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             T newMin = Greater(@this.Min, min);

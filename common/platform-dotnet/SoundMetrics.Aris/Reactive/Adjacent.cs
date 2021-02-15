@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reactive.Subjects;
 
 namespace SoundMetrics.Aris.Reactive
@@ -62,7 +61,9 @@ namespace SoundMetrics.Aris.Reactive
             return subject;
         }
 
+#pragma warning disable CA1715 // Identifiers should have correct prefix
         public static IObservable<U> TransformValuePairs<T, U>(this IObservable<T> ts, Func<T, T, U> transform)
+#pragma warning restore CA1715 // Identifiers should have correct prefix
             where T : struct
         {
             var subject = new Subject<U>();
@@ -86,7 +87,9 @@ namespace SoundMetrics.Aris.Reactive
             return subject;
         }
 
+#pragma warning disable CA1715 // Identifiers should have correct prefix
         public static IObservable<U> TransformPairs<T, U>(this IObservable<T> ts, Func<T, T, U> transform)
+#pragma warning restore CA1715 // Identifiers should have correct prefix
             where T : class
         {
             var subject = new Subject<U>();

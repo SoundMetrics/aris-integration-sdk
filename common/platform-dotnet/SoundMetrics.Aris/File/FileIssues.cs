@@ -4,7 +4,9 @@ using System.Collections.Generic;
 namespace SoundMetrics.Aris.File
 {
     [Flags]
-    public enum FileIssue : UInt16
+#pragma warning disable CA1028 // Enum Storage should be Int32
+    public enum FileIssues : UInt16
+#pragma warning restore CA1028 // Enum Storage should be Int32
     {
         None = 0,
         EmptyFile =                 0b00000000_00000001,
@@ -17,14 +19,14 @@ namespace SoundMetrics.Aris.File
 
     internal static class FileIssueDescriptions
     {
-        internal static string GetFlagDescription(FileIssue issue)
+        internal static string GetFlagDescription(FileIssues issues)
         {
             CheckExactlyOneFlag();
-            return issueDescriptions[issue];
+            return issueDescriptions[issues];
 
             void CheckExactlyOneFlag()
             {
-                if (CountSetBits((uint)issue) > 1)
+                if (CountSetBits((uint)issues) > 1)
                 {
                     throw new ArgumentException("More than one bit flag was set");
                 }
@@ -46,7 +48,7 @@ namespace SoundMetrics.Aris.File
             }
         }
 
-        internal static IEnumerable<string> GetFlagDescriptions(FileIssue issues)
+        internal static IEnumerable<string> GetFlagDescriptions(FileIssues issues)
         {
             UInt16 bit = 0b10000000_00000000;
             UInt16 uIssues = (UInt16)issues;
@@ -55,21 +57,21 @@ namespace SoundMetrics.Aris.File
             {
                 if ((bit & uIssues) != 0)
                 {
-                    var oneIssue = (FileIssue)bit;
+                    var oneIssue = (FileIssues)bit;
                     yield return issueDescriptions[oneIssue];
                 }
             } while ((bit >>= 1) != 0);
         }
 
-        private static readonly Dictionary<FileIssue, string> issueDescriptions =
-            new Dictionary<FileIssue, string>
+        private static readonly Dictionary<FileIssues, string> issueDescriptions =
+            new Dictionary<FileIssues, string>
             {
-                { FileIssue.EmptyFile, "The file is empty" },
-                { FileIssue.IncompleteFileHeader, "The file header is incomplete" },
-                { FileIssue.InvalidFileHeader, "The file header is invalid" },
-                { FileIssue.NoFrames, "The file contains no frames" },
-                { FileIssue.InvalidFirstFrameHeader, "The first frame header is invalid" },
-                { FileIssue.InvalidFrameHeaders, "There are one or more invalid frame headers" },
+                { FileIssues.EmptyFile, "The file is empty" },
+                { FileIssues.IncompleteFileHeader, "The file header is incomplete" },
+                { FileIssues.InvalidFileHeader, "The file header is invalid" },
+                { FileIssues.NoFrames, "The file contains no frames" },
+                { FileIssues.InvalidFirstFrameHeader, "The first frame header is invalid" },
+                { FileIssues.InvalidFrameHeaders, "There are one or more invalid frame headers" },
             };
     }
 }

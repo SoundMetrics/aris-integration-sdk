@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.UT.File
             var processedFile = FileTraits.GetFileTraits(path, validateFrameHeaders: false, out var fileTraits);
             Assert.IsTrue(processedFile);
             Assert.IsTrue(fileTraits.HasIssues);
-            Assert.IsTrue(fileTraits.HasIssue(FileIssue.EmptyFile));
+            Assert.IsTrue(fileTraits.HasIssue(FileIssues.EmptyFile));
         }
 
         [TestMethod]
@@ -36,7 +36,7 @@ namespace SoundMetrics.Aris.UT.File
             var processedFile = FileTraits.GetFileTraits(path, validateFrameHeaders: false, out var fileTraits);
             Assert.IsTrue(processedFile);
             Assert.IsTrue(fileTraits.HasIssues);
-            Assert.IsTrue(fileTraits.HasIssue(FileIssue.IncompleteFileHeader));
+            Assert.IsTrue(fileTraits.HasIssue(FileIssues.IncompleteFileHeader));
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace SoundMetrics.Aris.UT.File
             var processedFile = FileTraits.GetFileTraits(path, validateFrameHeaders: false, out var fileTraits);
             Assert.IsTrue(processedFile);
             Assert.IsTrue(fileTraits.HasIssues);
-            Assert.IsTrue(fileTraits.HasIssue(FileIssue.InvalidFileHeader));
+            Assert.IsTrue(fileTraits.HasIssue(FileIssues.InvalidFileHeader));
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace SoundMetrics.Aris.UT.File
             var processedFile = FileTraits.GetFileTraits(path, validateFrameHeaders: false, out var fileTraits);
             Assert.IsTrue(processedFile);
             Assert.IsTrue(fileTraits.HasIssues);
-            Assert.IsTrue(fileTraits.HasIssue(FileIssue.NoFrames));
+            Assert.IsTrue(fileTraits.HasIssue(FileIssues.NoFrames));
         }
 
 
@@ -75,7 +75,7 @@ namespace SoundMetrics.Aris.UT.File
             var processedFile = FileTraits.GetFileTraits(path, validateFrameHeaders: false, out var fileTraits);
             Assert.IsTrue(processedFile);
             Assert.IsTrue(fileTraits.HasIssues);
-            Assert.IsTrue(fileTraits.HasIssue(FileIssue.InvalidFirstFrameHeader));
+            Assert.IsTrue(fileTraits.HasIssue(FileIssues.InvalidFirstFrameHeader));
         }
 
         private static string CreateEmptyFile()
