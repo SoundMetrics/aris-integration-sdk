@@ -2,15 +2,21 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
+#pragma warning disable CA2225 // Operator overloads have named alternates
+
     /// <summary>
     /// Distance in meters.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay} m")]
+    [DataContract]
     public struct Distance : IComparable<Distance>, IEquatable<Distance>, IConvertible
     {
+        [DataMember]
         private readonly double _meters;
 
         private Distance(double meters)
@@ -23,7 +29,7 @@ namespace SoundMetrics.Aris.Core
             return new Distance(meters);
         }
 
-        public static Distance Zero = new Distance(0.0);
+        public static readonly Distance Zero = new Distance(0.0);
 
         public double Meters { get { return _meters; } }
         public double Centimeters { get { return _meters * 100; } }
@@ -148,10 +154,11 @@ namespace SoundMetrics.Aris.Core
 
         public override string ToString()
         {
-            return string.Format("{0:F3} m", this.Meters);
+            return string.Format(CultureInfo.CurrentCulture, "{0:F3} m", this.Meters);
         }
 
-        private string DebuggerDisplay { get { return string.Format("{0:F3} m", this.Meters); } }
+        private string DebuggerDisplay
+            => string.Format(CultureInfo.CurrentCulture, "{0:F3} m", this.Meters);
 
         #region IConvertible
 
@@ -242,4 +249,6 @@ namespace SoundMetrics.Aris.Core
 
         #endregion IConvertible
     }
+
+#pragma warning restore CA2225 // Operator overloads have named alternates
 }

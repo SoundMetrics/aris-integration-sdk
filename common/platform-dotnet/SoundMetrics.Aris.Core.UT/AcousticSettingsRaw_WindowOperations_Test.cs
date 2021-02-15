@@ -31,15 +31,15 @@ namespace SoundMetrics.Aris.Core.UT
             var frequency = Frequency.High;
             var enable150Volts = true;
             var receiverGain = sysCfg.ReceiverGainRange.Minimum;
-            var frameRate = Rate.FromHertz(1);
+            var frameRate = Rate.ToRate(1);
             var pingsPerFrame = pingMode.PingsPerFrame;
             var framePeriod = 1 / frameRate;
             var cyclePeriod = framePeriod / pingsPerFrame;
-            var focusPosition = FocusPosition.Automatic;
+            var focusPosition = Distance.FromMeters(8);
 
             return new AcousticSettingsRaw(
                 SystemType,
-                Rate.FromHertz(1),
+                Rate.ToRate(1),
                 sampleCount,
                 sampleStartDelay,
                 cyclePeriod,
@@ -91,30 +91,6 @@ namespace SoundMetrics.Aris.Core.UT
             Assert.AreEqual(expectedSampleStartDelay, result.SampleStartDelay, "unexpected sample start delay");
             Assert.AreEqual(expectedWindowStart, result.WindowStart, "unexpected window start");
             Assert.AreEqual(startSettings.SampleCount, result.SampleCount, "sample count should not change");
-        }
-
-        [TestMethod]
-        public void UseAutomaticFocusWithShortRange()
-        {
-            var original = GetNearRange(1000, FineDuration.Zero);
-            var settings = WindowOperations.ToShortWindow(original);
-            Assert.IsTrue(settings.FocusPosition is FocusPositionAutomatic);
-        }
-
-        [TestMethod]
-        public void UseAutomaticFocusWithMediumRange()
-        {
-            var original = GetNearRange(1000, FineDuration.Zero);
-            var settings = WindowOperations.ToLongWindow(original);
-            Assert.IsTrue(settings.FocusPosition is FocusPositionAutomatic);
-        }
-
-        [TestMethod]
-        public void UseAutomaticFocusWithLongRange()
-        {
-            var original = GetNearRange(1000, FineDuration.Zero);
-            var settings = WindowOperations.ToLongWindow(original);
-            Assert.IsTrue(settings.FocusPosition is FocusPositionAutomatic);
         }
     }
 }

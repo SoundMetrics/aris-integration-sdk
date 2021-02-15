@@ -1,33 +1,30 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
+    [DataContract]
     public struct PingMode : IEquatable<PingMode>
     {
-        private PingMode(
-            int integralValue,
-            int beamCount,
-            int pingsPerFrame)
+        private PingMode(int integralValue)
         {
             this.integralValue = integralValue;
-            this.beamCount = beamCount;
-            this.pingsPerFrame = pingsPerFrame;
         }
 
         public int IntegralValue => integralValue;
 
-        public int BeamCount => beamCount;
+        public int BeamCount => this.GetInfo().BeamCount;
 
-        public int PingsPerFrame => pingsPerFrame;
+        public int PingsPerFrame => this.GetInfo().PingsPerFrame;
 
-        public static readonly PingMode PingMode1 = new PingMode(1, 48, 3);
-        public static readonly PingMode PingMode3 = new PingMode(3, 96, 6);
-        public static readonly PingMode PingMode6 = new PingMode(6, 64, 4);
-        public static readonly PingMode PingMode9 = new PingMode(9, 128, 8);
+        public static readonly PingMode PingMode1 = new PingMode(1);
+        public static readonly PingMode PingMode3 = new PingMode(3);
+        public static readonly PingMode PingMode6 = new PingMode(6);
+        public static readonly PingMode PingMode9 = new PingMode(9);
 
-        public static bool TryGet(int integralValue, out PingMode pingMode)
+        internal static bool TryGet(int integralValue, out PingMode pingMode)
         {
             switch (integralValue)
             {
@@ -52,7 +49,7 @@ namespace SoundMetrics.Aris.Core
             return true;
         }
 
-        public static PingMode GetFrom(int integralValue)
+        internal static PingMode GetFrom(int integralValue)
         {
             if (TryGet(integralValue, out var pingMode))
             {
@@ -70,10 +67,11 @@ namespace SoundMetrics.Aris.Core
         public static bool operator ==(PingMode a, PingMode b) => a.Equals(b);
         public static bool operator !=(PingMode a, PingMode b) => !a.Equals(b);
 
+        public override string ToString() => $"PingMode {IntegralValue}";
+
         public override int GetHashCode() => IntegralValue;
 
+        [DataMember]
         private readonly int integralValue;
-        private readonly int beamCount;
-        private readonly int pingsPerFrame;
     }
 }

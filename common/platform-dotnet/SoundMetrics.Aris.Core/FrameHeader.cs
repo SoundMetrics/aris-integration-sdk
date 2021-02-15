@@ -5,13 +5,16 @@
 
 namespace SoundMetrics.Aris.Core
 {
+#pragma warning disable CA1051 // Do not declare visible instance fields
 
     using System;
     using System.Runtime.InteropServices;
 
     // Defines the metadata at the start of an ARIS frame.
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+#pragma warning disable CA1815 // Override equals and operator equals on value types
     public unsafe struct FrameHeader
+#pragma warning restore CA1815 // Override equals and operator equals on value types
     {
         public const uint ArisFileSignature = 0x05464444;
         public const uint ArisFrameSignature = 0x05464444;
@@ -487,5 +490,7 @@ namespace SoundMetrics.Aris.Core
         public fixed byte padding[288];
 
     }
+
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
 }

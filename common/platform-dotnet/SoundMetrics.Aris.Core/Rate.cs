@@ -3,13 +3,21 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
+#pragma warning disable CA2225 // Operator overloads have named alternates
+
     [DebuggerDisplay("{Hz}/s"), TypeConverter(typeof(Converters.RateConverter))]
+    [DataContract]
     public struct Rate : IComparable<Rate>, IEquatable<Rate>
     {
+        [DataMember]
         private readonly double _count;
+
+        [DataMember]
         private readonly FineDuration _duration;
 
         internal Rate(double count, FineDuration duration)
@@ -18,7 +26,10 @@ namespace SoundMetrics.Aris.Core
             _duration = duration;
         }
 
-        public static explicit operator Rate(double count) => Rate.FromHertz(count);
+        public static explicit operator Rate(double count) => Rate.ToRate(count);
+
+        public static Rate ToRate(double countsPerSecond)
+            => new Rate(countsPerSecond, FineDuration.FromSeconds(1.0));
 
         public double Hz => _count / _duration.TotalSeconds;
 
@@ -28,17 +39,18 @@ namespace SoundMetrics.Aris.Core
 
         public FineDuration Period => _duration / _count;
 
-        public static Rate FromHertz(double count)
-            => new Rate(count, FineDuration.FromSeconds(1.0));
+        public Rate NormalizeToHertz()
+            => Rate.ToRate(_count * (1 / _duration).Hz);
+
 
         public static Rate PerMillisecond(double count)
         {
             return new Rate(count, FineDuration.FromMilliseconds(1.0));
         }
 
-        public static readonly Rate Zero = FromHertz(0);
+        public static readonly Rate Zero = ToRate(0);
 
-        public static readonly Rate OneHertz = FromHertz(1);
+        public static readonly Rate OneHertz = ToRate(1);
 
         public static FineDuration operator /(double count, Rate rate)
         {
@@ -63,9 +75,11 @@ namespace SoundMetrics.Aris.Core
         public override int GetHashCode() => Hz.GetHashCode();
 
         public override string ToString()
-            => string.Format("{0}/s", this.Hz);
+            => string.Format(CultureInfo.CurrentCulture, "{0}/s", this.Hz);
 
         public int CompareTo(Rate other)
             => Hz.CompareTo(other.Hz);
     }
+
+#pragma warning restore CA2225 // Operator overloads have named alternates
 }

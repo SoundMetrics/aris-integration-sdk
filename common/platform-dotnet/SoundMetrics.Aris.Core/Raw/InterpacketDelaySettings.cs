@@ -8,8 +8,10 @@ namespace SoundMetrics.Aris.Core.Raw
     [DebuggerDisplay("{DisplayString}")]
     public struct InterpacketDelaySettings : IEquatable<InterpacketDelaySettings>
     {
+#pragma warning disable CA1051 // Do not declare visible instance fields
         public bool Enable;
         public FineDuration Delay;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
         public string DisplayString =>
             $"{Delay.TotalMicroseconds} \u00B5s" + (Enable ? "" : " disabled");
@@ -24,6 +26,8 @@ namespace SoundMetrics.Aris.Core.Raw
             => a.Equals(b);
         public static bool operator !=(InterpacketDelaySettings a, InterpacketDelaySettings b)
             => !a.Equals(b);
+
+        public override string ToString() => $"(Enable={Enable}; Delay={Delay})";
 
         public override int GetHashCode()
         {

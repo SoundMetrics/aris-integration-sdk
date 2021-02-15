@@ -31,7 +31,7 @@ namespace SoundMetrics.Aris.Core
             return limitedPulseWidth;
         }
 
-        public Rate LimitFrameRateEnergy(Frequency frequency, FineDuration pulseWidth, Rate frameRate)
+        public Rate LimitFrameRateEnergy(FineDuration pulseWidth, Rate frameRate)
         {
             var maxEnergyAllowedFrameRate = (Rate)(MaxCumulativePulsePerSecond.TotalMicroseconds / pulseWidth.TotalMicroseconds);
 

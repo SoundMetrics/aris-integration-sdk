@@ -15,8 +15,9 @@ namespace SoundMetrics.Aris.Core
     public sealed partial class SystemConfiguration
     {
         public static SystemConfiguration GetConfiguration(SystemType systemType)
-            =>
-                configurations[systemType.IntegralValue];
+        {
+            return configurations[systemType.IntegralValue];
+        }
 
         public IReadOnlyCollection<PingMode> PingModes { get; internal set; }
 

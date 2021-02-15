@@ -4,7 +4,7 @@ using System;
 
 namespace SoundMetrics.Aris.Core
 {
-    public struct Range<T> where T : IComparable, IComparable<T>
+    public struct Range<T> : IEquatable<Range<T>> where T : IComparable, IComparable<T>
     {
         public Range(T minimum, T maximum)
         {
@@ -48,6 +48,22 @@ namespace SoundMetrics.Aris.Core
         }
 
         public override string ToString() => $"[{Minimum}-{Maximum}]";
+
+        public override bool Equals(object obj)
+            => obj is Range<T> other && this.Equals(other);
+
+        public bool Equals(Range<T> other)
+            => this.minimum.Equals(other.minimum)
+                && this.maximum.Equals(other.maximum);
+
+        public static bool operator ==(Range<T> a, Range<T> b)
+            => a.Equals(b);
+
+        public static bool operator !=(Range<T> a, Range<T> b)
+            => !a.Equals(b);
+
+        public override int GetHashCode()
+            => minimum.GetHashCode() ^ maximum.GetHashCode();
 
         private readonly T minimum;
         private readonly T maximum;

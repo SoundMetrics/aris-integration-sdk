@@ -2,13 +2,20 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
+#pragma warning disable CA2225 // Operator overloads have named alternates
+
     [DebuggerDisplay("{MetersPerSecond} m/s")]
-    public struct Velocity : IComparable<Velocity>
+    [DataContract]
+    public struct Velocity : IComparable<Velocity>, IEquatable<Velocity>
     {
         private static readonly Velocity zero = new Velocity(Distance.FromMeters(0), FineDuration.FromSeconds(1));
+
+        [DataMember]
         private readonly double _metersPerSecond;
 
         public Velocity(Distance distance, FineDuration time)
@@ -25,13 +32,10 @@ namespace SoundMetrics.Aris.Core
         }
 
         public override bool Equals(object obj)
-        {
-            Velocity? other = obj as Velocity?;
-            if (!other.HasValue)
-                return false;
+            => obj is Velocity other && this.Equals(other);
 
-            return this._metersPerSecond == other.Value._metersPerSecond;
-        }
+        public bool Equals(Velocity other)
+            => this._metersPerSecond == other._metersPerSecond;
 
         public override int GetHashCode()
         {
@@ -103,8 +107,8 @@ namespace SoundMetrics.Aris.Core
         }
 
         public override string ToString()
-        {
-            return string.Format("{0} m/s", this.MetersPerSecond);
-        }
+            => string.Format(CultureInfo.CurrentCulture, "{0} m/s", this.MetersPerSecond);
     }
+
+#pragma warning restore CA2225 // Operator overloads have named alternates
 }

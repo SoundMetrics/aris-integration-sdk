@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Core.Converters
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            return Rate.FromHertz(Convert.ToDouble(value));
+            return Rate.ToRate(Convert.ToDouble(value, culture));
         }
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -32,7 +32,7 @@ namespace SoundMetrics.Aris.Core.Converters
 
             if (destinationType == typeof(string))
             {
-                return rate.ToString("G");
+                return rate.ToString("G", culture);
 
             }
             else if (destinationType == typeof(double))

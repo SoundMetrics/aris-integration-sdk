@@ -1,11 +1,13 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using System;
+
 namespace SoundMetrics.Aris.Core
 {
     /// <summary>
     /// Describes the &quot;shape&quot; of a frame's samples.
     /// </summary>
-    public struct SampleGeometry
+    public struct SampleGeometry : IEquatable<SampleGeometry>
     {
         internal SampleGeometry(
             int beamCount,
@@ -43,23 +45,13 @@ namespace SoundMetrics.Aris.Core
         // Equality -----------------------------------------------------
 
         public override bool Equals(object obj)
-        {
-            if (obj is SampleGeometry other)
-            {
-                return this.Equals(other);
-            }
-
-            return false;
-        }
+            => obj is SampleGeometry other && this.Equals(other);
 
         public bool Equals(SampleGeometry other)
-        {
-            return
-                BeamCount == other.BeamCount
+            => BeamCount == other.BeamCount
                 && SampleCount == other.SampleCount
                 && TotalSampleCount == other.TotalSampleCount
                 && PingsPerFrame == other.PingsPerFrame;
-        }
 
         public override int GetHashCode()
         {

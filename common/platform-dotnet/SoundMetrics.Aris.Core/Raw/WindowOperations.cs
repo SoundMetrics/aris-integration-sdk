@@ -84,22 +84,37 @@ namespace SoundMetrics.Aris.Core.Raw
             };
         }
 
-        public static AcousticSettingsRaw ToShortWindow(AcousticSettingsRaw currentSettings)
+        public static AcousticSettingsRaw ToShortWindow(AcousticSettingsRaw settings)
         {
-            var sizingInfo = windowSizingInfo[currentSettings.SystemType];
-            return ToFixedWindow(currentSettings, sizingInfo.SystemConfiguration, sizingInfo.FixedWindowSizeShort);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var sizingInfo = windowSizingInfo[settings.SystemType];
+            return ToFixedWindow(
+                settings,
+                sizingInfo.SystemConfiguration,
+                sizingInfo.FixedWindowSizeShort);
         }
 
-        public static AcousticSettingsRaw ToMediumWindow(AcousticSettingsRaw currentSettings)
+        public static AcousticSettingsRaw ToMediumWindow(AcousticSettingsRaw settings)
         {
-            var sizingInfo = windowSizingInfo[currentSettings.SystemType];
-            return ToFixedWindow(currentSettings, sizingInfo.SystemConfiguration, sizingInfo.FixedWindowSizeMedium);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var sizingInfo = windowSizingInfo[settings.SystemType];
+            return ToFixedWindow(
+                settings,
+                sizingInfo.SystemConfiguration,
+                sizingInfo.FixedWindowSizeMedium);
         }
 
-        public static AcousticSettingsRaw ToLongWindow(AcousticSettingsRaw currentSettings)
+        public static AcousticSettingsRaw ToLongWindow(AcousticSettingsRaw settings)
         {
-            var sizingInfo = windowSizingInfo[currentSettings.SystemType];
-            return ToFixedWindow(currentSettings, sizingInfo.SystemConfiguration, sizingInfo.FixedWindowSizeLong);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var sizingInfo = windowSizingInfo[settings.SystemType];
+            return ToFixedWindow(
+                settings,
+                sizingInfo.SystemConfiguration,
+                sizingInfo.FixedWindowSizeLong);
         }
 
         private static AcousticSettingsRaw ToFixedWindow(
@@ -122,12 +137,13 @@ namespace SoundMetrics.Aris.Core.Raw
                     .ConstrainTo(systemConfiguration.RawConfiguration.SamplePeriodRange);
 
             return
-                BuildNewSettings(
+                BuildNewWindowSettings(
                     original,
                     sampleStartDelay,
                     samplePeriod,
                     original.AntiAliasing,
-                    original.InterpacketDelay);
+                    original.InterpacketDelay,
+                    automateFocusPosition: true);
         }
 
         public static Distance TimeToDistance(FineDuration duration, Velocity sspd)
@@ -152,12 +168,13 @@ namespace SoundMetrics.Aris.Core.Raw
         /// <param name="samplePeriod">The new sample period.</param>
         /// <returns>A ready-to-use AcousticSettingsRaw.</returns>
         private static
-            AcousticSettingsRaw BuildNewSettings(
+            AcousticSettingsRaw BuildNewWindowSettings(
                 AcousticSettingsRaw original,
                 FineDuration sampleStartDelay,
                 FineDuration samplePeriod,
                 FineDuration antiAliasing,
-                InterpacketDelaySettings interpacketDelay)
+                InterpacketDelaySettings interpacketDelay,
+                bool automateFocusPosition)
         {
             var sysCfg = SystemConfiguration.GetConfiguration(original.SystemType);
             var frameRate =
@@ -184,23 +201,10 @@ namespace SoundMetrics.Aris.Core.Raw
             var windowStart = CalculateWindowStart(sampleStartDelay, original.SonarEnvironment);
             var windowLength = CalculateWindowLength(original.SampleCount, samplePeriod, original.SonarEnvironment);
 
-            FocusPosition focusPosition;
-            if (original.FocusPosition is FocusPositionAutomatic)
-            {
-                focusPosition = original.FocusPosition;
-            }
-            else if (original.FocusPosition is FocusPositionManual position)
-            {
-                var maxFocusPosition = windowStart + windowLength;
-                focusPosition =
-                    (position.Value > maxFocusPosition)
-                        ? FocusPosition.At(maxFocusPosition)
-                        : position;
-            }
-            else
-            {
-                throw new Exception($"Unhandled focus position type: {original.FocusPosition.GetType().Name}");
-            }
+            var focusPosition =
+                automateFocusPosition
+                    ? windowStart + (windowLength / 2)
+                    : original.FocusPosition;
 
             var newSettings =
                 new AcousticSettingsRaw(
@@ -232,36 +236,39 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static readonly FineDuration WindowTerminusAdjustment = FineDuration.FromMicroseconds(2);
 
-        public static AcousticSettingsRaw MoveWindowStartIn(AcousticSettingsRaw original)
+        public static AcousticSettingsRaw MoveWindowStartIn(AcousticSettingsRaw settings)
         {
-            var cfg = SystemConfiguration.GetConfiguration(original.SystemType);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var cfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             // This operation extends the window range. Because we're maintaining a fixed number of samples,
             // we must do this by increasing the sample period. The edge case is when we try to enlarge the window
             // to start before minimum sample start delay.
 
-            if (original.SamplePeriod >= cfg.RawConfiguration.SamplePeriodRange.Maximum)
+            if (settings.SamplePeriod >= cfg.RawConfiguration.SamplePeriodRange.Maximum)
             {
-                return original;
+                return settings;
             }
 
-            if (original.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayRange.Minimum)
+            if (settings.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayRange.Minimum)
             {
-                return original;
+                return settings;
             }
 
-            var newSamplePeriod = original.SamplePeriod + WindowTerminusAdjustment;
-            var additionalSampleTime = WindowTerminusAdjustment * original.SampleCount;
+            var newSamplePeriod = settings.SamplePeriod + WindowTerminusAdjustment;
+            var additionalSampleTime = WindowTerminusAdjustment * settings.SampleCount;
             var newSampleStartDelay =
-                (original.SampleStartDelay - additionalSampleTime)
+                (settings.SampleStartDelay - additionalSampleTime)
                     .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
 
-            return BuildNewSettings(
-                original,
+            return BuildNewWindowSettings(
+                settings,
                 newSampleStartDelay,
                 newSamplePeriod,
-                original.AntiAliasing,
-                original.InterpacketDelay);
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                automateFocusPosition: true);
         }
 
         private static FineDuration GetSamplePeriodToCover(Distance windowLength, int sampleCount, Velocity speedOfSound)
@@ -270,132 +277,147 @@ namespace SoundMetrics.Aris.Core.Raw
             return 2 * (duration / sampleCount);
         }
 
-        public static AcousticSettingsRaw MoveWindowStartOut(AcousticSettingsRaw original)
+        public static AcousticSettingsRaw MoveWindowStartOut(AcousticSettingsRaw settings)
         {
-            var cfg = SystemConfiguration.GetConfiguration(original.SystemType);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var cfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             // This operation shortens the window range. Because we're maintaining a fixed number of samples,
             // we must do this by decreasing the sample period. The edge case is when we try to decrease the window
             // past its minimum sample period.
 
-            if (original.SamplePeriod <= cfg.RawConfiguration.SamplePeriodRange.Minimum)
+            if (settings.SamplePeriod <= cfg.RawConfiguration.SamplePeriodRange.Minimum)
             {
-                return original;
+                return settings;
             }
 
-            if (original.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayRange.Maximum)
+            if (settings.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayRange.Maximum)
             {
-                return original;
+                return settings;
             }
 
-            var newSamplePeriod = original.SamplePeriod - WindowTerminusAdjustment;
-            var sampleTimeReduction = WindowTerminusAdjustment * original.SampleCount;
+            var newSamplePeriod = settings.SamplePeriod - WindowTerminusAdjustment;
+            var sampleTimeReduction = WindowTerminusAdjustment * settings.SampleCount;
             var newSampleStartDelay =
-                (original.SampleStartDelay + sampleTimeReduction)
+                (settings.SampleStartDelay + sampleTimeReduction)
                     .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
 
-            return BuildNewSettings(
-                original,
+            return BuildNewWindowSettings(
+                settings,
                 newSampleStartDelay,
                 newSamplePeriod,
-                original.AntiAliasing,
-                original.InterpacketDelay);
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                automateFocusPosition: true);
         }
 
-        public static AcousticSettingsRaw MoveWindowEndIn(AcousticSettingsRaw original)
+        public static AcousticSettingsRaw MoveWindowEndIn(AcousticSettingsRaw settings)
         {
-            var cfg = SystemConfiguration.GetConfiguration(original.SystemType);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var cfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             // This operation shortens the window range. Because we're maintaining a fixed number of samples,
             // we must do this by decreasing the sample period. The edge case is when we try to decrease the window
             // past its minimum sample period.
 
-            if (original.SamplePeriod <= cfg.RawConfiguration.SamplePeriodRange.Minimum)
+            if (settings.SamplePeriod <= cfg.RawConfiguration.SamplePeriodRange.Minimum)
             {
-                return original;
+                return settings;
             }
 
-            var newSamplePeriod = original.SamplePeriod - WindowTerminusAdjustment;
+            var newSamplePeriod = settings.SamplePeriod - WindowTerminusAdjustment;
 
-            return BuildNewSettings(
-                original,
-                original.SampleStartDelay,
+            return BuildNewWindowSettings(
+                settings,
+                settings.SampleStartDelay,
                 newSamplePeriod,
-                original.AntiAliasing,
-                original.InterpacketDelay);
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                automateFocusPosition: true);
         }
 
-        public static AcousticSettingsRaw MoveWindowEndOut(AcousticSettingsRaw original)
+        public static AcousticSettingsRaw MoveWindowEndOut(AcousticSettingsRaw settings)
         {
-            var cfg = SystemConfiguration.GetConfiguration(original.SystemType);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var cfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             // This operation extends the window range. Because we're maintaining a fixed number of samples,
             // we must do this by increasing the sample period. The edge case is when we try to enlarge the window
             // to start before minimum sample start delay.
 
-            if (original.SamplePeriod >= cfg.RawConfiguration.SamplePeriodRange.Maximum)
+            if (settings.SamplePeriod >= cfg.RawConfiguration.SamplePeriodRange.Maximum)
             {
-                return original;
+                return settings;
             }
 
-            var newSamplePeriod = original.SamplePeriod + WindowTerminusAdjustment;
+            var newSamplePeriod = settings.SamplePeriod + WindowTerminusAdjustment;
 
-            return BuildNewSettings(
-                original,
-                original.SampleStartDelay,
+            return BuildNewWindowSettings(
+                settings,
+                settings.SampleStartDelay,
                 newSamplePeriod,
-                original.AntiAliasing,
-                original.InterpacketDelay);
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                automateFocusPosition: true);
         }
 
-        public static AcousticSettingsRaw SlideRangeIn(AcousticSettingsRaw original)
+        public static AcousticSettingsRaw SlideRangeIn(AcousticSettingsRaw settings)
         {
-            var cfg = SystemConfiguration.GetConfiguration(original.SystemType);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var cfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             // This operation slides the window range. Because we're maintaining a fixed number of samples and
             // a fixed sample period, we must do this by decreasing the sample start delay. The edge case is when
             // we try to reduce the sample start delay below the minimum.
 
-            if (original.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayRange.Minimum)
+            if (settings.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayRange.Minimum)
             {
-                return original;
+                return settings;
             }
 
-            var decrement = (original.SampleCount * original.SamplePeriod) / 3;
-            var newSampleStartDelay = (original.SampleStartDelay - decrement)
+            var decrement = (settings.SampleCount * settings.SamplePeriod) / 3;
+            var newSampleStartDelay = (settings.SampleStartDelay - decrement)
                 .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
 
-            return BuildNewSettings(
-                original,
+            return BuildNewWindowSettings(
+                settings,
                 newSampleStartDelay,
-                original.SamplePeriod,
-                original.AntiAliasing,
-                original.InterpacketDelay);
+                settings.SamplePeriod,
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                automateFocusPosition: true);
         }
 
-        public static AcousticSettingsRaw SlideRangeOut(AcousticSettingsRaw original)
+        public static AcousticSettingsRaw SlideRangeOut(AcousticSettingsRaw settings)
         {
-            var cfg = SystemConfiguration.GetConfiguration(original.SystemType);
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            var cfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             // This operation slides the window range. Because we're maintaining a fixed number of samples and
             // a fixed sample period, we must do this by increasing the sample start delay. The edge case is when
             // we try to increase the sample start delay above the maximum.
 
-            if (original.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayRange.Maximum)
+            if (settings.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayRange.Maximum)
             {
-                return original;
+                return settings;
             }
 
-            var increment = (original.SampleCount * original.SamplePeriod) / 3;
-            var newSampleStartDelay = (original.SampleStartDelay + increment)
+            var increment = (settings.SampleCount * settings.SamplePeriod) / 3;
+            var newSampleStartDelay = (settings.SampleStartDelay + increment)
                 .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
 
-            return BuildNewSettings(
-                original,
+            return BuildNewWindowSettings(
+                settings,
                 newSampleStartDelay,
-                original.SamplePeriod,
-                original.AntiAliasing,
-                original.InterpacketDelay);
+                settings.SamplePeriod,
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                automateFocusPosition: true);
         }
 
     }

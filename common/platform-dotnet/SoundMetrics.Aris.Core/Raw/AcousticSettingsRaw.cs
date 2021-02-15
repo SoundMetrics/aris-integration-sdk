@@ -2,48 +2,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+#pragma warning disable CA1051 // Do not declare visible instance fields
+
     /// <summary>
     /// This type is ported over from some legacy ARIS Integration SDK work,
     /// and will continue in new ARIS Integration SDK work.
     /// </summary>
+    [DataContract]
     public sealed partial class AcousticSettingsRaw : IEquatable<AcousticSettingsRaw>
     {
-        public SystemType SystemType { get; private set; }
-        public Rate FrameRate { get; private set; }
-        public int SampleCount { get; private set; }
-        public FineDuration SampleStartDelay { get; private set; }
-        public FineDuration CyclePeriod { get; private set; }
-        public FineDuration SamplePeriod { get; private set; }
-        public FineDuration PulseWidth { get; private set; }
-        public PingMode PingMode { get; private set; }
-        public bool EnableTransmit { get; private set; }
-        public Frequency Frequency { get; private set; }
-        public bool Enable150Volts { get; private set; }
-        public float ReceiverGain { get; private set; }
-
-        // There are not directly an acoustic setting, but part of the package.
-        public FocusPosition FocusPosition { get; private set; }
-        public FineDuration AntiAliasing { get; private set; }
-        public InterpacketDelaySettings InterpacketDelay { get; private set; }
-        public Rate MaximumFrameRate { get; private set; }
-
-        /// <summary>
-        /// Environmental status when the settings were created.
-        /// </summary>
-        public EnvironmentalContext SonarEnvironment { get; private set; }
-
-        public Distance WindowStart => this.CalculateWindowStart();
-        public Distance WindowEnd => WindowStart + WindowLength;
-        public Distance WindowLength => this.CalculateWindowLength();
-
-        // Parameterless ctor for serialization.
-        private AcousticSettingsRaw() { }
-
-        internal AcousticSettingsRaw(
+        public AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
             int sampleCount,
@@ -56,7 +30,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Frequency frequency,
             bool enable150Volts,
             float receiverGain,
-            FocusPosition focusPosition,
+            Distance focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
             EnvironmentalContext sonarEnvironment)
@@ -81,6 +55,52 @@ namespace SoundMetrics.Aris.Core.Raw
             MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
         }
 
+        [DataMember]
+        public readonly SystemType SystemType;
+        [DataMember]
+        public readonly Rate FrameRate;
+        [DataMember]
+        public readonly int SampleCount;
+        [DataMember]
+        public readonly FineDuration SampleStartDelay;
+        [DataMember]
+        public readonly FineDuration CyclePeriod;
+        [DataMember]
+        public readonly FineDuration SamplePeriod;
+        [DataMember]
+        public readonly FineDuration PulseWidth;
+        [DataMember]
+        public readonly PingMode PingMode;
+        [DataMember]
+        public readonly bool EnableTransmit;
+        [DataMember]
+        public readonly Frequency Frequency;
+        [DataMember]
+        public readonly bool Enable150Volts;
+        [DataMember]
+        public readonly float ReceiverGain;
+
+        // There are not directly an acoustic setting, but part of the package.
+        [DataMember]
+        public readonly Distance FocusPosition;
+        [DataMember]
+        public readonly FineDuration AntiAliasing;
+        [DataMember]
+        public readonly InterpacketDelaySettings InterpacketDelay;
+        [DataMember]
+        public readonly Rate MaximumFrameRate;
+
+        /// <summary>
+        /// Environmental status when the settings were created.
+        /// </summary>
+        [DataMember]
+        public readonly EnvironmentalContext SonarEnvironment;
+
+        public Distance WindowStart => this.CalculateWindowStart();
+        public Distance WindowEnd => WindowStart + WindowLength;
+        public Distance WindowLength => this.CalculateWindowLength();
+        public Distance WindowMidPoint => WindowStart + (WindowLength / 2);
+
         public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);
 
         public bool Equals(AcousticSettingsRaw other)
@@ -100,7 +120,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 return false;
             }
 
-            return this.SystemType == other.SystemType
+            return
+                this.SystemType == other.SystemType
                 && this.FrameRate == other.FrameRate
                 && this.SampleCount == other.SampleCount
                 && this.SampleStartDelay == other.SampleStartDelay
@@ -118,9 +139,17 @@ namespace SoundMetrics.Aris.Core.Raw
                 && this.SonarEnvironment == other.SonarEnvironment;
         }
 
+        public static bool operator ==(AcousticSettingsRaw a, AcousticSettingsRaw b)
+            => !(a is null) && a.Equals(b);
+
+        public static bool operator !=(AcousticSettingsRaw a, AcousticSettingsRaw b)
+            => (a is null) || !a.Equals(b);
+
         public override int GetHashCode()
         {
-            return SystemType.GetHashCode()
+            return
+                base.GetHashCode()
+                ^ SystemType.GetHashCode()
                 ^ FrameRate.GetHashCode()
                 ^ SampleCount.GetHashCode()
                 ^ SampleStartDelay.GetHashCode()
@@ -146,4 +175,6 @@ namespace SoundMetrics.Aris.Core.Raw
                 + $"InterpacketDelay={InterpacketDelay}; SonarEnvironment={SonarEnvironment}; "
                 + $"CALCULATED[WindowStart={WindowStart}; WindowEnd={WindowEnd}; WindowLength={WindowLength}]";
     }
+
+#pragma warning restore CA1051 // Do not declare visible instance fields
 }

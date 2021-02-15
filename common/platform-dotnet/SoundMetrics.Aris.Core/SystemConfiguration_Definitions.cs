@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Core
         {
             var commonSampleCountRange = new ValueRange<int>(200, 4000);
             var commonReceiverGainRange = new ValueRange<int>(0, 24);
-            var commonFrameRateRange = new ValueRange<Rate>(Rate.FromHertz(1), Rate.FromHertz(15));
+            var commonFrameRateRange = new ValueRange<Rate>(Rate.ToRate(1), Rate.ToRate(15));
 
             var configurations = new SystemConfiguration[3];
 
@@ -48,8 +48,8 @@ namespace SoundMetrics.Aris.Core
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1800),
 
-                    FrequencyHigh = Rate.FromHertz(1_800_000),
-                    FrequencyLow = Rate.FromHertz(1_100_000),
+                    FrequencyHigh = Rate.ToRate(1_800_000),
+                    FrequencyLow = Rate.ToRate(1_100_000),
                 };
 
             configurations[SystemType.Aris3000.IntegralValue] =
@@ -85,8 +85,8 @@ namespace SoundMetrics.Aris.Core
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings3000),
 
-                    FrequencyHigh = Rate.FromHertz(3_000_000),
-                    FrequencyLow = Rate.FromHertz(1_800_000),
+                    FrequencyHigh = Rate.ToRate(3_000_000),
+                    FrequencyLow = Rate.ToRate(1_800_000),
                 };
 
             configurations[SystemType.Aris1200.IntegralValue] =
@@ -122,14 +122,15 @@ namespace SoundMetrics.Aris.Core
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1200),
 
-                    FrequencyHigh = Rate.FromHertz(1_200_000),
-                    FrequencyLow = Rate.FromHertz(700_000),
+                    FrequencyHigh = Rate.ToRate(1_200_000),
+                    FrequencyLow = Rate.ToRate(700_000),
                 };
 
             return configurations;
 
             Func<EnvironmentalContext, AcousticSettingsRaw>
-                CreateSettingsBuilder(Func<EnvironmentalContext, AcousticSettingsRaw> makeDefaultSettings)
+                CreateSettingsBuilder(
+                    Func<EnvironmentalContext, AcousticSettingsRaw> makeDefaultSettings)
             {
                 return MakeSettings;
 
@@ -154,7 +155,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = FocusPosition.Automatic;
+                var focusPosition = Distance.FromMeters(10);
 
                 // We get away with referencing the system configuration here (while we're
                 // defining system configurations) as we're returning this function via
@@ -173,7 +174,8 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment);
+                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
+                    .SetAutomatedFocus().Allowed;
             }
 
             AcousticSettingsRaw MakeDefaultSettings3000(EnvironmentalContext sonarEnvironment)
@@ -190,7 +192,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = FocusPosition.Automatic;
+                var focusPosition = Distance.FromMeters(10);
 
                 // We get away with referencing the system configuration here (while we're
                 // defining system configurations) as we're returning this function via
@@ -209,7 +211,9 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment);
+                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
+                    .SetAutomatedFocus()
+                    .Allowed;
             }
 
             AcousticSettingsRaw MakeDefaultSettings1200(EnvironmentalContext sonarEnvironment)
@@ -226,7 +230,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = FocusPosition.Automatic;
+                var focusPosition = Distance.FromMeters(10);
 
                 // We get away with referencing the system configuration here (while we're
                 // defining system configurations) as we're returning this function via
@@ -245,7 +249,8 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment);
+                    focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
+                    .SetAutomatedFocus().Allowed;
             }
         }
     }

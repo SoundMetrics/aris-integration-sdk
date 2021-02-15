@@ -4,7 +4,7 @@ using System;
 
 namespace SoundMetrics.Aris.Core
 {
-    public struct ValueRange<T>
+    public struct ValueRange<T> : IEquatable<ValueRange<T>>
         where T : struct, IComparable<T>
     {
         public ValueRange(T min, T max)
@@ -13,8 +13,10 @@ namespace SoundMetrics.Aris.Core
             Maximum = max;
         }
 
-        public T Minimum;
-        public T Maximum;
+#pragma warning disable CA1051 // Do not declare visible instance fields
+        public readonly T Minimum;
+        public readonly T Maximum;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
         public bool IsEmpty => Minimum.Equals(Maximum) || Minimum.CompareTo(Maximum) > 0;
 
@@ -24,6 +26,22 @@ namespace SoundMetrics.Aris.Core
         {
             return $"{Minimum}-{Maximum}";
         }
+
+        public override bool Equals(object obj)
+            => obj is ValueRange<T> other && this.Equals(other);
+
+        public bool Equals(ValueRange<T> other)
+            => this.Minimum.Equals(other.Minimum)
+                && this.Maximum.Equals(other.Maximum);
+
+        public override int GetHashCode()
+            => Minimum.GetHashCode() ^ Maximum.GetHashCode();
+
+        public static bool operator ==(ValueRange<T> left, ValueRange<T> right)
+            => left.Equals(right);
+
+        public static bool operator !=(ValueRange<T> left, ValueRange<T> right)
+            => !(left == right);
     }
 
     public static class RangeExtensions
@@ -33,7 +51,9 @@ namespace SoundMetrics.Aris.Core
         {
             if (@this.IsReverseRange)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new InvalidOperationException("Negative range is not allowed.");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             return @this.Minimum.CompareTo(value) <= 0 && value.CompareTo(@this.Maximum) <= 0;
@@ -53,7 +73,9 @@ namespace SoundMetrics.Aris.Core
         {
             if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException($"{nameof(min)} may not be greater than {nameof(max)}");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             T newMin = Greater(@this.Minimum, min);
@@ -88,7 +110,9 @@ namespace SoundMetrics.Aris.Core
         {
             if (@this.Intersect(that).IsEmpty)
             {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Cannot represent a sparse range");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             throw new NotImplementedException();

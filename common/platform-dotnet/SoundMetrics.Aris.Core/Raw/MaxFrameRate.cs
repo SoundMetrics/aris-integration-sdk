@@ -11,6 +11,7 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         public static Rate DetermineMaximumFrameRate(AcousticSettingsRaw settings)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
             return DetermineMaximumFrameRate(
                 settings.SystemType.GetConfiguration(),
                 settings.PingMode,
@@ -86,7 +87,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var trueMax = sysCfg.FrameRateRange.Maximum;
             var limitedRate = Rate.Max(trueMin, Rate.Min(maximumFrameRate, trueMax));
 
-            return limitedRate;
+            return limitedRate.NormalizeToHertz();
 
             FineDuration CalculateMinimumFramePeriod() =>
                     ppf * (mcp + cpa1);
