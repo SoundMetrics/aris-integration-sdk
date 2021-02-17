@@ -11,7 +11,10 @@ namespace SoundMetrics.Aris.Core
             if (maximum.CompareTo(minimum) < 0)
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(maximum), "Maximum must not be less than minimum");
+                    nameof(maximum),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                    "Maximum must not be less than minimum");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             this.minimum = minimum;
