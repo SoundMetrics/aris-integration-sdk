@@ -7,6 +7,13 @@ namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsConstraints;
 
+    [Flags]
+    public enum AutomaticAcousticSettings
+    {
+        FocusPosition = 0b0001,
+        Frequency = 0b0010,
+    }
+
     public static class AcousticSettingsOracle
     {
         /// <summary>
@@ -171,10 +178,36 @@ namespace SoundMetrics.Aris.Core.Raw
             return newSettings;
         }
 
-        public static AcousticSettingsRaw SetAutomatedFocus(this AcousticSettingsRaw settings)
+        public static AcousticSettingsRaw SetAutomaticSettings(
+            this AcousticSettingsRaw settings,
+            AutomaticAcousticSettings automaticFlags)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-            return SetFocusPosition(settings, settings.WindowMidPoint);
+
+            if ((automaticFlags & AutomaticAcousticSettings.FocusPosition) != 0)
+            {
+                automaticFlags ^= AutomaticAcousticSettings.FocusPosition;
+
+                settings = settings.SetFocusPosition(settings.WindowMidPoint);
+            }
+
+            if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
+            {
+                automaticFlags ^= AutomaticAcousticSettings.Frequency;
+
+                var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
+                var isLongerRange = settings.WindowEnd > sysCfg.FrequencyCrossover;
+                var frequency = isLongerRange ? Frequency.Low : Frequency.High;
+
+                settings = settings.SetFrequency(frequency);
+            }
+
+            if (automaticFlags != 0)
+            {
+                throw new NotImplementedException($"automatic setting(s) not implemented: {automaticFlags}");
+            }
+
+            return settings;
         }
 
         public static AcousticSettingsRaw SetFrequency(
@@ -182,6 +215,9 @@ namespace SoundMetrics.Aris.Core.Raw
             Frequency frequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            if (frequency == settings.Frequency) return settings;
+
             return new AcousticSettingsRaw(
                 settings.SystemType,
                 settings.FrameRate,
@@ -201,21 +237,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.SonarEnvironment);
         }
 
-        private static AcousticSettingsRaw SetAutomatedFrequency(this AcousticSettingsRaw settings)
-        {
-            if (settings is null) throw new ArgumentNullException(nameof(settings));
-            var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-            var isLongerRange = settings.WindowEnd > sysCfg.FrequencyCrossover;
-            var frequency = isLongerRange ? Frequency.High : Frequency.Low;
-            return settings.SetFrequency(frequency);
-        }
-
         public static AcousticSettingsRaw SetInterpacketDelay(
             this AcousticSettingsRaw settings,
             InterpacketDelaySettings newInterpacketDelay,
             bool useMaxFrameRate)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            if (newInterpacketDelay == settings.InterpacketDelay) return settings;
+
             var newSettings =
                 new AcousticSettingsRaw(
                     settings.SystemType,
@@ -243,6 +273,10 @@ namespace SoundMetrics.Aris.Core.Raw
             this AcousticSettingsRaw settings,
             float gain)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            if (gain == settings.ReceiverGain) return settings;
+
             throw new NotImplementedException();
         }
 

@@ -17,7 +17,7 @@ namespace SoundMetrics.Aris.Core.Raw
     [DataContract]
     public sealed partial class AcousticSettingsRaw : IEquatable<AcousticSettingsRaw>
     {
-        public AcousticSettingsRaw(
+        internal AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
             int sampleCount,

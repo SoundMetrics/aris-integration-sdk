@@ -7,9 +7,9 @@ namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsRawCalculations;
 
-    public delegate AcousticSettingsRaw AdjustRangeFn(AcousticSettingsRaw currentSettings);
+    internal delegate AcousticSettingsRaw AdjustRangeFn(AcousticSettingsRaw settings);
 
-    public static class WindowOperations
+    internal static class WindowOperations
     {
         private struct FixedWindowSize
         {

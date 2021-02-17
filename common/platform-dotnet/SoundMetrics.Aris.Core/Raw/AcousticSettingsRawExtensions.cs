@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    public static class AcousticSettingsRawExtensions
+    internal static class AcousticSettingsRawExtensions
     {
         internal static Distance CalculateWindowStart(
             this AcousticSettingsRaw acousticSettings)
