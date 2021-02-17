@@ -1,9 +1,14 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core
 {
+    /// <summary>
+    /// Describes an inclusive range of `T`.
+    /// </summary>
+    [DebuggerDisplay("[{Minimum}, {Maximum}]")]
     public struct ValueRange<T> : IEquatable<ValueRange<T>>
         where T : struct, IComparable<T>
     {
@@ -22,9 +27,15 @@ namespace SoundMetrics.Aris.Core
 
         public bool IsReverseRange => Minimum.CompareTo(Maximum) > 0;
 
+        public void Deconstruct(out T minimum, out T maximum)
+        {
+            minimum = Minimum;
+            maximum = Maximum;
+        }
+
         public override string ToString()
         {
-            return $"{Minimum}-{Maximum}";
+            return $"[{Minimum}, {Maximum}]";
         }
 
         public override bool Equals(object obj)
@@ -96,11 +107,23 @@ namespace SoundMetrics.Aris.Core
                 Lesser(range.Maximum, t));
 
         public static ValueRange<T> Intersect<T>(
-            this ValueRange<T> @this,
-            in ValueRange<T> that)
+            this in ValueRange<T> a,
+            in ValueRange<T> b)
             where T : struct, IComparable<T>
         {
-            throw new NotImplementedException();
+            var aIsLess = a.Minimum.CompareTo(b.Minimum) <= 0;
+            var left = aIsLess ? a : b;
+            var right = aIsLess ? b : a;
+
+            if (right.Minimum.CompareTo(left.Maximum) >= 0)
+            {
+                return new ValueRange<T>(left.Maximum, left.Maximum);
+            }
+            else
+            {
+                var lesserMax = Lesser(left.Maximum, right.Maximum);
+                return new ValueRange<T>(right.Minimum, lesserMax);
+            }
         }
 
         public static ValueRange<T> Union<T>(
@@ -108,15 +131,41 @@ namespace SoundMetrics.Aris.Core
             in ValueRange<T> that)
             where T : struct, IComparable<T>
         {
-            if (@this.Intersect(that).IsEmpty)
+            if (@this.IsEmpty) return that;
+            if (that.IsEmpty) return @this;
+
+            Debug.Assert(!@this.IsEmpty);
+            Debug.Assert(!that.IsEmpty);
+
+            if (@this.Intersect(that).IsEmpty && !@this.IsAdjacent(that))
             {
+                throw new InvalidOperationException(
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
-                throw new ArgumentException("Cannot represent a sparse range");
+                    $"Cannot represent a sparse range, given {@this} & {that}");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            throw new NotImplementedException();
+            var leastMin = Lesser(@this.Minimum, that.Minimum);
+            var greatestMax = Greater(@this.Maximum, that.Maximum);
+            return new ValueRange<T>(leastMin, greatestMax);
         }
+
+        internal static bool IsAdjacent<T>(this in ValueRange<T> a, in ValueRange<T> b)
+            where T : struct, IComparable<T>
+        {
+            var (left, right) = Order(a, b);
+            return left.Maximum.Equals(right.Minimum);
+        }
+
+        /// <summary>
+        /// Returns a tuple of `a` and `b` in ascending order
+        /// based on the value of `Minimum`.
+        /// </summary>
+        internal static (ValueRange<T>, ValueRange<T>) Order<T>(
+            in ValueRange<T> a,
+            in ValueRange<T> b)
+            where T : struct, IComparable<T>
+            => (a.Minimum.CompareTo(b.Minimum) <= 0) ? (a, b) : (b, a);
 
         internal static T Lesser<T>(in T t, in T? other)
             where T : struct, IComparable<T>
