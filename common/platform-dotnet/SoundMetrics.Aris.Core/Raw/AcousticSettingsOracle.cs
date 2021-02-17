@@ -1,52 +1,18 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsConstraints;
-
-    public struct AcousticSettingsRequest : IEquatable<AcousticSettingsRequest>
-    {
-        internal AcousticSettingsRequest(
-            AcousticSettingsRaw requested,
-            AcousticSettingsRaw allowed)
-        {
-            if (requested is null) throw new ArgumentNullException(nameof(requested));
-            if (allowed is null) throw new ArgumentNullException(nameof(allowed));
-
-            Requested = requested;
-            Allowed = allowed;
-        }
-
-        public AcousticSettingsRaw Requested { get; private set; }
-        public AcousticSettingsRaw Allowed { get; private set; }
-
-        public override bool Equals(object obj)
-            => obj is AcousticSettingsRequest other && this.Equals(other);
-
-        public bool Equals(AcousticSettingsRequest other)
-            => !(Requested is null)
-                && Requested.Equals(other.Requested)
-                && !(Allowed is null)
-                && Allowed.Equals(other.Allowed);
-
-        public override int GetHashCode()
-            => Requested.GetHashCode() ^ Allowed.GetHashCode();
-
-        public static bool operator ==(AcousticSettingsRequest left, AcousticSettingsRequest right)
-            => left.Equals(right);
-
-        public static bool operator !=(AcousticSettingsRequest left, AcousticSettingsRequest right)
-            => !left.Equals(right);
-    }
 
     public static class AcousticSettingsOracle
     {
         /// <summary>
         /// Initializes a new instance of acoustic settings.
         /// </summary>
-        public static AcousticSettingsRequest Initialize(
+        public static AcousticSettingsRaw Initialize(
             SystemType systemType,
             Rate frameRate,
             int sampleCount,
@@ -84,9 +50,9 @@ namespace SoundMetrics.Aris.Core.Raw
                 antiAliasing,
                 interpacketDelay,
                 sonarEnvironment);
-            var allowed = ApplyAllConstraints(requested);
 
-            return new AcousticSettingsRequest(requested, allowed);
+            var allowed = ApplyAllConstraints(requested);
+            return allowed;
         }
 
         private static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw requested)
@@ -108,7 +74,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return settings;
         }
 
-        public static AcousticSettingsRequest SetFrameRate(
+        public static AcousticSettingsRaw SetFrameRate(
             this AcousticSettingsRaw settings,
             Rate requestedFrameRate)
         {
@@ -126,12 +92,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay);
 
-            return new AcousticSettingsRequest(
-                requested: UpdateFrameRate(settings, requestedFrameRate),
-                allowed: UpdateFrameRate(settings, allowedFrameRate));
+            return UpdateFrameRate(settings, allowedFrameRate);
         }
 
-        public static AcousticSettingsRequest SetMaxFrameRate(
+        public static AcousticSettingsRaw SetMaxFrameRate(
             this AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
@@ -181,7 +145,7 @@ namespace SoundMetrics.Aris.Core.Raw
         //    return allowedFrameRate;
         //}
 
-        public static AcousticSettingsRequest SetFocusPosition(
+        public static AcousticSettingsRaw SetFocusPosition(
             this AcousticSettingsRaw settings,
             Distance newFocusPosition)
         {
@@ -204,18 +168,49 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
-            return new AcousticSettingsRequest(
-                requested: newSettings,
-                allowed: newSettings);
+            return newSettings;
         }
 
-        public static AcousticSettingsRequest SetAutomatedFocus(this AcousticSettingsRaw settings)
+        public static AcousticSettingsRaw SetAutomatedFocus(this AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             return SetFocusPosition(settings, settings.WindowMidPoint);
         }
 
-        public static AcousticSettingsRequest SetInterpacketDelay(
+        public static AcousticSettingsRaw SetFrequency(
+            this AcousticSettingsRaw settings,
+            Frequency frequency)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            return new AcousticSettingsRaw(
+                settings.SystemType,
+                settings.FrameRate,
+                settings.SampleCount,
+                settings.SampleStartDelay,
+                settings.CyclePeriod,
+                settings.SamplePeriod,
+                settings.PulseWidth,
+                settings.PingMode,
+                settings.EnableTransmit,
+                frequency,
+                settings.Enable150Volts,
+                settings.ReceiverGain,
+                settings.FocusPosition,
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                settings.SonarEnvironment);
+        }
+
+        private static AcousticSettingsRaw SetAutomatedFrequency(this AcousticSettingsRaw settings)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
+            var isLongerRange = settings.WindowEnd > sysCfg.FrequencyCrossover;
+            var frequency = isLongerRange ? Frequency.High : Frequency.Low;
+            return settings.SetFrequency(frequency);
+        }
+
+        public static AcousticSettingsRaw SetInterpacketDelay(
             this AcousticSettingsRaw settings,
             InterpacketDelaySettings newInterpacketDelay,
             bool useMaxFrameRate)
@@ -240,38 +235,38 @@ namespace SoundMetrics.Aris.Core.Raw
                     newInterpacketDelay,
                     settings.SonarEnvironment);
             var result =
-                useMaxFrameRate ? newSettings.SetMaxFrameRate().Allowed : newSettings;
-            return new AcousticSettingsRequest(result, result);
+                useMaxFrameRate ? newSettings.SetMaxFrameRate() : newSettings;
+            return result;
         }
 
-        public static AcousticSettingsRequest SetReceiverGain(
+        public static AcousticSettingsRaw SetReceiverGain(
             this AcousticSettingsRaw settings,
             float gain)
         {
             throw new NotImplementedException();
         }
 
-        //public static AcousticSettingsRequest SetTransmitEnable(
+        //public static AcousticSettingsRaw SetTransmitEnable(
         //    this AcousticSettingsRaw settings,
         //    bool enable)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRequest Set150VoltsEnable(
+        //public static AcousticSettingsRaw Set150VoltsEnable(
         //    this AcousticSettingsRaw settings,
         //    bool enable)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRequest SetSampleCount(
+        //public static AcousticSettingsRaw SetSampleCount(
         //    this AcousticSettingsRaw settings,
         //    int sampleCount)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRequest SetFrequency(
+        //public static AcousticSettingsRaw SetFrequency(
         //    this AcousticSettingsRaw settings,
         //    Frequency frequency)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRequest SetPulseWidth(
+        //public static AcousticSettingsRaw SetPulseWidth(
         //    this AcousticSettingsRaw settings,
         //    FineDuration pulseWidth)
         //{
