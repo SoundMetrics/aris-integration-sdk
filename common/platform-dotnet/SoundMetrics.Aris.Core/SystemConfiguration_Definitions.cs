@@ -175,7 +175,7 @@ namespace SoundMetrics.Aris.Core
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
                     focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
-                    .SetAutomaticSettings(
+                    .WithAutomaticSettings(
                         AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
             }
 
@@ -213,7 +213,7 @@ namespace SoundMetrics.Aris.Core
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
                     focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
-                    .SetAutomaticSettings(
+                    .WithAutomaticSettings(
                         AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
             }
 
@@ -251,7 +251,7 @@ namespace SoundMetrics.Aris.Core
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
                     focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
-                    .SetAutomaticSettings(
+                    .WithAutomaticSettings(
                         AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
             }
         }

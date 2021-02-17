@@ -81,7 +81,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return settings;
         }
 
-        public static AcousticSettingsRaw SetFrameRate(
+        public static AcousticSettingsRaw WithFrameRate(
             this AcousticSettingsRaw settings,
             Rate requestedFrameRate)
         {
@@ -102,11 +102,11 @@ namespace SoundMetrics.Aris.Core.Raw
             return UpdateFrameRate(settings, allowedFrameRate);
         }
 
-        public static AcousticSettingsRaw SetMaxFrameRate(
+        public static AcousticSettingsRaw WithMaxFrameRate(
             this AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-            return settings.SetFrameRate(settings.MaximumFrameRate);
+            return settings.WithFrameRate(settings.MaximumFrameRate);
         }
 
         private static AcousticSettingsRaw UpdateFrameRate(
@@ -152,7 +152,7 @@ namespace SoundMetrics.Aris.Core.Raw
         //    return allowedFrameRate;
         //}
 
-        public static AcousticSettingsRaw SetFocusPosition(
+        public static AcousticSettingsRaw WithFocusPosition(
             this AcousticSettingsRaw settings,
             Distance newFocusPosition)
         {
@@ -178,7 +178,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return newSettings;
         }
 
-        public static AcousticSettingsRaw SetAutomaticSettings(
+        public static AcousticSettingsRaw WithAutomaticSettings(
             this AcousticSettingsRaw settings,
             AutomaticAcousticSettings automaticFlags)
         {
@@ -188,7 +188,7 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 automaticFlags ^= AutomaticAcousticSettings.FocusPosition;
 
-                settings = settings.SetFocusPosition(settings.WindowMidPoint);
+                settings = settings.WithFocusPosition(settings.WindowMidPoint);
             }
 
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
@@ -199,7 +199,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 var isLongerRange = settings.WindowEnd > sysCfg.FrequencyCrossover;
                 var frequency = isLongerRange ? Frequency.Low : Frequency.High;
 
-                settings = settings.SetFrequency(frequency);
+                settings = settings.WithFrequency(frequency);
             }
 
             if (automaticFlags != 0)
@@ -210,7 +210,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return settings;
         }
 
-        public static AcousticSettingsRaw SetFrequency(
+        public static AcousticSettingsRaw WithFrequency(
             this AcousticSettingsRaw settings,
             Frequency frequency)
         {
@@ -237,7 +237,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.SonarEnvironment);
         }
 
-        public static AcousticSettingsRaw SetInterpacketDelay(
+        public static AcousticSettingsRaw WithInterpacketDelay(
             this AcousticSettingsRaw settings,
             InterpacketDelaySettings newInterpacketDelay,
             bool useMaxFrameRate)
@@ -265,11 +265,11 @@ namespace SoundMetrics.Aris.Core.Raw
                     newInterpacketDelay,
                     settings.SonarEnvironment);
             var result =
-                useMaxFrameRate ? newSettings.SetMaxFrameRate() : newSettings;
+                useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
             return result;
         }
 
-        public static AcousticSettingsRaw SetReceiverGain(
+        public static AcousticSettingsRaw WithReceiverGain(
             this AcousticSettingsRaw settings,
             float gain)
         {
@@ -280,27 +280,22 @@ namespace SoundMetrics.Aris.Core.Raw
             throw new NotImplementedException();
         }
 
-        //public static AcousticSettingsRaw SetTransmitEnable(
+        //public static AcousticSettingsRaw WithTransmitEnable(
         //    this AcousticSettingsRaw settings,
         //    bool enable)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRaw Set150VoltsEnable(
+        //public static AcousticSettingsRaw With150VoltsEnable(
         //    this AcousticSettingsRaw settings,
         //    bool enable)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRaw SetSampleCount(
+        //public static AcousticSettingsRaw WithSampleCount(
         //    this AcousticSettingsRaw settings,
         //    int sampleCount)
         //    => throw new NotImplementedException();
 
-        //public static AcousticSettingsRaw SetFrequency(
-        //    this AcousticSettingsRaw settings,
-        //    Frequency frequency)
-        //    => throw new NotImplementedException();
-
-        //public static AcousticSettingsRaw SetPulseWidth(
+        //public static AcousticSettingsRaw WithPulseWidth(
         //    this AcousticSettingsRaw settings,
         //    FineDuration pulseWidth)
         //{
