@@ -2,6 +2,8 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    using static FineDuration;
+
     // Constraint implementations.
     // These methods spell out their inputs to allow for dependency analysis.
     // `SystemConfiguration` is considered ambient context, is immutable, and
@@ -38,9 +40,11 @@ namespace SoundMetrics.Aris.Core.Raw
 
 
         internal static FineDuration ConstrainAntiAliasing(this AcousticSettingsRaw settings)
-            => settings
+            => Max(
+                FineDuration.Zero,
+                settings
                     .SystemType.GetConfiguration()
                     .RawConfiguration
-                    .MaxAntialiasingFor(settings);
+                    .MaxAntialiasingFor(settings));
     }
 }
