@@ -2,6 +2,8 @@
 
 namespace SoundMetrics.Aris.Core
 {
+    using SoundMetrics.Aris.Core.Raw;
+    using System;
     using static FineDuration;
     using static Rate;
 
@@ -37,6 +39,12 @@ namespace SoundMetrics.Aris.Core
 
             var limitedFrameRate = Min(maxEnergyAllowedFrameRate, frameRate);
             return limitedFrameRate;
+        }
+
+        public FineDuration MaxAntialiasingFor(AcousticSettingsRaw settings)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            return CyclePeriodRange.Maximum - settings.CyclePeriod;
         }
 
         public static readonly FineDuration CyclePeriodMargin = FineDuration.FromMicroseconds(420);

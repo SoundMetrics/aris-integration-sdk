@@ -35,5 +35,12 @@ namespace SoundMetrics.Aris.Core.Raw
             var goodRange = new ValueRange<Rate>(min, max);
             return requestedFrameRate.ConstrainTo(goodRange);
         }
+
+
+        internal static FineDuration ConstrainAntiAliasing(this AcousticSettingsRaw settings)
+            => settings
+                    .SystemType.GetConfiguration()
+                    .RawConfiguration
+                    .MaxAntialiasingFor(settings);
     }
 }

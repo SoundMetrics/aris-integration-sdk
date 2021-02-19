@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace SoundMetrics.Aris.Core.Raw
@@ -62,10 +63,10 @@ namespace SoundMetrics.Aris.Core.Raw
             return allowed;
         }
 
-        private static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw requested)
+        internal static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw settings)
         {
-            var sysCfg = SystemConfiguration.GetConfiguration(requested.SystemType);
-            var settings = requested;
+            var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
+
             // ### TODO much else
             settings = UpdateFrameRate(
                 settings,
@@ -78,6 +79,11 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.SamplePeriod,
                     settings.AntiAliasing,
                     settings.InterpacketDelay));
+            settings =
+                UpdateAntiAliasing(
+                    settings,
+                    settings.ConstrainAntiAliasing());
+
             return settings;
         }
 
@@ -106,13 +112,14 @@ namespace SoundMetrics.Aris.Core.Raw
             this AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-            return settings.WithFrameRate(settings.MaximumFrameRate);
+            return settings
+                    .WithFrameRate(settings.MaximumFrameRate)
+                    .ApplyAllConstraints();
         }
 
         private static AcousticSettingsRaw UpdateFrameRate(
             AcousticSettingsRaw settings, Rate newFrameRate)
-        {
-            return settings.FrameRate.Equals(newFrameRate)
+            => settings.FrameRate == newFrameRate
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -131,33 +138,37 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
-        }
 
-        //private static Rate ConstrainFrameRate(
-        //    Rate requestedFrameRate,
-        //    AcousticSettingsRaw settings)
-        //{
-        //    var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-        //    var min = sysCfg.FrameRateRange.Minimum;
-        //    var max = MaxFrameRate.DetermineMaximumFrameRate(
-        //                settings.SystemType,
-        //                settings.PingMode,
-        //                settings.SampleCount,
-        //                settings.SampleStartDelay,
-        //                settings.SamplePeriod,
-        //                settings.AntiAliasing,
-        //                settings.InterpacketDelay);
+        private static AcousticSettingsRaw UpdateAntiAliasing(
+            AcousticSettingsRaw settings,
+            FineDuration antiAliasing)
+        => settings.AntiAliasing == antiAliasing
+            ? settings
+            : new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.CyclePeriod,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusPosition,
+                    antiAliasing,
+                    settings.InterpacketDelay,
+                    settings.SonarEnvironment);
 
-        //    var allowedFrameRate = Rate.Max(min, Rate.Min(max, requestedFrameRate));
-        //    return allowedFrameRate;
-        //}
-
-        public static AcousticSettingsRaw WithFocusPosition(
+    public static AcousticSettingsRaw WithFocusPosition(
             this AcousticSettingsRaw settings,
             Distance newFocusPosition)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-            var newSettings =
+
+            return
                 new AcousticSettingsRaw(
                     settings.SystemType,
                     settings.FrameRate,
@@ -174,8 +185,21 @@ namespace SoundMetrics.Aris.Core.Raw
                     newFocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.SonarEnvironment);
-            return newSettings;
+                    settings.SonarEnvironment)
+                .ApplyAllConstraints();
+        }
+
+        public static AcousticSettingsRaw WithAntiAliasing(
+            this AcousticSettingsRaw settings,
+            FineDuration newDelay)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+            if (newDelay < FineDuration.Zero) throw new ArgumentOutOfRangeException(nameof(newDelay), "Argument value is negative");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+
+            return UpdateAntiAliasing(settings, newDelay)
+                    .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithAutomaticSettings(
@@ -191,6 +215,10 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings = settings.WithFocusPosition(settings.WindowMidPoint);
             }
 
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+            if (settings is null) throw new Exception("Settings became null");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
             {
                 automaticFlags ^= AutomaticAcousticSettings.Frequency;
@@ -202,12 +230,16 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings = settings.WithFrequency(frequency);
             }
 
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+            if (settings is null) throw new Exception("Settings became null");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+
             if (automaticFlags != 0)
             {
                 throw new NotImplementedException($"automatic setting(s) not implemented: {automaticFlags}");
             }
 
-            return settings;
+            return settings.ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithFrequency(
@@ -234,7 +266,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.FocusPosition,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                settings.SonarEnvironment);
+                settings.SonarEnvironment)
+                .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithInterpacketDelay(
@@ -266,7 +299,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.SonarEnvironment);
             var result =
                 useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
-            return result;
+            return result.ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithReceiverGain(
