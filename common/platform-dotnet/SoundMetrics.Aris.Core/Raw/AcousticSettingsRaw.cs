@@ -56,45 +56,45 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         [DataMember]
-        public readonly SystemType SystemType;
+        public SystemType SystemType { get; private set; }
         [DataMember]
-        public readonly Rate FrameRate;
+        public Rate FrameRate { get; private set; }
         [DataMember]
-        public readonly int SampleCount;
+        public int SampleCount { get; private set; }
         [DataMember]
-        public readonly FineDuration SampleStartDelay;
+        public FineDuration SampleStartDelay { get; private set; }
         [DataMember]
-        public readonly FineDuration CyclePeriod;
+        public FineDuration CyclePeriod { get; private set; }
         [DataMember]
-        public readonly FineDuration SamplePeriod;
+        public FineDuration SamplePeriod { get; private set; }
         [DataMember]
-        public readonly FineDuration PulseWidth;
+        public FineDuration PulseWidth { get; private set; }
         [DataMember]
-        public readonly PingMode PingMode;
+        public PingMode PingMode { get; private set; }
         [DataMember]
-        public readonly bool EnableTransmit;
+        public bool EnableTransmit { get; private set; }
         [DataMember]
-        public readonly Frequency Frequency;
+        public Frequency Frequency { get; private set; }
         [DataMember]
-        public readonly bool Enable150Volts;
+        public bool Enable150Volts { get; private set; }
         [DataMember]
-        public readonly float ReceiverGain;
+        public float ReceiverGain { get; private set; }
 
         // There are not directly an acoustic setting, but part of the package.
         [DataMember]
-        public readonly Distance FocusPosition;
+        public Distance FocusPosition { get; private set; }
         [DataMember]
-        public readonly FineDuration AntiAliasing;
+        public FineDuration AntiAliasing { get; private set; }
         [DataMember]
-        public readonly InterpacketDelaySettings InterpacketDelay;
+        public InterpacketDelaySettings InterpacketDelay { get; private set; }
         [DataMember]
-        public readonly Rate MaximumFrameRate;
+        public Rate MaximumFrameRate { get; private set; }
 
         /// <summary>
         /// Environmental status when the settings were created.
         /// </summary>
         [DataMember]
-        public readonly EnvironmentalContext SonarEnvironment;
+        public EnvironmentalContext SonarEnvironment { get; private set; }
 
         public Distance WindowStart => this.CalculateWindowStart();
         public Distance WindowEnd => WindowStart + WindowLength;
