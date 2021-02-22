@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ApprovalTests;
+using ApprovalTests.Reporters;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoundMetrics.Aris.Core.ApprovalTests;
 using SoundMetrics.Aris.Core.Raw;
 
 namespace SoundMetrics.Aris.Core.UT
@@ -7,6 +10,7 @@ namespace SoundMetrics.Aris.Core.UT
     using static AcousticSettingsRawCalculations;
 
     [TestClass]
+    [UseReporter(typeof(DiffReporter))]
     public class AcousticSettingsRaw_WindowOperations_Test
     {
         private static readonly EnvironmentalContext TestEnvironment = EnvironmentalContext.Default;
@@ -63,14 +67,21 @@ namespace SoundMetrics.Aris.Core.UT
 
             var startSettings = GetClosestRange(SampleCount);
             var result = WindowOperations.MoveWindowStartIn(startSettings);
-            var expectedSampleStartDelay = startSettings.SampleStartDelay;
-            var expectedWindowStart = startSettings.WindowStart;
-            var expectedWindowEnd = startSettings.WindowEnd;
 
-            Assert.AreEqual(expectedSampleStartDelay, result.SampleStartDelay);
-            Assert.AreEqual(expectedWindowStart, result.WindowStart);
-            Assert.AreEqual(expectedWindowEnd, result.WindowEnd);
-            Assert.AreEqual(startSettings.SampleCount, result.SampleCount);
+            var helper = new PrettyPrintHelper(0);
+            helper.PrintHeading("Inputs");
+            using (var _ = helper.PushIndent())
+            {
+                helper.PrintValue("startSettings", startSettings);
+            }
+
+            helper.PrintHeading("Outputs");
+            using (var _ = helper.PushIndent())
+            {
+                helper.PrintValue("result", result);
+            }
+
+            Approvals.Verify(helper.ToString());
         }
 
         [TestMethod]
@@ -85,12 +96,21 @@ namespace SoundMetrics.Aris.Core.UT
             Assert.AreNotEqual(closestRange.WindowStart, startSettings.WindowStart);
 
             var result = WindowOperations.MoveWindowStartIn(startSettings);
-            var expectedSampleStartDelay = sysCfg.RawConfiguration.SampleStartDelayRange.Minimum;
-            var expectedWindowStart = closestRange.WindowStart;
 
-            Assert.AreEqual(expectedSampleStartDelay, result.SampleStartDelay, "unexpected sample start delay");
-            Assert.AreEqual(expectedWindowStart, result.WindowStart, "unexpected window start");
-            Assert.AreEqual(startSettings.SampleCount, result.SampleCount, "sample count should not change");
+            var helper = new PrettyPrintHelper(0);
+            helper.PrintHeading("Inputs");
+            using (var _ = helper.PushIndent())
+            {
+                helper.PrintValue("startSettings", startSettings);
+            }
+
+            helper.PrintHeading("Outputs");
+            using (var _ = helper.PushIndent())
+            {
+                helper.PrintValue("result", result);
+            }
+
+            Approvals.Verify(helper.ToString());
         }
     }
 }

@@ -1,0 +1,46 @@
+Inputs: 
+    AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 1/s
+        SampleCount: 1200
+        SampleStartDelay: 0.000930 s
+        CyclePeriod: 0.125000 s
+        SamplePeriod: 0.000004 s
+        PulseWidth: 0.000004 s
+        PingMode: PingMode 9
+        EnableTransmit: True
+        Frequency: High
+        Enable150Volts: True
+        ReceiverGain: 0
+        FocusPosition: 8.000 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        EnvironmentalContext: 
+            WaterTemp: 15
+            Salinity: Brackish
+            SpeedOfSound: 1450 m/s
+Outputs: 
+    AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 1/s
+        SampleCount: 1200
+        SampleStartDelay: 0.000930 s
+        CyclePeriod: 0.125000 s
+        SamplePeriod: 0.000004 s
+        PulseWidth: 0.000004 s
+        PingMode: PingMode 9
+        EnableTransmit: True
+        Frequency: High
+        Enable150Volts: True
+        ReceiverGain: 0
+        FocusPosition: 8.000 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        EnvironmentalContext: 
+            WaterTemp: 15
+            Salinity: Brackish
+            SpeedOfSound: 1450 m/s

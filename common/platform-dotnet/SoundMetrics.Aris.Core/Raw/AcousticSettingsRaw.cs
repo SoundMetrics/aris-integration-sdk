@@ -1,5 +1,6 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using SoundMetrics.Aris.Core.ApprovalTests;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +16,8 @@ namespace SoundMetrics.Aris.Core.Raw
     /// and will continue in new ARIS Integration SDK work.
     /// </summary>
     [DataContract]
-    public sealed partial class AcousticSettingsRaw : IEquatable<AcousticSettingsRaw>
+    public sealed partial class AcousticSettingsRaw
+        : IEquatable<AcousticSettingsRaw>, ApprovalTests.IPrettyPrintable
     {
         internal AcousticSettingsRaw(
             SystemType systemType,
@@ -174,6 +176,34 @@ namespace SoundMetrics.Aris.Core.Raw
                 + $"receiverGain={ReceiverGain}; FocusPosition={FocusPosition}; AntiAliasing={AntiAliasing}; "
                 + $"InterpacketDelay={InterpacketDelay}; SonarEnvironment={SonarEnvironment}; "
                 + $"CALCULATED[WindowStart={WindowStart}; WindowEnd={WindowEnd}; WindowLength={WindowLength}]";
+
+        PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
+        {
+            helper.PrintHeading($"{nameof(AcousticSettingsRaw)}");
+
+            using (var _ = helper.PushIndent())
+            {
+
+                helper.PrintValue("SystemType", SystemType);
+                helper.PrintValue("FrameRate", FrameRate);
+                helper.PrintValue("SampleCount", SampleCount);
+                helper.PrintValue("SampleStartDelay", SampleStartDelay);
+                helper.PrintValue("CyclePeriod", CyclePeriod);
+                helper.PrintValue("SamplePeriod", SamplePeriod);
+                helper.PrintValue("PulseWidth", PulseWidth);
+                helper.PrintValue("PingMode", PingMode);
+                helper.PrintValue("EnableTransmit", EnableTransmit);
+                helper.PrintValue("Frequency", Frequency);
+                helper.PrintValue("Enable150Volts", Enable150Volts);
+                helper.PrintValue("ReceiverGain", ReceiverGain);
+                helper.PrintValue("FocusPosition", FocusPosition);
+                helper.PrintValue("AntiAliasing", AntiAliasing);
+                helper.PrintValue("InterpacketDelay", InterpacketDelay);
+                helper.PrintValue("SonarEnvironment", SonarEnvironment);
+            }
+
+            return helper;
+        }
     }
 
 #pragma warning restore CA1051 // Do not declare visible instance fields

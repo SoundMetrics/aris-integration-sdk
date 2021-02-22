@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SoundMetrics.Aris.Core.ApprovalTests;
+using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
@@ -6,7 +7,8 @@ namespace SoundMetrics.Aris.Core
 {
     [DebuggerDisplay("{Description}")]
     [DataContract]
-    public sealed class EnvironmentalContext : IEquatable<EnvironmentalContext>
+    public sealed class EnvironmentalContext
+        : IEquatable<EnvironmentalContext>, IPrettyPrintable
     {
         [DataMember]
         private readonly double _waterTemp;
@@ -82,6 +84,20 @@ namespace SoundMetrics.Aris.Core
                 waterTemp: 15,
                 salinity: Salinity.Brackish,
                 speedOfSound: Velocity.FromMetersPerSecond(1450));
+        }
+
+        PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
+        {
+            helper.PrintHeading($"{nameof(EnvironmentalContext)}");
+
+            using (var _ = helper.PushIndent())
+            {
+                helper.PrintValue("WaterTemp", WaterTemp);
+                helper.PrintValue("Salinity", Salinity);
+                helper.PrintValue("SpeedOfSound", SpeedOfSound);
+            }
+
+            return helper;
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using SoundMetrics.Aris.Core.ApprovalTests;
 using System;
 using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
     [DebuggerDisplay("{DisplayString}")]
-    public struct InterpacketDelaySettings : IEquatable<InterpacketDelaySettings>
+    public struct InterpacketDelaySettings
+        : IEquatable<InterpacketDelaySettings>, IPrettyPrintable
     {
 #pragma warning disable CA1051 // Do not declare visible instance fields
         public bool Enable;
@@ -32,6 +34,19 @@ namespace SoundMetrics.Aris.Core.Raw
         public override int GetHashCode()
         {
             return Enable.GetHashCode() ^ Delay.GetHashCode();
+        }
+
+        PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
+        {
+            helper.PrintHeading($"{nameof(InterpacketDelaySettings)}");
+
+            using (var _ = helper.PushIndent())
+            {
+                helper.PrintValue("Enable", Enable);
+                helper.PrintValue("Delay", Delay);
+            }
+
+            return helper;
         }
     }
 }
