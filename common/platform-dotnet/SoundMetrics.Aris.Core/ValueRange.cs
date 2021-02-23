@@ -18,10 +18,8 @@ namespace SoundMetrics.Aris.Core
             Maximum = max;
         }
 
-#pragma warning disable CA1051 // Do not declare visible instance fields
-        public readonly T Minimum;
-        public readonly T Maximum;
-#pragma warning restore CA1051 // Do not declare visible instance fields
+        public T Minimum { get; private set; }
+        public T Maximum { get; private set; }
 
         public bool IsEmpty => Minimum.Equals(Maximum) || Minimum.CompareTo(Maximum) > 0;
 
