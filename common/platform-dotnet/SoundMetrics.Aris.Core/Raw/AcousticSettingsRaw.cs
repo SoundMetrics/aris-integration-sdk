@@ -2,7 +2,6 @@
 
 using SoundMetrics.Aris.Core.ApprovalTests;
 using System;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core.Raw
@@ -100,6 +99,35 @@ namespace SoundMetrics.Aris.Core.Raw
         public Distance WindowEnd => WindowStart + WindowLength;
         public Distance WindowLength => this.CalculateWindowLength();
         public Distance WindowMidPoint => WindowStart + (WindowLength / 2);
+
+        public ValueRange<Distance> AvailableWindow
+        {
+            get
+            {
+                var sspd = SonarEnvironment.SpeedOfSound;
+                var sysCfg = SystemType.GetConfiguration();
+                var rawCfg = sysCfg.RawConfiguration;
+                var ssdRange = rawCfg.SampleStartDelayRange;
+
+                var minWindowStart = CalculateMinWindowStart();
+                var maxWindowEnd = CalculateMaxWindowEnd();
+
+                return new ValueRange<Distance>(minWindowStart, maxWindowEnd);
+
+                Distance CalculateMinWindowStart()
+                {
+                    var minSampleStartDelayDistance = sspd * ssdRange.Minimum / 2;
+                    return minSampleStartDelayDistance;
+                }
+
+                Distance CalculateMaxWindowEnd()
+                {
+                    var maxWindowLength = SampleCount * SamplePeriod * sspd;
+                    var maxSampleStartDelayDistance = sspd * ssdRange.Maximum / 2;
+                    return maxSampleStartDelayDistance + maxWindowLength;
+                }
+            }
+        }
 
         public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);
 
