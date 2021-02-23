@@ -35,10 +35,7 @@ namespace SoundMetrics.Aris.Core.UT
             var frequency = Frequency.High;
             var enable150Volts = true;
             var receiverGain = sysCfg.ReceiverGainRange.Minimum;
-            var frameRate = Rate.ToRate(1);
-            var pingsPerFrame = pingMode.PingsPerFrame;
-            var framePeriod = 1 / frameRate;
-            var cyclePeriod = framePeriod / pingsPerFrame;
+            var cyclePeriod = sampleStartDelay + (sampleCount * samplePeriod);
             var focusPosition = Distance.FromMeters(8);
 
             return new AcousticSettingsRaw(

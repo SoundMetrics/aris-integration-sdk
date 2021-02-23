@@ -40,10 +40,11 @@ namespace SoundMetrics.Aris.Core.Raw
 
 
         internal static FineDuration ConstrainAntiAliasing(this AcousticSettingsRaw settings)
-            => Max(
-                FineDuration.Zero,
+            => Min(
+                settings.AntiAliasing,
                 settings
-                    .SystemType.GetConfiguration()
+                    .SystemType
+                    .GetConfiguration()
                     .RawConfiguration
                     .MaxAntialiasingFor(settings));
     }

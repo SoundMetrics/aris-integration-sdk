@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -187,11 +188,8 @@ namespace SoundMetrics.Aris.Core.Raw
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
-                        interpacketDelay));
-
-            var pingsPerFrame = original.PingMode.PingsPerFrame;
-            var framePeriod = 1 / frameRate;
-            var cyclePeriod = framePeriod / pingsPerFrame;
+                        interpacketDelay,
+                        out var cyclePeriod));
 
             // ### Leaving these as-is for now.
             var pulseWidth = original.PulseWidth;

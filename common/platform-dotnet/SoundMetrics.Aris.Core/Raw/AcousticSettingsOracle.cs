@@ -191,15 +191,17 @@ namespace SoundMetrics.Aris.Core.Raw
 
         public static AcousticSettingsRaw WithAntiAliasing(
             this AcousticSettingsRaw settings,
-            FineDuration newDelay)
+            FineDuration newDelay,
+            bool useMaxFrameRate)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
             if (newDelay < FineDuration.Zero) throw new ArgumentOutOfRangeException(nameof(newDelay), "Argument value is negative");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
 
-            return UpdateAntiAliasing(settings, newDelay)
-                    .ApplyAllConstraints();
+            var newSettings = UpdateAntiAliasing(settings, newDelay);
+            var withFrameRate = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
+            return withFrameRate.ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithAutomaticSettings(

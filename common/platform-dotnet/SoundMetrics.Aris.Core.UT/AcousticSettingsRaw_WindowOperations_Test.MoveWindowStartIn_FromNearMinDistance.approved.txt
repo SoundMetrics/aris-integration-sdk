@@ -4,7 +4,7 @@ Inputs:
         FrameRate: 1/s
         SampleCount: 1200
         SampleStartDelay: 0.000950 s
-        CyclePeriod: 0.125000 s
+        CyclePeriod: 0.005750 s
         SamplePeriod: 0.000004 s
         PulseWidth: 0.000004 s
         PingMode: PingMode 9
@@ -27,7 +27,7 @@ Outputs:
         FrameRate: 1/s
         SampleCount: 1200
         SampleStartDelay: 0.000930 s
-        CyclePeriod: 0.125000 s
+        CyclePeriod: 0.008806 s
         SamplePeriod: 0.000006 s
         PulseWidth: 0.000004 s
         PingMode: PingMode 9
