@@ -1,44 +1,89 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
-
-using System;
-using System.Collections.Generic;
+﻿using System;
+using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    public sealed partial class AcousticSettingsRaw
+    public static class AcousticSettingsRawRangeOperations
     {
-        public static AcousticSettingsRaw AdjustRange(
-            AcousticSettingsRaw currentSettings,
-            WindowOperation operation)
+        /// <summary>
+        /// Moves the range start, attempting to enclose the requested distance.
+        /// </summary>
+        public static AcousticSettingsRaw MoveWindowStart(
+            this AcousticSettingsRaw settings,
+            Distance requestedStart,
+            bool useMaxFrameRate)
         {
-            if (rangeOperationMap.TryGetValue(operation, out var adjustFn))
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (requestedStart <= Distance.Zero)
             {
-                return adjustFn(currentSettings);
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentOutOfRangeException(nameof(requestedStart), "Value is negative or zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
-            else
+
+            // Plan: Don't change the sample count, just adjust the sample period.
+            // Tactic: what integral sample period covers the smallest range that
+            // encloses the requested window end?
+
+            var windowLength = settings.WindowEnd - requestedStart;
+            if (windowLength <= Distance.Zero)
             {
-                throw new NotImplementedException($"Operation '{operation}' is not implemented");
+                Trace.TraceError($"{nameof(MoveWindowStart)}: requested window length is lte zero");
+                return settings;
             }
+
+            // rountrip time over the window
+            var timeOverWindow = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
+            var idealSamplePeriod = timeOverWindow / settings.SampleCount;
+            var samplePeriod = idealSamplePeriod.Ceiling;
+
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var constrainedSamplePeriod = samplePeriod.ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+
+            var sampleStartDelay = 2 * requestedStart / settings.SonarEnvironment.SpeedOfSound;
+
+            return settings
+                .WithSampleStartDelay(sampleStartDelay, useMaxFrameRate)
+                .WithSamplePeriod(constrainedSamplePeriod, useMaxFrameRate);
         }
 
-        private static readonly Dictionary<WindowOperation, AdjustRangeFn>
-            rangeOperationMap = BuildRangeOperationMap();
-
-        private static Dictionary<WindowOperation, AdjustRangeFn> BuildRangeOperationMap()
+        /// <summary>
+        /// Moves the range end, attempting to enclose the requested distance.
+        /// </summary>
+        public static AcousticSettingsRaw MoveWindowEnd(
+                this AcousticSettingsRaw settings,
+                Distance requestedEnd,
+                bool useMaxFrameRate)
         {
-            return new Dictionary<WindowOperation, AdjustRangeFn>
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (requestedEnd <= Distance.Zero)
             {
-                { WindowOperation.ShortWindow, WindowOperations.ToShortWindow },
-                { WindowOperation.MediumWindow, WindowOperations.ToMediumWindow },
-                { WindowOperation.LongWindow, WindowOperations.ToLongWindow },
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentOutOfRangeException(nameof(requestedEnd), "Value is negative or zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
 
-                { WindowOperation.WindowStartIn, WindowOperations.MoveWindowStartIn },
-                { WindowOperation.WindowStartOut, WindowOperations.MoveWindowStartOut },
-                { WindowOperation.WindowEndIn, WindowOperations.MoveWindowEndIn },
-                { WindowOperation.WindowEndOut, WindowOperations.MoveWindowEndOut },
-                { WindowOperation.SlideRangeIn, WindowOperations.SlideRangeIn },
-                { WindowOperation.SlideRangeOut, WindowOperations.SlideRangeOut },
-            };
+            // Plan: Don't change the sample count, just adjust the sample period.
+            // Tactic: what integral sample period covers the smallest range that
+            // encloses the requested window end?
+
+            var windowLength = requestedEnd - settings.WindowStart;
+            if (windowLength <= Distance.Zero)
+            {
+                Trace.TraceError($"{nameof(MoveWindowEnd)}: requested window length is lte zero");
+                return settings;
+            }
+
+            // rountrip time over the window
+            var timeOverWindow = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
+            var idealSamplePeriod = timeOverWindow / settings.SampleCount;
+            var samplePeriod = idealSamplePeriod.Ceiling;
+
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var constrainedSamplePeriod = samplePeriod.ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+
+            return settings.WithSamplePeriod(constrainedSamplePeriod, useMaxFrameRate);
         }
     }
 }
+

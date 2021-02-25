@@ -120,12 +120,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     return minSampleStartDelayDistance;
                 }
 
-                Distance CalculateMaxWindowEnd()
-                {
-                    var maxWindowLength = SampleCount * SamplePeriod * sspd;
-                    var maxSampleStartDelayDistance = sspd * ssdRange.Maximum / 2;
-                    return maxSampleStartDelayDistance + maxWindowLength;
-                }
+                Distance CalculateMaxWindowEnd() => sysCfg.UsefulImagingRange.Maximum;
             }
         }
 

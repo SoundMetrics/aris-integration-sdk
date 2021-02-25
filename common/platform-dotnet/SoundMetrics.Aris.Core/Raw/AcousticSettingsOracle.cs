@@ -162,7 +162,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
 
-    public static AcousticSettingsRaw WithFocusPosition(
+        public static AcousticSettingsRaw WithFocusPosition(
             this AcousticSettingsRaw settings,
             Distance newFocusPosition)
         {
@@ -202,6 +202,96 @@ namespace SoundMetrics.Aris.Core.Raw
             var newSettings = UpdateAntiAliasing(settings, newDelay);
             var withFrameRate = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
             return withFrameRate.ApplyAllConstraints();
+        }
+
+        internal static AcousticSettingsRaw WithSamplePeriod(
+            this AcousticSettingsRaw settings,
+            FineDuration samplePeriod,
+            bool useMaxFrameRate)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (samplePeriod <= FineDuration.Zero)
+            {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentOutOfRangeException(nameof(samplePeriod), "Negative or zero value");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var constrainedSamplePeriod =
+                samplePeriod.ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+
+            if (constrainedSamplePeriod == settings.SamplePeriod && !useMaxFrameRate)
+            {
+                return settings;
+            }
+
+            var newSettings =
+                new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.CyclePeriod,
+                    constrainedSamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusPosition,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.SonarEnvironment);
+
+            newSettings = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
+            return newSettings.ApplyAllConstraints();
+        }
+
+        public static AcousticSettingsRaw WithSampleStartDelay(
+            this AcousticSettingsRaw settings,
+            FineDuration sampleStartDelay,
+            bool useMaxFrameRate)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (sampleStartDelay <= FineDuration.Zero)
+            {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentOutOfRangeException(nameof(sampleStartDelay), "Negative or zero value");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var constrainedSampleStartDelay =
+                sampleStartDelay.ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayRange);
+
+            if (constrainedSampleStartDelay == settings.SampleStartDelay && !useMaxFrameRate)
+            {
+                return settings;
+            }
+
+            var newSettings =
+                new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    constrainedSampleStartDelay,
+                    settings.CyclePeriod,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusPosition,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.SonarEnvironment);
+
+            newSettings = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
+            return newSettings.ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithAutomaticSettings(

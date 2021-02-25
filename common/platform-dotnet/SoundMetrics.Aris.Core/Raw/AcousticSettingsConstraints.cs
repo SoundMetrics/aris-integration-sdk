@@ -14,6 +14,9 @@ namespace SoundMetrics.Aris.Core.Raw
     // refers to a user input.
     internal static class AcousticSettingsConstraints
     {
+        public static AcousticSettingsRaw ApplyAllConstraints(this AcousticSettingsRaw settings)
+            => AcousticSettingsOracle.ApplyAllConstraints(settings);
+
         internal static Rate ConstrainFrameRate(
             Rate requestedFrameRate,
             SystemConfiguration sysCfg,

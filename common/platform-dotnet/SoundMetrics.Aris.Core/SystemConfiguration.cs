@@ -35,28 +35,21 @@ namespace SoundMetrics.Aris.Core
         /// </summary>
         public Distance FrequencyCrossover { get; internal set; }
 
-        public ValueRange<Distance> UsefulHighFrequencyImagingRange { get; internal set; }
-
-        public ValueRange<Distance> UsefulLowFrequencyImagingRange { get; internal set; }
-
-        public ValueRange<Distance> CombinedUsefulImagingRange
-            => UsefulHighFrequencyImagingRange.Union(UsefulLowFrequencyImagingRange);
-
         public ValueRange<Distance> UsefulImagingRange
-            => UsefulHighFrequencyImagingRange.Union(UsefulLowFrequencyImagingRange);
+            => new ValueRange<Distance>(WindowStartRange.Minimum, WindowEndRange.Maximum);
 
-        public ValueRange<Distance> GetUsefulImagingRangeFor(Frequency frequency)
-        {
-            switch (frequency)
-            {
-                case Frequency.Low:
-                    return UsefulLowFrequencyImagingRange;
-                case Frequency.High:
-                    return UsefulHighFrequencyImagingRange;
-                default:
-                    throw new ArgumentException($"Unexpected value for {nameof(frequency)}: {frequency}");
-            }
-        }
+        //public ValueRange<Distance> GetUsefulImagingRangeFor(Frequency frequency)
+        //{
+        //    switch (frequency)
+        //    {
+        //        case Frequency.Low:
+        //            return UsefulLowFrequencyImagingRange;
+        //        case Frequency.High:
+        //            return UsefulHighFrequencyImagingRange;
+        //        default:
+        //            throw new ArgumentException($"Unexpected value for {nameof(frequency)}: {frequency}");
+        //    }
+        //}
 
         public ValueRange<Distance> WindowStartRange { get; internal set; }
 

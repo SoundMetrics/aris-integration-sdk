@@ -27,8 +27,6 @@ namespace SoundMetrics.Aris.Core
                     WindowEndRange = RangeOfMeters(1.3, 50.0),
 
                     FrequencyCrossover = Distance.FromMeters(15.0),
-                    UsefulLowFrequencyImagingRange = RangeOfMeters(20.0, 50.0),
-                    UsefulHighFrequencyImagingRange = RangeOfMeters(5.0, 20.0),
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -64,8 +62,6 @@ namespace SoundMetrics.Aris.Core
                     WindowEndRange = RangeOfMeters(1.3, 20.0),
 
                     FrequencyCrossover = Distance.FromMeters(5.0),
-                    UsefulLowFrequencyImagingRange = RangeOfMeters(8.0, 20.0),
-                    UsefulHighFrequencyImagingRange = RangeOfMeters(1.0, 8.0),
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -101,8 +97,6 @@ namespace SoundMetrics.Aris.Core
                     WindowEndRange = RangeOfMeters(1.3, 100.0),
 
                     FrequencyCrossover = Distance.FromMeters(25.0),
-                    UsefulLowFrequencyImagingRange = RangeOfMeters(30.0, 100.0),
-                    UsefulHighFrequencyImagingRange = RangeOfMeters(10.0, 30.0),
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -137,7 +131,7 @@ namespace SoundMetrics.Aris.Core
                 AcousticSettingsRaw MakeSettings(EnvironmentalContext environmentalContext)
                 {
                     var defaultSettings = makeDefaultSettings(environmentalContext);
-                    return WindowOperations.ToMediumWindow(defaultSettings);
+                    return WindowOperations.ToMediumWindow(defaultSettings, useMaxFrameRate: true);
                 }
             }
 
