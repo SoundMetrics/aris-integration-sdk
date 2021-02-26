@@ -135,19 +135,13 @@ namespace SoundMetrics.Aris.Core.Raw
             in FixedWindowSize windowSize,
             bool useMaxFrameRate)
         {
+            var original = currentSettings;
             var sspd = currentSettings.SonarEnvironment.SpeedOfSound;
 
-            var original = currentSettings;
-
-            var sampleStartDelay =
-                currentSettings.CalculateSampleStartDelay()
-                    .ConstrainTo(systemConfiguration.RawConfiguration.SampleStartDelayRange);
-
-            var actualWindowStart = TimeToDistance(sampleStartDelay, sspd) / 2;
-
             var samplePeriod =
-                CalculateSamplePeriod(actualWindowStart, windowSize.WindowEnd, original.SampleCount, sspd)
+                CalculateSamplePeriod(windowSize.WindowStart, windowSize.WindowEnd, original.SampleCount, sspd)
                     .ConstrainTo(systemConfiguration.RawConfiguration.SamplePeriodRange);
+            var sampleStartDelay = 2 * windowSize.WindowStart / sspd;
 
             return
                 BuildNewWindowSettings(
