@@ -18,6 +18,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public string DisplayString =>
             $"{Delay.TotalMicroseconds} \u00B5s" + (Enable ? "" : " disabled");
 
+        public static readonly InterpacketDelaySettings Off = new InterpacketDelaySettings { Enable = false };
+
         public override bool Equals(object obj)
             => (obj is InterpacketDelaySettings) ? Equals((InterpacketDelaySettings)obj) : false;
 

@@ -43,7 +43,6 @@ namespace SoundMetrics.Aris.Core.UT
                 Rate.ToRate(1),
                 sampleCount,
                 sampleStartDelay,
-                cyclePeriod,
                 samplePeriod,
                 pulseWidth,
                 pingMode,

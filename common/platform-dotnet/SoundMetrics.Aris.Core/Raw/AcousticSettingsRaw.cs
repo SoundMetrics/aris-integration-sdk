@@ -8,6 +8,8 @@ namespace SoundMetrics.Aris.Core.Raw
 {
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
+    using static FineDuration;
+
     /// <summary>
     /// This type is ported over from some legacy ARIS Integration SDK work,
     /// and will continue in new ARIS Integration SDK work.
@@ -21,7 +23,6 @@ namespace SoundMetrics.Aris.Core.Raw
             Rate frameRate,
             int sampleCount,
             FineDuration sampleStartDelay,
-            FineDuration cyclePeriod,
             FineDuration samplePeriod,
             FineDuration pulseWidth,
             PingMode pingMode,
@@ -38,7 +39,6 @@ namespace SoundMetrics.Aris.Core.Raw
             FrameRate = frameRate;
             SampleCount = sampleCount;
             SampleStartDelay = sampleStartDelay;
-            CyclePeriod = cyclePeriod;
             SamplePeriod = samplePeriod;
             PulseWidth = pulseWidth;
             PingMode = pingMode;
@@ -62,8 +62,6 @@ namespace SoundMetrics.Aris.Core.Raw
         public int SampleCount { get; private set; }
         [DataMember]
         public FineDuration SampleStartDelay { get; private set; }
-        [DataMember]
-        public FineDuration CyclePeriod { get; private set; }
         [DataMember]
         public FineDuration SamplePeriod { get; private set; }
         [DataMember]
@@ -94,6 +92,15 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         [DataMember]
         public EnvironmentalContext SonarEnvironment { get; private set; }
+
+        public FineDuration CyclePeriod
+        {
+            get
+            {
+                var _ = MaxFrameRate.DetermineMaximumFrameRate(this, out var cyclePeriod);
+                return cyclePeriod;
+            }
+        }
 
         public Distance WindowStart => this.CalculateWindowStart();
         public Distance WindowEnd => WindowStart + WindowLength;
@@ -209,7 +216,6 @@ namespace SoundMetrics.Aris.Core.Raw
                 helper.PrintValue("FrameRate", FrameRate);
                 helper.PrintValue("SampleCount", SampleCount);
                 helper.PrintValue("SampleStartDelay", SampleStartDelay);
-                helper.PrintValue("CyclePeriod", CyclePeriod);
                 helper.PrintValue("SamplePeriod", SamplePeriod);
                 helper.PrintValue("PulseWidth", PulseWidth);
                 helper.PrintValue("PingMode", PingMode);
@@ -221,6 +227,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 helper.PrintValue("AntiAliasing", AntiAliasing);
                 helper.PrintValue("InterpacketDelay", InterpacketDelay);
                 helper.PrintValue("SonarEnvironment", SonarEnvironment);
+                helper.PrintValue("CyclePeriod (calculated)", CyclePeriod);
             }
 
             return helper;

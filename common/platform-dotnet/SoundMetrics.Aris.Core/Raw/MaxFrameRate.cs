@@ -23,6 +23,22 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public static Rate DetermineMaximumFrameRate(
+            AcousticSettingsRaw settings,
+            out FineDuration cyclePeriod)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            return DetermineMaximumFrameRate(
+                settings.SystemType.GetConfiguration(),
+                settings.PingMode,
+                settings.SampleCount,
+                settings.SampleStartDelay,
+                settings.SamplePeriod,
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                out cyclePeriod);
+        }
+
+        internal static Rate DetermineMaximumFrameRate(
             SystemConfiguration sysCfg,
             PingMode pingMode,
             int sampleCount,
@@ -83,9 +99,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var maxFramePeriod = mfp;
 
             var maximumFrameRate = 1 / maxFramePeriod;
-            var trueMin = sysCfg.FrameRateRange.Minimum;
-            var trueMax = sysCfg.FrameRateRange.Maximum;
-            var limitedRate = Rate.Max(trueMin, Rate.Min(maximumFrameRate, trueMax));
+            var limitedRate = maximumFrameRate.ConstrainTo(sysCfg.FrameRateRange);
 
             return limitedRate.NormalizeToHertz();
 

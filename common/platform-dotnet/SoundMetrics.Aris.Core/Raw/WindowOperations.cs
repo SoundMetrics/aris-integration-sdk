@@ -202,8 +202,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
-                        interpacketDelay,
-                        out var cyclePeriod));
+                        interpacketDelay));
 
             // ### Leaving these as-is for now.
             var pulseWidth = original.PulseWidth;
@@ -224,7 +223,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     frameRate: frameRate,
                     sampleCount: original.SampleCount,
                     sampleStartDelay: sampleStartDelay,
-                    cyclePeriod: cyclePeriod,
                     samplePeriod: samplePeriod,
                     pulseWidth: pulseWidth,
                     pingMode: original.PingMode,

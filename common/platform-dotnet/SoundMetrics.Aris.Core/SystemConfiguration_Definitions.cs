@@ -162,11 +162,10 @@ namespace SoundMetrics.Aris.Core
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
-                        interpacketDelay,
-                        out FineDuration cyclePeriod);
+                        interpacketDelay);
 
                 return new AcousticSettingsRaw(
-                    systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
+                    systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
                     focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
                     .WithAutomaticSettings(
@@ -200,11 +199,10 @@ namespace SoundMetrics.Aris.Core
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
-                        interpacketDelay,
-                        out FineDuration cyclePeriod);
+                        interpacketDelay);
 
                 return new AcousticSettingsRaw(
-                    systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
+                    systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
                     focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
                     .WithAutomaticSettings(
@@ -238,11 +236,10 @@ namespace SoundMetrics.Aris.Core
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
-                        interpacketDelay,
-                        out FineDuration cyclePeriod);
+                        interpacketDelay);
 
                 return new AcousticSettingsRaw(
-                    systemType, maxFrameRate, sampleCount, sampleStartDelay, cyclePeriod, samplePeriod,
+                    systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
                     focusPosition, antiAliasing, interpacketDelay, sonarEnvironment)
                     .WithAutomaticSettings(

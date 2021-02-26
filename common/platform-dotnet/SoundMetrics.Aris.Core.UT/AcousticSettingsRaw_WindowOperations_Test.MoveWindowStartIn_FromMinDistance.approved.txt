@@ -4,7 +4,6 @@ Inputs:
         FrameRate: 1/s
         SampleCount: 1200
         SampleStartDelay: 0.000930 s
-        CyclePeriod: 0.005730 s
         SamplePeriod: 0.000004 s
         PulseWidth: 0.000004 s
         PingMode: PingMode 9
@@ -21,13 +20,13 @@ Inputs:
             WaterTemp: 15
             Salinity: Brackish
             SpeedOfSound: 1450 m/s
+        CyclePeriod (calculated): 0.007257 s
 Outputs: 
     AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
         FrameRate: 1/s
         SampleCount: 1200
         SampleStartDelay: 0.000930 s
-        CyclePeriod: 0.005730 s
         SamplePeriod: 0.000004 s
         PulseWidth: 0.000004 s
         PingMode: PingMode 9
@@ -44,3 +43,4 @@ Outputs:
             WaterTemp: 15
             Salinity: Brackish
             SpeedOfSound: 1450 m/s
+        CyclePeriod (calculated): 0.007257 s
