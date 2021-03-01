@@ -110,9 +110,16 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public static AcousticSettingsRaw WithMaxFrameRate(
-            this AcousticSettingsRaw settings)
+            this AcousticSettingsRaw settings,
+            bool enable)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            if (!enable)
+            {
+                return settings;
+            }
+
             return settings
                     .WithFrameRate(settings.MaximumFrameRate)
                     .ApplyAllConstraints();
@@ -197,9 +204,10 @@ namespace SoundMetrics.Aris.Core.Raw
             if (newDelay < FineDuration.Zero) throw new ArgumentOutOfRangeException(nameof(newDelay), "Argument value is negative");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
 
-            var newSettings = UpdateAntiAliasing(settings, newDelay);
-            var withFrameRate = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
-            return withFrameRate.ApplyAllConstraints();
+            return
+                UpdateAntiAliasing(settings, newDelay)
+                    .WithMaxFrameRate(useMaxFrameRate)
+                    .ApplyAllConstraints();
         }
 
         internal static AcousticSettingsRaw WithSamplePeriod(
@@ -242,8 +250,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
 
-            newSettings = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
-            return newSettings.ApplyAllConstraints();
+            return
+                newSettings
+                    .WithMaxFrameRate(useMaxFrameRate)
+                    .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithSampleStartDelay(
@@ -286,8 +296,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.SonarEnvironment);
 
-            newSettings = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
-            return newSettings.ApplyAllConstraints();
+            return
+                newSettings
+                    .WithMaxFrameRate(useMaxFrameRate)
+                    .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithAutomaticSettings(
@@ -383,9 +395,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     newInterpacketDelay,
                     settings.SonarEnvironment);
-            var result =
-                useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
-            return result.ApplyAllConstraints();
+            return
+                newSettings
+                    .WithMaxFrameRate(useMaxFrameRate)
+                    .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithReceiverGain(

@@ -87,6 +87,12 @@ namespace SoundMetrics.Aris.Core.Raw
         [DataMember]
         public Rate MaximumFrameRate { get; private set; }
 
+#pragma warning disable CA1822 // does not access instance data and can be marked as static
+        // Leave this as an instance property in case it ever needs to be an instance property
+        // rather than class property.
+        public Rate MinimumFrameRate => Rate.OneHertz;
+#pragma warning restore CA1822 // does not access instance data and can be marked as static
+
         /// <summary>
         /// Environmental status when the settings were created.
         /// </summary>

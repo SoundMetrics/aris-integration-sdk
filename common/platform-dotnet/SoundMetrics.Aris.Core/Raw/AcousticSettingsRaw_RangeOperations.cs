@@ -68,16 +68,17 @@ namespace SoundMetrics.Aris.Core.Raw
             // only do it in machine units (microseconds) to avoid conversion to/from distance
             // (distance is derived from the machine units).
 
-            var newSampleStartDelay = CalculatedNewSampleStartDelay();
+            var newSampleStartDelay = CalculateNewSampleStartDelay();
 
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
                     .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
 
-            FineDuration CalculatedNewSampleStartDelay()
+            FineDuration CalculateNewSampleStartDelay()
             {
                 var oldSampleStartDelay = settings.SampleStartDelay;
                 var oldSamplePeriod = settings.SamplePeriod;
@@ -135,8 +136,41 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
                     .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithMaxFrameRate(useMaxFrameRate)
+                    .ApplyAllConstraints();
+        }
+
+        public static AcousticSettingsRaw SlideWindow(
+                this AcousticSettingsRaw settings,
+                Distance requestedStart,
+                bool useMaxFrameRate)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (requestedStart <= Distance.Zero)
+            {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentOutOfRangeException(nameof(requestedStart), "Value is negative or zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
+            // Plan: Don't change the sample count, just adjust the sampel start delay.
+
+            var sysCfg = settings.SystemType.GetConfiguration();
+
+            if (requestedStart == settings.WindowStart)
+            {
+                return settings;
+            }
+
+            var newSampleStartDelay =
+                (2 * requestedStart / settings.SonarEnvironment.SpeedOfSound)
+                    .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayRange);
+            return
+                settings
+                    .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
+                    .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
         }
     }
 }
-

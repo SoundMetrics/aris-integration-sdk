@@ -229,7 +229,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     interpacketDelay: interpacketDelay,
                     sonarEnvironment: original.SonarEnvironment);
 
-            newSettings = useMaxFrameRate ? newSettings.WithMaxFrameRate() : newSettings;
+            newSettings = newSettings.WithMaxFrameRate(useMaxFrameRate);
 
             if (original.SampleCount != newSettings.SampleCount)
             {
