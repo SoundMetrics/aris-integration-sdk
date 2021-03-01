@@ -55,6 +55,9 @@ namespace SoundMetrics.Aris.Core
             return new FineDuration((long)(seconds * (1000 * 1000.0)));
         }
 
+        public FineDuration RoundToMicroseconds()
+            => FineDuration.FromMicroseconds(Math.Round(this.TotalMicroseconds));
+
         /// <summary>
         /// Performs a Floor() on FineDuration's native unit, which is microseconds.
         /// </summary>
