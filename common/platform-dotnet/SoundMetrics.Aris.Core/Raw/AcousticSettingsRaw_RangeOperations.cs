@@ -74,6 +74,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
+                    .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
                     .ApplyAllConstraints();
 
             FineDuration CalculatedNewSampleStartDelay()
@@ -133,6 +134,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
+                    .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
                     .ApplyAllConstraints();
         }
     }

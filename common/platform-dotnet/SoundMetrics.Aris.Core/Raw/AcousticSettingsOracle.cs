@@ -13,6 +13,8 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         FocusPosition = 0b0001,
         Frequency = 0b0010,
+
+        FrequencyAndFocus = Frequency | FocusPosition,
     }
 
     public static class AcousticSettingsOracle
