@@ -73,7 +73,8 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                    .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate);
+                    .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
+                    .ApplyAllConstraints();
 
             FineDuration CalculatedNewSampleStartDelay()
             {
@@ -114,15 +115,25 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
-            // rountrip time over the window
-            var timeOverWindow = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
-            var idealSamplePeriod = timeOverWindow / settings.SampleCount;
-            var samplePeriod = idealSamplePeriod.Ceiling;
-
             var sysCfg = settings.SystemType.GetConfiguration();
-            var constrainedSamplePeriod = samplePeriod.ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
 
-            return settings.WithSamplePeriod(constrainedSamplePeriod, useMaxFrameRate);
+            // rountrip time over the window
+            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
+            var newSamplePeriod =
+                (newWindowRoughTimeOfFlight / settings.SampleCount)
+                    .RoundToMicroseconds()
+                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+
+            if (newSamplePeriod == settings.SamplePeriod)
+            {
+                // Nothing to do.
+                return settings;
+            }
+
+            return
+                settings
+                    .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
+                    .ApplyAllConstraints();
         }
     }
 }
