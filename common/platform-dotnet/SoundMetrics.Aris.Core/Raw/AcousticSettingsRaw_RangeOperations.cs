@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             // Plan: Don't change the sample count, just adjust the sample period.
             // Tactic: what integral sample period covers the smallest range that
-            // encloses the requested window end?
+            // encloses the requested window start without moving the end?
 
             var windowLength = settings.WindowEnd - requestedStart;
             if (windowLength <= Distance.Zero)
@@ -32,19 +32,59 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
-            // rountrip time over the window
-            var timeOverWindow = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
-            var idealSamplePeriod = timeOverWindow / settings.SampleCount;
-            var samplePeriod = idealSamplePeriod.Ceiling;
-
             var sysCfg = settings.SystemType.GetConfiguration();
-            var constrainedSamplePeriod = samplePeriod.ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
 
-            var sampleStartDelay = 2 * requestedStart / settings.SonarEnvironment.SpeedOfSound;
+            if (settings.WindowStart <= requestedStart
+                && settings.SamplePeriod <= sysCfg.RawConfiguration.SamplePeriodRange.Minimum)
+            {
+                // Sample period is already at its minimum.
+                return settings;
+            }
 
-            return settings
-                .WithSampleStartDelay(sampleStartDelay, useMaxFrameRate)
-                .WithSamplePeriod(constrainedSamplePeriod, useMaxFrameRate);
+            if (requestedStart <= settings.WindowStart
+                && settings.SamplePeriod >= sysCfg.RawConfiguration.SamplePeriodRange.Maximum)
+            {
+                // Sample period is already at its maximum.
+                return settings;
+            }
+
+            // Make sure we don't move window end here.
+            // Expand the window by adjusting sample period,
+            // move the window start.
+
+            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
+            var newSamplePeriod =
+                (newWindowRoughTimeOfFlight / settings.SampleCount)
+                    .RoundToMicroseconds()
+                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+
+            if (newSamplePeriod == settings.SamplePeriod)
+            {
+                // Nothing to do.
+                return settings;
+            }
+
+            // Calculate SSD backwards from WindowEnd -- by new [WindowEnd - (sample period * sample count)],
+            // only do it in machine units (microseconds) to avoid conversion to/from distance
+            // (distance is derived from the machine units).
+
+            var newSampleStartDelay = CalculatedNewSampleStartDelay();
+
+            return
+                settings
+                    .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
+                    .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate);
+
+            FineDuration CalculatedNewSampleStartDelay()
+            {
+                var oldSampleStartDelay = settings.SampleStartDelay;
+                var oldSamplePeriod = settings.SamplePeriod;
+                var oldWindowTimeOfFlight = settings.SampleCount * oldSamplePeriod;
+                var newWindowTimeOfFlight = settings.SampleCount * newSamplePeriod;
+                var calculatedEndWindowTime = oldSampleStartDelay + oldWindowTimeOfFlight;
+                var calculatedSampleStartDelay = calculatedEndWindowTime - newWindowTimeOfFlight;
+                return calculatedSampleStartDelay;
+            }
         }
 
         /// <summary>
