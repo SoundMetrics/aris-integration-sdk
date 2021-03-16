@@ -15,23 +15,31 @@ namespace SoundMetrics.Aris.Core
         [DataMember]
         private readonly Salinity _salinity;
         [DataMember]
+        private readonly Distance _depth;
+        [DataMember]
         private readonly Velocity _speedOfSound;
 
-        private static Lazy<EnvironmentalContext> _default = new Lazy<EnvironmentalContext>(CreateDefaultValue);
+        private static readonly Lazy<EnvironmentalContext> _default =
+            new Lazy<EnvironmentalContext>(CreateDefaultValue);
 
         // Parameterless ctor for serialization.
         private EnvironmentalContext() { }
 
-        public EnvironmentalContext(double waterTemp, Salinity salinity, Velocity speedOfSound)
+        public EnvironmentalContext(double waterTemp, Salinity salinity, Distance depth)
         {
             _waterTemp = waterTemp;
             _salinity = salinity;
-            _speedOfSound = speedOfSound;
+            _depth = depth;
+            _speedOfSound =
+                Velocity.FromMetersPerSecond(
+                    AcousticMath.CalculateSpeedOfSound(
+                        waterTemp, depth.Meters, (double)salinity));
         }
 
-        public double WaterTemp { get { return _waterTemp; } }
-        public Salinity Salinity { get { return _salinity; } }
-        public Velocity SpeedOfSound { get { return _speedOfSound; } }
+        public double WaterTemp => _waterTemp;
+        public Salinity Salinity => _salinity;
+        public Distance Depth => _depth;
+        public Velocity SpeedOfSound => _speedOfSound;
 
         public override bool Equals(object obj) => Equals(obj as EnvironmentalContext);
 
@@ -54,6 +62,7 @@ namespace SoundMetrics.Aris.Core
 
             return this._waterTemp == other._waterTemp
                 && this._salinity == other._salinity
+                && this._depth == other._depth
                 && this._speedOfSound == other._speedOfSound;
         }
 
@@ -64,14 +73,17 @@ namespace SoundMetrics.Aris.Core
             => (a is null) || !a.Equals(b);
 
         public override int GetHashCode()
-            => _waterTemp.GetHashCode() ^ _salinity.GetHashCode() ^ _speedOfSound.GetHashCode();
+            => _waterTemp.GetHashCode()
+                ^ _salinity.GetHashCode()
+                ^ _depth.GetHashCode()
+                ^ _speedOfSound.GetHashCode();
 
         public override string ToString()
         {
             return Description;
         }
 
-        public string Description => $"(WaterTemp={WaterTemp}; Salinity={Salinity}; SpeedOfSound={SpeedOfSound})";
+        public string Description => $"(WaterTemp={WaterTemp}; Salinity={Salinity}; Depth={Depth}; SpeedOfSound={SpeedOfSound})";
 
         /// <summary>
         /// Handy for debugging whether we have valid environment data yet.
@@ -80,10 +92,11 @@ namespace SoundMetrics.Aris.Core
 
         private static EnvironmentalContext CreateDefaultValue()
         {
-            return new EnvironmentalContext(
-                waterTemp: 15,
-                salinity: Salinity.Brackish,
-                speedOfSound: Velocity.FromMetersPerSecond(1450));
+            var defaultWaterTemp = 15.0;
+            var defaultSalinity = Salinity.Brackish;
+            var defaultDepth = Distance.FromMeters(1.0);
+
+            return new EnvironmentalContext(defaultWaterTemp, defaultSalinity, defaultDepth);
         }
 
         PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
@@ -94,6 +107,7 @@ namespace SoundMetrics.Aris.Core
             {
                 helper.PrintValue("WaterTemp", WaterTemp);
                 helper.PrintValue("Salinity", Salinity);
+                helper.PrintValue("Depth", Depth);
                 helper.PrintValue("SpeedOfSound", SpeedOfSound);
             }
 
