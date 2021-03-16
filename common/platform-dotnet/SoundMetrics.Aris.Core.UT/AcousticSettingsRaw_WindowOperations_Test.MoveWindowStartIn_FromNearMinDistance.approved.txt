@@ -19,7 +19,8 @@ Inputs:
         EnvironmentalContext: 
             WaterTemp: 15
             Salinity: Brackish
-            SpeedOfSound: 1450 m/s
+            Depth: 1.000 m
+            SpeedOfSound: 1483.4604752549928 m/s
         CyclePeriod (calculated): 0.007280 s
 Outputs: 
     AcousticSettingsRaw: 
@@ -34,7 +35,7 @@ Outputs:
         Frequency: High
         Enable150Volts: True
         ReceiverGain: 0
-        FocusPosition: 3.284 m
+        FocusPosition: 3.360 m
         AntiAliasing: 0.000000 s
         InterpacketDelaySettings: 
             Enable: False
@@ -42,5 +43,6 @@ Outputs:
         EnvironmentalContext: 
             WaterTemp: 15
             Salinity: Brackish
-            SpeedOfSound: 1450 m/s
+            Depth: 1.000 m
+            SpeedOfSound: 1483.4604752549928 m/s
         CyclePeriod (calculated): 0.008806 s

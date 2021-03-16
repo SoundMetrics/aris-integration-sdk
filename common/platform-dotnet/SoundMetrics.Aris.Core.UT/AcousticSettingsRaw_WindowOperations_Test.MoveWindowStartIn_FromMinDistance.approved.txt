@@ -19,7 +19,8 @@ Inputs:
         EnvironmentalContext: 
             WaterTemp: 15
             Salinity: Brackish
-            SpeedOfSound: 1450 m/s
+            Depth: 1.000 m
+            SpeedOfSound: 1483.4604752549928 m/s
         CyclePeriod (calculated): 0.007257 s
 Outputs: 
     AcousticSettingsRaw: 
@@ -42,5 +43,6 @@ Outputs:
         EnvironmentalContext: 
             WaterTemp: 15
             Salinity: Brackish
-            SpeedOfSound: 1450 m/s
+            Depth: 1.000 m
+            SpeedOfSound: 1483.4604752549928 m/s
         CyclePeriod (calculated): 0.007257 s
