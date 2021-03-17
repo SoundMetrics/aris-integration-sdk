@@ -16,11 +16,9 @@ Inputs:
         InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
-        EnvironmentalContext: 
+        ObservedConditions: 
             WaterTemp: 15
-            Salinity: Brackish
             Depth: 1.000 m
-            SpeedOfSound: 1483.4604752549928 m/s
         CyclePeriod (calculated): 0.007257 s
 Outputs: 
     AcousticSettingsRaw: 
@@ -40,9 +38,7 @@ Outputs:
         InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
-        EnvironmentalContext: 
+        ObservedConditions: 
             WaterTemp: 15
-            Salinity: Brackish
             Depth: 1.000 m
-            SpeedOfSound: 1483.4604752549928 m/s
         CyclePeriod (calculated): 0.007257 s

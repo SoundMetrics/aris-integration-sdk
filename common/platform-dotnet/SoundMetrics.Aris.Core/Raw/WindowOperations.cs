@@ -136,7 +136,7 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate)
         {
             var original = currentSettings;
-            var sspd = currentSettings.SonarEnvironment.SpeedOfSound;
+            var sspd = currentSettings.ObservedConditions.SpeedOfSound(currentSettings.Salinity);
 
             var samplePeriod =
                 CalculateSamplePeriod(windowSize.WindowStart, windowSize.WindowEnd, original.SampleCount, sspd)
@@ -203,8 +203,11 @@ namespace SoundMetrics.Aris.Core.Raw
             var frequency = original.Frequency;
             var receiverGain = original.ReceiverGain;
 
-            var windowStart = CalculateWindowStart(sampleStartDelay, original.SonarEnvironment);
-            var windowLength = CalculateWindowLength(original.SampleCount, samplePeriod, original.SonarEnvironment);
+            var windowStart =
+                CalculateWindowStart(sampleStartDelay, original.Salinity, original.ObservedConditions);
+            var windowLength =
+                CalculateWindowLength(
+                    original.SampleCount, samplePeriod, original.Salinity, original.ObservedConditions);
 
             var focusPosition =
                 automateFocusPosition
@@ -227,7 +230,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     focusPosition: focusPosition,
                     antiAliasing: antiAliasing,
                     interpacketDelay: interpacketDelay,
-                    sonarEnvironment: original.SonarEnvironment);
+                    salinity: original.Salinity,
+                    observedConditions: original.ObservedConditions);
 
             newSettings = newSettings.WithMaxFrameRate(useMaxFrameRate);
 

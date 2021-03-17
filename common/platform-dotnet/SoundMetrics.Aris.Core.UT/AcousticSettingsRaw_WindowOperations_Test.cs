@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.Core.UT
     [UseReporter(typeof(DiffReporter))]
     public class AcousticSettingsRaw_WindowOperations_Test
     {
-        private static readonly EnvironmentalContext TestEnvironment = EnvironmentalContext.Default;
+        private static readonly ObservedConditions TestConditions = ObservedConditions.Default;
         private static readonly SystemType SystemType = SystemType.Aris3000;
         private static readonly SystemConfiguration sysCfg;
 
@@ -37,6 +37,7 @@ namespace SoundMetrics.Aris.Core.UT
             var receiverGain = sysCfg.ReceiverGainRange.Minimum;
             var cyclePeriod = sampleStartDelay + (sampleCount * samplePeriod);
             var focusPosition = Distance.FromMeters(8);
+            var salinity = Salinity.Brackish;
 
             return new AcousticSettingsRaw(
                 SystemType,
@@ -53,7 +54,8 @@ namespace SoundMetrics.Aris.Core.UT
                 focusPosition,
                 antiAliasing: FineDuration.Zero,
                 new InterpacketDelaySettings { },
-                sonarEnvironment: TestEnvironment);
+                salinity,
+                TestConditions);
         }
 
         [TestMethod]

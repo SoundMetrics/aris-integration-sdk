@@ -52,7 +52,8 @@ namespace SoundMetrics.Aris.Core.Raw
             // Expand the window by adjusting sample period,
             // move the window start.
 
-            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
+            var salinity = settings.Salinity;
+            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.ObservedConditions.SpeedOfSound(salinity);
             var newSamplePeriod =
                 (newWindowRoughTimeOfFlight / settings.SampleCount)
                     .RoundToMicroseconds()
@@ -120,7 +121,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = settings.SystemType.GetConfiguration();
 
             // rountrip time over the window
-            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.SonarEnvironment.SpeedOfSound;
+            var salinity = settings.Salinity;
+            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.ObservedConditions.SpeedOfSound(salinity);
             var newSamplePeriod =
                 (newWindowRoughTimeOfFlight / settings.SampleCount)
                     .RoundToMicroseconds()
@@ -162,8 +164,9 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
+            var salinity = settings.Salinity;
             var newSampleStartDelay =
-                (2 * requestedStart / settings.SonarEnvironment.SpeedOfSound)
+                (2 * requestedStart / settings.ObservedConditions.SpeedOfSound(salinity))
                     .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayRange);
             return
                 settings

@@ -6,20 +6,23 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         internal static Distance CalculateWindowStart(
             FineDuration sampleStartDelay,
-            EnvironmentalContext sonarEnvironment)
-            => sampleStartDelay * sonarEnvironment.SpeedOfSound / 2;
+            Salinity salinity,
+            ObservedConditions observedConditions)
+            => sampleStartDelay * observedConditions.SpeedOfSound(salinity) / 2;
 
         internal static Distance CalculateWindowLength(
             int sampleCount,
             FineDuration samplePeriod,
-            EnvironmentalContext sonarEnvironment)
-            => sampleCount * samplePeriod * sonarEnvironment.SpeedOfSound / 2;
+            Salinity salinity,
+            ObservedConditions observedConditions)
+            => sampleCount * samplePeriod * observedConditions.SpeedOfSound(salinity) / 2;
 
         internal static FineDuration CalculateSampleStartDelay(
             Distance windowStart,
-            EnvironmentalContext sonarEnvironment)
+            Salinity salinity,
+            ObservedConditions observedConditions)
         {
-            return 2 * (windowStart / sonarEnvironment.SpeedOfSound);
+            return 2 * (windowStart / observedConditions.SpeedOfSound(salinity));
         }
     }
 }

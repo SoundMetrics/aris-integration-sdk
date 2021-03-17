@@ -37,7 +37,8 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
-            EnvironmentalContext sonarEnvironment)
+            Salinity salinity,
+            ObservedConditions observedConditions)
         {
             // This method is the only public route to a new instance of AcousticSettingsRaw.
             // This promotes strong control over the values in AcousticSettingsRaw.
@@ -57,7 +58,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 focusPosition,
                 antiAliasing,
                 interpacketDelay,
-                sonarEnvironment);
+                salinity,
+                observedConditions);
 
             var allowed = ApplyAllConstraints(requested);
             return allowed;
@@ -144,7 +146,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.SonarEnvironment);
+                    settings.Salinity,
+                    settings.ObservedConditions);
 
         private static AcousticSettingsRaw UpdateAntiAliasing(
             AcousticSettingsRaw settings,
@@ -166,7 +169,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     antiAliasing,
                     settings.InterpacketDelay,
-                    settings.SonarEnvironment);
+                    settings.Salinity,
+                    settings.ObservedConditions);
 
         public static AcousticSettingsRaw WithFocusPosition(
             this AcousticSettingsRaw settings,
@@ -190,7 +194,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     newFocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.SonarEnvironment)
+                    settings.Salinity,
+                    settings.ObservedConditions)
                 .ApplyAllConstraints();
         }
 
@@ -248,7 +253,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.SonarEnvironment);
+                    settings.Salinity,
+                    settings.ObservedConditions);
 
             return
                 newSettings
@@ -294,7 +300,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.SonarEnvironment);
+                    settings.Salinity,
+                    settings.ObservedConditions);
 
             return
                 newSettings
@@ -365,7 +372,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.FocusPosition,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                settings.SonarEnvironment)
+                settings.Salinity,
+                settings.ObservedConditions)
                 .ApplyAllConstraints();
         }
 
@@ -394,7 +402,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     newInterpacketDelay,
-                    settings.SonarEnvironment);
+                    settings.Salinity,
+                    settings.ObservedConditions);
             return
                 newSettings
                     .WithMaxFrameRate(useMaxFrameRate)

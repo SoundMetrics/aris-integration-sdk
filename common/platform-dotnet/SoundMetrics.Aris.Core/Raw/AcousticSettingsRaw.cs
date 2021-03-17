@@ -33,8 +33,14 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
-            EnvironmentalContext sonarEnvironment)
+            Salinity salinity,
+            ObservedConditions observedConditions)
         {
+            if (observedConditions is null)
+            {
+                throw new ArgumentNullException(nameof(observedConditions));
+            }
+
             SystemType = systemType;
             FrameRate = frameRate;
             SampleCount = sampleCount;
@@ -49,7 +55,8 @@ namespace SoundMetrics.Aris.Core.Raw
             FocusPosition = focusPosition;
             AntiAliasing = antiAliasing;
             InterpacketDelay = interpacketDelay;
-            SonarEnvironment = sonarEnvironment;
+            Salinity = salinity;
+            ObservedConditions = observedConditions;
 
             MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
         }
@@ -93,11 +100,41 @@ namespace SoundMetrics.Aris.Core.Raw
         public Rate MinimumFrameRate => Rate.OneHertz;
 #pragma warning restore CA1822 // does not access instance data and can be marked as static
 
+        [DataMember]
+        public Salinity Salinity { get; private set; }
+
         /// <summary>
-        /// Environmental status when the settings were created.
+        /// Observed conditions when the settings were created.
         /// </summary>
         [DataMember]
-        public EnvironmentalContext SonarEnvironment { get; private set; }
+        public ObservedConditions ObservedConditions { get; private set; }
+
+        public AcousticSettingsRaw
+            WithObservedConditions(ObservedConditions observedConditions)
+        {
+            if (observedConditions is null)
+            {
+                throw new ArgumentNullException(nameof(observedConditions));
+            }
+
+            return new AcousticSettingsRaw(
+                    this.SystemType,
+                    this.FrameRate,
+                    this.SampleCount,
+                    this.SampleStartDelay,
+                    this.SamplePeriod,
+                    this.PulseWidth,
+                    this.PingMode,
+                    this.EnableTransmit,
+                    this.Frequency,
+                    this.Enable150Volts,
+                    this.ReceiverGain,
+                    this.FocusPosition,
+                    this.AntiAliasing,
+                    this.InterpacketDelay,
+                    this.Salinity,
+                    observedConditions);
+        }
 
         public FineDuration CyclePeriod
         {
@@ -108,16 +145,16 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        public Distance WindowStart => this.CalculateWindowStart();
+        public Distance WindowStart => this.CalculateWindowStart(Salinity);
         public Distance WindowEnd => WindowStart + WindowLength;
-        public Distance WindowLength => this.CalculateWindowLength();
+        public Distance WindowLength => this.CalculateWindowLength(Salinity);
         public Distance WindowMidPoint => WindowStart + (WindowLength / 2);
 
         public ValueRange<Distance> AvailableWindow
         {
             get
             {
-                var sspd = SonarEnvironment.SpeedOfSound;
+                var sspd = ObservedConditions.SpeedOfSound(Salinity);
                 var sysCfg = SystemType.GetConfiguration();
                 var rawCfg = sysCfg.RawConfiguration;
                 var ssdRange = rawCfg.SampleStartDelayRange;
@@ -172,7 +209,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 && this.FocusPosition == other.FocusPosition
                 && this.AntiAliasing == other.AntiAliasing
                 && this.InterpacketDelay == other.InterpacketDelay
-                && this.SonarEnvironment == other.SonarEnvironment;
+                && this.ObservedConditions == other.ObservedConditions;
         }
 
         public static bool operator ==(AcousticSettingsRaw a, AcousticSettingsRaw b)
@@ -200,7 +237,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 ^ FocusPosition.GetHashCode()
                 ^ AntiAliasing.GetHashCode()
                 ^ InterpacketDelay.GetHashCode()
-                ^ SonarEnvironment.GetHashCode();
+                ^ ObservedConditions.GetHashCode();
         }
 
         public override string ToString()
@@ -208,7 +245,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 + $"cyclePeriod={CyclePeriod}; samplePeriod={SamplePeriod}; pulseWidth={PulseWidth}; "
                 + $"pingMode={PingMode}; enableTransmit={EnableTransmit}; frequency={Frequency}; enable150Volts={Enable150Volts}; "
                 + $"receiverGain={ReceiverGain}; FocusPosition={FocusPosition}; AntiAliasing={AntiAliasing}; "
-                + $"InterpacketDelay={InterpacketDelay}; SonarEnvironment={SonarEnvironment}; "
+                + $"InterpacketDelay={InterpacketDelay}; ObservedConditions={ObservedConditions}; "
                 + $"CALCULATED[WindowStart={WindowStart}; WindowEnd={WindowEnd}; WindowLength={WindowLength}]";
 
         PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
@@ -232,7 +269,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 helper.PrintValue("FocusPosition", FocusPosition);
                 helper.PrintValue("AntiAliasing", AntiAliasing);
                 helper.PrintValue("InterpacketDelay", InterpacketDelay);
-                helper.PrintValue("SonarEnvironment", SonarEnvironment);
+                helper.PrintValue("ObservedConditions", ObservedConditions);
                 helper.PrintValue("CyclePeriod (calculated)", CyclePeriod);
             }
 
