@@ -402,6 +402,30 @@ namespace SoundMetrics.Aris.Core.Raw
                     .ApplyAllConstraints();
         }
 
+        public static AcousticSettingsRaw WithSalinity(
+            this AcousticSettingsRaw settings,
+            Salinity salinity)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            return new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusPosition,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    salinity);
+        }
+
         public static AcousticSettingsRaw WithReceiverGain(
             this AcousticSettingsRaw settings,
             float gain)
