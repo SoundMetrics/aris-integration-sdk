@@ -74,6 +74,16 @@ namespace SoundMetrics.Aris.Core
         /// </summary>
         public static ObservedConditions Default { get { return _default.Value; } }
 
+        public (double waterTemp, Distance depth) Difference(ObservedConditions other)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            return (this.WaterTemp - other.WaterTemp, this.Depth - other.Depth);
+        }
+
         private static ObservedConditions CreateDefaultValue()
         {
             var defaultWaterTemp = 15.0;

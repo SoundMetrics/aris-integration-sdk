@@ -54,8 +54,7 @@ namespace SoundMetrics.Aris.Core.UT
                 focusPosition,
                 antiAliasing: FineDuration.Zero,
                 new InterpacketDelaySettings { },
-                salinity,
-                TestConditions);
+                salinity);
         }
 
         [TestMethod]
@@ -64,7 +63,7 @@ namespace SoundMetrics.Aris.Core.UT
             const int SampleCount = 1200;
 
             var startSettings = GetClosestRange(SampleCount);
-            var result = WindowOperations.MoveWindowStartIn(startSettings, useMaxFrameRate: false);
+            var result = WindowOperations.MoveWindowStartIn(startSettings, TestConditions, useMaxFrameRate: false);
 
             var helper = new PrettyPrintHelper(0);
             helper.PrintHeading("Inputs");
@@ -91,9 +90,9 @@ namespace SoundMetrics.Aris.Core.UT
             var startSettings = GetNearRange(SampleCount, addStartDelay: FineDuration.FromMicroseconds(20));
 
             Assert.AreNotEqual(closestRange.SampleStartDelay, startSettings.SampleStartDelay);
-            Assert.AreNotEqual(closestRange.WindowStart, startSettings.WindowStart);
+            Assert.AreNotEqual(closestRange.WindowStart(TestConditions), startSettings.WindowStart(TestConditions));
 
-            var result = WindowOperations.MoveWindowStartIn(startSettings, useMaxFrameRate: false);
+            var result = WindowOperations.MoveWindowStartIn(startSettings, TestConditions, useMaxFrameRate: false);
 
             var helper = new PrettyPrintHelper(0);
             helper.PrintHeading("Inputs");

@@ -10,10 +10,13 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         public static AcousticSettingsRaw MoveWindowStart(
             this AcousticSettingsRaw settings,
+            ObservedConditions observedConditions,
             Distance requestedStart,
             bool useMaxFrameRate)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             if (requestedStart <= Distance.Zero)
             {
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
@@ -25,7 +28,10 @@ namespace SoundMetrics.Aris.Core.Raw
             // Tactic: what integral sample period covers the smallest range that
             // encloses the requested window start without moving the end?
 
-            var windowLength = settings.WindowEnd - requestedStart;
+            var windowStart = settings.WindowStart(observedConditions);
+            var windowEnd = settings.WindowEnd(observedConditions);
+
+            var windowLength = windowEnd - requestedStart;
             if (windowLength <= Distance.Zero)
             {
                 Trace.TraceError($"{nameof(MoveWindowStart)}: requested window length is lte zero");
@@ -34,14 +40,14 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var sysCfg = settings.SystemType.GetConfiguration();
 
-            if (settings.WindowStart <= requestedStart
+            if (windowStart <= requestedStart
                 && settings.SamplePeriod <= sysCfg.RawConfiguration.SamplePeriodRange.Minimum)
             {
                 // Sample period is already at its minimum.
                 return settings;
             }
 
-            if (requestedStart <= settings.WindowStart
+            if (requestedStart <= windowStart
                 && settings.SamplePeriod >= sysCfg.RawConfiguration.SamplePeriodRange.Maximum)
             {
                 // Sample period is already at its maximum.
@@ -53,7 +59,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // move the window start.
 
             var salinity = settings.Salinity;
-            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.ObservedConditions.SpeedOfSound(salinity);
+            var newWindowRoughTimeOfFlight = 2 * windowLength / observedConditions.SpeedOfSound(salinity);
             var newSamplePeriod =
                 (newWindowRoughTimeOfFlight / settings.SampleCount)
                     .RoundToMicroseconds()
@@ -75,7 +81,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.FrequencyAndFocus)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
 
@@ -96,10 +102,13 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         public static AcousticSettingsRaw MoveWindowEnd(
                 this AcousticSettingsRaw settings,
+                ObservedConditions observedConditions,
                 Distance requestedEnd,
                 bool useMaxFrameRate)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             if (requestedEnd <= Distance.Zero)
             {
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
@@ -111,7 +120,8 @@ namespace SoundMetrics.Aris.Core.Raw
             // Tactic: what integral sample period covers the smallest range that
             // encloses the requested window end?
 
-            var windowLength = requestedEnd - settings.WindowStart;
+            var windowStart = settings.WindowStart(observedConditions);
+            var windowLength = requestedEnd - windowStart;
             if (windowLength <= Distance.Zero)
             {
                 Trace.TraceError($"{nameof(MoveWindowEnd)}: requested window length is lte zero");
@@ -122,7 +132,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             // rountrip time over the window
             var salinity = settings.Salinity;
-            var newWindowRoughTimeOfFlight = 2 * windowLength / settings.ObservedConditions.SpeedOfSound(salinity);
+            var newWindowRoughTimeOfFlight = 2 * windowLength / observedConditions.SpeedOfSound(salinity);
             var newSamplePeriod =
                 (newWindowRoughTimeOfFlight / settings.SampleCount)
                     .RoundToMicroseconds()
@@ -137,17 +147,20 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                    .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.FrequencyAndFocus)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw SlideWindow(
                 this AcousticSettingsRaw settings,
+                ObservedConditions observedConditions,
                 Distance requestedStart,
                 bool useMaxFrameRate)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             if (requestedStart <= Distance.Zero)
             {
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
@@ -158,20 +171,21 @@ namespace SoundMetrics.Aris.Core.Raw
             // Plan: Don't change the sample count, just adjust the sampel start delay.
 
             var sysCfg = settings.SystemType.GetConfiguration();
+            var windowStart = settings.WindowStart(observedConditions);
 
-            if (requestedStart == settings.WindowStart)
+            if (requestedStart == windowStart)
             {
                 return settings;
             }
 
             var salinity = settings.Salinity;
             var newSampleStartDelay =
-                (2 * requestedStart / settings.ObservedConditions.SpeedOfSound(salinity))
+                (2 * requestedStart / observedConditions.SpeedOfSound(salinity))
                     .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayRange);
             return
                 settings
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.FrequencyAndFocus)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
         }

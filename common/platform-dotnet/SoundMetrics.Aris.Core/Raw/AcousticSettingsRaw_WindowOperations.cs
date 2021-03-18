@@ -9,12 +9,13 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         public static AcousticSettingsRaw AdjustRange(
             AcousticSettingsRaw currentSettings,
+            ObservedConditions observedConditions,
             WindowOperation operation,
             bool useMaxFrameRate)
         {
             if (rangeOperationMap.TryGetValue(operation, out var adjustFn))
             {
-                return adjustFn(currentSettings, useMaxFrameRate);
+                return adjustFn(currentSettings, observedConditions, useMaxFrameRate);
             }
             else
             {

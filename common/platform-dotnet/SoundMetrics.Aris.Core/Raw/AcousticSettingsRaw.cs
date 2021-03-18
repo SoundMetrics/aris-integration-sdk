@@ -33,14 +33,8 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
-            Salinity salinity,
-            ObservedConditions observedConditions)
+            Salinity salinity)
         {
-            if (observedConditions is null)
-            {
-                throw new ArgumentNullException(nameof(observedConditions));
-            }
-
             SystemType = systemType;
             FrameRate = frameRate;
             SampleCount = sampleCount;
@@ -56,7 +50,6 @@ namespace SoundMetrics.Aris.Core.Raw
             AntiAliasing = antiAliasing;
             InterpacketDelay = interpacketDelay;
             Salinity = salinity;
-            ObservedConditions = observedConditions;
 
             MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
         }
@@ -103,39 +96,6 @@ namespace SoundMetrics.Aris.Core.Raw
         [DataMember]
         public Salinity Salinity { get; private set; }
 
-        /// <summary>
-        /// Observed conditions when the settings were created.
-        /// </summary>
-        [DataMember]
-        public ObservedConditions ObservedConditions { get; private set; }
-
-        public AcousticSettingsRaw
-            WithObservedConditions(ObservedConditions observedConditions)
-        {
-            if (observedConditions is null)
-            {
-                throw new ArgumentNullException(nameof(observedConditions));
-            }
-
-            return new AcousticSettingsRaw(
-                    this.SystemType,
-                    this.FrameRate,
-                    this.SampleCount,
-                    this.SampleStartDelay,
-                    this.SamplePeriod,
-                    this.PulseWidth,
-                    this.PingMode,
-                    this.EnableTransmit,
-                    this.Frequency,
-                    this.Enable150Volts,
-                    this.ReceiverGain,
-                    this.FocusPosition,
-                    this.AntiAliasing,
-                    this.InterpacketDelay,
-                    this.Salinity,
-                    observedConditions);
-        }
-
         public FineDuration CyclePeriod
         {
             get
@@ -145,34 +105,14 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        public Distance WindowStart => this.CalculateWindowStart(Salinity);
-        public Distance WindowEnd => WindowStart + WindowLength;
-        public Distance WindowLength => this.CalculateWindowLength(Salinity);
-        public Distance WindowMidPoint => WindowStart + (WindowLength / 2);
-
-        public ValueRange<Distance> AvailableWindow
-        {
-            get
-            {
-                var sspd = ObservedConditions.SpeedOfSound(Salinity);
-                var sysCfg = SystemType.GetConfiguration();
-                var rawCfg = sysCfg.RawConfiguration;
-                var ssdRange = rawCfg.SampleStartDelayRange;
-
-                var minWindowStart = CalculateMinWindowStart();
-                var maxWindowEnd = CalculateMaxWindowEnd();
-
-                return new ValueRange<Distance>(minWindowStart, maxWindowEnd);
-
-                Distance CalculateMinWindowStart()
-                {
-                    var minSampleStartDelayDistance = sspd * ssdRange.Minimum / 2;
-                    return minSampleStartDelayDistance;
-                }
-
-                Distance CalculateMaxWindowEnd() => sysCfg.UsefulImagingRange.Maximum;
-            }
-        }
+        public Distance WindowStart(ObservedConditions observedConditions)
+            => this.CalculateWindowStart(observedConditions, Salinity);
+        public Distance WindowEnd(ObservedConditions observedConditions)
+            => WindowStart(observedConditions) + WindowLength(observedConditions);
+        public Distance WindowLength(ObservedConditions observedConditions)
+            => this.CalculateWindowLength(observedConditions, Salinity);
+        public Distance WindowMidPoint(ObservedConditions observedConditions)
+            => WindowStart(observedConditions)+ (WindowLength(observedConditions) / 2);
 
         public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);
 
@@ -209,7 +149,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 && this.FocusPosition == other.FocusPosition
                 && this.AntiAliasing == other.AntiAliasing
                 && this.InterpacketDelay == other.InterpacketDelay
-                && this.ObservedConditions == other.ObservedConditions;
+                && this.Salinity == other.Salinity;
         }
 
         public static bool operator ==(AcousticSettingsRaw a, AcousticSettingsRaw b)
@@ -237,7 +177,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 ^ FocusPosition.GetHashCode()
                 ^ AntiAliasing.GetHashCode()
                 ^ InterpacketDelay.GetHashCode()
-                ^ ObservedConditions.GetHashCode();
+                ^ Salinity.GetHashCode();
         }
 
         public override string ToString()
@@ -245,8 +185,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 + $"cyclePeriod={CyclePeriod}; samplePeriod={SamplePeriod}; pulseWidth={PulseWidth}; "
                 + $"pingMode={PingMode}; enableTransmit={EnableTransmit}; frequency={Frequency}; enable150Volts={Enable150Volts}; "
                 + $"receiverGain={ReceiverGain}; FocusPosition={FocusPosition}; AntiAliasing={AntiAliasing}; "
-                + $"InterpacketDelay={InterpacketDelay}; ObservedConditions={ObservedConditions}; "
-                + $"CALCULATED[WindowStart={WindowStart}; WindowEnd={WindowEnd}; WindowLength={WindowLength}]";
+                + $"InterpacketDelay={InterpacketDelay}; Salinity={Salinity}";
 
         PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
         {
@@ -255,22 +194,22 @@ namespace SoundMetrics.Aris.Core.Raw
             using (var _ = helper.PushIndent())
             {
 
-                helper.PrintValue("SystemType", SystemType);
-                helper.PrintValue("FrameRate", FrameRate);
-                helper.PrintValue("SampleCount", SampleCount);
-                helper.PrintValue("SampleStartDelay", SampleStartDelay);
-                helper.PrintValue("SamplePeriod", SamplePeriod);
-                helper.PrintValue("PulseWidth", PulseWidth);
-                helper.PrintValue("PingMode", PingMode);
-                helper.PrintValue("EnableTransmit", EnableTransmit);
-                helper.PrintValue("Frequency", Frequency);
-                helper.PrintValue("Enable150Volts", Enable150Volts);
-                helper.PrintValue("ReceiverGain", ReceiverGain);
-                helper.PrintValue("FocusPosition", FocusPosition);
-                helper.PrintValue("AntiAliasing", AntiAliasing);
-                helper.PrintValue("InterpacketDelay", InterpacketDelay);
-                helper.PrintValue("ObservedConditions", ObservedConditions);
-                helper.PrintValue("CyclePeriod (calculated)", CyclePeriod);
+                helper.PrintValue(nameof(SystemType), SystemType);
+                helper.PrintValue(nameof(FrameRate), FrameRate);
+                helper.PrintValue(nameof(SampleCount), SampleCount);
+                helper.PrintValue(nameof(SampleStartDelay), SampleStartDelay);
+                helper.PrintValue(nameof(SamplePeriod), SamplePeriod);
+                helper.PrintValue(nameof(PulseWidth), PulseWidth);
+                helper.PrintValue(nameof(PingMode), PingMode);
+                helper.PrintValue(nameof(EnableTransmit), EnableTransmit);
+                helper.PrintValue(nameof(Frequency), Frequency);
+                helper.PrintValue(nameof(Enable150Volts), Enable150Volts);
+                helper.PrintValue(nameof(ReceiverGain), ReceiverGain);
+                helper.PrintValue(nameof(FocusPosition), FocusPosition);
+                helper.PrintValue(nameof(AntiAliasing), AntiAliasing);
+                helper.PrintValue(nameof(InterpacketDelay), InterpacketDelay);
+                helper.PrintValue(nameof(Salinity), Salinity);
+                helper.PrintValue($"{nameof(CyclePeriod)} (calculated)", CyclePeriod);
             }
 
             return helper;

@@ -37,8 +37,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance focusPosition,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
-            Salinity salinity,
-            ObservedConditions observedConditions)
+            Salinity salinity)
         {
             // This method is the only public route to a new instance of AcousticSettingsRaw.
             // This promotes strong control over the values in AcousticSettingsRaw.
@@ -58,8 +57,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 focusPosition,
                 antiAliasing,
                 interpacketDelay,
-                salinity,
-                observedConditions);
+                salinity);
 
             var allowed = ApplyAllConstraints(requested);
             return allowed;
@@ -146,8 +144,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.Salinity,
-                    settings.ObservedConditions);
+                    settings.Salinity);
 
         private static AcousticSettingsRaw UpdateAntiAliasing(
             AcousticSettingsRaw settings,
@@ -169,8 +166,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     antiAliasing,
                     settings.InterpacketDelay,
-                    settings.Salinity,
-                    settings.ObservedConditions);
+                    settings.Salinity);
 
         public static AcousticSettingsRaw WithFocusPosition(
             this AcousticSettingsRaw settings,
@@ -194,8 +190,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     newFocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.Salinity,
-                    settings.ObservedConditions)
+                    settings.Salinity)
                 .ApplyAllConstraints();
         }
 
@@ -253,8 +248,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.Salinity,
-                    settings.ObservedConditions);
+                    settings.Salinity);
 
             return
                 newSettings
@@ -300,8 +294,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    settings.Salinity,
-                    settings.ObservedConditions);
+                    settings.Salinity);
 
             return
                 newSettings
@@ -311,6 +304,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         public static AcousticSettingsRaw WithAutomaticSettings(
             this AcousticSettingsRaw settings,
+            ObservedConditions observedConditions,
             AutomaticAcousticSettings automaticFlags)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
@@ -319,7 +313,7 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 automaticFlags ^= AutomaticAcousticSettings.FocusPosition;
 
-                settings = settings.WithFocusPosition(settings.WindowMidPoint);
+                settings = settings.WithFocusPosition(settings.WindowMidPoint(observedConditions));
             }
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
@@ -331,7 +325,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 automaticFlags ^= AutomaticAcousticSettings.Frequency;
 
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-                var isLongerRange = settings.WindowEnd > sysCfg.FrequencyCrossover;
+                var isLongerRange = settings.WindowEnd(observedConditions) > sysCfg.FrequencyCrossover;
                 var frequency = isLongerRange ? Frequency.Low : Frequency.High;
 
                 settings = settings.WithFrequency(frequency);
@@ -372,8 +366,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.FocusPosition,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                settings.Salinity,
-                settings.ObservedConditions)
+                settings.Salinity)
                 .ApplyAllConstraints();
         }
 
@@ -402,8 +395,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.FocusPosition,
                     settings.AntiAliasing,
                     newInterpacketDelay,
-                    settings.Salinity,
-                    settings.ObservedConditions);
+                    settings.Salinity);
             return
                 newSettings
                     .WithMaxFrameRate(useMaxFrameRate)

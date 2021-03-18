@@ -131,7 +131,7 @@ namespace SoundMetrics.Aris.Core
                 AcousticSettingsRaw MakeSettings(ObservedConditions observedConditions)
                 {
                     var defaultSettings = makeDefaultSettings(observedConditions);
-                    return WindowOperations.ToMediumWindow(defaultSettings, useMaxFrameRate: true);
+                    return WindowOperations.ToMediumWindow(defaultSettings, observedConditions, useMaxFrameRate: true);
                 }
             }
 
@@ -168,8 +168,9 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, salinity, observedConditions)
+                    focusPosition, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
+                        observedConditions,
                         AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
             }
 
@@ -206,8 +207,9 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, salinity, observedConditions)
+                    focusPosition, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
+                        observedConditions,
                         AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
             }
 
@@ -244,8 +246,9 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, salinity, observedConditions)
+                    focusPosition, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
+                        observedConditions,
                         AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
             }
         }

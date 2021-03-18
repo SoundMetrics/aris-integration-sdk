@@ -16,9 +16,7 @@ Inputs:
         InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
-        ObservedConditions: 
-            WaterTemp: 15
-            Depth: 1.000 m
+        Salinity: Brackish
         CyclePeriod (calculated): 0.007257 s
 Outputs: 
     AcousticSettingsRaw: 
@@ -38,7 +36,5 @@ Outputs:
         InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
-        ObservedConditions: 
-            WaterTemp: 15
-            Depth: 1.000 m
+        Salinity: Brackish
         CyclePeriod (calculated): 0.007257 s

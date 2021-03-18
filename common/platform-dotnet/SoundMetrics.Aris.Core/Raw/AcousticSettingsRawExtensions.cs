@@ -6,22 +6,25 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         internal static Distance CalculateWindowStart(
             this AcousticSettingsRaw acousticSettings,
+            ObservedConditions observedConditions,
             Salinity salinity)
             => acousticSettings.SampleStartDelay
-                * acousticSettings.ObservedConditions.SpeedOfSound(salinity) / 2;
+                * observedConditions.SpeedOfSound(salinity) / 2;
 
         internal static Distance CalculateWindowLength(
             this AcousticSettingsRaw acousticSettings,
+            ObservedConditions observedConditions,
             Salinity salinity)
             => acousticSettings.SampleCount * acousticSettings.SamplePeriod
-                * acousticSettings.ObservedConditions.SpeedOfSound(salinity) / 2;
+                * observedConditions.SpeedOfSound(salinity) / 2;
 
         internal static FineDuration CalculateSampleStartDelay(
             this AcousticSettingsRaw acousticSettings,
+            ObservedConditions observedConditions,
             Salinity salinity)
         {
-            var windowStart = CalculateWindowStart(acousticSettings, salinity);
-            return 2 * (windowStart / acousticSettings.ObservedConditions.SpeedOfSound(salinity));
+            var windowStart = CalculateWindowStart(acousticSettings, observedConditions, salinity);
+            return 2 * (windowStart / observedConditions.SpeedOfSound(salinity));
         }
 
         public static Velocity SpeedOfSound(
