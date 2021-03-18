@@ -51,9 +51,9 @@ namespace SoundMetrics.Aris.Core
 
         public override bool Equals(object obj)
         {
-            if (obj is Distance)
+            if (obj is Distance d)
             {
-                return Equals((Distance)obj);
+                return Equals(d);
             }
 
             return false;
