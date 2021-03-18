@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 Velocity.FromMetersPerSecond(
                     AcousticMath.CalculateSpeedOfSound(
                         observedConditions.WaterTemp,
-                        observedConditions.Depth.Meters,
+                        observedConditions.Depth,
                         (double)salinity));
     }
 }

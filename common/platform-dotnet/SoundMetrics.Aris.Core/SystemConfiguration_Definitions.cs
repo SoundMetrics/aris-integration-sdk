@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.Core
                     WindowStartRange = RangeOfMeters(0.7, 25.0),
                     WindowEndRange = RangeOfMeters(1.3, 50.0),
 
-                    FrequencyCrossover = Distance.FromMeters(15.0),
+                    FrequencyCrossover = (Distance)15.0,
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -61,7 +61,7 @@ namespace SoundMetrics.Aris.Core
                     WindowStartRange = RangeOfMeters(0.7, 12.0),
                     WindowEndRange = RangeOfMeters(1.3, 20.0),
 
-                    FrequencyCrossover = Distance.FromMeters(5.0),
+                    FrequencyCrossover = (Distance)5.0,
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -96,7 +96,7 @@ namespace SoundMetrics.Aris.Core
                     WindowStartRange = RangeOfMeters(0.7, 40.0),
                     WindowEndRange = RangeOfMeters(1.3, 100.0),
 
-                    FrequencyCrossover = Distance.FromMeters(25.0),
+                    FrequencyCrossover = (Distance)25.0,
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -149,7 +149,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = Distance.FromMeters(10);
+                var focusPosition = (Distance)10;
                 var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
@@ -188,7 +188,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = Distance.FromMeters(10);
+                var focusPosition = (Distance)10;
                 var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
@@ -227,7 +227,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = Distance.FromMeters(10);
+                var focusPosition = (Distance)10;
                 var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're

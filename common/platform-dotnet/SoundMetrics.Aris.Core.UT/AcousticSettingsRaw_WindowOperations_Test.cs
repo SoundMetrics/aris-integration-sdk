@@ -36,7 +36,7 @@ namespace SoundMetrics.Aris.Core.UT
             var enable150Volts = true;
             var receiverGain = sysCfg.ReceiverGainRange.Minimum;
             var cyclePeriod = sampleStartDelay + (sampleCount * samplePeriod);
-            var focusPosition = Distance.FromMeters(8);
+            var focusPosition = (Distance)8;
             var salinity = Salinity.Brackish;
 
             return new AcousticSettingsRaw(

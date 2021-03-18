@@ -99,9 +99,7 @@ namespace SoundMetrics.Aris.Core
                     FineDuration.FromMicroseconds(b));
 
         private static ValueRange<Distance> RangeOfMeters(double a, double b)
-            => new ValueRange<Distance>(
-                    Distance.FromMeters(a),
-                    Distance.FromMeters(b));
+            => new ValueRange<Distance>((Distance)a, (Distance)b);
 
         private static readonly SystemConfiguration[] configurations = InitializeConfigurations();
     }

@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Core
         : IEquatable<ObservedConditions>, IPrettyPrintable
     {
         [DataMember]
-        private readonly double _waterTemp;
+        private readonly Temperature _waterTemp;
         [DataMember]
         private readonly Distance _depth;
 
@@ -21,13 +21,13 @@ namespace SoundMetrics.Aris.Core
         // Parameterless ctor for serialization.
         private ObservedConditions() { }
 
-        public ObservedConditions(double waterTemp, Distance depth)
+        public ObservedConditions(Temperature waterTemp, Distance depth)
         {
             _waterTemp = waterTemp;
             _depth = depth;
         }
 
-        public double WaterTemp => _waterTemp;
+        public Temperature WaterTemp => _waterTemp;
         public Distance Depth => _depth;
 
         public override bool Equals(object obj) => Equals(obj as ObservedConditions);
@@ -74,7 +74,7 @@ namespace SoundMetrics.Aris.Core
         /// </summary>
         public static ObservedConditions Default { get { return _default.Value; } }
 
-        public (double waterTemp, Distance depth) Difference(ObservedConditions other)
+        public (Temperature waterTemp, Distance depth) Difference(ObservedConditions other)
         {
             if (other is null)
             {
@@ -86,8 +86,8 @@ namespace SoundMetrics.Aris.Core
 
         private static ObservedConditions CreateDefaultValue()
         {
-            var defaultWaterTemp = 15.0;
-            var defaultDepth = Distance.FromMeters(1.0);
+            var defaultWaterTemp = (Temperature)15.0;
+            var defaultDepth = (Distance)1.0;
 
             return new ObservedConditions(defaultWaterTemp, defaultDepth);
         }

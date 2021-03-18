@@ -28,8 +28,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
             public FixedWindowSize(float windowStart, float windowEnd)
             {
-                WindowStart = Distance.FromMeters(windowStart);
-                WindowEnd = Distance.FromMeters(windowEnd);
+                WindowStart = (Distance)windowStart;
+                WindowEnd = (Distance)windowEnd;
             }
 
             public override string ToString()

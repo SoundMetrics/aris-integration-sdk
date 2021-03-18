@@ -13,7 +13,8 @@ namespace SoundMetrics.Aris.Core
     [DataContract]
     public struct Velocity : IComparable<Velocity>, IEquatable<Velocity>
     {
-        private static readonly Velocity zero = new Velocity(Distance.FromMeters(0), FineDuration.FromSeconds(1));
+        private static readonly Velocity zero =
+            new Velocity((Distance)0, FineDuration.FromSeconds(1));
 
         [DataMember]
         private readonly double _metersPerSecond;
@@ -23,13 +24,13 @@ namespace SoundMetrics.Aris.Core
             _metersPerSecond = distance.Meters / time.TotalSeconds;
         }
 
+        public static explicit operator double(Velocity v) => v._metersPerSecond;
+
         public static Velocity Zero { get { return zero; } }
         public double MetersPerSecond { get { return _metersPerSecond; } }
 
         public static Velocity FromMetersPerSecond(double meters)
-        {
-            return new Velocity(Distance.FromMeters(meters), FineDuration.FromSeconds(1.0));
-        }
+            => new Velocity((Distance)meters, FineDuration.FromSeconds(1.0));
 
         public override bool Equals(object obj)
             => obj is Velocity other && this.Equals(other);
@@ -81,12 +82,12 @@ namespace SoundMetrics.Aris.Core
 
         public static Distance operator *(Velocity velocity, FineDuration time)
         {
-            return Distance.FromMeters(velocity.MetersPerSecond * time.TotalSeconds);
+            return (Distance)(velocity.MetersPerSecond * time.TotalSeconds);
         }
 
         public static Distance operator *(FineDuration time, Velocity velocity)
         {
-            return Distance.FromMeters(velocity.MetersPerSecond * time.TotalSeconds);
+            return (Distance)(velocity.MetersPerSecond * time.TotalSeconds);
         }
 
         public static Velocity operator *(Velocity velocity, double multiplier)

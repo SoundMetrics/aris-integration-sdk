@@ -216,9 +216,9 @@ namespace SoundMetrics.Aris.Core.UT
         {
             // [1.000 m, 8.000 m] & [8.000 m, 20.000 m]
             var (left, right) =
-                (R<Distance>(Distance.FromMeters(1), Distance.FromMeters(8)),
-                R<Distance>(Distance.FromMeters(8), Distance.FromMeters(20)));
-            var expected = R<Distance>(Distance.FromMeters(1), Distance.FromMeters(20));
+                (R<Distance>((Distance)1, (Distance)8),
+                R<Distance>((Distance)8, (Distance)20));
+            var expected = R<Distance>((Distance)1, (Distance)20);
 
             Assert.AreEqual(expected, left.Union(right));
             Assert.AreEqual(expected, right.Union(left));

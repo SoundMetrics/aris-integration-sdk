@@ -15,11 +15,11 @@ namespace SoundMetrics.Aris.Core
         // + (1.2e-6 * Z * (Theta - 45))  -(9.5e-13 * T * Z*Z*Z)    // second order latitude/temperature/depth, max +/- .004 m/s @ 300m over latitude 0 to 90 degrees
         // + (3e-7 * T*T * Z) + (1.43e-5 * S * Z)                   // third order temperature/salinity/depth, max + .29 m/s @ 40°C, 35ppt, 300m
 
-        public static double CalculateSpeedOfSound(double temperatureC, double depthM, double salinityPPT)
+        public static double CalculateSpeedOfSound(Temperature temperatureC, Distance depthM, double salinityPPT)
         {
 
-            var T = temperatureC;
-            var Z = depthM;
+            var T = (double)temperatureC;
+            var Z = (double)depthM;
             var S = salinityPPT;
 
             return 1402.5 + (5 * T) - (5.44e-2 * T * T) + (2.1e-4 * T * T * T) + 1.33 * S - (1.23e-2 * S * T) + (8.7e-5 * S * T * T)	// first order for small depths

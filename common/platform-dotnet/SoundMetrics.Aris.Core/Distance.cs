@@ -24,10 +24,8 @@ namespace SoundMetrics.Aris.Core
             _meters = meters;
         }
 
-        public static Distance FromMeters(double meters)
-        {
-            return new Distance(meters);
-        }
+        public static explicit operator double(Distance d) => d.Meters;
+        public static explicit operator Distance(double d) => new Distance(d);
 
         public static readonly Distance Zero = new Distance(0.0);
 
@@ -42,12 +40,12 @@ namespace SoundMetrics.Aris.Core
         /// <summary>
         /// Performs a Floor() on Distance's native unit, which is meters.
         /// </summary>
-        public Distance Floor => Distance.FromMeters(Math.Floor(_meters));
+        public Distance Floor => (Distance)Math.Floor(_meters);
 
         /// <summary>
         /// Performs a Ceiling() on Distance's native unit, which is meters.
         /// </summary>
-        public Distance Ceiling => Distance.FromMeters(Math.Ceiling(_meters));
+        public Distance Ceiling => (Distance)Math.Ceiling(_meters);
 
         public override bool Equals(object obj)
         {
