@@ -222,7 +222,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var focusPosition =
                 automateFocusPosition
                     ? windowStart + (windowLength / 2)
-                    : original.FocusPosition;
+                    : original.FocusDistance;
 
             var newSettings =
                 new AcousticSettingsRaw(
@@ -237,7 +237,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     frequency: frequency,
                     enable150Volts: original.Enable150Volts,
                     receiverGain: receiverGain,
-                    focusPosition: focusPosition,
+                    focusDistance: focusPosition,
                     antiAliasing: antiAliasing,
                     interpacketDelay: interpacketDelay,
                     salinity: original.Salinity);

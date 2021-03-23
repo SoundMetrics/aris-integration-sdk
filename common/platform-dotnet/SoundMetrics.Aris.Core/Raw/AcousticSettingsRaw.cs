@@ -30,7 +30,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Frequency frequency,
             bool enable150Volts,
             float receiverGain,
-            Distance focusPosition,
+            Distance focusDistance,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
             Salinity salinity)
@@ -46,7 +46,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Frequency = frequency;
             Enable150Volts = enable150Volts;
             ReceiverGain = receiverGain;
-            FocusPosition = focusPosition;
+            FocusDistance = focusDistance;
             AntiAliasing = antiAliasing;
             InterpacketDelay = interpacketDelay;
             Salinity = salinity;
@@ -77,9 +77,9 @@ namespace SoundMetrics.Aris.Core.Raw
         [DataMember]
         public float ReceiverGain { get; private set; }
 
-        // There are not directly an acoustic setting, but part of the package.
+        // These are not directly an acoustic setting, but part of the package.
         [DataMember]
-        public Distance FocusPosition { get; private set; }
+        public Distance FocusDistance { get; private set; }
         [DataMember]
         public FineDuration AntiAliasing { get; private set; }
         [DataMember]
@@ -146,7 +146,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 && this.Frequency == other.Frequency
                 && this.Enable150Volts == other.Enable150Volts
                 && this.ReceiverGain == other.ReceiverGain
-                && this.FocusPosition == other.FocusPosition
+                && this.FocusDistance == other.FocusDistance
                 && this.AntiAliasing == other.AntiAliasing
                 && this.InterpacketDelay == other.InterpacketDelay
                 && this.Salinity == other.Salinity;
@@ -174,7 +174,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 ^ Frequency.GetHashCode()
                 ^ Enable150Volts.GetHashCode()
                 ^ ReceiverGain.GetHashCode()
-                ^ FocusPosition.GetHashCode()
+                ^ FocusDistance.GetHashCode()
                 ^ AntiAliasing.GetHashCode()
                 ^ InterpacketDelay.GetHashCode()
                 ^ Salinity.GetHashCode();
@@ -184,7 +184,7 @@ namespace SoundMetrics.Aris.Core.Raw
             => $"systemType={SystemType}; frameRate={FrameRate}; sampleCount={SampleCount}; sampleStartDelay={SampleStartDelay}; "
                 + $"cyclePeriod={CyclePeriod}; samplePeriod={SamplePeriod}; pulseWidth={PulseWidth}; "
                 + $"pingMode={PingMode}; enableTransmit={EnableTransmit}; frequency={Frequency}; enable150Volts={Enable150Volts}; "
-                + $"receiverGain={ReceiverGain}; FocusPosition={FocusPosition}; AntiAliasing={AntiAliasing}; "
+                + $"receiverGain={ReceiverGain}; FocusPosition={FocusDistance}; AntiAliasing={AntiAliasing}; "
                 + $"InterpacketDelay={InterpacketDelay}; Salinity={Salinity}";
 
         PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
@@ -205,7 +205,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 helper.PrintValue(nameof(Frequency), Frequency);
                 helper.PrintValue(nameof(Enable150Volts), Enable150Volts);
                 helper.PrintValue(nameof(ReceiverGain), ReceiverGain);
-                helper.PrintValue(nameof(FocusPosition), FocusPosition);
+                helper.PrintValue(nameof(FocusDistance), FocusDistance);
                 helper.PrintValue(nameof(AntiAliasing), AntiAliasing);
                 helper.PrintValue(nameof(InterpacketDelay), InterpacketDelay);
                 helper.PrintValue(nameof(Salinity), Salinity);

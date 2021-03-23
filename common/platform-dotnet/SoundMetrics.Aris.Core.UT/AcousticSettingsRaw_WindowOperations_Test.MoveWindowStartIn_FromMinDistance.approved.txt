@@ -11,7 +11,7 @@ Inputs:
         Frequency: High
         Enable150Volts: True
         ReceiverGain: 0
-        FocusPosition: 8.000 m
+        FocusDistance: 8.000 m
         AntiAliasing: 0.000000 s
         InterpacketDelaySettings: 
             Enable: False
@@ -31,7 +31,7 @@ Outputs:
         Frequency: High
         Enable150Volts: True
         ReceiverGain: 0
-        FocusPosition: 8.000 m
+        FocusDistance: 8.000 m
         AntiAliasing: 0.000000 s
         InterpacketDelaySettings: 
             Enable: False

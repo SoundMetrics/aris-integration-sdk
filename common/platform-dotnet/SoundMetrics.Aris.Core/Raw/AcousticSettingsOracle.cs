@@ -2,7 +2,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -141,7 +140,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    settings.FocusPosition,
+                    settings.FocusDistance,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
@@ -163,7 +162,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    settings.FocusPosition,
+                    settings.FocusDistance,
                     antiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
@@ -245,7 +244,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    settings.FocusPosition,
+                    settings.FocusDistance,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
@@ -291,7 +290,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    settings.FocusPosition,
+                    settings.FocusDistance,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
@@ -313,7 +312,8 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 automaticFlags ^= AutomaticAcousticSettings.FocusPosition;
 
-                settings = settings.WithFocusPosition(settings.WindowMidPoint(observedConditions));
+                var windowMidPoint = settings.WindowMidPoint(observedConditions);
+                settings = settings.WithFocusPosition(windowMidPoint);
             }
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
@@ -363,7 +363,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 frequency,
                 settings.Enable150Volts,
                 settings.ReceiverGain,
-                settings.FocusPosition,
+                settings.FocusDistance,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 settings.Salinity)
@@ -392,7 +392,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    settings.FocusPosition,
+                    settings.FocusDistance,
                     settings.AntiAliasing,
                     newInterpacketDelay,
                     settings.Salinity);
@@ -420,7 +420,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    settings.FocusPosition,
+                    settings.FocusDistance,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     salinity);
