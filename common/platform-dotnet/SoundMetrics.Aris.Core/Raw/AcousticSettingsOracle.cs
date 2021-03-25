@@ -79,12 +79,59 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay));
 
+            // Limit pulse width
+            {
+                var limitedPulseWidth =
+                    LimitPulseWidth(
+                        settings.SystemType,
+                        settings.PulseWidth,
+                        settings.Frequency,
+                        settings.FrameRate);
+                settings =
+                    limitedPulseWidth == settings.PulseWidth
+                        ? settings
+                        : new AcousticSettingsRaw(
+                            settings.SystemType,
+                            settings.FrameRate,
+                            settings.SampleCount,
+                            settings.SampleStartDelay,
+                            settings.SamplePeriod,
+                            limitedPulseWidth,
+                            settings.PingMode,
+                            settings.EnableTransmit,
+                            settings.Frequency,
+                            settings.Enable150Volts,
+                            settings.ReceiverGain,
+                            settings.FocusDistance,
+                            settings.AntiAliasing,
+                            settings.InterpacketDelay,
+                            settings.Salinity);
+            }
+
+            // Last: antialiasing
             settings =
                 UpdateAntiAliasing(
                     settings,
                     settings.ConstrainAntiAliasing());
 
             return settings;
+        }
+
+        internal static FineDuration LimitPulseWidth(
+            SystemType systemType,
+            FineDuration requestedPulseWidth,
+            Frequency frequency,
+            Rate frameRate)
+        {
+            var rawCfg = systemType.GetConfiguration().RawConfiguration;
+            var constrainedValue =
+                requestedPulseWidth.ConstrainTo(rawCfg.PulseWidthRange);
+
+            return
+                rawCfg
+                    .LimitPulseWidthEnergy(frequency, constrainedValue, frameRate)
+                    .Floor;
+
         }
 
         public static AcousticSettingsRaw WithFrameRate(
@@ -465,7 +512,7 @@ namespace SoundMetrics.Aris.Core.Raw
         //            var frameRate = (Rate)settings.frameRate;
 
         //            safePulseWidth =
-        //                (uint)MakeSafePulseWidth(
+        //                (uint)LimitPulseWidth(
         //                        systemType,
         //                        pulseWidth,
         //                        frequency,
