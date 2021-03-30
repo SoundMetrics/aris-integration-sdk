@@ -135,9 +135,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowBeacons", "ShowBeacons\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnnamedTestProgram", "UnnamedTestProgram\UnnamedTestProgram.csproj", "{54328139-3467-4231-BE06-9410A03168FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.Core", "SoundMetrics.Aris.Core\SoundMetrics.Aris.Core.csproj", "{F17FF0D4-B6EA-42C8-90D1-E696827B1017}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.Core", "SoundMetrics.Aris.Core\SoundMetrics.Aris.Core.csproj", "{F17FF0D4-B6EA-42C8-90D1-E696827B1017}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundMetrics.Aris.Core.UT", "SoundMetrics.Aris.Core.UT\SoundMetrics.Aris.Core.UT.csproj", "{9511F7BF-F7EA-4099-BFE6-78A094CB31AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.Core.UT", "SoundMetrics.Aris.Core.UT\SoundMetrics.Aris.Core.UT.csproj", "{9511F7BF-F7EA-4099-BFE6-78A094CB31AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtractGpsInfo", "Samples\ExtractGpsInfo\ExtractGpsInfo.csproj", "{7A0D47F2-CD37-4F73-951E-DFEAE28046BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -297,6 +299,10 @@ Global
 		{9511F7BF-F7EA-4099-BFE6-78A094CB31AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9511F7BF-F7EA-4099-BFE6-78A094CB31AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9511F7BF-F7EA-4099-BFE6-78A094CB31AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A0D47F2-CD37-4F73-951E-DFEAE28046BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A0D47F2-CD37-4F73-951E-DFEAE28046BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A0D47F2-CD37-4F73-951E-DFEAE28046BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A0D47F2-CD37-4F73-951E-DFEAE28046BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -318,6 +324,7 @@ Global
 		{14FB0E4E-8C6D-4AA7-A129-606091C73121} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
 		{1CBD762E-FEDC-45E0-A146-8E2CA36909D8} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
 		{54328139-3467-4231-BE06-9410A03168FE} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
+		{7A0D47F2-CD37-4F73-951E-DFEAE28046BE} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}
