@@ -6,6 +6,7 @@ using System.IO;
 namespace ExtractRecordingInfo
 {
     using static ErrorCodes;
+    using static Math;
 
     public static class GPSProcessor
     {
@@ -40,6 +41,11 @@ namespace ExtractRecordingInfo
             int frameCount = 0;
             int framesWithGpsAge = 0;
             int framesWithMaxGpsAge = 0;
+            uint minGpsAge = 0;
+            uint maxGpsAge = 0;
+
+            // A `long` is large enough to sum a couple billion frames' GPS ages.
+            long cumulativeGpsAges = 0;
 
             ProcessFrames(recordingPath);
             LogFrames();
@@ -55,16 +61,33 @@ namespace ExtractRecordingInfo
 
             void ProcessFrameHeader(in FrameHeader frameHeader)
             {
-                framesWithGpsAge += frameHeader.GpsTimeAge != 0 ? 1 : 0;
-                framesWithMaxGpsAge += frameHeader.GpsTimeAge == ~0u ? 1 : 0;
+                var gpsAge = frameHeader.GpsTimeAge;
+
+                framesWithGpsAge += gpsAge != 0 ? 1 : 0;
+                framesWithMaxGpsAge += gpsAge == ~0u ? 1 : 0;
+                cumulativeGpsAges += gpsAge;
+
+                minGpsAge = Min(minGpsAge, gpsAge);
+                maxGpsAge = Max(maxGpsAge, gpsAge);
+
                 ++frameCount;
             }
 
             void LogFrames()
             {
                 writer.WriteLine($"Frame count=[{frameCount}]");
-                writer.WriteLine($"Frames with GPS age=[{framesWithGpsAge}]");
-                writer.WriteLine($"Frames with GPS max age=[{framesWithMaxGpsAge}]");
+
+                if (frameCount > 0)
+                {
+                    writer.WriteLine($"Frames with GPS age=[{framesWithGpsAge}]");
+                    writer.WriteLine($"Frames with GPS max age=[{framesWithMaxGpsAge}]");
+
+                    var averageGpsAge = (double)cumulativeGpsAges / frameCount;
+                    writer.WriteLine($"Average GPS age=[{(FineDuration)averageGpsAge:F1}]");
+
+                    writer.WriteLine($"Minimum GPS age=[{(FineDuration)minGpsAge}]");
+                    writer.WriteLine($"Maximum GPS age=[{(FineDuration)maxGpsAge}]");
+                }
             }
         }
 
