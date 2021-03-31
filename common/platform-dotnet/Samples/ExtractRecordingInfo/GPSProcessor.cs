@@ -46,6 +46,7 @@ namespace ExtractRecordingInfo
 
             // A `long` is large enough to sum a couple billion frames' GPS ages.
             long cumulativeGpsAges = 0;
+            long cumulativeVelocityCents = 0;
 
             ProcessFrames(recordingPath);
             LogFrames();
@@ -70,6 +71,8 @@ namespace ExtractRecordingInfo
                 minGpsAge = Min(minGpsAge, gpsAge);
                 maxGpsAge = Max(maxGpsAge, gpsAge);
 
+                cumulativeVelocityCents += (int)Ceiling(frameHeader.Velocity * 100);
+
                 ++frameCount;
             }
 
@@ -87,6 +90,9 @@ namespace ExtractRecordingInfo
 
                     writer.WriteLine($"Minimum GPS age=[{(FineDuration)minGpsAge}]");
                     writer.WriteLine($"Maximum GPS age=[{(FineDuration)maxGpsAge}]");
+
+                    var averageVelocity = ((double)cumulativeVelocityCents) / (frameCount * 100);
+                    writer.WriteLine($"Average velocity=[{Velocity.FromMetersPerSecond(averageVelocity):F2}]");
                 }
             }
         }
