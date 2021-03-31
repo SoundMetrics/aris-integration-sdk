@@ -29,6 +29,8 @@ namespace SoundMetrics.Aris.Core
             _microseconds = microseconds;
         }
 
+        public static explicit operator FineDuration(double microseconds) => FineDuration.FromMicroseconds(microseconds);
+
         public double TotalMicroseconds { get { return _microseconds; } }
         public double TotalMilliseconds { get { return _microseconds / 1000.0; } }
         public double TotalSeconds { get { return _microseconds / (1000.0 * 1000.0); } }
