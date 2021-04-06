@@ -19,6 +19,21 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static Rate ConstrainFrameRate(
             Rate requestedFrameRate,
+            AcousticSettingsRaw acousticSettings)
+            =>
+                AcousticSettingsConstraints.ConstrainFrameRate(
+                    requestedFrameRate,
+                    acousticSettings.SystemType.GetConfiguration(),
+                    acousticSettings.PingMode,
+                    acousticSettings.SampleCount,
+                    acousticSettings.SampleStartDelay,
+                    acousticSettings.SamplePeriod,
+                    acousticSettings.AntiAliasing,
+                    acousticSettings.InterpacketDelay);
+
+
+        internal static Rate ConstrainFrameRate(
+            Rate requestedFrameRate,
             SystemConfiguration sysCfg,
             PingMode pingMode,
             int sampleCount,
