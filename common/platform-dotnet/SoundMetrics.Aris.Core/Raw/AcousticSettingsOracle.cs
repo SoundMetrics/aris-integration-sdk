@@ -192,6 +192,32 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
+        public static AcousticSettingsRaw WithTransmit(
+            this AcousticSettingsRaw settings,
+            bool enableTransmit)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            return settings.EnableTransmit == enableTransmit
+                ? settings
+                : new AcousticSettingsRaw(
+                        settings.SystemType,
+                        settings.FrameRate,
+                        settings.SampleCount,
+                        settings.SampleStartDelay,
+                        settings.SamplePeriod,
+                        settings.PulseWidth,
+                        settings.PingMode,
+                        enableTransmit: enableTransmit,
+                        settings.Frequency,
+                        settings.Enable150Volts,
+                        settings.ReceiverGain,
+                        settings.FocusDistance,
+                        settings.AntiAliasing,
+                        settings.InterpacketDelay,
+                        settings.Salinity);
+        }
+
         private static AcousticSettingsRaw UpdateAntiAliasing(
             AcousticSettingsRaw settings,
             FineDuration antiAliasing)
