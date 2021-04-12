@@ -1,7 +1,6 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
-using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -66,7 +65,6 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
-            // ### TODO much else
             settings = UpdateFrameRate(
                 settings,
                 ConstrainFrameRate(
