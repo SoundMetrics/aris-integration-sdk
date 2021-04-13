@@ -71,11 +71,13 @@ namespace SoundMetrics.Aris.Core.Raw
             InterpacketDelaySettings interpacketDelaySettings,
             out FineDuration cyclePeriod)
         {
-            // Aliases to match Bill's doc, only for reference. The function interface
-            // shouldn't use these abbreviated names as they're not good names for an API.
+            // Aliases to match Bill's doc, only for reference:
+            // \\soundserv\Software\ARIS\ARIS Documentation\Sonar\ARIS Maximum Frame Rate Calculation.docx
+            // The function interface shouldn't use these abbreviated names as
+            // they are not good names for an API.
 
             var ssd = sampleStartDelay;
-            var sc = sampleCount;
+            var spb = sampleCount;
             var sp = samplePeriod;
             var ppf = pingMode.PingsPerFrame;
             var aa = antiAliasing;
@@ -83,13 +85,12 @@ namespace SoundMetrics.Aris.Core.Raw
 
             // From Bill's document
 
-            var mcp = ssd + (sp * sc) + CyclePeriodMargin;
+            var mcp = ssd + (sp * spb) + CyclePeriodMargin;
+            cyclePeriod = mcp;
 
             var cpaFactor = DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
             var cpa = mcp * cpaFactor;
             var cpa1 = cpa + aa;
-
-            cyclePeriod = mcp + cpa1;
 
             var mfp = interpacketDelaySettings.Enable
                 ? CalculateMinimumFramePeriodWithInterpacketDelay()
@@ -113,7 +114,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
                 return
                     ppf * (mcp + cpa1)
-                        + (((nob * sc) + 1024) / 1392) * (headroom + interpacketDelaySettings.Delay);
+                        + (((nob * spb) + 1024) / 1392) * (headroom + interpacketDelaySettings.Delay);
             }
         }
 
