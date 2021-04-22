@@ -5,14 +5,16 @@ using System;
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsConstraints;
+    using static Math;
 
     [Flags]
     public enum AutomaticAcousticSettings
     {
-        FocusPosition = 0b0001,
-        Frequency = 0b0010,
+        FocusPosition = 0b0000_0001,
+        Frequency = 0b0000_0010,
+        PulseWidth = 0b0000_0100,
 
-        FrequencyAndFocus = Frequency | FocusPosition,
+        All = 0b1111_1111
     }
 
     public static class AcousticSettingsOracle
@@ -381,8 +383,6 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if ((automaticFlags & AutomaticAcousticSettings.FocusPosition) != 0)
             {
-                automaticFlags ^= AutomaticAcousticSettings.FocusPosition;
-
                 var windowMidPoint = settings.WindowMidPoint(observedConditions);
                 settings = settings.WithFocusPosition(windowMidPoint);
             }
@@ -393,8 +393,6 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
             {
-                automaticFlags ^= AutomaticAcousticSettings.Frequency;
-
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
                 var isLongerRange = settings.WindowEnd(observedConditions) > sysCfg.FrequencyCrossover;
                 var frequency = isLongerRange ? Frequency.Low : Frequency.High;
@@ -406,9 +404,11 @@ namespace SoundMetrics.Aris.Core.Raw
             if (settings is null) throw new Exception("Settings became null");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
 
-            if (automaticFlags != 0)
+            // Pulse width depends on frequency, so it's addressed *after* frequency.
+            if ((automaticFlags & AutomaticAcousticSettings.PulseWidth) != 0)
             {
-                throw new NotImplementedException($"automatic setting(s) not implemented: {automaticFlags}");
+                var automaticPulseWidth = CalculateAutomaticPulseWidth(settings, observedConditions);
+                settings = settings.WithPulseWidth(automaticPulseWidth);
             }
 
             return settings.ApplyAllConstraints();
@@ -506,6 +506,49 @@ namespace SoundMetrics.Aris.Core.Raw
             if (gain == settings.ReceiverGain) return settings;
 
             throw new NotImplementedException();
+        }
+
+        private static FineDuration CalculateAutomaticPulseWidth(
+            AcousticSettingsRaw settings,
+            ObservedConditions observedConditions)
+        {
+            // Based on ARIScope 2's auto pulse width
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var rawCfg = sysCfg.RawConfiguration;
+
+            var multiplier = rawCfg.GetPulseWidthMultiplierFor(settings.Frequency);
+            var windowEnd = settings.WindowEnd(observedConditions);
+
+            var pulseWidth =
+                ((FineDuration)(uint)((multiplier * windowEnd.Meters) + 0.5))
+                    .ConstrainTo(rawCfg.AllowedPulseWidthRangeFor(settings.Frequency));
+            return pulseWidth;
+        }
+
+        public static AcousticSettingsRaw WithPulseWidth(
+            this AcousticSettingsRaw settings,
+            FineDuration requestedPulseWidth)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            if (requestedPulseWidth == settings.PulseWidth) return settings;
+
+            return new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    requestedPulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity);
         }
 
         //public static AcousticSettingsRaw WithTransmitEnable(

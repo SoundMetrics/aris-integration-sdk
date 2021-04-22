@@ -39,6 +39,8 @@ namespace SoundMetrics.Aris.Core
                         MaxPulseWidthLowFrequency = FineDuration.FromMicroseconds(40),
                         MaxPulseWidthHighFrequency = FineDuration.FromMicroseconds(30),
                         MaxCumulativePulsePerSecond = FineDuration.FromMicroseconds(300),
+                        PulseWidthMultiplierLow = 1.0,
+                        PulseWidthMultiplierHigh = 1.5,
                     },
 
                     SmallPeriodAdjustmentFactor = 0.18,
@@ -74,6 +76,8 @@ namespace SoundMetrics.Aris.Core
                         MaxPulseWidthLowFrequency = FineDuration.FromMicroseconds(24),
                         MaxPulseWidthHighFrequency = FineDuration.FromMicroseconds(16),
                         MaxCumulativePulsePerSecond = FineDuration.FromMicroseconds(240),
+                        PulseWidthMultiplierLow = 1.5,
+                        PulseWidthMultiplierHigh = 2.0,
                     },
 
                     SmallPeriodAdjustmentFactor = 0.18,
@@ -109,10 +113,12 @@ namespace SoundMetrics.Aris.Core
                         MaxPulseWidthLowFrequency = FineDuration.FromMicroseconds(80),
                         MaxPulseWidthHighFrequency = FineDuration.FromMicroseconds(60),
                         MaxCumulativePulsePerSecond = FineDuration.FromMicroseconds(400),
+                        PulseWidthMultiplierLow = 1.0,
+                        PulseWidthMultiplierHigh = 1.0, // high/low are the same for the 1200
                     },
 
                     SmallPeriodAdjustmentFactor = 0.02,
-                    LargePeriodAdjustmentFactor = 0.02,
+                    LargePeriodAdjustmentFactor = 0.02, // large/small are the same for the 1200
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1200),
 
@@ -171,7 +177,7 @@ namespace SoundMetrics.Aris.Core
                     focusPosition, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
                         observedConditions,
-                        AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
+                        AutomaticAcousticSettings.All);
             }
 
             AcousticSettingsRaw MakeDefaultSettings3000(ObservedConditions observedConditions)
@@ -210,7 +216,7 @@ namespace SoundMetrics.Aris.Core
                     focusPosition, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
                         observedConditions,
-                        AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
+                        AutomaticAcousticSettings.All);
             }
 
             AcousticSettingsRaw MakeDefaultSettings1200(ObservedConditions observedConditions)
@@ -249,7 +255,7 @@ namespace SoundMetrics.Aris.Core
                     focusPosition, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
                         observedConditions,
-                        AutomaticAcousticSettings.FocusPosition | AutomaticAcousticSettings.Frequency);
+                        AutomaticAcousticSettings.All);
             }
         }
     }

@@ -20,6 +20,20 @@ namespace SoundMetrics.Aris.Core
         internal FineDuration MaxPulseWidthLowFrequency { get; set; }
         internal FineDuration MaxPulseWidthHighFrequency { get; set; }
         internal FineDuration MaxCumulativePulsePerSecond { get; set; }
+        internal double PulseWidthMultiplierLow { get; set; }
+        internal double PulseWidthMultiplierHigh { get; set; }
+
+        internal double GetPulseWidthMultiplierFor(Frequency frequency)
+            => frequency == Frequency.Low
+                    ? PulseWidthMultiplierLow
+                    : PulseWidthMultiplierHigh;
+
+        internal ValueRange<FineDuration> AllowedPulseWidthRangeFor(Frequency frequency)
+            => new ValueRange<FineDuration>(
+                    PulseWidthRange.Minimum,
+                    frequency == Frequency.Low
+                        ? MaxPulseWidthLowFrequency
+                        : MaxPulseWidthHighFrequency);
 
         public FineDuration LimitPulseWidthEnergy(Frequency frequency, FineDuration pulseWidth, Rate frameRate)
         {
