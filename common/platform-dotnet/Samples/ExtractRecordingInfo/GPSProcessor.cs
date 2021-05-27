@@ -2,6 +2,7 @@
 using SoundMetrics.Aris.File;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace ExtractRecordingInfo
 {
@@ -97,11 +98,58 @@ namespace ExtractRecordingInfo
             }
         }
 
+        private delegate object GetFieldValue(FrameHeader frameHeader);
+
         private static void DumpGpsInfo(
             string recordingPath,
             TextWriter writer)
         {
-            throw new NotImplementedException(nameof(DumpGpsInfo));
+            (string FieldName, GetFieldValue GetFieldValue)[] fieldExtractors =
+                new (string, GetFieldValue)[]
+                {
+                    ("DateTime", GetDateTime),
+                    ("GpsTimeAge", hdr => hdr.GpsTimeAge),
+                    ("Latitude", hdr => hdr.Latitude),
+                    ("Longitude", hdr => hdr.Longitude),
+                    ("Heading", hdr => hdr.Heading),
+                    ("CompassHeading", hdr => hdr.CompassHeading),
+                    ("YearGPS", hdr => hdr.YearGPS),
+                    ("MonthGPS", hdr => hdr.MonthGPS),
+                    ("DayGPS", hdr => hdr.DayGPS),
+                    ("HourGPS", hdr => hdr.HourGPS),
+                    ("MinuteGPS", hdr => hdr.MinuteGPS),
+                    ("SecondGPS", hdr => hdr.SecondGPS),
+                    ("HSecondGPS", hdr => hdr.HSecondGPS),
+                };
+
+            string GetColumnHeaders()
+                => String.Join(",", fieldExtractors.Select(fe => fe.FieldName));
+
+            ProcessFrames(recordingPath);
+
+            void ProcessFrames(string recordingPath)
+            {
+                writer.WriteLine(GetColumnHeaders());
+
+                foreach (var frameHeader in
+                    ArisRecording.EnumerateFrameHeaders(recordingPath))
+                {
+                    ProcessFrameHeader(frameHeader);
+                }
+            }
+
+            void ProcessFrameHeader(FrameHeader frameHeader)
+            {
+                var values =
+                    String.Join(",", fieldExtractors.Select(fe => fe.GetFieldValue(frameHeader).ToString()));
+                writer.WriteLine(values);
+            }
+
+            object GetDateTime(FrameHeader hdr)
+                => new DateTime(
+                    (int)hdr.YearGPS, (int)hdr.MonthGPS, (int)hdr.DayGPS,
+                    (int)hdr.HourGPS, (int)hdr.MinuteGPS, (int)hdr.SecondGPS,
+                    (int)hdr.HSecondGPS * 10);
         }
     }
 }
