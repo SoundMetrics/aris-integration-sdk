@@ -52,6 +52,15 @@ namespace SoundMetrics.Aris.Core
 
         public static readonly Rate OneHertz = ToRate(1);
 
+        public static Rate operator +(Rate a, Rate b) => (Rate)(a.Hz + b.Hz);
+        public static Rate operator -(Rate a, Rate b) => (Rate)(a.Hz - b.Hz);
+
+        public static Rate operator *(Rate rate, double multiplier)
+            => (Rate)(rate.Hz * multiplier);
+
+        public static Rate operator *(double multiplier, Rate rate)
+            => (Rate)(rate.Hz * multiplier);
+
         public static FineDuration operator /(double count, Rate rate)
         {
             return (count / rate._count) * rate._duration;

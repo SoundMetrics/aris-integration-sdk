@@ -81,7 +81,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.All)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
 
@@ -147,7 +147,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.All)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
         }
@@ -185,7 +185,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 settings
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.FrequencyAndFocus)
+                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.All)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
         }

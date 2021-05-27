@@ -23,7 +23,6 @@
 #include "FrameStreamListener.h"
 #include "frame_stream.h"
 #include <boost/asio/buffer.hpp>
-#include <boost/bind.hpp>
 #include <vector>
 
 namespace Aris {
@@ -40,8 +39,9 @@ FrameStreamListener::FrameStreamListener(
     , optional<udp::endpoint> receiveFrom
     )
     : socket(io), readBuffer(getReadBufferSize()), sonarFilter(targetSonar),
-      frameAssembler(boost::bind(&FrameStreamListener::SendAck, this, _1, _2),
-                     onFrameComplete) {
+      frameAssembler(
+        [this](int frameIndex, int dataOffset) { SendAck(frameIndex, dataOffset); },
+        onFrameComplete) {
   assert(onFrameComplete);
   assert(getReadBufferSize);
 
@@ -73,9 +73,9 @@ void FrameStreamListener::StartReceiveAsync() {
   socket.async_receive_from(
       buffer(readBuffer.data(), readBuffer.size()), remoteEndpoint,
       socket_base::message_flags(0),
-      boost::bind(&FrameStreamListener::HandlePacketFrom, this,
-                  boost::asio::placeholders::error,
-                  boost::asio::placeholders::bytes_transferred));
+      [this](const boost::system::error_code& error, size_t bytesRead) {
+        HandlePacketFrom(error, bytesRead);
+      });
 }
 
 void

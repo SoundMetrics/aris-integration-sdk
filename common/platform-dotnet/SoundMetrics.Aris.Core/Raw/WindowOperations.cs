@@ -208,7 +208,6 @@ namespace SoundMetrics.Aris.Core.Raw
                         antiAliasing,
                         interpacketDelay));
 
-            // ### Leaving these as-is for now.
             var pulseWidth = original.PulseWidth;
             var frequency = original.Frequency;
             var receiverGain = original.ReceiverGain;

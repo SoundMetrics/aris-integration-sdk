@@ -68,34 +68,35 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration sampleStartDelay,
             FineDuration samplePeriod,
             FineDuration antiAliasing,
-            InterpacketDelaySettings interpacketDelay,
+            InterpacketDelaySettings interpacketDelaySettings,
             out FineDuration cyclePeriod)
         {
-            // Aliases to match bill's doc; the function interface shouldn't use these.
+            // Aliases to match Bill's doc, only for reference:
+            // \\soundserv\Software\ARIS\ARIS Documentation\Sonar\ARIS Maximum Frame Rate Calculation.docx
+            // The function interface shouldn't use these abbreviated names as
+            // they are not good names for an API.
 
             var ssd = sampleStartDelay;
-            var sc = sampleCount;
+            var spb = sampleCount;
             var sp = samplePeriod;
             var ppf = pingMode.PingsPerFrame;
             var aa = antiAliasing;
             var nob = pingMode.BeamCount;
 
-            // from the document
+            // From Bill's document
 
-            var mcp = ssd + (sp * sc) + CyclePeriodMargin;
+            var mcp = ssd + (sp * spb) + CyclePeriodMargin;
+            cyclePeriod = mcp;
 
-            var cpaFactor =
-                DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
+            var cpaFactor = DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
             var cpa = mcp * cpaFactor;
             var cpa1 = cpa + aa;
 
-            cyclePeriod = mcp + cpa1;
-
-            var mfp = interpacketDelay.Enable
-                ? CalculateMinimumFramePeriodWithDelay()
+            var mfp = interpacketDelaySettings.Enable
+                ? CalculateMinimumFramePeriodWithInterpacketDelay()
                 : CalculateMinimumFramePeriod();
 
-            // De-alias
+            // Back to good naming
             var maxFramePeriod = mfp;
 
             var maximumFrameRate = 1 / maxFramePeriod;
@@ -103,17 +104,17 @@ namespace SoundMetrics.Aris.Core.Raw
 
             return limitedRate.NormalizeToHertz();
 
+
             FineDuration CalculateMinimumFramePeriod() =>
                     ppf * (mcp + cpa1);
 
-            FineDuration CalculateMinimumFramePeriodWithDelay()
+            FineDuration CalculateMinimumFramePeriodWithInterpacketDelay()
             {
-                var id = interpacketDelay.Delay;
-                var headroom = FineDuration.FromMicroseconds(16.6);
+                var headroom = (FineDuration)16.6;
 
                 return
                     ppf * (mcp + cpa1)
-                        + (((nob * sc) + 1024) / 1392) * (headroom + id);
+                        + (((nob * spb) + 1024) / 1392) * (headroom + interpacketDelaySettings.Delay);
             }
         }
 
@@ -121,7 +122,7 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration samplePeriod,
             SystemConfiguration sysCfg)
         {
-            var isSmallSamplePeriod = samplePeriod <= FineDuration.FromMicroseconds(4);
+            var isSmallSamplePeriod = samplePeriod <= (FineDuration)4;
             return isSmallSamplePeriod ? sysCfg.SmallPeriodAdjustmentFactor : sysCfg.LargePeriodAdjustmentFactor;
         }
 
