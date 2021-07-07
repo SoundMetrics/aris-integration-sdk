@@ -14,7 +14,7 @@ type ProjectionChangeTests () =
         let ctx = {
             SystemType = ArisSystemType.Aris3000
             WaterTemp = 20.0<degC>
-            Salinity = Salinity.Seawater
+            Salinity = float Salinity.Seawater
             Depth = 10.0<m>
             AuxLens = AuxLensType.None
         }

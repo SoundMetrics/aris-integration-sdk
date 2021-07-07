@@ -8,8 +8,6 @@ open System
 
 module internal BeaconListener =
     open System.Collections.ObjectModel
-    open Serilog
-    open Serilog.Events
 
     type SonarAvailability  = Aris.Availability
     type DefenderAvailability = Defender.Availability
@@ -47,6 +45,41 @@ module internal BeaconListener =
                     IPAddress =         pkt.UdpResult.RemoteEndPoint.Address
                     ConnectionState =   enum (int av.ConnectionState)
                     CpuTemp =           av.CpuTemp
+                }
+            Some beacon
+        with
+            _ -> None
+
+    let toArisExplorerOrVoyagerBeacon2 (buffer : ArraySegment<byte>)
+                                       timestamp
+                                       remoteAddress
+                                       ifcInfo
+                                       : ArisBeacon2 option =
+        try
+            let av = SonarAvailability.Parser.ParseFrom(buffer.Array, buffer.Offset, buffer.Count)
+            let beacon =
+                let model =
+                    defaultArg
+                        (av.SystemVariants // possibly null
+                            |> Option.ofObj
+                            |> Option.map (fun variants ->
+                                if variants.Enabled |> Seq.contains VoyagerVariant then
+                                    Voyager
+                                else
+                                    Explorer
+                            ))
+                        Explorer
+
+                {
+                    Model =             model
+                    SystemType =        enum (int av.SystemType)
+                    SerialNumber =      av.SerialNumber
+                    SoftwareVersion =   toSoftwareVersion av.SoftwareVersion
+                    Timestamp =         timestamp
+                    SenderAddress =         remoteAddress
+                    ConnectionState =   enum (int av.ConnectionState)
+                    CpuTemp =           av.CpuTemp
+                    InterfaceInfo =     ifcInfo
                 }
             Some beacon
         with
@@ -94,9 +127,30 @@ module internal BeaconListener =
                     Timestamp =     pkt.Timestamp
                 }
 
-            if Log.IsEnabled(LogEventLevel.Verbose) then
-                Log.Verbose("CM Beacon, length of {length}: {cmBeacon}",
-                    pkt.UdpResult.Buffer.Length, sprintf "%A" beacon)
+            Some beacon
+        with
+            _ -> None
+
+    let toArisCommandModuleBeacon2 (buffer : ArraySegment<byte>)
+                                   timestamp
+                                   remoteAddress
+                                   ifcInfo
+                                   : ArisCommandModuleBeacon2 option =
+
+        try
+            let cms = Aris.CommandModuleBeacon.Parser.ParseFrom(buffer.Array, buffer.Offset, buffer.Count)
+            let beacon =
+                {
+                    SenderAddress =     remoteAddress
+                    // SonarSerialNumber is not well-implemented.
+                    ArisCurrent =   cms.ArisCurrent
+                    ArisPower =     cms.ArisPower
+                    ArisVoltage =   cms.ArisVoltage
+                    CpuTemp =       cms.CpuTemp
+                    Revision =      cms.Revision
+                    Timestamp =     timestamp
+                    InterfaceInfo = ifcInfo
+                }
             Some beacon
         with
             _ -> None
@@ -189,6 +243,8 @@ open System.Net
 open System.Reactive
 open System.Reactive.Linq
 open System.Reactive.Subjects
+open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open System.Threading
 open System.Threading.Tasks
 open BeaconListener
@@ -197,16 +253,17 @@ open BeaconListener
 /// See <see cref="CreateForArisExplorerAndVoyager"/> and
 /// <see cref="CreateForArisDefender"/> for simple construction.
 [<Sealed>]
-type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, bool>) as self =
+type BeaconListener (syncCtx : SynchronizationContext,
+                     expirationPeriod : TimeSpan,
+                     filter : Func<NetworkDevice, bool>) as self =
     // ctor(Func<_,_>) is the primary ctor as it helps on the C# side.
 
     let mutable disposed = false
 
     let shouldInclude device = filter.Invoke(device)
-    let syncContext =   let ctx = SynchronizationContext.Current
-                        if isNull ctx then
+    let syncContext =   if isNull syncCtx then
                             failwith "No SynchronizationContext is set"
-                        ctx
+                        syncCtx
 
     let arisExplorerCollection = ObservableCollection<ArisBeacon>()
     let arisDefenderCollection = ObservableCollection<ArisBeacon>()
@@ -313,46 +370,53 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
 
     /// Factory function to create a beacon listener that sees only ARIS Explorer
     /// and ARIS Voyager beacons.
-    static member CreateForArisExplorerAndVoyager (expirationPeriod : TimeSpan) =
+    static member CreateForArisExplorerAndVoyager (synchronizationContext, expirationPeriod : TimeSpan) =
 
         let predicate = function
             | Aris beacon -> match beacon.Model with
                              | Explorer | Voyager -> true
                              | _ -> false
             | _ -> false
-        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+        new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
     /// Factory function to create a beacon listener that sees only ARIS Defender beacons.
-    static member CreateForArisDefender (expirationPeriod : TimeSpan) =
+    static member CreateForArisDefender (synchronizationContext, expirationPeriod : TimeSpan) =
 
         let predicate = function
             | Aris beacon -> match beacon.Model with
                              | Defender _ -> true
                              | _ -> false
             | _ -> false
-        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+        new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
-    static member CreateForCommandModules (expirationPeriod : TimeSpan) =
+    static member CreateForCommandModules (synchronizationContext, expirationPeriod : TimeSpan) =
 
         let predicate = function
             | ArisCommandModule beacon -> true
             | _ -> false
 
-        new BeaconListener(expirationPeriod, Func<_,_>(predicate))
+        new BeaconListener(synchronizationContext, expirationPeriod, Func<_,_>(predicate))
 
+    member private __.PushModuleName
+            ([<CallerMemberName; Optional; DefaultParameterValue("")>]
+                memberName : string) =
+        let logPrefix = "BeaconListener."
+        Logging.pushModuleName logPrefix memberName
 
     /// Blocking wait for the beacon you're interested in, for F# folk.
     /// Cancellation does not throw.
     [<CompiledName("WaitForBeaconFSharpAsync")>]
     member s.WaitForBeaconAsync (predicate : NetworkDevice -> bool) (timeout : TimeSpan) : Async<NetworkDevice option> = async {
-        Log.Debug("BeaconSource.WaitForBeaconAsync: entering...")
+        use _ctx = s.PushModuleName()
+
+        Log.Debug("Entering...")
         try
             let mutable beacon = None
             use ev = new ManualResetEventSlim(false)
 
             use observer = new AnonymousObserver<NetworkDevice>(
                                 onNext = (fun b ->
-                                            Log.Debug("BeaconSource.WaitForBeaconAsync: Received a beacon")
+                                            Log.Verbose("Received a beacon")
                                             if beacon.IsNone then
                                                 beacon <- Some b
                                             ev.Set () |> ignore),
@@ -363,7 +427,7 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
                                                     ev.Set() |> ignore)
             let! ct = Async.CancellationToken
 
-            Log.Debug("BeaconSource.WaitForBeaconAsync: Set up subscription")
+            Log.Debug("Set up subscription")
             use _sub =
                 s.AllBeacons.Where(predicate)
                             .Timeout(timeout)
@@ -371,17 +435,17 @@ type BeaconListener (expirationPeriod : TimeSpan, filter : Func<NetworkDevice, b
                             .SubscribeSafe(observer)
 
             try
-                Log.Debug("BeaconSource.WaitForBeaconAsync: waiting...")
+                Log.Debug("Waiting...")
                 if not (ev.Wait(-1, ct)) then
                     Log.Information("Timed out waiting for beacon")
                 if ct.IsCancellationRequested then
                     Log.Information("Cancellation requested while waiting for beacon")
-                Log.Debug("BeaconSource.WaitForBeaconAsync: wait complete.")
+                Log.Debug("...wait complete.")
                 return beacon
             with
                 :? OperationCanceledException -> return None
         finally
-            Log.Debug("BeaconSource.WaitForBeaconAsync: leaving.")
+            Log.Debug("Exiting.")
     }
 
     /// Blocking wait for the beacon you're interested in, for C# folk.

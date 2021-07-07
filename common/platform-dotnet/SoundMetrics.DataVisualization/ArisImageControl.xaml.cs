@@ -3,14 +3,16 @@
 using SoundMetrics.Aris.PaletteShader;
 using System.Windows.Controls;
 using System.Windows.Media;
-using ArisFrameSource = System.IObservable<SoundMetrics.Aris.Comms.Frame>;
+
+using ArisFrameSource =
+    System.IObservable<SoundMetrics.Aris.Comms.Experimental.ArisFinishedFrame>;
 
 namespace SoundMetrics.DataVisualization
 {
     /// <summary>Simple visualization control for ARIS.</summary>
-    public sealed partial class SimpleVisualizationControl : UserControl
+    public sealed partial class ArisImageControl : UserControl
     {
-        public SimpleVisualizationControl()
+        public ArisImageControl()
         {
             InitializeComponent();
         }

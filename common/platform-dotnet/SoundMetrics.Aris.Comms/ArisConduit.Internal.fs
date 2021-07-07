@@ -28,7 +28,7 @@ module internal ArisConduitHelpers =
         Telephoto: bool
         ObservedFocus: FU }
     with
-        static member FromFrame (fr : Frame) =
+        static member FromFrame (fr : RawFrame) =
             // Use 0 if depth is not available from the frame.
             let depth =
                 let fd = fr.Header.Depth
@@ -83,7 +83,10 @@ module internal ArisConduitDetails =
 
 
     let logSentAcousticSettings (settings : AcousticSettingsVersioned) =
-        Log.Information("Sent acoustic settings: {settings}", settings)
+        Log.Information(
+            "Sent acoustic settings: cookie={cookie}; {settings}",
+            settings.Cookie,
+            settings.Settings.ToShortString())
 
     let private _loaded =   Log.logLoad "ArisConduit"
 

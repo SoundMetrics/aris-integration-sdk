@@ -46,6 +46,8 @@
     <Compile Include="JoyAxis.cs" />
     <Compile Include="JoyCaps.cs" />
     <Compile Include="JoyInfoEx.cs" />
+    <Compile Include="JoystickInfo.cs" />
+    <Compile Include="JoystickObserver.cs" />
     <Compile Include="ObservableJoystick.cs" />
     <Compile Include="Joystick_Api.cs" />
     <Compile Include="Joystick_Constants.cs" />
@@ -55,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Reactive">
-      <Version>4.1.2</Version>
+      <Version>4.1.5</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

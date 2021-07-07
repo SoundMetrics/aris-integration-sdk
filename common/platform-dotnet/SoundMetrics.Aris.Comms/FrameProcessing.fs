@@ -17,7 +17,7 @@ open System.Reactive.Subjects
 module internal FrameProcessing =
 
     type WorkType =
-        | IncomingFrame of Frame
+        | IncomingFrame of RawFrame
         | Command of ProcessingCommand
         | Quit
 
@@ -59,7 +59,7 @@ module internal FrameProcessing =
             SampleData: NativeBuffer
         }
         with
-            static member FromFrame (f: Frame) =
+            static member FromFrame (f: RawFrame) =
                 let cfg = SonarConfig.getPingModeConfig (PingMode.From f.Header.PingMode)
                 {
                     FrameIndex = int f.Header.FrameIndex
@@ -90,14 +90,16 @@ module internal FrameProcessing =
 
             let struct (struct (reordered, method), sw) = timeThis (fun _sw ->
                 let reorderedSampleData =
-                    let reorder = TransformFunction(SoundMetrics.Aris.ReorderCS.Reorder.ReorderFrame)
-                    NativeBuffer.transformFrame
-                        reorder
-                        fb.PingMode
-                        fb.PingsPerFrame
-                        fb.BeamCount
-                        fb.SampleCount
-                        fb.SampleData
+                    let reorder = fun src dest ->
+                        Reorder.ReorderFrame(
+                            int fb.PingMode,
+                            int fb.PingsPerFrame,
+                            int fb.BeamCount,
+                            int fb.SampleCount,
+                            src,
+                            dest
+                        )
+                    NativeBuffer.transform reorder fb.SampleData
 
                 struct (reorderedSampleData, "ReorderCS")
             )
@@ -109,7 +111,7 @@ module internal FrameProcessing =
 
             let struct (histogram, sw) = timeThis (fun _sw ->
 
-                let buildHistogram (source : nativeptr<byte>, length) =
+                let buildHistogram source length =
                     FrameHistogram.Generate(source, length)
 
                 fb.SampleData |> NativeBuffer.map buildHistogram

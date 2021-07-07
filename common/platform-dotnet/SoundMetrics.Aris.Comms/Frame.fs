@@ -42,7 +42,7 @@ type ArisFrameHeaderExtensions =
 
 /// Note that the SampleData must be disposed. This record does not do so as
 /// buffers are recomposed in new Frame instances.
-type Frame = {
+type RawFrame = {
     Header : ArisFrameHeader
     SampleData : NativeBuffer
 }
@@ -84,7 +84,7 @@ type internal AcousticSettingsFromFrame = {
 type internal ArisFrameExtensions =
 
     [<Extension>]
-    static member internal GetAcousticSettings (f : Frame) =
+    static member internal GetAcousticSettings (f : RawFrame) =
 
         let currentSettings = { FrameRate =         float f.Header.FrameRate * 1.0</s>
                                 SampleCount =       int f.Header.SamplesPerBeam

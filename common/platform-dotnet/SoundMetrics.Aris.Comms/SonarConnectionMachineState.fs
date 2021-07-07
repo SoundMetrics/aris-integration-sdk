@@ -116,8 +116,6 @@ module internal SonarConnectionMachineState =
             s.machineState <- newState
             let stateString = newState.ToString()
             logConnectionStateChange s.targetSonar stateString
-            Log.Information("EventHandlerState[{target}]: state changed to [{state}]" ,
-                                    s.targetSonar, stateString)
 
     /// Builds the TCP command link with appropriate settings.
     let buildCmdLink (ip: IPAddress) =
@@ -157,7 +155,7 @@ module internal SonarConnectionMachineState =
                     | :? System.Net.Sockets.SocketException as ex ->
                         logSocketException ex.Message
                         state.ChangeState (refused targetAddr state.machineState)
-                    
+
                 match state.machineState with
                 | SonarNotFound ->
                     state.ChangeState (foundSonar (beacon.IPAddress) state.machineState)
@@ -205,7 +203,7 @@ module internal SonarConnectionMachineState =
             // Curry the event handler state with the event handler--nobody else can see it.
             let evHandlerState = EventHandlerState.Create targetSonar callbacks cxnMgrDone
             handleEvent evHandlerState
-        
+
         let inBuffer = BufferBlock<CxnEvent>()
         let txf = TransformBlock<CxnEvent, CxnEventCallback * bool>(eventHandler)
         let outBuffer = BufferBlock<CxnEventCallback * bool>()

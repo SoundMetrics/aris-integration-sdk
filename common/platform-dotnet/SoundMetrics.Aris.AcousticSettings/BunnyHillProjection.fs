@@ -9,7 +9,7 @@ namespace SoundMetrics.Aris.AcousticSettings.Experimental
 open Microsoft.FSharp.Data.UnitSystems.SI.UnitSymbols
 open System
 
-type DownrangeWindow = SoundMetrics.Aris.AcousticSettings.AcousticMath.DownrangeWindow
+type DownrangeWindow = SoundMetrics.Aris.AcousticSettings.DownrangeWindow
 
 type BunnyHillProjection = {
     DownrangeWindow:    DownrangeWindow

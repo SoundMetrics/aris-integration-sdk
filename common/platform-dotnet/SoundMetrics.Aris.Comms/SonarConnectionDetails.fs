@@ -51,24 +51,24 @@ module internal SonarConnectionDetails =
                 member v.ToCommand () = ArisCommands.makeAcousticSettingsCmd v
 
         let settingsValidators =
-            let simpleRangeCheck value range =
+            let simpleRangeCheck name value range =
                 if range |> Range.contains value then
                     None
                 else
-                    Some (sprintf "Value %A is out of range %s" value (range.ToString()))
+                    Some (sprintf "%s [%A] is out of range %s" name value (range.ToString()))
 
             [
-                fun settings -> simpleRangeCheck settings.FrameRate             SonarConfig.FrameRateRange
-                fun settings -> simpleRangeCheck settings.SampleCount           SonarConfig.SampleCountRange
-                fun settings -> simpleRangeCheck settings.SampleStartDelay      SonarConfig.SampleStartDelayRange
-                fun settings -> simpleRangeCheck settings.CyclePeriod           SonarConfig.CyclePeriodRange
-                fun settings -> simpleRangeCheck settings.SamplePeriod          SonarConfig.SamplePeriodRange
-                fun settings -> simpleRangeCheck settings.PulseWidth            SonarConfig.PulseWidthRange
-                fun settings -> simpleRangeCheck settings.ReceiverGain          SonarConfig.ReceiverGainRange
+                fun settings -> simpleRangeCheck "FrameRate"        settings.FrameRate             SonarConfig.FrameRateRange
+                fun settings -> simpleRangeCheck "SampleCount"      settings.SampleCount           SonarConfig.SampleCountRange
+                fun settings -> simpleRangeCheck "SampleStartDelay" settings.SampleStartDelay      SonarConfig.SampleStartDelayRange
+                fun settings -> simpleRangeCheck "CyclePeriod"      settings.CyclePeriod           SonarConfig.CyclePeriodRange
+                fun settings -> simpleRangeCheck "SamplePeriod"     settings.SamplePeriod          SonarConfig.SamplePeriodRange
+                fun settings -> simpleRangeCheck "PulseWidth"       settings.PulseWidth            SonarConfig.PulseWidthRange
+                fun settings -> simpleRangeCheck "ReceiverGain"     settings.ReceiverGain          SonarConfig.ReceiverGainRange
 
                 fun settings -> match settings.Frequency with
                                 | Frequency.Low | Frequency.High -> None
-                                | _ -> Some (sprintf "Frequency %A is not Low or High" settings.Frequency)
+                                | _ -> Some (sprintf "Frequency [%A] is not Low or High" settings.Frequency)
             ]
 
         let validateSettings settings =

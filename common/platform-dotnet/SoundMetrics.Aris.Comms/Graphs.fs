@@ -15,7 +15,7 @@ module internal GraphBuilder =
     open GraphBinding
 
     // Kind of a custom job to bring in a reactive subject, so it's not in GraphBinding.
-    let bindFrameSource (subject: IObservable<Frame>): Scaffold<WorkUnit> -> Scaffold<WorkUnit> =
+    let bindFrameSource (subject: IObservable<RawFrame>): Scaffold<WorkUnit> -> Scaffold<WorkUnit> =
         fun rhNode ->
             let tgt, leaves, disposablesIn = rhNode
             let linkableOutput = BufferBlock<WorkUnit> ()

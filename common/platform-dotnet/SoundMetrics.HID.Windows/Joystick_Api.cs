@@ -9,17 +9,6 @@ namespace SoundMetrics.HID.Windows
 {
     public static partial class Joystick
     {
-        public struct JoystickInfo
-        {
-            public uint JoystickId;
-            public JoyCaps Caps;
-
-            private static Lazy<JoystickInfo> empty =
-                new Lazy<JoystickInfo>(() => new JoystickInfo());
-
-            public static JoystickInfo Empty = empty.Value;
-        }
-
         public static JoystickInfo[] EnumerateJoysticks()
         {
             var bufSize = Marshal.SizeOf(typeof(JoyCaps));
@@ -49,6 +38,11 @@ namespace SoundMetrics.HID.Windows
                 h.Free();
             }
         }
+
+        public static IJoystickObserver JoystickObserver => joystickObserver.Value;
+
+        private static Lazy<IJoystickObserver> joystickObserver =
+            new Lazy<IJoystickObserver>(() => new JoystickObserver());
 
         private static bool GetJoystickInfo(
                     uint id,

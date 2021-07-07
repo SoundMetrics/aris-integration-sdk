@@ -143,11 +143,13 @@ module TestInput =
         let getConduit (sn : SerialNumber)=
 
             Log.Information("Looking for ARIS {sn}'s beacon", sn)
-            use availables = BeaconListener.CreateForArisExplorerAndVoyager(TimeSpan.FromSeconds(15.0))
+            use availables = BeaconListener.CreateForArisExplorerAndVoyager(
+                                SynchronizationContext.Current, TimeSpan.FromSeconds(15.0))
             getArisBeacon availables sn
             |> Option.map (fun beacon ->
                 beacon,
                     new ArisConduit(
+                            SynchronizationContext.Current,
                             AcousticSettingsRaw.DefaultAcousticSettingsFor(beacon.SystemType),
                             sn,
                             FrameStreamReliabilityPolicy.DropPartialFrames))

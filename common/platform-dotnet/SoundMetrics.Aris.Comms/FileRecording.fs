@@ -55,7 +55,7 @@ module internal FileRecording =
             stream.Position <- offset
             stream.Write(bytes, 0, bytes.Length)
 
-        let writeFileHeader stream (frame: Frame option) =
+        let writeFileHeader stream (frame: RawFrame option) =
             performOperationReturnToPosition stream (fun stream ->
                 match frame with
                 | Some f ->
@@ -93,7 +93,7 @@ module internal FileRecording =
 
             buf
 
-        let writeFrame (stream: Stream) (frame: Frame) newFrameIndex =
+        let writeFrame (stream: Stream) (frame: RawFrame) newFrameIndex =
 
             // Caller deals with I/O exceptions.
             let mutable hdr = frame.Header
@@ -169,7 +169,7 @@ module internal FileRecording =
 
         /// Writes the frame and returns the recorded frame index offset
         /// (vs the incoming frame index).
-        member __.WriteFrame (frame: Frame) : int =
+        member __.WriteFrame (frame: RawFrame) : int =
 
             let startPosition = stream.Position
 
