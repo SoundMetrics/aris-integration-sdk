@@ -28,6 +28,7 @@ namespace SoundMetrics.Aris.Core
         public static explicit operator Distance(double d) => new Distance(d);
 
         public static readonly Distance Zero = new Distance(0.0);
+        public static readonly Distance OneMeter = new Distance(1.0);
 
         public double Meters { get { return _meters; } }
         public double Centimeters { get { return _meters * 100; } }
