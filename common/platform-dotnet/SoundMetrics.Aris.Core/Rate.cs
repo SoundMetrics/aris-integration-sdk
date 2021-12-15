@@ -61,6 +61,9 @@ namespace SoundMetrics.Aris.Core
         public static Rate operator *(double multiplier, Rate rate)
             => (Rate)(rate.Hz * multiplier);
 
+        public static Rate operator /(Rate rate, double divisor)
+            => rate * (1 / divisor);
+
         public static FineDuration operator /(double count, Rate rate)
         {
             return (count / rate._count) * rate._duration;
