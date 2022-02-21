@@ -79,34 +79,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay));
 
-            // Limit pulse width
-            {
-                var limitedPulseWidth =
-                    LimitPulseWidth(
-                        settings.SystemType,
-                        settings.PulseWidth,
-                        settings.Frequency,
-                        settings.FrameRate);
-                settings =
-                    limitedPulseWidth == settings.PulseWidth
-                        ? settings
-                        : new AcousticSettingsRaw(
-                            settings.SystemType,
-                            settings.FrameRate,
-                            settings.SampleCount,
-                            settings.SampleStartDelay,
-                            settings.SamplePeriod,
-                            limitedPulseWidth,
-                            settings.PingMode,
-                            settings.EnableTransmit,
-                            settings.Frequency,
-                            settings.Enable150Volts,
-                            settings.ReceiverGain,
-                            settings.FocusDistance,
-                            settings.AntiAliasing,
-                            settings.InterpacketDelay,
-                            settings.Salinity);
-            }
+            settings = settings.WithLimitedPulseWidth(settings.PulseWidth);
 
             // Last: antialiasing
             settings =
@@ -140,6 +113,11 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
+            if (requestedFrameRate == settings.FrameRate)
+            {
+                return settings;
+            }
+
             var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
             var allowedFrameRate =
                 ConstrainFrameRate(
@@ -161,14 +139,11 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            if (!enable)
-            {
-                return settings;
-            }
-
-            return settings
+            return enable
+                ? settings
                     .WithFrameRate(settings.MaximumFrameRate)
-                    .ApplyAllConstraints();
+                    .ApplyAllConstraints()
+                : settings;
         }
 
         private static AcousticSettingsRaw UpdateFrameRate(
@@ -420,25 +395,25 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            if (frequency == settings.Frequency) return settings;
-
-            return new AcousticSettingsRaw(
-                settings.SystemType,
-                settings.FrameRate,
-                settings.SampleCount,
-                settings.SampleStartDelay,
-                settings.SamplePeriod,
-                settings.PulseWidth,
-                settings.PingMode,
-                settings.EnableTransmit,
-                frequency,
-                settings.Enable150Volts,
-                settings.ReceiverGain,
-                settings.FocusDistance,
-                settings.AntiAliasing,
-                settings.InterpacketDelay,
-                settings.Salinity)
-                .ApplyAllConstraints();
+            return frequency == settings.Frequency
+                ? settings
+                : new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity)
+                    .ApplyAllConstraints();
         }
 
         public static AcousticSettingsRaw WithInterpacketDelay(
@@ -479,7 +454,9 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return new AcousticSettingsRaw(
+            return salinity == settings.Salinity
+                ? settings
+                : new AcousticSettingsRaw(
                     settings.SystemType,
                     settings.FrameRate,
                     settings.SampleCount,
@@ -503,9 +480,9 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            if (gain == settings.ReceiverGain) return settings;
-
-            throw new NotImplementedException();
+            return gain == settings.ReceiverGain
+                ? settings
+                : throw new NotImplementedException();
         }
 
         private static FineDuration CalculateAutomaticPulseWidth(
@@ -531,15 +508,64 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            if (requestedPulseWidth == settings.PulseWidth) return settings;
+            return requestedPulseWidth == settings.PulseWidth
+                ? settings
+                : settings.WithLimitedPulseWidth(requestedPulseWidth);
+        }
 
-            return new AcousticSettingsRaw(
+        public static AcousticSettingsRaw WithTransmitEnable(
+            this AcousticSettingsRaw settings,
+            bool enable)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            return enable == settings.EnableTransmit
+                ? settings
+                : throw new NotImplementedException();
+        }
+
+        public static AcousticSettingsRaw With150VoltsEnable(
+            this AcousticSettingsRaw settings,
+            bool enable)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            return enable == settings.Enable150Volts
+                ? settings
+                : throw new NotImplementedException();
+        }
+
+        public static AcousticSettingsRaw WithSampleCount(
+            this AcousticSettingsRaw settings,
+            int sampleCount)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            return sampleCount == settings.SampleCount
+                ? settings
+                : throw new NotImplementedException();
+        }
+
+        private static AcousticSettingsRaw WithLimitedPulseWidth(
+            this AcousticSettingsRaw settings,
+            FineDuration requestedPulseWidth)
+        {
+            var limitedPulseWidth =
+                LimitPulseWidth(
+                    settings.SystemType,
+                    requestedPulseWidth,
+                    settings.Frequency,
+                    settings.FrameRate);
+
+            return limitedPulseWidth == settings.PulseWidth
+                ? settings
+                : new AcousticSettingsRaw(
                     settings.SystemType,
                     settings.FrameRate,
                     settings.SampleCount,
                     settings.SampleStartDelay,
                     settings.SamplePeriod,
-                    requestedPulseWidth,
+                    limitedPulseWidth,
                     settings.PingMode,
                     settings.EnableTransmit,
                     settings.Frequency,
@@ -550,44 +576,5 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
         }
-
-        //public static AcousticSettingsRaw WithTransmitEnable(
-        //    this AcousticSettingsRaw settings,
-        //    bool enable)
-        //    => throw new NotImplementedException();
-
-        //public static AcousticSettingsRaw With150VoltsEnable(
-        //    this AcousticSettingsRaw settings,
-        //    bool enable)
-        //    => throw new NotImplementedException();
-
-        //public static AcousticSettingsRaw WithSampleCount(
-        //    this AcousticSettingsRaw settings,
-        //    int sampleCount)
-        //    => throw new NotImplementedException();
-
-        //public static AcousticSettingsRaw WithPulseWidth(
-        //    this AcousticSettingsRaw settings,
-        //    FineDuration pulseWidth)
-        //{
-        //    throw new NotImplementedException();
-
-        //    /*
-        //            var systemType = SoundMetrics.Aris.Core.SystemType.GetFromIntegralValue((int)connection.SystemType);
-        //            var pulseWidth = FineDuration.FromMicroseconds(pulseWidthUsec);
-        //            var frequency = (SoundMetrics.Aris.Core.Frequency)settings.frequency;
-        //            var frameRate = (Rate)settings.frameRate;
-
-        //            safePulseWidth =
-        //                (uint)LimitPulseWidth(
-        //                        systemType,
-        //                        pulseWidth,
-        //                        frequency,
-        //                        frameRate)
-        //                        .Floor
-        //                        .TotalMicroseconds;
-        //            settings.pulseWidth = safePulseWidth;
-        //     */
-        //}
     }
 }
