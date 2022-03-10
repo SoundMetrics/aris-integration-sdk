@@ -63,7 +63,11 @@ namespace SoundMetrics.Aris.Core.UT
             const int SampleCount = 1200;
 
             var startSettings = GetClosestRange(SampleCount);
-            var result = WindowOperations.MoveWindowStartIn(startSettings, TestConditions, useMaxFrameRate: false);
+            var result = WindowOperations.MoveWindowStartIn(
+                startSettings,
+                TestConditions,
+                useMaxFrameRate: false,
+                useAutoFrequency: false);
 
             var helper = new PrettyPrintHelper(0);
             helper.PrintHeading("Inputs");
@@ -92,7 +96,11 @@ namespace SoundMetrics.Aris.Core.UT
             Assert.AreNotEqual(closestRange.SampleStartDelay, startSettings.SampleStartDelay);
             Assert.AreNotEqual(closestRange.WindowStart(TestConditions), startSettings.WindowStart(TestConditions));
 
-            var result = WindowOperations.MoveWindowStartIn(startSettings, TestConditions, useMaxFrameRate: false);
+            var result = WindowOperations.MoveWindowStartIn(
+                startSettings,
+                TestConditions,
+                useMaxFrameRate: false,
+                useAutoFrequency: false);
 
             var helper = new PrettyPrintHelper(0);
             helper.PrintHeading("Inputs");

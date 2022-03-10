@@ -12,7 +12,8 @@ namespace SoundMetrics.Aris.Core.Raw
             this AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             Distance requestedStart,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
@@ -76,12 +77,13 @@ namespace SoundMetrics.Aris.Core.Raw
             // (distance is derived from the machine units).
 
             var newSampleStartDelay = CalculateNewSampleStartDelay();
+            var autoFlags = GetAutoFlags(useAutoFrequency);
 
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.All)
+                    .WithAutomaticSettings(observedConditions, autoFlags)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
 
@@ -104,7 +106,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 this AcousticSettingsRaw settings,
                 ObservedConditions observedConditions,
                 Distance requestedEnd,
-                bool useMaxFrameRate)
+                bool useMaxFrameRate,
+                bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
@@ -144,19 +147,31 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
+            var autoFlags = GetAutoFlags(useAutoFrequency);
             return
                 settings
                     .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.All)
+                    .WithAutomaticSettings(observedConditions, autoFlags)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
+        }
+
+        private static AutomaticAcousticSettings GetAutoFlags(
+            bool useAutoFrequency)
+        {
+            var autoFlags = AutomaticAcousticSettings.None;
+            autoFlags |= AutomaticAcousticSettings.FocusPosition;
+            autoFlags |= AutomaticAcousticSettings.PulseWidth;
+            autoFlags |= useAutoFrequency ? AutomaticAcousticSettings.Frequency : AutomaticAcousticSettings.None;
+            return autoFlags;
         }
 
         public static AcousticSettingsRaw SlideWindow(
                 this AcousticSettingsRaw settings,
                 ObservedConditions observedConditions,
                 Distance requestedStart,
-                bool useMaxFrameRate)
+                bool useMaxFrameRate,
+                bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
@@ -182,10 +197,11 @@ namespace SoundMetrics.Aris.Core.Raw
             var newSampleStartDelay =
                 (2 * requestedStart / observedConditions.SpeedOfSound(salinity))
                     .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayRange);
+            var autoFlags = GetAutoFlags(useAutoFrequency);
             return
                 settings
                     .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, AutomaticAcousticSettings.All)
+                    .WithAutomaticSettings(observedConditions, autoFlags)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
         }

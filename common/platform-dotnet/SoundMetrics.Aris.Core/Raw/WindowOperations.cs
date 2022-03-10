@@ -11,7 +11,8 @@ namespace SoundMetrics.Aris.Core.Raw
     internal delegate AcousticSettingsRaw AdjustRangeFn(
         AcousticSettingsRaw settings,
         ObservedConditions observedConditions,
-        bool useMaxFrameRate);
+        bool useMaxFrameRate,
+        bool useAutoFrequency);
 
     internal static class WindowOperations
     {
@@ -91,7 +92,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw ToShortWindow(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -101,13 +103,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 observedConditions,
                 sizingInfo.SystemConfiguration,
                 sizingInfo.FixedWindowSizeShort,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         public static AcousticSettingsRaw ToMediumWindow(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -117,13 +121,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 observedConditions,
                 sizingInfo.SystemConfiguration,
                 sizingInfo.FixedWindowSizeMedium,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         public static AcousticSettingsRaw ToLongWindow(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -133,7 +139,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 observedConditions,
                 sizingInfo.SystemConfiguration,
                 sizingInfo.FixedWindowSizeLong,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         private static AcousticSettingsRaw ToFixedWindow(
@@ -141,7 +148,8 @@ namespace SoundMetrics.Aris.Core.Raw
             ObservedConditions observedConditions,
             SystemConfiguration systemConfiguration,
             in FixedWindowSize windowSize,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             var original = currentSettings;
             var sspd = observedConditions.SpeedOfSound(currentSettings.Salinity);
@@ -160,7 +168,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     original.AntiAliasing,
                     original.InterpacketDelay,
                     automateFocusPosition: true,
-                    useMaxFrameRate);
+                    useMaxFrameRate,
+                    useAutoFrequency);
         }
 
         public static Distance TimeToDistance(FineDuration duration, Velocity sspd)
@@ -193,7 +202,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 FineDuration antiAliasing,
                 InterpacketDelaySettings interpacketDelay,
                 bool automateFocusPosition,
-                bool useMaxFrameRate)
+                bool useMaxFrameRate,
+                bool useAutoFrequency)
         {
             var sysCfg = SystemConfiguration.GetConfiguration(original.SystemType);
             var frameRate =
@@ -242,6 +252,9 @@ namespace SoundMetrics.Aris.Core.Raw
                     salinity: original.Salinity);
 
             newSettings = newSettings.WithMaxFrameRate(useMaxFrameRate);
+            newSettings = useAutoFrequency
+                            ? newSettings.WithAutomaticFrequency(observedConditions)
+                            : newSettings;
 
             if (original.SampleCount != newSettings.SampleCount)
             {
@@ -257,7 +270,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw MoveWindowStartIn(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -291,7 +305,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 automateFocusPosition: true,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         private static FineDuration GetSamplePeriodToCover(Distance windowLength, int sampleCount, Velocity speedOfSound)
@@ -303,7 +318,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw MoveWindowStartOut(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -337,13 +353,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 automateFocusPosition: true,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         public static AcousticSettingsRaw MoveWindowEndIn(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -368,7 +386,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 automateFocusPosition: true,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         /// <summary>
@@ -378,7 +397,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw MoveWindowEndOut(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -403,13 +423,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 automateFocusPosition: true,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         public static AcousticSettingsRaw SlideRangeIn(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -436,13 +458,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 automateFocusPosition: true,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
         public static AcousticSettingsRaw SlideRangeOut(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -469,7 +493,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
                 automateFocusPosition: true,
-                useMaxFrameRate);
+                useMaxFrameRate,
+                useAutoFrequency);
         }
 
     }

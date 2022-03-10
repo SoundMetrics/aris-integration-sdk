@@ -10,6 +10,8 @@ namespace SoundMetrics.Aris.Core.Raw
     [Flags]
     public enum AutomaticAcousticSettings
     {
+        None = 0,
+
         FocusPosition = 0b0000_0001,
         Frequency = 0b0000_0010,
         PulseWidth = 0b0000_0100,
@@ -349,7 +351,14 @@ namespace SoundMetrics.Aris.Core.Raw
                     .ApplyAllConstraints();
         }
 
-        public static AcousticSettingsRaw WithAutomaticSettings(
+        public static AcousticSettingsRaw WithAutomaticFrequency(
+            this AcousticSettingsRaw settings,
+            ObservedConditions observedConditions)
+            => settings.WithAutomaticSettings(
+                observedConditions,
+                AutomaticAcousticSettings.Frequency);
+
+        internal static AcousticSettingsRaw WithAutomaticSettings(
             this AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             AutomaticAcousticSettings automaticFlags)
@@ -369,7 +378,8 @@ namespace SoundMetrics.Aris.Core.Raw
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
             {
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-                var isLongerRange = settings.WindowEnd(observedConditions) > sysCfg.FrequencyCrossover;
+                var windowEnd = settings.WindowEnd(observedConditions);
+                var isLongerRange = windowEnd > sysCfg.FrequencyCrossover;
                 var frequency = isLongerRange ? Frequency.Low : Frequency.High;
 
                 settings = settings.WithFrequency(frequency);

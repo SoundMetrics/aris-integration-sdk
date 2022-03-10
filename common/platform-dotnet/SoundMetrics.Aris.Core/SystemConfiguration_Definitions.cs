@@ -137,7 +137,11 @@ namespace SoundMetrics.Aris.Core
                 AcousticSettingsRaw MakeSettings(ObservedConditions observedConditions)
                 {
                     var defaultSettings = makeDefaultSettings(observedConditions);
-                    return WindowOperations.ToMediumWindow(defaultSettings, observedConditions, useMaxFrameRate: true);
+                    return WindowOperations.ToMediumWindow(
+                        defaultSettings,
+                        observedConditions,
+                        useMaxFrameRate: true,
+                        useAutoFrequency: true);
                 }
             }
 

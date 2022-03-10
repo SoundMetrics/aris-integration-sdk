@@ -11,11 +11,16 @@ namespace SoundMetrics.Aris.Core.Raw
             AcousticSettingsRaw currentSettings,
             ObservedConditions observedConditions,
             WindowOperation operation,
-            bool useMaxFrameRate)
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
         {
             if (rangeOperationMap.TryGetValue(operation, out var adjustFn))
             {
-                return adjustFn(currentSettings, observedConditions, useMaxFrameRate);
+                return adjustFn(
+                    currentSettings,
+                    observedConditions,
+                    useMaxFrameRate,
+                    useAutoFrequency);
             }
             else
             {
