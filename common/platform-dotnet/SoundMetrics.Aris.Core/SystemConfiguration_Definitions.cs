@@ -18,7 +18,7 @@ namespace SoundMetrics.Aris.Core
             configurations[SystemType.Aris1800.IntegralValue] =
                 new SystemConfiguration
                 {
-                    PingModes = new[] { PingMode.PingMode1, PingMode.PingMode3 },
+                    AvailablePingModes = new[] { PingMode.PingMode1, PingMode.PingMode3 },
                     DefaultPingMode = PingMode.PingMode3,
                     SampleCountRange = commonSampleCountRange,
                     ReceiverGainRange = commonReceiverGainRange,
@@ -55,7 +55,7 @@ namespace SoundMetrics.Aris.Core
             configurations[SystemType.Aris3000.IntegralValue] =
                 new SystemConfiguration
                 {
-                    PingModes = new[] { PingMode.PingMode6, PingMode.PingMode9 },
+                    AvailablePingModes = new[] { PingMode.PingMode6, PingMode.PingMode9 },
                     DefaultPingMode = PingMode.PingMode9,
                     SampleCountRange = commonSampleCountRange,
                     ReceiverGainRange = commonReceiverGainRange,
@@ -92,7 +92,7 @@ namespace SoundMetrics.Aris.Core
             configurations[SystemType.Aris1200.IntegralValue] =
                 new SystemConfiguration
                 {
-                    PingModes = new[] { PingMode.PingMode1 },
+                    AvailablePingModes = new[] { PingMode.PingMode1 },
                     DefaultPingMode = PingMode.PingMode1,
                     SampleCountRange = commonSampleCountRange,
                     ReceiverGainRange = commonReceiverGainRange,

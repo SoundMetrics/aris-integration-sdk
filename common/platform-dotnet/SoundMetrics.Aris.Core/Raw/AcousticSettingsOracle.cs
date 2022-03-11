@@ -109,6 +109,38 @@ namespace SoundMetrics.Aris.Core.Raw
 
         }
 
+        public static AcousticSettingsRaw WithPingMode(
+            this AcousticSettingsRaw settings,
+            PingMode pingMode)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            if (!settings.SystemType.GetConfiguration().IsValidPingMode(pingMode))
+            {
+                throw new ArgumentOutOfRangeException(
+                    $"Invalid ping mode [{pingMode}] for system type [{settings.SystemType}]");
+            }
+
+            return new AcousticSettingsRaw(
+                        settings.SystemType,
+                        settings.FrameRate,
+                        settings.SampleCount,
+                        settings.SampleStartDelay,
+                        settings.SamplePeriod,
+                        settings.PulseWidth,
+                        pingMode,
+                        settings.EnableTransmit,
+                        settings.Frequency,
+                        settings.Enable150Volts,
+                        settings.ReceiverGain,
+                        settings.FocusDistance,
+                        settings.AntiAliasing,
+                        settings.InterpacketDelay,
+                        settings.Salinity)
+                    .ApplyAllConstraints();
+
+        }
+
         public static AcousticSettingsRaw WithFrameRate(
             this AcousticSettingsRaw settings,
             Rate requestedFrameRate)

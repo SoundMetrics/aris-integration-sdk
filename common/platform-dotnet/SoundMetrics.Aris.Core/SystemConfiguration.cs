@@ -3,6 +3,7 @@
 using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -19,7 +20,9 @@ namespace SoundMetrics.Aris.Core
             return configurations[systemType.IntegralValue];
         }
 
-        public IReadOnlyCollection<PingMode> PingModes { get; internal set; }
+        public IReadOnlyCollection<PingMode> AvailablePingModes { get; internal set; }
+
+        public bool IsValidPingMode(PingMode pingMode) => AvailablePingModes.Contains(pingMode);
 
         public PingMode DefaultPingMode { get; internal set; }
 
