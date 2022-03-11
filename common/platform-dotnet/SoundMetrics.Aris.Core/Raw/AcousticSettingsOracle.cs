@@ -531,7 +531,22 @@ namespace SoundMetrics.Aris.Core.Raw
 
             return enable == settings.EnableTransmit
                 ? settings
-                : throw new NotImplementedException();
+                : new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    enable,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity);
         }
 
         public static AcousticSettingsRaw With150VoltsEnable(
@@ -542,7 +557,22 @@ namespace SoundMetrics.Aris.Core.Raw
 
             return enable == settings.Enable150Volts
                 ? settings
-                : throw new NotImplementedException();
+                : new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    enable,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity);
         }
 
         public static AcousticSettingsRaw WithSampleCount(
