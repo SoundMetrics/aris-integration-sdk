@@ -615,7 +615,22 @@ namespace SoundMetrics.Aris.Core.Raw
 
             return sampleCount == settings.SampleCount
                 ? settings
-                : throw new NotImplementedException();
+                : new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    sampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity);
         }
 
         private static AcousticSettingsRaw WithLimitedPulseWidth(
