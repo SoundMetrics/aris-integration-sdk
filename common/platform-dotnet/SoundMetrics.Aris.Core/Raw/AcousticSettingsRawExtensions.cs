@@ -27,6 +27,12 @@ namespace SoundMetrics.Aris.Core.Raw
             return 2 * (windowStart / observedConditions.SpeedOfSound(salinity));
         }
 
+        internal static Distance ConvertSamplePeriodToResolution(
+            this ObservedConditions observedConditions,
+            FineDuration samplePeriod,
+            Salinity salinity)
+            => samplePeriod * observedConditions.SpeedOfSound(salinity) / 2;
+
         public static Velocity SpeedOfSound(
             this ObservedConditions observedConditions,
             Salinity salinity)

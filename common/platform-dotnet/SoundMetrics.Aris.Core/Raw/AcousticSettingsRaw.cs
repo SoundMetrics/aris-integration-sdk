@@ -113,6 +113,8 @@ namespace SoundMetrics.Aris.Core.Raw
             => this.CalculateWindowLength(observedConditions, Salinity);
         public Distance WindowMidPoint(ObservedConditions observedConditions)
             => WindowStart(observedConditions)+ (WindowLength(observedConditions) / 2);
+        public Distance SampleResolution(ObservedConditions observedConditions)
+            => observedConditions.ConvertSamplePeriodToResolution(SamplePeriod, Salinity);
 
         public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);
 
