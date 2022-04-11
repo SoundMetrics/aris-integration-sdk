@@ -67,7 +67,7 @@ namespace SoundMetrics.Aris.Core
         public static bool operator ==(PingMode a, PingMode b) => a.Equals(b);
         public static bool operator !=(PingMode a, PingMode b) => !a.Equals(b);
 
-        public override string ToString() => $"PingMode {IntegralValue}";
+        public override string ToString() => $"PingMode {IntegralValue}, {BeamCount} beams";
 
         public override int GetHashCode() => IntegralValue;
 
