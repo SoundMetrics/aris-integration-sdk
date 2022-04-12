@@ -752,9 +752,10 @@ namespace SoundMetrics.Aris.Core.Raw
             return result;
         }
 
+        private const string LogSettingsTag = "#aris.settings";
         internal static void LogSettingsChangeContext(string context)
         {
-            Trace.TraceInformation($"Settings change context: {context}");
+            Trace.TraceInformation($"{LogSettingsTag} change context: {context}");
         }
 
         private static void LogSettingsChangeResult(
@@ -766,9 +767,8 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 if (IsDifferent(a, b, out var differences))
                 {
-                    Trace.TraceInformation($"{contextName}: {differences}");
+                    Trace.TraceInformation($"{LogSettingsTag} [{contextName}]: {differences}");
                 }
-
             }
         }
     }
