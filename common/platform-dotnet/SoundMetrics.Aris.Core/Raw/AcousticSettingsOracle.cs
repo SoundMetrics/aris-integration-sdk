@@ -1,10 +1,12 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsConstraints;
+    using static AcousticSettingsRawExtensions;
     using static Math;
 
     [Flags]
@@ -69,7 +71,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
-            settings = UpdateFrameRate(
+            var settings2 = UpdateFrameRate(
                 settings,
                 ConstrainFrameRate(
                     settings.FrameRate,
@@ -81,15 +83,17 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay));
 
-            settings = settings.WithLimitedPulseWidth(settings.PulseWidth);
+            var settings3 = settings2.WithLimitedPulseWidth(settings2.PulseWidth);
 
             // Last: antialiasing
-            settings =
+            var result =
                 UpdateAntiAliasing(
-                    settings,
-                    settings.ConstrainAntiAliasing());
+                    settings3,
+                    settings3.ConstrainAntiAliasing());
 
-            return settings;
+            LogSettingsChangeResult($"{nameof(ApplyAllConstraints)}", settings, result);
+
+            return result;
         }
 
         internal static FineDuration LimitPulseWidth(
@@ -121,7 +125,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     $"Invalid ping mode [{pingMode}] for system type [{settings.SystemType}]");
             }
 
-            return new AcousticSettingsRaw(
+            var result = new AcousticSettingsRaw(
                         settings.SystemType,
                         settings.FrameRate,
                         settings.SampleCount,
@@ -139,6 +143,9 @@ namespace SoundMetrics.Aris.Core.Raw
                         settings.Salinity)
                     .ApplyAllConstraints();
 
+            LogSettingsChangeResult($"{nameof(WithPingMode)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithFrameRate(
@@ -164,7 +171,11 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay);
 
-            return UpdateFrameRate(settings, allowedFrameRate);
+            var result = UpdateFrameRate(settings, allowedFrameRate);
+
+            LogSettingsChangeResult($"{nameof(WithFrameRate)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithMaxFrameRate(
@@ -173,16 +184,21 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return enable
+            var result = enable
                 ? settings
                     .WithFrameRate(settings.MaximumFrameRate)
                     .ApplyAllConstraints()
                 : settings;
+
+            LogSettingsChangeResult($"{nameof(WithMaxFrameRate)}", settings, result);
+
+            return result;
         }
 
         private static AcousticSettingsRaw UpdateFrameRate(
             AcousticSettingsRaw settings, Rate newFrameRate)
-            => settings.FrameRate == newFrameRate
+        {
+            var result = settings.FrameRate == newFrameRate
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -201,13 +217,18 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
+            LogSettingsChangeResult($"{nameof(UpdateFrameRate)}", settings, result);
+
+            return result;
+        }
+
         public static AcousticSettingsRaw WithTransmit(
             this AcousticSettingsRaw settings,
             bool enableTransmit)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return settings.EnableTransmit == enableTransmit
+            var result = settings.EnableTransmit == enableTransmit
                 ? settings
                 : new AcousticSettingsRaw(
                         settings.SystemType,
@@ -225,12 +246,18 @@ namespace SoundMetrics.Aris.Core.Raw
                         settings.AntiAliasing,
                         settings.InterpacketDelay,
                         settings.Salinity);
+
+            LogSettingsChangeResult($"{nameof(WithTransmit)}", settings, result);
+
+            return result;
         }
 
         private static AcousticSettingsRaw UpdateAntiAliasing(
             AcousticSettingsRaw settings,
             FineDuration antiAliasing)
-        => settings.AntiAliasing == antiAliasing
+
+        {
+            var result = settings.AntiAliasing == antiAliasing
             ? settings
             : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -249,13 +276,18 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
+            LogSettingsChangeResult($"{nameof(UpdateAntiAliasing)}", settings, result);
+
+            return result;
+        }
+
         public static AcousticSettingsRaw WithFocusPosition(
             this AcousticSettingsRaw settings,
             Distance newFocusPosition)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return
+            var result =
                 new AcousticSettingsRaw(
                     settings.SystemType,
                     settings.FrameRate,
@@ -273,6 +305,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity)
                 .ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithFocusPosition)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithAntiAliasing(
@@ -285,10 +321,14 @@ namespace SoundMetrics.Aris.Core.Raw
             if (newDelay < FineDuration.Zero) throw new ArgumentOutOfRangeException(nameof(newDelay), "Argument value is negative");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
 
-            return
+            var result =
                 UpdateAntiAliasing(settings, newDelay)
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithAntiAliasing)}", settings, result);
+
+            return result;
         }
 
         internal static AcousticSettingsRaw WithSamplePeriod(
@@ -331,10 +371,14 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
-            return
+            var result =
                 newSettings
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithSamplePeriod)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithSampleStartDelay(
@@ -377,10 +421,14 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
-            return
+            var result =
                 newSettings
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithSampleStartDelay)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithAutomaticFrequency(
@@ -428,7 +476,11 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings = settings.WithPulseWidth(automaticPulseWidth);
             }
 
-            return settings.ApplyAllConstraints();
+            var result = settings.ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithAutomaticSettings)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithFrequency(
@@ -437,7 +489,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return frequency == settings.Frequency
+            var result = frequency == settings.Frequency
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -456,6 +508,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity)
                     .ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithFrequency)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithInterpacketDelay(
@@ -484,10 +540,14 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     newInterpacketDelay,
                     settings.Salinity);
-            return
+            var result =
                 newSettings
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
+
+            LogSettingsChangeResult($"{nameof(WithInterpacketDelay)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithSalinity(
@@ -496,7 +556,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return salinity == settings.Salinity
+            var result = salinity == settings.Salinity
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -514,6 +574,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     salinity);
+
+            LogSettingsChangeResult($"{nameof(WithSalinity)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithReceiverGain(
@@ -522,9 +586,13 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return gain == settings.ReceiverGain
+            var result = gain == settings.ReceiverGain
                 ? settings
                 : throw new NotImplementedException();
+
+            LogSettingsChangeResult($"{nameof(WithReceiverGain)}", settings, result);
+
+            return result;
         }
 
         private static FineDuration CalculateAutomaticPulseWidth(
@@ -550,9 +618,13 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return requestedPulseWidth == settings.PulseWidth
+            var result = requestedPulseWidth == settings.PulseWidth
                 ? settings
                 : settings.WithLimitedPulseWidth(requestedPulseWidth);
+
+            LogSettingsChangeResult($"{nameof(WithPulseWidth)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithTransmitEnable(
@@ -561,7 +633,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return enable == settings.EnableTransmit
+            var result = enable == settings.EnableTransmit
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -579,6 +651,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
+
+            LogSettingsChangeResult($"{nameof(WithTransmitEnable)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw With150VoltsEnable(
@@ -587,7 +663,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return enable == settings.Enable150Volts
+            var result = enable == settings.Enable150Volts
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -605,6 +681,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
+
+            LogSettingsChangeResult($"{nameof(With150VoltsEnable)}", settings, result);
+
+            return result;
         }
 
         public static AcousticSettingsRaw WithSampleCount(
@@ -613,7 +693,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return sampleCount == settings.SampleCount
+            var result = sampleCount == settings.SampleCount
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -631,6 +711,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
+
+            LogSettingsChangeResult($"{nameof(WithSampleCount)}", settings, result);
+
+            return result;
         }
 
         private static AcousticSettingsRaw WithLimitedPulseWidth(
@@ -644,7 +728,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.FrameRate);
 
-            return limitedPulseWidth == settings.PulseWidth
+            var result = limitedPulseWidth == settings.PulseWidth
                 ? settings
                 : new AcousticSettingsRaw(
                     settings.SystemType,
@@ -662,6 +746,30 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
+
+            LogSettingsChangeResult($"{nameof(WithLimitedPulseWidth)}", settings, result);
+
+            return result;
+        }
+
+        internal static void LogSettingsChangeContext(string context)
+        {
+            Trace.TraceInformation($"Settings change context: {context}");
+        }
+
+        private static void LogSettingsChangeResult(
+            string contextName,
+            AcousticSettingsRaw a,
+            AcousticSettingsRaw b)
+        {
+            if (IsSettingsChangeLoggingEnabled)
+            {
+                if (IsDifferent(a, b, out var differences))
+                {
+                    Trace.TraceInformation($"{contextName}: {differences}");
+                }
+
+            }
         }
     }
 }
