@@ -54,12 +54,12 @@ namespace SoundMetrics.Aris.Core.Raw
         // Logging support
 
         [ThreadStatic]
-        private static bool isSettingsChangeLoggingEnabled;
+        private static (bool IsEnabled, int Count) settingsChangeLogging;
 
-        internal static bool IsSettingsChangeLoggingEnabled
+        internal static (bool IsEnabled, int Count) SettingsChangeLogging
         {
-            get => isSettingsChangeLoggingEnabled;
-            private set => isSettingsChangeLoggingEnabled = value;
+            get => settingsChangeLogging;
+            private set => settingsChangeLogging = value;
         }
 
         /// <summary>
@@ -74,8 +74,18 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (enable)
             {
-                IsSettingsChangeLoggingEnabled = true;
-                LogSettingsChangeContext($"Enabled settings tracing in {context}");
+                if (SettingsChangeLogging.IsEnabled)
+                {
+                    LogSettingsChangeContext($"Settings change logging is already enabled in {context}");
+                }
+                else
+                {
+                    SettingsChangeLogging =
+                        (IsEnabled: true, Count: SettingsChangeLogging.Count + 1);
+
+                    LogSettingsChangeContext($"Enabled settings tracing in {context}");
+                }
+
                 return new CleanUpLogging();
             }
             else
@@ -98,7 +108,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 if (!disposed)
                 {
                     disposed = true;
-                    IsSettingsChangeLoggingEnabled = false;
+                    SettingsChangeLogging =
+                        (IsEnabled: false, Count: SettingsChangeLogging.Count);
                 }
             }
 

@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -753,9 +754,16 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         private const string LogSettingsTag = "#aris.settings";
+
+        private static string GetLogSettingsPrefix()
+            => $"{LogSettingsTag} {{tid.#={Thread.CurrentThread.ManagedThreadId}.{SettingsChangeLogging.Count}}}";
+
         internal static void LogSettingsChangeContext(string context)
         {
-            Trace.TraceInformation($"{LogSettingsTag} change context: {context}");
+            if (SettingsChangeLogging.IsEnabled)
+            {
+                Trace.TraceInformation($"{GetLogSettingsPrefix()} change context: {context}");
+            }
         }
 
         private static void LogSettingsChangeResult(
@@ -763,11 +771,11 @@ namespace SoundMetrics.Aris.Core.Raw
             AcousticSettingsRaw a,
             AcousticSettingsRaw b)
         {
-            if (IsSettingsChangeLoggingEnabled)
+            if (SettingsChangeLogging.IsEnabled)
             {
                 if (IsDifferent(a, b, out var differences))
                 {
-                    Trace.TraceInformation($"{LogSettingsTag} [{contextName}]: {differences}");
+                    Trace.TraceInformation($"{GetLogSettingsPrefix()} [{contextName}]: {differences}");
                 }
             }
         }
