@@ -583,13 +583,31 @@ namespace SoundMetrics.Aris.Core.Raw
 
         public static AcousticSettingsRaw WithReceiverGain(
             this AcousticSettingsRaw settings,
-            float gain)
+            int gain)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            var result = gain == settings.ReceiverGain
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var constrainedValue = gain.ConstrainTo(sysCfg.ReceiverGainRange);
+
+            var result = constrainedValue == settings.ReceiverGain
                 ? settings
-                : throw new NotImplementedException();
+                : new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    settings.SampleCount,
+                    settings.SampleStartDelay,
+                    settings.SamplePeriod,
+                    settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    settings.Frequency,
+                    settings.Enable150Volts,
+                    constrainedValue,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity);
 
             LogSettingsChangeResult($"{nameof(WithReceiverGain)}", settings, result);
 
