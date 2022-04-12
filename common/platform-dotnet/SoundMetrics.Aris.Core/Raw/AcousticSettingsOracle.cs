@@ -773,7 +773,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             if (SettingsChangeLogging.IsEnabled)
             {
-                if (IsDifferent(a, b, out var differences))
+                if (GetDifferences(a, b, out var differences))
                 {
                     Trace.TraceInformation($"{GetLogSettingsPrefix()} [{contextName}]: {differences}");
                 }

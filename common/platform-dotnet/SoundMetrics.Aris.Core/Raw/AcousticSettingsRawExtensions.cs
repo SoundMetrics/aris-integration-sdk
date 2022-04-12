@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
@@ -119,7 +120,7 @@ namespace SoundMetrics.Aris.Core.Raw
         //---------------------------------------------------------------------
         // Diff support
 
-        internal static bool IsDifferent(
+        internal static bool GetDifferences(
             AcousticSettingsRaw a,
             AcousticSettingsRaw b,
             out string differences)
@@ -135,13 +136,13 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var buf = new StringBuilder();
-            var result = IsDifferent(a, b, buf);
+            var isDifferent = GetDifferences(a, b, buf);
             differences = buf.ToString();
 
-            return result;
+            return isDifferent;
         }
 
-        internal static bool IsDifferent(
+        internal static bool GetDifferences(
             AcousticSettingsRaw a,
             AcousticSettingsRaw b,
             StringBuilder differences)
@@ -191,13 +192,22 @@ namespace SoundMetrics.Aris.Core.Raw
                         _ = differences.Append("; ");
                     }
 
-                    _ = differences.Append($"{propertyInfo.Name} [{valueA}]->[{valueB}]");
+                    var valueStringA = GetInvariantFormatttedString(valueA);
+                    var valueStringB = GetInvariantFormatttedString(valueB);
+                    var difference = $"{propertyInfo.Name} [{valueStringA}]->[{valueStringB}]";
+
+                    _ = differences.Append(difference);
 
                     return true;
                 }
             }
         }
 
+        // Gets an invariant formatted version of the value.
+        internal static string GetInvariantFormatttedString(object value)
+            => value is null
+                ? "(null)"
+                : string.Format(CultureInfo.InvariantCulture, "{0}", value);
 
         private static IReadOnlyList<PropertyInfo> PublicPropertyInfos =
             GetPropertyInfos<AcousticSettingsRaw>();
