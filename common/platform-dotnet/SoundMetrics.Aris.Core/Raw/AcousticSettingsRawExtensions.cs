@@ -55,13 +55,11 @@ namespace SoundMetrics.Aris.Core.Raw
         // Logging support
 
         [ThreadStatic]
-        private static (bool IsEnabled, int Count) settingsChangeLogging;
+        private static (int Count, int ScopeDepth) settingsChangeLogging;
 
-        internal static (bool IsEnabled, int Count) SettingsChangeLogging
-        {
-            get => settingsChangeLogging;
-            private set => settingsChangeLogging = value;
-        }
+        internal static int SettingsChangeLoggingCounter => settingsChangeLogging.Count;
+
+        internal static bool IsSettingsChangeLoggingEnabled => settingsChangeLogging.ScopeDepth > 0;
 
         /// <summary>
         /// Enables settings logging on the current thread. Nested calls have
@@ -69,23 +67,23 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         /// <param name="enable">Enables logging for the scope of the return.</param>
         /// <returns>Disposable that terminates the logging scope when disposed.</returns>
-        public static IDisposable EnableSettingsChangeLoggingOnThread(
+        public static IDisposable StartSettingsChangeLoggingScope(
             string context,
             bool enable)
         {
             if (enable)
             {
-                if (SettingsChangeLogging.IsEnabled)
-                {
-                    LogSettingsChangeContext($"Settings change logging is already enabled in {context}");
-                }
-                else
-                {
-                    SettingsChangeLogging =
-                        (IsEnabled: true, Count: SettingsChangeLogging.Count + 1);
+                var (count, scopeDepth) = settingsChangeLogging;
 
-                    LogSettingsChangeContext($"Enabled settings tracing in {context}");
-                }
+                var firstEntryIntoScope = scopeDepth == 0;
+                var incrementedScopeDepth = scopeDepth + 1;
+
+                count = firstEntryIntoScope ? count + 1 : count;
+
+                settingsChangeLogging = (Count: count, ScopeDepth: incrementedScopeDepth);
+                var indent = new string('>', incrementedScopeDepth);
+
+                LogSettingsChangeContext($"Enabled settings tracing in {indent} {context}");
 
                 return new CleanUpLogging();
             }
@@ -93,6 +91,19 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 return NoopCleanUpLogging;
             }
+        }
+
+        private static void ExitSettingsLogging()
+        {
+            var (count, scopeDepth) = settingsChangeLogging;
+            var decrementedScopeDepth = scopeDepth - 1;
+
+            if (decrementedScopeDepth < 0)
+            {
+                throw new InvalidOperationException($"{nameof(decrementedScopeDepth)} is invalid: [{decrementedScopeDepth}]");
+            }
+
+            settingsChangeLogging = (Count: count, ScopeDepth: decrementedScopeDepth);
         }
 
         private static readonly NoopCleanUp NoopCleanUpLogging = new NoopCleanUp();
@@ -109,8 +120,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 if (!disposed)
                 {
                     disposed = true;
-                    SettingsChangeLogging =
-                        (IsEnabled: false, Count: SettingsChangeLogging.Count);
+                    ExitSettingsLogging();
                 }
             }
 

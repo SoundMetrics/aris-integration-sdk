@@ -756,11 +756,11 @@ namespace SoundMetrics.Aris.Core.Raw
         private const string LogSettingsTag = "#aris.settings";
 
         private static string GetLogSettingsPrefix()
-            => $"{LogSettingsTag} {{tid.#={Thread.CurrentThread.ManagedThreadId}.{SettingsChangeLogging.Count}}}";
+            => $"{LogSettingsTag} {{tid.#={Thread.CurrentThread.ManagedThreadId}.{SettingsChangeLoggingCounter}}}";
 
         internal static void LogSettingsChangeContext(string context)
         {
-            if (SettingsChangeLogging.IsEnabled)
+            if (IsSettingsChangeLoggingEnabled)
             {
                 Trace.TraceInformation($"{GetLogSettingsPrefix()} change context: {context}");
             }
@@ -771,7 +771,7 @@ namespace SoundMetrics.Aris.Core.Raw
             AcousticSettingsRaw a,
             AcousticSettingsRaw b)
         {
-            if (SettingsChangeLogging.IsEnabled)
+            if (IsSettingsChangeLoggingEnabled)
             {
                 if (GetDifferences(a, b, out var differences))
                 {
