@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -83,7 +84,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settingsChangeLogging = (Count: count, ScopeDepth: incrementedScopeDepth);
                 var indent = new string('>', incrementedScopeDepth);
 
-                LogSettingsChangeContext($"Enabled settings tracing in {indent} {context}");
+                AcousticSettingsOracle.LogSettingsContext($"Enabled settings tracing in {indent} {context}");
 
                 return new CleanUpLogging();
             }
@@ -125,6 +126,34 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             private bool disposed;
+        }
+
+        internal static AcousticSettingsRaw LogSettingsContext(
+            this AcousticSettingsRaw settings,
+            string context)
+        {
+            if (IsSettingsChangeLoggingEnabled)
+            {
+                Trace.TraceInformation(context);
+            }
+
+            return settings;
+        }
+
+        internal static AcousticSettingsRaw LogSettingsContext(
+            this AcousticSettingsRaw settings,
+            string prefix,
+            Func<AcousticSettingsRaw, string> buildContext)
+        {
+            if (IsSettingsChangeLoggingEnabled)
+            {
+                var context = prefix + " " + buildContext(settings);
+                return settings.LogSettingsContext(context);
+            }
+            else
+            {
+                return settings;
+            }
         }
 
         //---------------------------------------------------------------------
