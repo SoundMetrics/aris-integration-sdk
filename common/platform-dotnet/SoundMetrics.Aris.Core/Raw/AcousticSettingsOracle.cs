@@ -378,7 +378,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var validRange = sysCfg.RawConfiguration.SamplePeriodRange;
             var constrainedSamplePeriod = samplePeriod.ConstrainTo(validRange);
 
-            if (constrainedSamplePeriod == settings.SamplePeriod && !useMaxFrameRate)
+            if ((constrainedSamplePeriod == settings.SamplePeriod) && !useMaxFrameRate)
             {
                 return settings;
             }
