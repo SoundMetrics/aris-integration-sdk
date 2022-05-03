@@ -108,7 +108,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         public override string ToString()
-            => string.Format(CultureInfo.CurrentCulture, "{0} m/s", this.MetersPerSecond);
+            => string.Format(CultureInfo.CurrentCulture, "{0:F3} m/s", this.MetersPerSecond);
     }
 
 #pragma warning restore CA2225 // Operator overloads have named alternates
