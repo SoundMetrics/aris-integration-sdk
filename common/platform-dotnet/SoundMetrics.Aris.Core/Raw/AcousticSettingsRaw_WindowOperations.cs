@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using System;
 using System.Collections.Generic;
@@ -35,16 +35,16 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             return new Dictionary<WindowOperation, AdjustRangeFn>
             {
-                { WindowOperation.ShortWindow, WindowOperations.ToShortWindow },
-                { WindowOperation.MediumWindow, WindowOperations.ToMediumWindow },
-                { WindowOperation.LongWindow, WindowOperations.ToLongWindow },
+                { WindowOperation.SetShortWindow, WindowOperations.ToShortWindow },
+                { WindowOperation.SetMediumWindow, WindowOperations.ToMediumWindow },
+                { WindowOperation.SetLongWindow, WindowOperations.ToLongWindow },
 
-                { WindowOperation.WindowStartIn, WindowOperations.MoveWindowStartIn },
-                { WindowOperation.WindowStartOut, WindowOperations.MoveWindowStartOut },
-                { WindowOperation.WindowEndIn, WindowOperations.MoveWindowEndIn },
-                { WindowOperation.WindowEndOut, WindowOperations.MoveWindowEndOut },
-                { WindowOperation.SlideRangeIn, WindowOperations.SlideRangeIn },
-                { WindowOperation.SlideRangeOut, WindowOperations.SlideRangeOut },
+                { WindowOperation.MoveWindowStartCloser, WindowOperations.MoveWindowStartCloser },
+                { WindowOperation.MoveWindowStartFarther, WindowOperations.MoveWindowStartFarther },
+                { WindowOperation.MoveWindowEndCloser, WindowOperations.MoveWindowEndCloser },
+                { WindowOperation.MoveWindowEndFarther, WindowOperations.MoveWindowEndFarther },
+                { WindowOperation.SlideWindowCloser, WindowOperations.SlideWindowCloser },
+                { WindowOperation.SlideWindowFarther, WindowOperations.SlideWindowFarther },
             };
         }
     }

@@ -1,8 +1,7 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -267,7 +266,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static readonly FineDuration WindowTerminusAdjustment = FineDuration.FromMicroseconds(2);
 
-        public static AcousticSettingsRaw MoveWindowStartIn(
+        public static AcousticSettingsRaw MoveWindowStartCloser(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -315,7 +314,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return 2 * (duration / sampleCount);
         }
 
-        public static AcousticSettingsRaw MoveWindowStartOut(
+        public static AcousticSettingsRaw MoveWindowStartFarther(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -357,7 +356,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw MoveWindowEndIn(
+        public static AcousticSettingsRaw MoveWindowEndCloser(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -394,7 +393,7 @@ namespace SoundMetrics.Aris.Core.Raw
         /// Moves the range end outward in a chunk-wise fashion.
         /// For use with streamdeck-style operations.
         /// </summary>
-        public static AcousticSettingsRaw MoveWindowEndOut(
+        public static AcousticSettingsRaw MoveWindowEndFarther(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -427,7 +426,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw SlideRangeIn(
+        public static AcousticSettingsRaw SlideWindowCloser(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -462,7 +461,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw SlideRangeOut(
+        public static AcousticSettingsRaw SlideWindowFarther(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,

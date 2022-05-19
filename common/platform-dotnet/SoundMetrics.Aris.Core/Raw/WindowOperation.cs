@@ -4,31 +4,40 @@ namespace SoundMetrics.Aris.Core.Raw
 {
     public enum WindowOperation
     {
-        /// <summary>Invokes the 'z' keyboard shortcut behavior.</summary>
-        ShortWindow,
+        /// <summary>
+        /// Sets the image window to a short view, similar to the 'z'
+        /// keyboard shortcut behavior in ARIScope.
+        /// </summary>
+        SetShortWindow,
 
-        /// <summary>Invokes the 'a' keyboard shortcut behavior.</summary>
-        MediumWindow,
+        /// <summary>
+        /// Sets the image window to a medium view, similar to the 'a'
+        /// keyboard shortcut behavior in ARIScope.
+        /// </summary>
+        SetMediumWindow,
 
-        /// <summary>Invokes the 'q' keyboard shortcut behavior.</summary>
-        LongWindow,
+        /// <summary>
+        /// Sets the image window to a long view, similar to the 'q'
+        /// keyboard shortcut behavior in ARIScope.
+        /// </summary>
+        SetLongWindow,
 
         /// <summary>Moves the image window start closer.</summary>
-        WindowStartIn,
+        MoveWindowStartCloser,
 
         /// <summary>Moves the image window start farther.</summary>
-        WindowStartOut,
+        MoveWindowStartFarther,
 
         /// <summary>Moves the image window end closer.</summary>
-        WindowEndIn,
+        MoveWindowEndCloser,
 
         /// <summary>Moves the image window end farther.</summary>
-        WindowEndOut,
+        MoveWindowEndFarther,
 
         /// <summary>Slides the whole window closer.</summary>
-        SlideRangeIn,
+        SlideWindowCloser,
 
         /// <summary>Slides the whole window farther.</summary>
-        SlideRangeOut,
+        SlideWindowFarther,
     }
 }
