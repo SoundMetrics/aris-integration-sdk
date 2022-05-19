@@ -7,17 +7,16 @@ namespace SoundMetrics.Aris.Core.Raw
 {
     public sealed partial class AcousticSettingsRaw
     {
-        public static AcousticSettingsRaw AdjustRange(
-            AcousticSettingsRaw currentSettings,
-            ObservedConditions observedConditions,
+        public AcousticSettingsRaw AdjustRange(
             WindowOperation operation,
+            ObservedConditions observedConditions,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
             if (rangeOperationMap.TryGetValue(operation, out var adjustFn))
             {
                 return adjustFn(
-                    currentSettings,
+                    this,
                     observedConditions,
                     useMaxFrameRate,
                     useAutoFrequency);
