@@ -208,14 +208,16 @@ namespace SoundMetrics.Aris.Core.Raw
             var frameRate =
                 Rate.Min(
                     original.FrameRate,
-                    MaxFrameRate.DetermineMaximumFrameRate(
+                    MaxFrameRate.DetermineMaximumFrameRateWithIntermediates(
                         sysCfg,
                         original.PingMode,
                         original.SampleCount,
                         sampleStartDelay,
                         samplePeriod,
                         antiAliasing,
-                        interpacketDelay));
+                        interpacketDelay,
+                        out var _,
+                        out var _));
 
             var pulseWidth = original.PulseWidth;
             var frequency = original.Frequency;

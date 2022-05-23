@@ -12,14 +12,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public static Rate DetermineMaximumFrameRate(AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-            return DetermineMaximumFrameRate(
-                settings.SystemType.GetConfiguration(),
-                settings.PingMode,
-                settings.SampleCount,
-                settings.SampleStartDelay,
-                settings.SamplePeriod,
-                settings.AntiAliasing,
-                settings.InterpacketDelay);
+
+            return DetermineMaximumFrameRate(settings, out var _);
         }
 
         public static Rate DetermineMaximumFrameRate(
@@ -27,7 +21,8 @@ namespace SoundMetrics.Aris.Core.Raw
             out FineDuration cyclePeriod)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-            return DetermineMaximumFrameRate(
+
+            return DetermineMaximumFrameRateWithIntermediates(
                 settings.SystemType.GetConfiguration(),
                 settings.PingMode,
                 settings.SampleCount,
@@ -35,7 +30,34 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.SamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                out cyclePeriod);
+                out cyclePeriod,
+                out var _);
+        }
+
+        internal static Rate DetermineMaximumFrameRateWithIntermediates(
+            AcousticSettingsRaw settings,
+            out FineDuration cyclePeriod,
+            out IntermediateMaximumFrameRateResults intermediateResults)
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+            return DetermineMaximumFrameRateWithIntermediates(
+                settings.SystemType.GetConfiguration(),
+                settings.PingMode,
+                settings.SampleCount,
+                settings.SampleStartDelay,
+                settings.SamplePeriod,
+                settings.AntiAliasing,
+                settings.InterpacketDelay,
+                out cyclePeriod,
+                out intermediateResults);
+        }
+
+        internal struct IntermediateMaximumFrameRateResults
+        {
+            public FineDuration MCP;
+            public FineDuration CPA1;
+            public int PPF;
         }
 
         internal static Rate DetermineMaximumFrameRate(
@@ -48,7 +70,7 @@ namespace SoundMetrics.Aris.Core.Raw
             InterpacketDelaySettings interpacketDelay)
         {
             return
-                DetermineMaximumFrameRate(
+                DetermineMaximumFrameRateWithIntermediates(
                     sysCfg,
                     pingMode,
                     sampleCount,
@@ -56,12 +78,13 @@ namespace SoundMetrics.Aris.Core.Raw
                     samplePeriod,
                     antiAliasing,
                     interpacketDelay,
+                    out var _,
                     out var _);
         }
 
         // This variant allows us to return the value for cyclePeriod, which is required for
         // sending raw settings to ARIS.
-        internal static Rate DetermineMaximumFrameRate(
+        internal static Rate DetermineMaximumFrameRateWithIntermediates(
             SystemConfiguration sysCfg,
             PingMode pingMode,
             int sampleCount,
@@ -69,7 +92,8 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration samplePeriod,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelaySettings,
-            out FineDuration cyclePeriod)
+            out FineDuration cyclePeriod,
+            out IntermediateMaximumFrameRateResults intermediateResults)
         {
             // Aliases to match Bill's doc, only for reference:
             // \\soundserv\Software\ARIS\ARIS Documentation\Sonar\ARIS Maximum Frame Rate Calculation.docx
@@ -86,11 +110,12 @@ namespace SoundMetrics.Aris.Core.Raw
             // From Bill's document
 
             var mcp = ssd + (sp * spb) + CyclePeriodMargin;
-            cyclePeriod = mcp;
 
             var cpaFactor = DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
             var cpa = mcp * cpaFactor;
             var cpa1 = cpa + aa;
+
+            cyclePeriod = mcp + cpa1;
 
             var mfp = interpacketDelaySettings.Enable
                 ? CalculateMinimumFramePeriodWithInterpacketDelay()
@@ -101,8 +126,17 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var maximumFrameRate = 1 / maxFramePeriod;
             var limitedRate = maximumFrameRate.ConstrainTo(sysCfg.FrameRateRange);
+            var hz = limitedRate.NormalizeToHertz();
 
-            return limitedRate.NormalizeToHertz();
+            intermediateResults =
+                new IntermediateMaximumFrameRateResults
+                {
+                    MCP = mcp,
+                    CPA1 = cpa1,
+                    PPF = ppf,
+                };
+
+            return hz;
 
 
             FineDuration CalculateMinimumFramePeriod() =>

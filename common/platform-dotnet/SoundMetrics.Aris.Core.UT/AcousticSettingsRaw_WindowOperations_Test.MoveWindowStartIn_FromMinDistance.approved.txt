@@ -17,7 +17,7 @@ Inputs:
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish
-        CyclePeriod (calculated): 0.006150 s
+        CyclePeriod (calculated): 0.007257 s
 Outputs: 
     AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
@@ -37,4 +37,4 @@ Outputs:
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish
-        CyclePeriod (calculated): 0.006150 s
+        CyclePeriod (calculated): 0.007257 s
