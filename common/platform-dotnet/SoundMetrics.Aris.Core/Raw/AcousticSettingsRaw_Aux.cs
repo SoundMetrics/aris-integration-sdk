@@ -35,7 +35,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static readonly Temperature referenceTemp = (Temperature)15;
 
-        public static Distance CalculateFrequencyCrossoverRange(
+        public static Distance CalculateFrequencyCrossoverDistance(
             SystemType systemType,
             Temperature temperature,
             Salinity salinity)
@@ -53,7 +53,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance windowEnd)
         {
             var crossoverRange =
-                CalculateFrequencyCrossoverRange(systemType, temperature, salinity);
+                CalculateFrequencyCrossoverDistance(systemType, temperature, salinity);
             var isHighFrequency = windowEnd <= crossoverRange;
 
             if (systemType == SystemType.Aris3000)

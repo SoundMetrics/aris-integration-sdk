@@ -20,6 +20,13 @@ namespace SoundMetrics.Aris.Core
             return configurations[systemType.IntegralValue];
         }
 
+        internal SystemConfiguration(SystemType systemType)
+        {
+            SystemType = systemType;
+        }
+
+        public SystemType SystemType { get; }
+
         public IReadOnlyCollection<PingMode> AvailablePingModes { get; internal set; }
 
         public bool IsValidPingMode(PingMode pingMode) => AvailablePingModes.Contains(pingMode);
@@ -33,26 +40,42 @@ namespace SoundMetrics.Aris.Core
         public ValueRange<Rate> FrameRateRange { get; internal set; }
 
         /// <summary>
-        /// The distance at which the low or high frequency is chosen.
-        /// The lower frequency is used for longer distances.
+        /// Calculate the crossover distance given water temperature
+        /// and salinity. If Window End is greater than the calculated value
+        /// the lower frequency should be used.
         /// </summary>
-        public Distance FrequencyCrossover { get; internal set; }
+        /// <param name="temperature">Water temperature</param>
+        /// <param name="salinity">Water salinity</param>
+        /// <returns>The crossover distance given current water temperature
+        /// and salinity.</returns>
+        internal Distance CalculateFrequencyCrossoverDistance(
+            Temperature temperature,
+            Salinity salinity)
+            => AcousticSettingsRaw_Aux.CalculateFrequencyCrossoverDistance(
+                    SystemType, temperature, salinity);
+
+        /// <summary>
+        /// Calculate the prefered frequency given water tempearture,
+        /// salinity, and the window end.
+        /// </summary>
+        /// <param name="temperature">Water temperature</param>
+        /// <param name="salinity">Water salinity</param>
+        /// <param name="windowEnd">
+        /// The window end; note that calculating this
+        /// is dependent on conditions as well.
+        /// </param>
+        /// <returns>The prefered frequency.</returns>
+        public Frequency CalculateBestFrequency(
+            Temperature temperature,
+            Salinity salinity,
+            Distance windowEnd)
+        {
+            var crossover = CalculateFrequencyCrossoverDistance(temperature, salinity);
+            return windowEnd > crossover ? Frequency.Low : Frequency.High;
+        }
 
         public ValueRange<Distance> UsefulImagingRange
             => new ValueRange<Distance>(WindowStartRange.Minimum, WindowEndRange.Maximum);
-
-        //public ValueRange<Distance> GetUsefulImagingRangeFor(Frequency frequency)
-        //{
-        //    switch (frequency)
-        //    {
-        //        case Frequency.Low:
-        //            return UsefulLowFrequencyImagingRange;
-        //        case Frequency.High:
-        //            return UsefulHighFrequencyImagingRange;
-        //        default:
-        //            throw new ArgumentException($"Unexpected value for {nameof(frequency)}: {frequency}");
-        //    }
-        //}
 
         public ValueRange<Distance> WindowStartRange { get; internal set; }
 

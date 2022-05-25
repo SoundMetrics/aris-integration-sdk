@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Core
             var configurations = new SystemConfiguration[3];
 
             configurations[SystemType.Aris1800.IntegralValue] =
-                new SystemConfiguration
+                new SystemConfiguration(SystemType.Aris1800)
                 {
                     AvailablePingModes = new[] { PingMode.PingMode1, PingMode.PingMode3 },
                     DefaultPingMode = PingMode.PingMode3,
@@ -25,8 +25,6 @@ namespace SoundMetrics.Aris.Core
                     FrameRateRange = commonFrameRateRange,
                     WindowStartRange = RangeOfMeters(0.7, 25.0),
                     WindowEndRange = RangeOfMeters(1.3, 50.0),
-
-                    FrequencyCrossover = (Distance)15.0,
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -53,7 +51,7 @@ namespace SoundMetrics.Aris.Core
                 };
 
             configurations[SystemType.Aris3000.IntegralValue] =
-                new SystemConfiguration
+                new SystemConfiguration(SystemType.Aris3000)
                 {
                     AvailablePingModes = new[] { PingMode.PingMode6, PingMode.PingMode9 },
                     DefaultPingMode = PingMode.PingMode9,
@@ -62,8 +60,6 @@ namespace SoundMetrics.Aris.Core
                     FrameRateRange = commonFrameRateRange,
                     WindowStartRange = RangeOfMeters(0.7, 12.0),
                     WindowEndRange = RangeOfMeters(1.3, 20.0),
-
-                    FrequencyCrossover = (Distance)5.0,
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -90,7 +86,7 @@ namespace SoundMetrics.Aris.Core
                 };
 
             configurations[SystemType.Aris1200.IntegralValue] =
-                new SystemConfiguration
+                new SystemConfiguration(SystemType.Aris1200)
                 {
                     AvailablePingModes = new[] { PingMode.PingMode1 },
                     DefaultPingMode = PingMode.PingMode1,
@@ -99,8 +95,6 @@ namespace SoundMetrics.Aris.Core
                     FrameRateRange = commonFrameRateRange,
                     WindowStartRange = RangeOfMeters(0.7, 40.0),
                     WindowEndRange = RangeOfMeters(1.3, 100.0),
-
-                    FrequencyCrossover = (Distance)25.0,
 
                     RawConfiguration = new SystemConfigurationRaw
                     {

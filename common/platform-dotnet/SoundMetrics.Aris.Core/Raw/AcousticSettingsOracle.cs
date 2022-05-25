@@ -486,9 +486,13 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw WithAutomaticFrequency(
             this AcousticSettingsRaw settings,
             ObservedConditions observedConditions)
-            => settings.WithAutomaticSettings(
+        {
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
+            return settings.WithAutomaticSettings(
                 observedConditions,
                 AutomaticAcousticSettings.Frequency);
+        }
 
         internal static AcousticSettingsRaw WithAutomaticSettings(
             this AcousticSettingsRaw settings,
@@ -511,8 +515,11 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
                 var windowEnd = settings.WindowEnd(observedConditions);
-                var isLongerRange = windowEnd > sysCfg.FrequencyCrossover;
-                var frequency = isLongerRange ? Frequency.Low : Frequency.High;
+
+                var frequency = sysCfg.CalculateBestFrequency(
+                    observedConditions.WaterTemp,
+                    settings.Salinity,
+                    windowEnd);
 
                 settings = settings.WithFrequency(frequency);
             }
