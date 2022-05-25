@@ -85,7 +85,7 @@ namespace SoundMetrics.Aris.Core
         public Rate FrequencyLow { get; private set; }
         public Rate FrequencyHigh { get; private set; }
 
-        public Rate GetFrequency(Frequency frequency)
+        public Rate AsRate(Frequency frequency)
             => frequency == Frequency.High ? FrequencyHigh : FrequencyLow;
 
         internal double SmallPeriodAdjustmentFactor { get; set; }
