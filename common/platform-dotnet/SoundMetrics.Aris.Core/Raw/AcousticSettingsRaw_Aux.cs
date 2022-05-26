@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
                         { (SystemType.Aris1800, Salinity.Fresh), ((Distance)15, 0.375) },
                         { (SystemType.Aris1800, Salinity.Brackish), ((Distance)14.5, 0.360) },
-                        { (SystemType.Aris1800, Salinity.Seawater), ((Distance)14, 294) },
+                        { (SystemType.Aris1800, Salinity.Seawater), ((Distance)14, 0.294) },
 
                         { (SystemType.Aris1200, Salinity.Fresh), ((Distance)25, 0.571) },
                         { (SystemType.Aris1200, Salinity.Brackish), ((Distance)24, 0.444) },
