@@ -46,7 +46,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return baseDistance + ((temperature - referenceTemp) * slope);
         }
 
-        public static FineDuration CalculatePulseWidth(
+        public static FineDuration CalculateAutoPulseWidth(
             SystemType systemType,
             Temperature temperature,
             Salinity salinity,
@@ -103,7 +103,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        public static FineDuration CalculateSamplePeriodWNR(
+        public static FineDuration CalculateAutoSamplePeriodWhenNotRecording(
             SystemType systemType,
             Temperature temperature,
             Distance windowEnd)
