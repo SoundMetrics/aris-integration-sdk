@@ -17,6 +17,8 @@ dotnet restore common\platform-dotnet\SoundMetrics.Network\SoundMetrics.Network.
 dotnet restore common\platform-dotnet\SoundMetrics.Network.UT\SoundMetrics.Network.UT.fsproj
 dotnet restore common\platform-dotnet\SoundMetrics.Dataflow\SoundMetrics.Dataflow.fsproj
 dotnet restore common\platform-dotnet\SoundMetrics.Data\SoundMetrics.Data.fsproj
+dotnet restore common\platform-dotnet\SoundMetrics.Data.UT\SoundMetrics.Data.UT.csproj
+dotnet restore common\platform-dotnet\SoundMetrics.DataVisualization\SoundMetrics.DataVisualization.csproj
 dotnet restore common\platform-dotnet\SsdpAdHocTest.Model\SsdpAdHocTest.Model.fsproj
 dotnet restore common\platform-dotnet\SsdpAdHocTestWPF\SsdpAdHocTestWPF.csproj
 dotnet restore common\platform-dotnet\SoundMetrics.Aris.AcousticSettings.UT\SoundMetrics.Aris.AcousticSettings.UT.fsproj
