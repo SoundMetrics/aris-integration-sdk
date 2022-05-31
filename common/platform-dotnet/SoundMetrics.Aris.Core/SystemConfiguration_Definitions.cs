@@ -41,8 +41,8 @@ namespace SoundMetrics.Aris.Core
                         PulseWidthMultiplierHigh = 1.5,
                     },
 
-                    SmallPeriodAdjustmentFactor = 0.18,
-                    LargePeriodAdjustmentFactor = 0.03,
+                    SmallPeriodAdjustmentFactor = 1.08,
+                    LargePeriodAdjustmentFactor = 1.03,
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1800),
 
@@ -76,8 +76,8 @@ namespace SoundMetrics.Aris.Core
                         PulseWidthMultiplierHigh = 2.0,
                     },
 
-                    SmallPeriodAdjustmentFactor = 0.18,
-                    LargePeriodAdjustmentFactor = 0.03,
+                    SmallPeriodAdjustmentFactor = 1.08,
+                    LargePeriodAdjustmentFactor = 1.03,
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings3000),
 
@@ -111,8 +111,8 @@ namespace SoundMetrics.Aris.Core
                         PulseWidthMultiplierHigh = 1.0, // high/low are the same for the 1200
                     },
 
-                    SmallPeriodAdjustmentFactor = 0.02,
-                    LargePeriodAdjustmentFactor = 0.02, // large/small are the same for the 1200
+                    SmallPeriodAdjustmentFactor = 1.02,
+                    LargePeriodAdjustmentFactor = 1.02, // large/small are the same for the 1200
 
                     MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1200),
 
