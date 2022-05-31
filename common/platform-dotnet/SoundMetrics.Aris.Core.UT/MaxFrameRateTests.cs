@@ -16,6 +16,9 @@ namespace SoundMetrics.Aris.Core.UT
         {
             public FineDuration CyclePeriod;
             public FineDuration MinimumFramePeriod;
+
+            public override string ToString() =>
+                $"CyclePeriod=[{CyclePeriod}]; MinimumFramePeriod=[{MinimumFramePeriod}]";
         }
 
         private struct ExpectedIntermediates
@@ -23,6 +26,8 @@ namespace SoundMetrics.Aris.Core.UT
             public FineDuration MCP;
             public FineDuration CPA;
             public int PPF;
+
+            public override string ToString() => $"MCP=[{MCP}]; PPF=[{PPF}]";
         }
 
         private struct TestCase
@@ -39,6 +44,17 @@ namespace SoundMetrics.Aris.Core.UT
 
             public Expecteds Expecteds;
             public ExpectedIntermediates ExpectedIntermediates;
+
+            public override string ToString() =>
+                $"SystemType={SystemType}; "
+                + $"PingMode={PingMode}; "
+                + $"SampleCount={SampleCount}; "
+                + $"SampleStartDelay={SampleStartDelay}; "
+                + $"SamplePeriod={SamplePeriod}; "
+                + $"Antialiasing={Antialiasing}; "
+                + $"InterpacketDelay={InterpacketDelay}; "
+                + $"Expecteds={Expecteds}; "
+                + $"ExpectedIntermediates={ExpectedIntermediates}; ";
         }
 
         private static AcousticSettingsRaw CreateTestSettings(

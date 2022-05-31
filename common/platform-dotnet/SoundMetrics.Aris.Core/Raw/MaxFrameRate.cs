@@ -58,6 +58,8 @@ namespace SoundMetrics.Aris.Core.Raw
             public FineDuration MCP;
             public FineDuration CPA1;
             public int PPF;
+
+            public override string ToString() => $"MCP=[{MCP}]; PPF=[{PPF}]";
         }
 
         internal static Rate DetermineMaximumFrameRate(
