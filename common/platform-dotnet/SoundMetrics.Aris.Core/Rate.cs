@@ -42,6 +42,8 @@ namespace SoundMetrics.Aris.Core
         public Rate NormalizeToHertz()
             => Rate.ToRate(_count * (1 / _duration).Hz);
 
+        public Rate Abs() => new Rate(_count, _duration.Abs());
+
 
         public static Rate PerMillisecond(double count)
         {
