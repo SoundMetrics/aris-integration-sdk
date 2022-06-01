@@ -56,7 +56,6 @@ namespace SoundMetrics.Aris.Core.Raw
         internal struct IntermediateMaximumFrameRateResults
         {
             public FineDuration MCP;
-            public FineDuration CPA1;
             public int PPF;
 
             public override string ToString() => $"MCP=[{MCP}]; PPF=[{PPF}]";
@@ -97,10 +96,10 @@ namespace SoundMetrics.Aris.Core.Raw
             out FineDuration cyclePeriod,
             out IntermediateMaximumFrameRateResults intermediateResults)
         {
-            // Aliases to match Bill's doc, only for reference:
+            // Aliases to match internal doc; aliases are only for reference:
             // \\soundserv\Software\ARIS\ARIS Documentation\Sonar\ARIS Maximum Frame Rate Calculation.docx
-            // The function interface shouldn't use these abbreviated names as
-            // they are not good names for an API.
+            // The function interface shouldn't use these abbreviated names as they
+            // are not good names for an API and are not used widely in this codebase.
 
             var ssd = sampleStartDelay;
             var spb = sampleCount;
@@ -109,49 +108,38 @@ namespace SoundMetrics.Aris.Core.Raw
             var aa = antiAliasing;
             var nob = pingMode.BeamCount;
 
-            // From Bill's document
+            // From internal docs
 
             var mcp = ssd + (sp * spb) + CyclePeriodMargin;
+            var cp = mcp + aa;
+
+
+            var id = interpacketDelaySettings.Enable
+                ? interpacketDelaySettings.Delay
+                    + (((nob * spb) + 1024.0) / 1392.0)
+                        * ((FineDuration)16.6 + interpacketDelaySettings.Delay)
+                : (FineDuration)0;
 
             var cpaFactor = DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
-            var cpa = mcp * cpaFactor;
-            var cpa1 = cpa + aa;
 
-            cyclePeriod = mcp + cpa1;
+            var mfpa = ppf * ((mcp * cpaFactor) + aa) + id;
+            var mfra = 1 / mfpa;
 
-            var mfp = interpacketDelaySettings.Enable
-                ? CalculateMinimumFramePeriodWithInterpacketDelay()
-                : CalculateMinimumFramePeriod();
+            // Back to proper naming
+            var maximumFrameRate = mfra;
 
-            // Back to good naming
-            var maxFramePeriod = mfp;
-
-            var maximumFrameRate = 1 / maxFramePeriod;
             var limitedRate = maximumFrameRate.ConstrainTo(sysCfg.FrameRateRange);
             var hz = limitedRate.NormalizeToHertz();
 
+            cyclePeriod = cp;
             intermediateResults =
                 new IntermediateMaximumFrameRateResults
                 {
                     MCP = mcp,
-                    CPA1 = cpa1,
                     PPF = ppf,
                 };
 
             return hz;
-
-
-            FineDuration CalculateMinimumFramePeriod() =>
-                    ppf * (mcp + cpa1);
-
-            FineDuration CalculateMinimumFramePeriodWithInterpacketDelay()
-            {
-                var headroom = (FineDuration)16.6;
-
-                return
-                    ppf * (mcp + cpa1)
-                        + (((nob * spb) + 1024) / 1392) * (headroom + interpacketDelaySettings.Delay);
-            }
         }
 
         private static double DetermineCyclePeriodAdjustmentFactor(

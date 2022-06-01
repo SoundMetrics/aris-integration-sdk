@@ -16,6 +16,7 @@ namespace SoundMetrics.Aris.Core.UT
         {
             public FineDuration CyclePeriod;
             public FineDuration MinimumFramePeriod;
+            public Rate MaximuimFrameRate;
 
             public override string ToString() =>
                 $"CyclePeriod=[{CyclePeriod}]; MinimumFramePeriod=[{MinimumFramePeriod}]";
@@ -24,7 +25,6 @@ namespace SoundMetrics.Aris.Core.UT
         private struct ExpectedIntermediates
         {
             public FineDuration MCP;
-            public FineDuration CPA;
             public int PPF;
 
             public override string ToString() => $"MCP=[{MCP}]; PPF=[{PPF}]";
@@ -83,13 +83,12 @@ namespace SoundMetrics.Aris.Core.UT
         {
             foreach (var testCase in TestCaseParser.ParseTestCases(TestCases))
             {
+                Console.WriteLine($"Input: [{testCase}]");
+
                 var settings = CreateTestSettings(testCase);
                 var expectedIntermediates = testCase.ExpectedIntermediates;
                 var expected = testCase.Expecteds;
-                var expectedMaximumFrameRate =
-                    (1 / expected.MinimumFramePeriod)
-                        .Hz
-                        .ConstrainTo(SystemConfigurationRaw.MaxFrameRateRange);
+                var expectedMaximumFrameRate = expected.MaximuimFrameRate;
 
                 var maximumFrameRate =
                     MaxFrameRate.DetermineMaximumFrameRateWithIntermediates(
@@ -97,14 +96,15 @@ namespace SoundMetrics.Aris.Core.UT
                         out var calculatedCyclePeriod,
                         out var intermediateResults);
 
+                Console.WriteLine($"Calculated Cycle Period: [{calculatedCyclePeriod}]");
+                Console.WriteLine($"Output intermediates: [{intermediateResults}]");
+                Console.WriteLine($"Expected max frame rate: [{expectedMaximumFrameRate}]");
+                Console.WriteLine($"Actual max frame rate: [{maximumFrameRate}]");
+
                 Assert.AreEqual(
                     expectedIntermediates.MCP,
                     intermediateResults.MCP,
                     $"{nameof(intermediateResults.MCP)} {testCase.Description}");
-                Assert.AreEqual(
-                    expectedIntermediates.CPA,
-                    intermediateResults.CPA1,
-                    $"{nameof(intermediateResults.CPA1)} {testCase.Description}");
                 Assert.AreEqual(
                     expectedIntermediates.PPF,
                     intermediateResults.PPF,
@@ -118,10 +118,10 @@ namespace SoundMetrics.Aris.Core.UT
                 var toleranceRatio = 0.01;
 
                 var tolerance = expectedMaximumFrameRate * toleranceRatio;
-                var variance = Abs(expectedMaximumFrameRate - maximumFrameRate.Hz);
+                var variance = (expectedMaximumFrameRate - maximumFrameRate).Abs();
 
                 Assert.IsTrue(variance <= tolerance,
-                    $"Variance [{variance}] exceeds tolerance [{tolerance}];\n"
+                    $"Max frame rate Variance [{variance}] exceeds tolerance [{tolerance}];\n"
                     + $"toleranceRatio=[{toleranceRatio}];\n"
                     + $"expected=[{expectedMaximumFrameRate}]; actual=[{maximumFrameRate}]\n"
                     + $"{testCase.Description}");
@@ -129,21 +129,16 @@ namespace SoundMetrics.Aris.Core.UT
         }
 
         private const string TestCases =
-            // System Type, SSD (input), SP (input), SPB (input), MCP (calc), AA (input), CPA (calc), CP (output), PPF (input), ID (input), IDA (calc), MFP (µs), MFR (fps)
+            // System Type, SSD (input), SP (input), SPB (input), MCP (calc), AA (input), CP (output), PPF (input), ID (input), IDA (calc), MFP (µs), MFR (fps), MFPA (µs), MFRA (fps)
+
+            // test inputs 5/31/2022, after implementing new max frame rate changes
             @"
-                ARIS 3000, 2626, 8, 1250, 13046, 0, 391, 13437, 8, 0, 0, 107496, 9.30
-                ARIS 1800, 2626, 8, 1250, 13046, 0, 391, 13437, 6, 0, 0, 80622, 12.40
-                ARIS 1200, 2626, 8, 1250, 13046, 0, 260, 13306, 3, 0, 0, 39918, 25.05
+                ARIS 3000, 1000, 5, 1500, 8920, 3000, 11920, 8, 10, 3689, 99049, 10.096061, 101189, 9.882497
+                ARIS 1800, 1000, 4, 2000, 9420, 1000, 10420, 6, 0, 0, 62520, 15.994882, 67041, 14.916245
+                ARIS 1200, 6000, 4, 4000, 22420, 6000, 28420, 3, 20, 5075, 90335, 11.069882, 92353, 10.828019
 
-                ARIS 3000, 2626, 8, 1250, 13046, 0, 391, 13437, 4, 0, 0, 53748, 18.61
-                ARIS 1800, 2626, 8, 1250, 13046, 0, 391, 13437, 3, 0, 0, 40311, 24.81
-
-                ARIS 3000, 2626, 8, 1250, 13046, 2345, 2736, 15782, 8, 0, 0, 126256, 7.92
-                ARIS 1800, 2626, 8, 1250, 13046, 2345, 2736, 15782, 6, 0, 0, 94692, 10.56
-                ARIS 1200, 2626, 8, 1250, 13046, 2345, 2605, 15651, 3, 0, 0, 46953, 21.30
-
-                ARIS 3000, 2626, 8, 1250, 13046, 2345, 2736, 15782, 4, 0, 0, 63128, 15.84
-                ARIS 1800, 2626, 8, 1250, 13046, 2345, 2736, 15782, 3, 0, 0, 47346, 21.12
+                ARIS 3000, 1000, 8, 2000, 17420, 0, 17420, 4, 0, 0, 69680, 14.351320, 71770, 13.933398
+                ARIS 1800, 1000, 8, 3000, 25420, 0, 25420, 3, 0, 0, 76260, 13.113034, 78547, 12.731231
             ";
 
         private static class TestCaseParser
@@ -155,13 +150,12 @@ namespace SoundMetrics.Aris.Core.UT
             private const int SampleCountIdx = 3;
             private const int MCPIdx = 4;
             private const int AntialiasingIdx = 5;
-            private const int CPAIdx = 6;
-            private const int CyclePeriodIdx = 7;
-            private const int PPFIdx = 8;
-            private const int InterpacketDelayIdx = 9;
-            private const int IDAIdx = 10;
-            private const int MFPIdx = 11;
-            // private const int MFRIdx = 12; min(15, 1/MFP)
+            private const int CyclePeriodIdx = 6;
+            private const int PPFIdx = 7;
+            private const int InterpacketDelayIdx = 8;
+            private const int IDAIdx = 9;
+            private const int MFPIdx = 10;
+            private const int MFRAIdx = 13;
 
             private static readonly Dictionary<string, SystemType> systemTypeLookup =
                 new Dictionary<string, SystemType>
@@ -180,17 +174,21 @@ namespace SoundMetrics.Aris.Core.UT
 
                 IEnumerable<string> GetNonEmptyLines()
                 {
+                    int linesReturned = 0;
                     var reader = new StringReader(input);
 
                     string line;
-                    while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
+                    while ((line = reader.ReadLine()) != null)
                     {
                         string trimmedLine;
                         if (!string.IsNullOrWhiteSpace(trimmedLine = line.Trim()))
                         {
+                            ++linesReturned;
                             yield return trimmedLine;
                         }
                     }
+
+                    Assert.AreNotEqual(0, linesReturned);
                 }
 
                 static TestCase ParseTestCase(string line)
@@ -214,12 +212,12 @@ namespace SoundMetrics.Aris.Core.UT
                         {
                             CyclePeriod = (FineDuration)int.Parse(fields[CyclePeriodIdx]),
                             MinimumFramePeriod = (FineDuration)int.Parse(fields[MFPIdx]),
+                            MaximuimFrameRate = (Rate)double.Parse(fields[MFRAIdx]),
                         },
 
                         ExpectedIntermediates = new ExpectedIntermediates
                         {
                             MCP = (FineDuration)int.Parse(fields[MCPIdx]),
-                            CPA = (FineDuration)int.Parse(fields[CPAIdx]),
                             PPF = int.Parse(fields[PPFIdx]),
                         },
                     };
