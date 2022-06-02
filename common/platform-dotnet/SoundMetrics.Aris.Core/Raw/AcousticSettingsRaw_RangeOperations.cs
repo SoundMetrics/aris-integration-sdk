@@ -42,14 +42,14 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = settings.SystemType.GetConfiguration();
 
             if (windowStart <= requestedStart
-                && settings.SamplePeriod <= sysCfg.RawConfiguration.SamplePeriodRange.Minimum)
+                && settings.SamplePeriod <= sysCfg.RawConfiguration.SamplePeriodLimits.Minimum)
             {
                 // Sample period is already at its minimum.
                 return settings;
             }
 
             if (requestedStart <= windowStart
-                && settings.SamplePeriod >= sysCfg.RawConfiguration.SamplePeriodRange.Maximum)
+                && settings.SamplePeriod >= sysCfg.RawConfiguration.SamplePeriodLimits.Maximum)
             {
                 // Sample period is already at its maximum.
                 return settings;
@@ -64,7 +64,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var newSamplePeriod =
                 (newWindowRoughTimeOfFlight / settings.SampleCount)
                     .RoundToMicroseconds()
-                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
 
             if (newSamplePeriod == settings.SamplePeriod)
             {
@@ -139,7 +139,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var newSamplePeriod =
                 (newWindowRoughTimeOfFlight / settings.SampleCount)
                     .RoundToMicroseconds()
-                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodRange);
+                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
 
             if (newSamplePeriod == settings.SamplePeriod)
             {
@@ -196,7 +196,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var salinity = settings.Salinity;
             var newSampleStartDelay =
                 (2 * requestedStart / observedConditions.SpeedOfSound(salinity))
-                    .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayRange);
+                    .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayLimits);
             var autoFlags = GetAutoFlags(useAutoFrequency);
             return
                 settings

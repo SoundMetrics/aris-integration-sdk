@@ -128,7 +128,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // Back to proper naming
             var maximumFrameRate = mfra;
 
-            var limitedRate = maximumFrameRate.ConstrainTo(sysCfg.FrameRateRange);
+            var limitedRate = maximumFrameRate.ConstrainTo(sysCfg.FrameRateLimits);
             var hz = limitedRate.NormalizeToHertz();
 
             cyclePeriod = cp;

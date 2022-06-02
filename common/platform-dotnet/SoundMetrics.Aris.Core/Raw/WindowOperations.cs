@@ -155,7 +155,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var samplePeriod =
                 CalculateSamplePeriod(windowSize.WindowStart, windowSize.WindowEnd, original.SampleCount, sspd)
-                    .ConstrainTo(systemConfiguration.RawConfiguration.SamplePeriodRange);
+                    .ConstrainTo(systemConfiguration.RawConfiguration.SamplePeriodLimits);
             var sampleStartDelay = 2 * windowSize.WindowStart / sspd;
 
             return
@@ -282,12 +282,12 @@ namespace SoundMetrics.Aris.Core.Raw
             // we must do this by increasing the sample period. The edge case is when we try to enlarge the window
             // to start before minimum sample start delay.
 
-            if (settings.SamplePeriod >= cfg.RawConfiguration.SamplePeriodRange.Maximum)
+            if (settings.SamplePeriod >= cfg.RawConfiguration.SamplePeriodLimits.Maximum)
             {
                 return settings;
             }
 
-            if (settings.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayRange.Minimum)
+            if (settings.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayLimits.Minimum)
             {
                 return settings;
             }
@@ -296,7 +296,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var additionalSampleTime = WindowTerminusAdjustment * settings.SampleCount;
             var newSampleStartDelay =
                 (settings.SampleStartDelay - additionalSampleTime)
-                    .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
+                    .ConstrainTo(cfg.RawConfiguration.SampleStartDelayLimits);
 
             return BuildNewWindowSettings(
                 settings,
@@ -330,12 +330,12 @@ namespace SoundMetrics.Aris.Core.Raw
             // we must do this by decreasing the sample period. The edge case is when we try to decrease the window
             // past its minimum sample period.
 
-            if (settings.SamplePeriod <= cfg.RawConfiguration.SamplePeriodRange.Minimum)
+            if (settings.SamplePeriod <= cfg.RawConfiguration.SamplePeriodLimits.Minimum)
             {
                 return settings;
             }
 
-            if (settings.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayRange.Maximum)
+            if (settings.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayLimits.Maximum)
             {
                 return settings;
             }
@@ -344,7 +344,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var sampleTimeReduction = WindowTerminusAdjustment * settings.SampleCount;
             var newSampleStartDelay =
                 (settings.SampleStartDelay + sampleTimeReduction)
-                    .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
+                    .ConstrainTo(cfg.RawConfiguration.SampleStartDelayLimits);
 
             return BuildNewWindowSettings(
                 settings,
@@ -372,7 +372,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // we must do this by decreasing the sample period. The edge case is when we try to decrease the window
             // past its minimum sample period.
 
-            if (settings.SamplePeriod <= cfg.RawConfiguration.SamplePeriodRange.Minimum)
+            if (settings.SamplePeriod <= cfg.RawConfiguration.SamplePeriodLimits.Minimum)
             {
                 return settings;
             }
@@ -409,7 +409,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // we must do this by increasing the sample period. The edge case is when we try to enlarge the window
             // to start before minimum sample start delay.
 
-            if (settings.SamplePeriod >= cfg.RawConfiguration.SamplePeriodRange.Maximum)
+            if (settings.SamplePeriod >= cfg.RawConfiguration.SamplePeriodLimits.Maximum)
             {
                 return settings;
             }
@@ -442,14 +442,14 @@ namespace SoundMetrics.Aris.Core.Raw
             // a fixed sample period, we must do this by decreasing the sample start delay. The edge case is when
             // we try to reduce the sample start delay below the minimum.
 
-            if (settings.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayRange.Minimum)
+            if (settings.SampleStartDelay <= cfg.RawConfiguration.SampleStartDelayLimits.Minimum)
             {
                 return settings;
             }
 
             var decrement = (settings.SampleCount * settings.SamplePeriod) / 3;
             var newSampleStartDelay = (settings.SampleStartDelay - decrement)
-                .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
+                .ConstrainTo(cfg.RawConfiguration.SampleStartDelayLimits);
 
             return BuildNewWindowSettings(
                 settings,
@@ -477,14 +477,14 @@ namespace SoundMetrics.Aris.Core.Raw
             // a fixed sample period, we must do this by increasing the sample start delay. The edge case is when
             // we try to increase the sample start delay above the maximum.
 
-            if (settings.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayRange.Maximum)
+            if (settings.SampleStartDelay >= cfg.RawConfiguration.SampleStartDelayLimits.Maximum)
             {
                 return settings;
             }
 
             var increment = (settings.SampleCount * settings.SamplePeriod) / 3;
             var newSampleStartDelay = (settings.SampleStartDelay + increment)
-                .ConstrainTo(cfg.RawConfiguration.SampleStartDelayRange);
+                .ConstrainTo(cfg.RawConfiguration.SampleStartDelayLimits);
 
             return BuildNewWindowSettings(
                 settings,

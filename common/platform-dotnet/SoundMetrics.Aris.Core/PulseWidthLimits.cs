@@ -1,0 +1,31 @@
+﻿// Copyright (c) 2022 Sound Metrics Corp.
+
+namespace SoundMetrics.Aris.Core
+{
+    public sealed class PulseWidthLimits
+    {
+        public PulseWidthLimits(
+            in (int Min, int Max) limits,
+            int narrow,
+            int medium,
+            int wide,
+            double multiplier,
+            int maxCumulativePulsePerSecond)
+        {
+            Limits = new ValueRange<FineDuration>(
+                (FineDuration)limits.Min, (FineDuration)limits.Max);
+            Narrow = (FineDuration)narrow;
+            Medium = (FineDuration)medium;
+            Wide = (FineDuration)wide;
+            Multiplier = multiplier;
+            MaxCumulativePulsePerSecond = (FineDuration)maxCumulativePulsePerSecond;
+        }
+
+        public ValueRange<FineDuration> Limits { get; }
+        public FineDuration Narrow { get; }
+        public FineDuration Medium { get; }
+        public FineDuration Wide { get; }
+        internal double Multiplier { get; }
+        internal FineDuration MaxCumulativePulsePerSecond { get; }
+    }
+}

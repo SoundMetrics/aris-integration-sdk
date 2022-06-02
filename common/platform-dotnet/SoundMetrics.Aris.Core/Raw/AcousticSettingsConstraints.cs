@@ -42,7 +42,7 @@ namespace SoundMetrics.Aris.Core.Raw
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay)
         {
-            var min = sysCfg.FrameRateRange.Minimum;
+            var min = sysCfg.FrameRateLimits.Minimum;
             var max = MaxFrameRate.DetermineMaximumFrameRate(
                         sysCfg,
                         pingMode,

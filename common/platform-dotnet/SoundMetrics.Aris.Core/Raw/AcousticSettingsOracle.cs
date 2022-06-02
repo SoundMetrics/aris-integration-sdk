@@ -114,7 +114,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Rate frameRate)
         {
             var rawCfg = systemType.GetConfiguration().RawConfiguration;
-            var validRange = rawCfg.PulseWidthRange;
+            var validRange = rawCfg.GetPulseWidthLimitsFor(frequency).Limits;
             var constrainedValue = requestedPulseWidth.ConstrainTo(validRange);
 
             LogSettingsContext($"PulseWidth [{requestedPulseWidth}]->[{constrainedValue}]; validRange={validRange}");
@@ -375,7 +375,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var sysCfg = settings.SystemType.GetConfiguration();
-            var validRange = sysCfg.RawConfiguration.SamplePeriodRange;
+            var validRange = sysCfg.RawConfiguration.SamplePeriodLimits;
             var constrainedSamplePeriod = samplePeriod.ConstrainTo(validRange);
 
             if ((constrainedSamplePeriod == settings.SamplePeriod) && !useMaxFrameRate)
@@ -434,7 +434,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var sysCfg = settings.SystemType.GetConfiguration();
-            var validRange = sysCfg.RawConfiguration.SampleStartDelayRange;
+            var validRange = sysCfg.RawConfiguration.SampleStartDelayLimits;
             var constrained = sampleStartDelay.ConstrainTo(validRange);
 
             LogSettingsContext($"{nameof(WithSampleStartDelay)} {nameof(validRange )}={validRange}");
@@ -646,7 +646,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
             var sysCfg = settings.SystemType.GetConfiguration();
-            var constrainedValue = gain.ConstrainTo(sysCfg.ReceiverGainRange);
+            var constrainedValue = gain.ConstrainTo(sysCfg.ReceiverGainLimits);
 
             var result = constrainedValue == settings.ReceiverGain
                 ? settings

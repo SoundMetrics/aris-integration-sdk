@@ -5,7 +5,7 @@ Inputs:
         SampleCount: 1200
         SampleStartDelay: 0.000950 s
         SamplePeriod: 0.000004 s
-        PulseWidth: 0.000004 s
+        PulseWidth: 0.000006 s
         PingMode: PingMode 9, 128 beams
         EnableTransmit: True
         Frequency: High
@@ -25,7 +25,7 @@ Outputs:
         SampleCount: 1200
         SampleStartDelay: 0.000930 s
         SamplePeriod: 0.000006 s
-        PulseWidth: 0.000004 s
+        PulseWidth: 0.000006 s
         PingMode: PingMode 9, 128 beams
         EnableTransmit: True
         Frequency: High

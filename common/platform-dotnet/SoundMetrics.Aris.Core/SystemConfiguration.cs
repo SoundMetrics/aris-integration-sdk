@@ -33,11 +33,28 @@ namespace SoundMetrics.Aris.Core
 
         public PingMode DefaultPingMode { get; internal set; }
 
-        public ValueRange<int> SampleCountRange { get; internal set; }
+#pragma warning disable CA1822 // does not access instance data and can be marked as static
+        // May eventually use instance data; don't mess up APIs just for warnings
 
-        public ValueRange<int> ReceiverGainRange { get; internal set; }
+        internal ValueRange<int> SampleCountDeviceLimits => sampleCountDeviceLimits;
 
-        public ValueRange<Rate> FrameRateRange { get; internal set; }
+        internal ValueRange<int> PulseWidthDeviceLimits => pulseWidthDeviceLimits;
+
+        internal ValueRange<int> SampleStartDelayDeviceLimits => sampleStartDelayDeviceLimits;
+
+        internal ValueRange<int> SamplePeriodDeviceLimits => samplePeriodDeviceLimits;
+
+        internal ValueRange<int> FocusPositionDeviceLimits => focusPositionDeviceLimits;
+
+        internal ValueRange<int> CyclePeriodDeviceLimits => cyclePeriodDeviceLimits;
+
+#pragma warning restore CA1822
+
+        public ValueRange<int> SampleCountPreferredLimits { get; internal set; }
+
+        public ValueRange<int> ReceiverGainLimits { get; internal set; }
+
+        public ValueRange<Rate> FrameRateLimits { get; internal set; }
 
         /// <summary>
         /// Calculate the crossover distance given water temperature
@@ -75,11 +92,11 @@ namespace SoundMetrics.Aris.Core
         }
 
         public ValueRange<Distance> UsefulImagingRange
-            => new ValueRange<Distance>(WindowStartRange.Minimum, WindowEndRange.Maximum);
+            => new ValueRange<Distance>(WindowStartLimits.Minimum, WindowEndLimits.Maximum);
 
-        public ValueRange<Distance> WindowStartRange { get; internal set; }
+        public ValueRange<Distance> WindowStartLimits { get; internal set; }
 
-        public ValueRange<Distance> WindowEndRange { get; internal set; }
+        public ValueRange<Distance> WindowEndLimits { get; internal set; }
 
         public static bool TryGetSampleGeometry(in FrameHeader frameHeader, out SampleGeometry sampleGeometry)
         {

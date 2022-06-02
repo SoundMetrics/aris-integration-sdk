@@ -6,9 +6,6 @@ using SoundMetrics.Aris.Core.Raw;
 
 namespace SoundMetrics.Aris.Core.UT
 {
-    using static AcousticSettingsRaw;
-    using static AcousticSettingsRawCalculations;
-
     [TestClass]
     [UseReporter(typeof(DiffReporter))]
     public class AcousticSettingsRaw_WindowOperations_Test
@@ -25,17 +22,18 @@ namespace SoundMetrics.Aris.Core.UT
         private static AcousticSettingsRaw GetClosestRange(int sampleCount)
             => GetNearRange(sampleCount,  addStartDelay: FineDuration.Zero);
 
-        private static AcousticSettingsRaw GetNearRange(int sampleCount, FineDuration addStartDelay)
+        private static AcousticSettingsRaw GetNearRange(
+            int sampleCount,
+            FineDuration addStartDelay)
         {
-            var sampleStartDelay = sysCfg.RawConfiguration.SampleStartDelayRange.Minimum + addStartDelay;
-            var samplePeriod = sysCfg.RawConfiguration.SamplePeriodRange.Minimum;
-            var pulseWidth = sysCfg.RawConfiguration.PulseWidthRange.Minimum;
+            var frequency = Frequency.High;
+            var sampleStartDelay = sysCfg.RawConfiguration.SampleStartDelayLimits.Minimum + addStartDelay;
+            var samplePeriod = sysCfg.RawConfiguration.SamplePeriodLimits.Minimum;
+            var pulseWidth = sysCfg.RawConfiguration.GetPulseWidthLimitsFor(frequency).Limits.Minimum;
             var pingMode = sysCfg.DefaultPingMode;
             var enableTransmit = true;
-            var frequency = Frequency.High;
             var enable150Volts = true;
-            var receiverGain = sysCfg.ReceiverGainRange.Minimum;
-            var cyclePeriod = sampleStartDelay + (sampleCount * samplePeriod);
+            var receiverGain = sysCfg.ReceiverGainLimits.Minimum;
             var focusPosition = (Distance)8;
             var salinity = Salinity.Brackish;
 
