@@ -531,7 +531,14 @@ namespace SoundMetrics.Aris.Core.Raw
             // Pulse width depends on frequency, so it's addressed *after* frequency.
             if ((automaticFlags & AutomaticAcousticSettings.PulseWidth) != 0)
             {
-                var automaticPulseWidth = CalculateAutomaticPulseWidth(settings, observedConditions);
+                var windowEnd = settings.WindowEnd(observedConditions);
+                var automaticPulseWidth =
+                    AcousticSettingsRaw_Aux.CalculateAutoPulseWidth(
+                        settings.SystemType,
+                        observedConditions.WaterTemp,
+                        settings.Salinity,
+                        windowEnd);
+;
                 settings = settings.WithPulseWidth(automaticPulseWidth);
             }
 
@@ -670,23 +677,6 @@ namespace SoundMetrics.Aris.Core.Raw
             LogSettingsChangeResult($"{nameof(WithReceiverGain)}", settings, result);
 
             return result;
-        }
-
-        private static FineDuration CalculateAutomaticPulseWidth(
-            AcousticSettingsRaw settings,
-            ObservedConditions observedConditions)
-        {
-            // Based on ARIScope 2's auto pulse width
-            var sysCfg = settings.SystemType.GetConfiguration();
-            var rawCfg = sysCfg.RawConfiguration;
-
-            var multiplier = rawCfg.GetPulseWidthMultiplierFor(settings.Frequency);
-            var windowEnd = settings.WindowEnd(observedConditions);
-
-            var pulseWidth =
-                ((FineDuration)(uint)((multiplier * windowEnd.Meters) + 0.5))
-                    .ConstrainTo(rawCfg.AllowedPulseWidthRangeFor(settings.Frequency));
-            return pulseWidth;
         }
 
         public static AcousticSettingsRaw WithPulseWidth(
