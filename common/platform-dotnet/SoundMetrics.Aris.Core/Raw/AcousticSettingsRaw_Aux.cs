@@ -103,7 +103,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        public static FineDuration CalculateAutoSamplePeriodWhenNotRecording(
+        public static FineDuration CalculateAutoSamplePeriod(
             SystemType systemType,
             Temperature temperature,
             Distance windowEnd)

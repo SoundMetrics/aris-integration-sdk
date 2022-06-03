@@ -1,8 +1,7 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using System;
 using System.Diagnostics;
-using System.Threading;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
