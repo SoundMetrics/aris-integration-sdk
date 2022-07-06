@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExtractRecordingInfo": {
+      "commandName": "Project",
+      "commandLineArgs": "gps --summary apath.aris"
+    }
+  }
+}
