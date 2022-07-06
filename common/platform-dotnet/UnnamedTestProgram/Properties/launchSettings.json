@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UnnamedTestProgram": {
+      "commandName": "Project",
+      "commandLineArgs": "test --duration 5 --serial-number 24 --settings \"13.9, 1000, 930, 23290, 22, 20, 1, true, high, 1, 12.0\""
+    }
+  }
+}

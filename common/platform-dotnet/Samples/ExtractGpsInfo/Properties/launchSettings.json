@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExtractGpsInfo": {
+      "commandName": "Project",
+      "commandLineArgs": "--summarize apath.aris"
+    }
+  }
+}

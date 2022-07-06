@@ -38,7 +38,7 @@
     <None Include="..\..\protobuf\frame_stream.proto" Link="frame_stream.proto" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.15.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.20.1" />
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="call &quot;$(ProjectDir)build-protobuf.cmd&quot;&#xD;&#xA;" />
