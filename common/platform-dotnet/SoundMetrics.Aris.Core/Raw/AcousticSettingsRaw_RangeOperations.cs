@@ -106,6 +106,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 this AcousticSettingsRaw settings,
                 ObservedConditions observedConditions,
                 Distance requestedEnd,
+                SampleCountMode sampleCountMode,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
@@ -136,24 +137,95 @@ namespace SoundMetrics.Aris.Core.Raw
             // rountrip time over the window
             var salinity = settings.Salinity;
             var newWindowRoughTimeOfFlight = 2 * windowLength / observedConditions.SpeedOfSound(salinity);
-            var newSamplePeriod =
-                (newWindowRoughTimeOfFlight / settings.SampleCount)
-                    .RoundToMicroseconds()
-                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
-
-            if (newSamplePeriod == settings.SamplePeriod)
-            {
-                // Nothing to do.
-                return settings;
-            }
 
             var autoFlags = GetAutoFlags(useAutoFrequency);
-            return
-                settings
-                    .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, autoFlags)
-                    .WithMaxFrameRate(useMaxFrameRate)
-                    .ApplyAllConstraints();
+            var newSettings =
+                sampleCountMode == SampleCountMode.AllowSampleCountChange
+                    ? MoveAllowingChangeToSampleCount()
+                    : MoveWithNoChangeToSampleCount();
+
+            if (newSettings == settings)
+            {
+                return settings;
+            }
+            else
+            {
+                return
+                    newSettings
+                        .WithAutomaticSettings(observedConditions, autoFlags)
+                        .WithMaxFrameRate(useMaxFrameRate)
+                        .ApplyAllConstraints();
+            }
+
+            AcousticSettingsRaw MoveWithNoChangeToSampleCount()
+            {
+                var newSamplePeriod =
+                    (newWindowRoughTimeOfFlight / settings.SampleCount)
+                        .RoundToMicroseconds()
+                        .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
+
+                if (newSamplePeriod == settings.SamplePeriod)
+                {
+                    // Nothing to do.
+                    return settings;
+                }
+
+                return
+                    settings
+                        .WithSamplePeriod(newSamplePeriod, useMaxFrameRate);
+            }
+
+            AcousticSettingsRaw MoveAllowingChangeToSampleCount()
+            {
+                var nominalSampleCount =
+                    CalculateNominalSampleCount(
+                        settings.SamplePeriod,
+                        windowStart,
+                        requestedEnd,
+                        observedConditions.SpeedOfSound(settings.Salinity),
+                        out var _);
+                return settings.WithSampleCount(nominalSampleCount);
+            }
+        }
+
+        private static int CalculateNominalSampleCount(
+            FineDuration samplePeriod,
+            Distance windowStart,
+            Distance windowEnd,
+            Velocity speedOfSound,
+            out Distance correctedWindowEnd)
+        {
+            double sampleCount = CalculateSampleCount();
+            correctedWindowEnd = windowStart + CalculatedCorrectedWindowLength();
+            return (int)sampleCount;
+
+            double CalculateSampleCount()
+            {
+                /*
+                 * samplePeriod = 2 * windowLength / (sspd * sampleCount)
+                 *
+                 * samplePeriod * sampleCount = 2 * windowLength / sspd
+                 *
+                 * sampleCount = 2 * windowLength / (sspd * samplePeriod)
+                 *
+                 * [round]
+                 */
+                var windowLength = windowEnd - windowStart;
+                return Math.Round(
+                    2 * windowLength / (speedOfSound * samplePeriod));
+            }
+
+            Distance CalculatedCorrectedWindowLength()
+            {
+                /*
+                 * samplePeriod = 2 * windowLength / (sspd * sampleCount)
+                 *
+                 *      so
+                 *
+                 * windowLength = samplePeriod * sspd * sampleCount / 2
+                 */
+                return samplePeriod * speedOfSound * sampleCount / 2.0;
+            }
         }
 
         private static AutomaticAcousticSettings GetAutoFlags(
@@ -183,7 +255,7 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            // Plan: Don't change the sample count, just adjust the sampel start delay.
+            // Plan: Don't change the sample count, just adjust the sample start delay.
 
             var sysCfg = settings.SystemType.GetConfiguration();
             var windowStart = settings.WindowStart(observedConditions);
