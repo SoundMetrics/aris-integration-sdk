@@ -2,6 +2,14 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    /*
+     * NOTE
+     *
+     * These enum values are spelled in the batch files located in
+     * ARIScope\automation-streamdeck\. The compiler will not catch
+     * the error if you rename them here without changing the batch
+     * files.
+     */
     public enum WindowOperation
     {
         /// <summary>
