@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -13,13 +14,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
-            if (rangeOperationMap.TryGetValue(operation, out var adjustFn))
+            if (rangeOperationMap.TryGetValue(operation, out var op))
             {
-                return adjustFn(
-                    this,
-                    observedConditions,
-                    useMaxFrameRate,
-                    useAutoFrequency);
+                return op(this, observedConditions, useMaxFrameRate, useAutoFrequency);
             }
             else
             {
@@ -27,24 +24,20 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        private static readonly Dictionary<WindowOperation, AdjustRangeFn>
-            rangeOperationMap = BuildRangeOperationMap();
+        private static readonly ReadOnlyDictionary<WindowOperation, AdjustRangeFn>
+            rangeOperationMap = new ReadOnlyDictionary<WindowOperation, AdjustRangeFn>(
+                new Dictionary<WindowOperation, AdjustRangeFn>
+                {
+                    { WindowOperation.SetShortWindow, WindowOperations.ToShortWindow },
+                    { WindowOperation.SetMediumWindow, WindowOperations.ToMediumWindow },
+                    { WindowOperation.SetLongWindow, WindowOperations.ToLongWindow },
 
-        private static Dictionary<WindowOperation, AdjustRangeFn> BuildRangeOperationMap()
-        {
-            return new Dictionary<WindowOperation, AdjustRangeFn>
-            {
-                { WindowOperation.SetShortWindow, WindowOperations.ToShortWindow },
-                { WindowOperation.SetMediumWindow, WindowOperations.ToMediumWindow },
-                { WindowOperation.SetLongWindow, WindowOperations.ToLongWindow },
-
-                { WindowOperation.MoveWindowStartCloser, WindowOperations.MoveWindowStartCloser },
-                { WindowOperation.MoveWindowStartFarther, WindowOperations.MoveWindowStartFarther },
-                { WindowOperation.MoveWindowEndCloser, WindowOperations.MoveWindowEndCloser },
-                { WindowOperation.MoveWindowEndFarther, WindowOperations.MoveWindowEndFarther },
-                { WindowOperation.SlideWindowCloser, WindowOperations.SlideWindowCloser },
-                { WindowOperation.SlideWindowFarther, WindowOperations.SlideWindowFarther },
-            };
-        }
+                    { WindowOperation.MoveWindowStartCloser, WindowOperations.MoveWindowStartCloser },
+                    { WindowOperation.MoveWindowStartFarther, WindowOperations.MoveWindowStartFarther },
+                    { WindowOperation.MoveWindowEndCloser, WindowOperations.MoveWindowEndCloser },
+                    { WindowOperation.MoveWindowEndFarther, WindowOperations.MoveWindowEndFarther },
+                    { WindowOperation.SlideWindowCloser, WindowOperations.SlideWindowCloser },
+                    { WindowOperation.SlideWindowFarther, WindowOperations.SlideWindowFarther },
+                });
     }
 }
