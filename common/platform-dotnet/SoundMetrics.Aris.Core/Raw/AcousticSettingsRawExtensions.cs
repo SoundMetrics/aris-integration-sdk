@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using System;
 using System.Collections.Generic;
@@ -9,8 +9,6 @@ using System.Text;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using static AcousticSettingsOracle;
-
     public static class AcousticSettingsRawExtensions
     {
         internal static Distance CalculateWindowStart(
@@ -42,15 +40,22 @@ namespace SoundMetrics.Aris.Core.Raw
             Salinity salinity)
             => samplePeriod * observedConditions.SpeedOfSound(salinity) / 2;
 
-        internal static Velocity SpeedOfSound(
+        public static Velocity SpeedOfSound(
             this ObservedConditions observedConditions,
             Salinity salinity)
-            =>
+        {
+            if (observedConditions is null)
+            {
+                throw new ArgumentNullException(nameof(observedConditions));
+            }
+
+            return
                 Velocity.FromMetersPerSecond(
                     AcousticMath.CalculateSpeedOfSound(
                         observedConditions.WaterTemp,
                         observedConditions.Depth,
                         (double)salinity));
+        }
 
         //---------------------------------------------------------------------
         // Logging support

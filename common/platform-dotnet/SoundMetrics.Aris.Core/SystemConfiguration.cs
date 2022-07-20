@@ -36,7 +36,7 @@ namespace SoundMetrics.Aris.Core
 #pragma warning disable CA1822 // does not access instance data and can be marked as static
         // May eventually use instance data; don't mess up APIs just for warnings
 
-        internal ValueRange<int> SampleCountDeviceLimits => sampleCountDeviceLimits;
+        public ValueRange<int> SampleCountDeviceLimits => sampleCountDeviceLimits;
 
         internal ValueRange<int> PulseWidthDeviceLimits => pulseWidthDeviceLimits;
 

@@ -27,7 +27,7 @@ namespace SoundMetrics.Aris.Core
         //internal double PulseWidthMultiplierLow { get; set; }
         //internal double PulseWidthMultiplierHigh { get; set; }
 
-        internal PulseWidthLimits GetPulseWidthLimitsFor(Frequency frequency)
+        public PulseWidthLimits GetPulseWidthLimitsFor(Frequency frequency)
             => frequency == Frequency.Low
                 ? PulseWidthLimitsLowFrequency
                 : PulseWidthLimitsHighFrequency;

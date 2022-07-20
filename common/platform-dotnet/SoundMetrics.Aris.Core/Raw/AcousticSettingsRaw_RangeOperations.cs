@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    public static class AcousticSettingsRawRangeOperations
+    internal static class AcousticSettingsRawRangeOperations
     {
         /// <summary>
         /// Moves the range start, attempting to enclose the requested distance.

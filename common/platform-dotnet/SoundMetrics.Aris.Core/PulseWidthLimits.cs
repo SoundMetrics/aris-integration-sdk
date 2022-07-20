@@ -4,7 +4,7 @@ namespace SoundMetrics.Aris.Core
 {
     public sealed class PulseWidthLimits
     {
-        public PulseWidthLimits(
+        internal PulseWidthLimits(
             in (int Min, int Max) limits,
             int narrow,
             int medium,

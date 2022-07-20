@@ -1,7 +1,8 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    using System;
     using static FineDuration;
 
     // Constraint implementations.
@@ -12,15 +13,33 @@ namespace SoundMetrics.Aris.Core.Raw
     // For example, "what ping modes are available for this ARIS?" uses a
     // SystemConfiguration value; however, "what is the current ping mode"
     // refers to a user input.
-    internal static class AcousticSettingsConstraints
+    public static class AcousticSettingsConstraints
     {
         public static AcousticSettingsRaw ApplyAllConstraints(this AcousticSettingsRaw settings)
-            => AcousticSettingsOracle.ApplyAllConstraints(settings);
+        {
+            if (settings is null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
 
-        internal static Rate ConstrainFrameRate(
+            return AcousticSettingsOracle.ApplyAllConstraints(settings);
+        }
+
+        public static Rate ConstrainFrameRate(
             Rate requestedFrameRate,
             AcousticSettingsRaw acousticSettings)
-            =>
+        {
+            if (requestedFrameRate < AcousticSettingsRaw.MinimumFrameRate)
+            {
+                throw new ArgumentOutOfRangeException(nameof(requestedFrameRate));
+            }
+
+            if (acousticSettings is null)
+            {
+                throw new ArgumentNullException(nameof(acousticSettings));
+            }
+
+            return
                 AcousticSettingsConstraints.ConstrainFrameRate(
                     requestedFrameRate,
                     acousticSettings.SystemType.GetConfiguration(),
@@ -30,6 +49,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     acousticSettings.SamplePeriod,
                     acousticSettings.AntiAliasing,
                     acousticSettings.InterpacketDelay);
+        }
 
 
         internal static Rate ConstrainFrameRate(

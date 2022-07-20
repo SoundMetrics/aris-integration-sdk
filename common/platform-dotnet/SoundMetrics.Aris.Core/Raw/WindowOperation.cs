@@ -10,6 +10,10 @@ namespace SoundMetrics.Aris.Core.Raw
      * the error if you rename them here without changing the batch
      * files.
      */
+
+    /// <summary>
+    /// Simple window operations.
+    /// </summary>
     public enum WindowOperation
     {
         /// <summary>
