@@ -21,8 +21,15 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance windowStart,
             Salinity salinity,
             ObservedConditions observedConditions)
+            => CalculateSampleStartDelay(
+                    windowStart,
+                    observedConditions.SpeedOfSound(salinity));
+
+        internal static FineDuration CalculateSampleStartDelay(
+            Distance windowStart,
+            Velocity speedOfSound)
         {
-            return 2 * (windowStart / observedConditions.SpeedOfSound(salinity));
+            return 2 * windowStart / speedOfSound;
         }
     }
 }
