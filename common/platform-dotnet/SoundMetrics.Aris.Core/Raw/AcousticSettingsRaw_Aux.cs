@@ -128,7 +128,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     Round(
                         Min(20, Max(4, slope * (windowEnd.Meters + offset))));
             }
-            if (systemType == SystemType.Aris1200)
+            else if (systemType == SystemType.Aris1200)
             {
                 var slope = 0.5;
                 var offset = 0.0;
