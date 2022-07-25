@@ -18,6 +18,11 @@ namespace SoundMetrics.Aris.Core
             Maximum = max;
         }
 
+        public ValueRange(in (T min, T max) range)
+            : this(range.min, range.max)
+        {
+        }
+
         public T Minimum { get; private set; }
         public T Maximum { get; private set; }
 
@@ -103,6 +108,10 @@ namespace SoundMetrics.Aris.Core
             => Greater(
                 range.Minimum,
                 Lesser(range.Maximum, t));
+
+        public static T ConstrainTo<T>(this T t, in (T min, T max) range)
+            where T : struct, IComparable<T>
+            => t.ConstrainTo<T>(new ValueRange<T>(range));
 
         public static ValueRange<T> Intersect<T>(
             this in ValueRange<T> a,
