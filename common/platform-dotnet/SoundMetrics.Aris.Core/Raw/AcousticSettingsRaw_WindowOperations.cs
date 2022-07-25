@@ -10,13 +10,19 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         public AcousticSettingsRaw AdjustRange(
             WindowOperation operation,
+            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
             if (rangeOperationMap.TryGetValue(operation, out var op))
             {
-                return op(this, observedConditions, useMaxFrameRate, useAutoFrequency);
+                return op(
+                    this,
+                    guidedSettingsMode,
+                    observedConditions,
+                    useMaxFrameRate,
+                    useAutoFrequency);
             }
             else
             {
@@ -32,7 +38,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     { WindowOperation.SetMediumWindow, WindowOperations.ToMediumWindow },
                     { WindowOperation.SetLongWindow, WindowOperations.ToLongWindow },
 
-                    { WindowOperation.MoveWindowStartCloser, WindowOperations.MoveWindowStartCloser },
+                    { WindowOperation.MoveWindowStartCloser, WindowOperations.MoveWindowStartCloser},
                     { WindowOperation.MoveWindowStartFarther, WindowOperations.MoveWindowStartFarther },
                     { WindowOperation.MoveWindowEndCloser, WindowOperations.MoveWindowEndCloser },
                     { WindowOperation.MoveWindowEndFarther, WindowOperations.MoveWindowEndFarther },

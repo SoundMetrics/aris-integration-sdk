@@ -2,94 +2,72 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsRawCalculations;
+    using static AcousticSettingsRaw_Aux;
 
     internal delegate AcousticSettingsRaw AdjustRangeFn(
         AcousticSettingsRaw settings,
+        GuidedSettingsMode guidedSettingsMode,
         ObservedConditions observedConditions,
         bool useMaxFrameRate,
         bool useAutoFrequency);
 
     internal static class WindowOperations
     {
-        private struct FixedWindowSize
-        {
-            public Distance WindowStart;
-            public Distance WindowEnd;
-
-            public FixedWindowSize(Distance windowStart, Distance windowEnd)
-            {
-                WindowStart = windowStart;
-                WindowEnd = windowEnd;
-            }
-
-            public FixedWindowSize(float windowStart, float windowEnd)
-            {
-                WindowStart = (Distance)windowStart;
-                WindowEnd = (Distance)windowEnd;
-            }
-
-            public override string ToString()
-                => $"WindowStart=[{WindowStart}]; WindowEnd=[{WindowEnd}]";
-        }
-
         private struct SystemTypeWindowSizing
         {
-            public FixedWindowSize FixedWindowSizeShort;
-            public FixedWindowSize FixedWindowSizeMedium;
-            public FixedWindowSize FixedWindowSizeLong;
+            public WindowBounds FixedWindowSizeShort;
+            public WindowBounds FixedWindowSizeMedium;
+            public WindowBounds FixedWindowSizeLong;
             public SystemConfiguration SystemConfiguration;
             public float StepwisePercent;
         }
 
-        private static readonly Dictionary<SystemType, SystemTypeWindowSizing>
-            windowSizingInfo = GetFixedWindowSizes();
-
-        private static Dictionary<SystemType, SystemTypeWindowSizing> GetFixedWindowSizes()
-        {
-            return new Dictionary<SystemType, SystemTypeWindowSizing>
-            {
+        private static readonly ReadOnlyDictionary<SystemType, SystemTypeWindowSizing>
+            windowSizingInfo = new ReadOnlyDictionary<SystemType, SystemTypeWindowSizing>(
+                new Dictionary<SystemType, SystemTypeWindowSizing>
                 {
-                    SystemType.Aris1200,
-                    new SystemTypeWindowSizing
                     {
-                        FixedWindowSizeShort = new FixedWindowSize(3, 15),
-                        FixedWindowSizeMedium = new FixedWindowSize(5, 60),
-                        FixedWindowSizeLong = new FixedWindowSize(15, 60),
-                        SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris1200),
-                        StepwisePercent = 10,
-                    }
-                },
-                {
-                    SystemType.Aris1800,
-                    new SystemTypeWindowSizing
+                        SystemType.Aris1200,
+                        new SystemTypeWindowSizing
+                        {
+                            FixedWindowSizeShort = new WindowBounds(3, 15),
+                            FixedWindowSizeMedium = new WindowBounds(5, 60),
+                            FixedWindowSizeLong = new WindowBounds(15, 60),
+                            SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris1200),
+                            StepwisePercent = 10,
+                        }
+                    },
                     {
-                        FixedWindowSizeShort = new FixedWindowSize(1, 7.5f),
-                        FixedWindowSizeMedium = new FixedWindowSize(3, 15),
-                        FixedWindowSizeLong = new FixedWindowSize(5, 30),
-                        SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris1800),
-                        StepwisePercent = 10,
-                    }
-                },
-                {
-                    SystemType.Aris3000,
-                    new SystemTypeWindowSizing
+                        SystemType.Aris1800,
+                        new SystemTypeWindowSizing
+                        {
+                            FixedWindowSizeShort = new WindowBounds(1, 7.5f),
+                            FixedWindowSizeMedium = new WindowBounds(3, 15),
+                            FixedWindowSizeLong = new WindowBounds(5, 30),
+                            SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris1800),
+                            StepwisePercent = 10,
+                        }
+                    },
                     {
-                        FixedWindowSizeShort = new FixedWindowSize(1, 5),
-                        FixedWindowSizeMedium = new FixedWindowSize(2, 10),
-                        FixedWindowSizeLong = new FixedWindowSize(4, 15),
-                        SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris3000),
-                        StepwisePercent = 10,
-                    }
-                },
-            };
-        }
-
-        public static AcousticSettingsRaw ToShortWindow(
+                        SystemType.Aris3000,
+                        new SystemTypeWindowSizing
+                        {
+                            FixedWindowSizeShort = new WindowBounds(1, 5),
+                            FixedWindowSizeMedium = new WindowBounds(2, 10),
+                            FixedWindowSizeLong = new WindowBounds(4, 15),
+                            SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris3000),
+                            StepwisePercent = 10,
+                        }
+                    },
+                });
+        internal static AcousticSettingsRaw ToShortWindow(
             AcousticSettingsRaw settings,
+            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
             bool useAutoFrequency)
@@ -99,15 +77,16 @@ namespace SoundMetrics.Aris.Core.Raw
             var sizingInfo = windowSizingInfo[settings.SystemType];
             return ToFixedWindow(
                 settings,
+                guidedSettingsMode,
                 observedConditions,
-                sizingInfo.SystemConfiguration,
                 sizingInfo.FixedWindowSizeShort,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw ToMediumWindow(
+        internal static AcousticSettingsRaw ToMediumWindow(
             AcousticSettingsRaw settings,
+            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
             bool useAutoFrequency)
@@ -117,15 +96,16 @@ namespace SoundMetrics.Aris.Core.Raw
             var sizingInfo = windowSizingInfo[settings.SystemType];
             return ToFixedWindow(
                 settings,
+                guidedSettingsMode,
                 observedConditions,
-                sizingInfo.SystemConfiguration,
                 sizingInfo.FixedWindowSizeMedium,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw ToLongWindow(
+        internal static AcousticSettingsRaw ToLongWindow(
             AcousticSettingsRaw settings,
+            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
             bool useAutoFrequency)
@@ -135,32 +115,34 @@ namespace SoundMetrics.Aris.Core.Raw
             var sizingInfo = windowSizingInfo[settings.SystemType];
             return ToFixedWindow(
                 settings,
+                guidedSettingsMode,
                 observedConditions,
-                sizingInfo.SystemConfiguration,
                 sizingInfo.FixedWindowSizeLong,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
 
-        private static AcousticSettingsRaw ToFixedWindow(
+        internal static AcousticSettingsRaw ToFixedWindow(
             AcousticSettingsRaw currentSettings,
+            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
-            SystemConfiguration systemConfiguration,
-            in FixedWindowSize windowSize,
+            in WindowBounds windowBounds,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+#if NOT_HERE
             var original = currentSettings;
             var sspd = observedConditions.SpeedOfSound(currentSettings.Salinity);
 
             var samplePeriod =
-                CalculateSamplePeriod(windowSize.WindowStart, windowSize.WindowEnd, original.SampleCount, sspd)
+                CalculateSamplePeriod(windowBounds.WindowStart, windowBounds.WindowEnd, original.SampleCount, sspd)
                     .ConstrainTo(systemConfiguration.RawConfiguration.SamplePeriodLimits);
-            var sampleStartDelay = 2 * windowSize.WindowStart / sspd;
+            var sampleStartDelay = 2 * windowBounds.WindowStart / sspd;
 
             return
                 BuildNewWindowSettings(
                     original,
+                    guidedSettingsMode,
                     observedConditions,
                     sampleStartDelay,
                     samplePeriod,
@@ -169,10 +151,21 @@ namespace SoundMetrics.Aris.Core.Raw
                     automateFocusPosition: true,
                     useMaxFrameRate,
                     useAutoFrequency);
-        }
+#else
 
-        public static Distance TimeToDistance(FineDuration duration, Velocity sspd)
-            => sspd * duration;
+            // ### REVIEW Naively replacing the above code with a call into
+            // ### REVIEW this new code.
+            return AcousticSettingsRawRangeOperations
+                    .GetSettingsForSpecificRange(
+                        currentSettings,
+                        guidedSettingsMode,
+                        observedConditions,
+                        windowBounds,
+                        useMaxFrameRate,
+                        useAutoFrequency);
+
+#endif
+        }
 
         private static FineDuration CalculateSamplePeriod(
             Distance windowStart,
@@ -219,7 +212,6 @@ namespace SoundMetrics.Aris.Core.Raw
                         out var _,
                         out var _));
 
-            var pulseWidth = original.PulseWidth;
             var frequency = original.Frequency;
             var receiverGain = original.ReceiverGain;
 
@@ -228,6 +220,14 @@ namespace SoundMetrics.Aris.Core.Raw
             var windowLength =
                 CalculateWindowLength(
                     original.SampleCount, samplePeriod, original.Salinity, observedConditions);
+            var windowEnd = windowStart + windowLength;
+
+            var pulseWidth =
+                CalculateAutoPulseWidth(
+                    original.SystemType,
+                    observedConditions.WaterTemp,
+                    original.Salinity,
+                    windowEnd);
 
             var focusPosition =
                 automateFocusPosition
@@ -268,7 +268,19 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static readonly FineDuration WindowTerminusAdjustment = FineDuration.FromMicroseconds(2);
 
-        public static AcousticSettingsRaw MoveWindowStartCloser(
+        internal static AcousticSettingsRaw MoveWindowStartCloser(
+            AcousticSettingsRaw settings,
+            GuidedSettingsMode _,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+            => MoveWindowStartCloser(
+                settings,
+                observedConditions,
+                useMaxFrameRate,
+                useAutoFrequency);
+
+        internal static AcousticSettingsRaw MoveWindowStartCloser(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -316,7 +328,19 @@ namespace SoundMetrics.Aris.Core.Raw
             return 2 * (duration / sampleCount);
         }
 
-        public static AcousticSettingsRaw MoveWindowStartFarther(
+        internal static AcousticSettingsRaw MoveWindowStartFarther(
+            AcousticSettingsRaw settings,
+            GuidedSettingsMode _,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+            => MoveWindowStartFarther(
+                settings,
+                observedConditions,
+                useMaxFrameRate,
+                useAutoFrequency);
+
+        internal static AcousticSettingsRaw MoveWindowStartFarther(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -358,7 +382,19 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw MoveWindowEndCloser(
+        internal static AcousticSettingsRaw MoveWindowEndCloser(
+            AcousticSettingsRaw settings,
+            GuidedSettingsMode _,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+            => MoveWindowEndCloser(
+                settings,
+                observedConditions,
+                useMaxFrameRate,
+                useAutoFrequency);
+
+        internal static AcousticSettingsRaw MoveWindowEndCloser(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -391,11 +427,24 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
+        internal static AcousticSettingsRaw MoveWindowEndFarther(
+            AcousticSettingsRaw settings,
+            GuidedSettingsMode _,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+            => MoveWindowEndFarther(
+                settings,
+                observedConditions,
+                useMaxFrameRate,
+                useAutoFrequency);
+
+
         /// <summary>
         /// Moves the range end outward in a chunk-wise fashion.
         /// For use with streamdeck-style operations.
         /// </summary>
-        public static AcousticSettingsRaw MoveWindowEndFarther(
+        internal static AcousticSettingsRaw MoveWindowEndFarther(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -428,7 +477,19 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw SlideWindowCloser(
+        internal static AcousticSettingsRaw SlideWindowCloser(
+            AcousticSettingsRaw settings,
+            GuidedSettingsMode _,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+            => SlideWindowCloser(
+                settings,
+                observedConditions,
+                useMaxFrameRate,
+                useAutoFrequency);
+
+        internal static AcousticSettingsRaw SlideWindowCloser(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
@@ -463,7 +524,19 @@ namespace SoundMetrics.Aris.Core.Raw
                 useAutoFrequency);
         }
 
-        public static AcousticSettingsRaw SlideWindowFarther(
+        internal static AcousticSettingsRaw SlideWindowFarther(
+            AcousticSettingsRaw settings,
+            GuidedSettingsMode _,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+            => SlideWindowFarther(
+                settings,
+                observedConditions,
+                useMaxFrameRate,
+                useAutoFrequency);
+
+        internal static AcousticSettingsRaw SlideWindowFarther(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             bool useMaxFrameRate,

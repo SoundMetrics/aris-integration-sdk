@@ -175,6 +175,7 @@ namespace SoundMetrics.Aris.Core
                     var defaultSettings = makeDefaultSettings(observedConditions);
                     return WindowOperations.ToMediumWindow(
                         defaultSettings,
+                        GuidedSettingsMode.FixedSampleCount,
                         observedConditions,
                         useMaxFrameRate: true,
                         useAutoFrequency: true);

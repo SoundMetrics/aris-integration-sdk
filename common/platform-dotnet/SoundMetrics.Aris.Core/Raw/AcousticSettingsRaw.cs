@@ -54,6 +54,32 @@ namespace SoundMetrics.Aris.Core.Raw
             MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
         }
 
+        internal static AcousticSettingsRaw CopyRawWith(
+            AcousticSettingsRaw settings,
+            Frequency? frequency = null,
+            FineDuration? sampleStartDelay = null,
+            FineDuration? samplePeriod = null,
+            int? sampleCount = null,
+            FineDuration? pulseWidth = null)
+        {
+            return new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    sampleCount ?? settings.SampleCount,
+                    sampleStartDelay ?? settings.SampleStartDelay,
+                    samplePeriod ?? settings.SamplePeriod,
+                    pulseWidth ?? settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    frequency ?? settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    settings.Salinity);
+        }
+
         [DataMember]
         public SystemType SystemType { get; private set; }
         [DataMember]
@@ -107,6 +133,17 @@ namespace SoundMetrics.Aris.Core.Raw
             => WindowStart(observedConditions) + WindowLength(observedConditions);
         public Distance WindowLength(ObservedConditions observedConditions)
             => this.CalculateWindowLength(observedConditions, Salinity);
+        public WindowBounds WindowBounds(ObservedConditions observedConditions)
+            => new WindowBounds(WindowStart(observedConditions), WindowEnd(observedConditions));
+
+        public (Distance WindowStart, Distance WindowEnd, Distance WindowLength)
+            WindowBoundsAndLength(ObservedConditions observedConditions)
+        {
+            var (windowStart, windowEnd) = WindowBounds(observedConditions);
+            var windowLength = windowEnd - windowStart;
+            return (windowStart, windowEnd, windowLength);
+        }
+
         public Distance WindowMidPoint(ObservedConditions observedConditions)
             => WindowStart(observedConditions)+ (WindowLength(observedConditions) / 2);
         public Distance SampleResolution(ObservedConditions observedConditions)

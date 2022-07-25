@@ -46,6 +46,18 @@ namespace SoundMetrics.Aris.Core.Raw
             return baseDistance + ((temperature - referenceTemp) * slope);
         }
 
+        internal static Frequency CalculateFrequencyPerWindowEnd(
+            SystemType systemType,
+            Temperature temperature,
+            Salinity salinity,
+            Distance windowEnd)
+        {
+            var crossover =
+                CalculateFrequencyCrossoverDistance(systemType, temperature, salinity);
+            return windowEnd < crossover ? Frequency.High : Frequency.Low;
+        }
+
+
         public static FineDuration CalculateAutoPulseWidth(
             SystemType systemType,
             Temperature temperature,
