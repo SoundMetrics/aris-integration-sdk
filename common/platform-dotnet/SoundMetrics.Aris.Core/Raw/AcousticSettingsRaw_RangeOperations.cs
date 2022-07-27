@@ -93,7 +93,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // encloses the requested window start without moving the end?
 
             var (windowStart, windowEnd, windowLength) =
-                settings.WindowBoundsAndLength(observedConditions);
+                settings.WindowBounds(observedConditions);
 
             if (windowLength <= Distance.Zero)
             {
@@ -240,7 +240,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var sysCfg = settings.SystemType.GetConfiguration();
             var (windowStart, windowEnd, windowLength) =
-                settings.WindowBoundsAndLength(observedConditions);
+                settings.WindowBounds(observedConditions);
 
             if (windowLength <= Distance.Zero)
             {
@@ -430,7 +430,7 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            var originalSize = settings.WindowBoundsAndLength(observedConditions);
+            var originalSize = settings.WindowBounds(observedConditions);
             var sysCfg = settings.SystemType.GetConfiguration();
 
             return guidedSettingsMode

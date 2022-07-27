@@ -8,6 +8,7 @@ namespace SoundMetrics.Aris.Core
     {
         public Distance WindowStart { get; }
         public Distance WindowEnd { get; }
+        public Distance WindowLength => WindowEnd - WindowStart;
 
         public WindowBounds(Distance windowStart, Distance windowEnd)
         {
@@ -25,6 +26,16 @@ namespace SoundMetrics.Aris.Core
         {
             windowStart = WindowStart;
             windowEnd = WindowEnd;
+        }
+
+        public void Deconstruct(
+            out Distance windowStart,
+            out Distance windowEnd,
+            out Distance windowLength)
+        {
+            windowStart = WindowStart;
+            windowEnd = WindowEnd;
+            windowLength = WindowLength;
         }
 
         public override string ToString()

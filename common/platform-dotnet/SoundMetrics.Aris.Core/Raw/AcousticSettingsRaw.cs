@@ -136,14 +136,6 @@ namespace SoundMetrics.Aris.Core.Raw
         public WindowBounds WindowBounds(ObservedConditions observedConditions)
             => new WindowBounds(WindowStart(observedConditions), WindowEnd(observedConditions));
 
-        public (Distance WindowStart, Distance WindowEnd, Distance WindowLength)
-            WindowBoundsAndLength(ObservedConditions observedConditions)
-        {
-            var (windowStart, windowEnd) = WindowBounds(observedConditions);
-            var windowLength = windowEnd - windowStart;
-            return (windowStart, windowEnd, windowLength);
-        }
-
         public Distance WindowMidPoint(ObservedConditions observedConditions)
             => WindowStart(observedConditions)+ (WindowLength(observedConditions) / 2);
         public Distance SampleResolution(ObservedConditions observedConditions)
