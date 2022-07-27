@@ -58,11 +58,10 @@ namespace SoundMetrics.Aris.Core.Raw
                         out var _);
 
             AcousticSettingsRaw SelectSpecificRange_Free()
-                => WindowOperations.ToFixedWindow(
+                => CalculateFreeSettingsWithRange(
                         settings,
-                        guidedSettingsMode,
-                        observedConditions,
                         constrainedWindowBounds,
+                        observedConditions,
                         useMaxFrameRate,
                         useAutoFrequency);
         }
@@ -647,6 +646,39 @@ namespace SoundMetrics.Aris.Core.Raw
                 var samplePeriodPerSampleCount = (2 * windowlength / (sspd * sampleCount)).RoundToMicroseconds();
                 return samplePeriodPerSampleCount;
             }
+        }
+
+        internal static AcousticSettingsRaw
+            CalculateFreeSettingsWithRange(
+                this AcousticSettingsRaw settings,
+                in WindowBounds requestedWindow,
+                ObservedConditions observedConditions,
+                bool useMaxFrameRate,
+                bool useAutoFrequency)
+        {
+            var sysCfg = settings.SystemType.GetConfiguration();
+            var constrainedWindowBounds =
+                GetConstrainedWindowBounds(sysCfg, requestedWindow);
+
+            var (windowStart, windowEnd) = constrainedWindowBounds;
+            var sspd = observedConditions.SpeedOfSound(settings.Salinity);
+
+            var samplePeriod =
+                CalculateSamplePeriod(windowStart, windowEnd, settings.SampleCount, sspd)
+                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
+            var sampleStartDelay = 2 * windowStart / sspd;
+
+            return
+                WindowOperations.BuildNewWindowSettings(
+                    settings,
+                    observedConditions,
+                    sampleStartDelay,
+                    samplePeriod,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    automateFocusPosition: true,
+                    useMaxFrameRate,
+                    useAutoFrequency);
         }
 
         private static Distance CalculateWindowEnd(

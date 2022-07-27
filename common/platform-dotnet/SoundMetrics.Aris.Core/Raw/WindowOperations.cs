@@ -167,16 +167,6 @@ namespace SoundMetrics.Aris.Core.Raw
 #endif
         }
 
-        private static FineDuration CalculateSamplePeriod(
-            Distance windowStart,
-            Distance windowEnd,
-            int sampleCount,
-            Velocity sspd)
-            =>
-                // (2 * WL) / (N * SSPD)
-                ((2 * (windowEnd - windowStart)) / (sampleCount * sspd))
-                    .Ceiling;
-
         /// <summary>
         /// Builds acoustic settings using the new sample start delay and sample period.
         /// Sample count is meant to always be constant.
@@ -185,7 +175,7 @@ namespace SoundMetrics.Aris.Core.Raw
         /// <param name="sampleStartDelay">The new sample start delay.</param>
         /// <param name="samplePeriod">The new sample period.</param>
         /// <returns>A ready-to-use AcousticSettingsRaw.</returns>
-        private static
+        internal static
             AcousticSettingsRaw BuildNewWindowSettings(
                 AcousticSettingsRaw original,
                 ObservedConditions observedConditions,

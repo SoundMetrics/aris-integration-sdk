@@ -153,5 +153,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 throw new ArgumentException($"Unhandled system type: [{systemType}]");
             }
         }
+
+        public static FineDuration CalculateSamplePeriod(
+            Distance windowStart,
+            Distance windowEnd,
+            int sampleCount,
+            Velocity sspd)
+            =>
+                // (2 * WL) / (N * SSPD)
+                ((2 * (windowEnd - windowStart)) / (sampleCount * sspd))
+                    .Ceiling;
     }
 }
