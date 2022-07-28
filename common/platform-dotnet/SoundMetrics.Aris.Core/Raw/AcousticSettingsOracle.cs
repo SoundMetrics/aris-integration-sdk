@@ -67,8 +67,11 @@ namespace SoundMetrics.Aris.Core.Raw
             return allowed;
         }
 
-        internal static AcousticSettingsRaw ApplyAllConstraints(AcousticSettingsRaw settings)
+        internal static AcousticSettingsRaw ApplyAllConstraints(
+            this AcousticSettingsRaw settings)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+
             var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
 
             var settings2 = UpdateFrameRate(
