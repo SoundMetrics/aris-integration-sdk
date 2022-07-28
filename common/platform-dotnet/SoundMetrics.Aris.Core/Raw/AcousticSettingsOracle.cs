@@ -301,9 +301,9 @@ namespace SoundMetrics.Aris.Core.Raw
             return result;
         }
 
-        public static AcousticSettingsRaw WithFocusPosition(
+        public static AcousticSettingsRaw WithFocusDistance(
             this AcousticSettingsRaw settings,
-            Distance newFocusPosition)
+            Distance newFocusDistance)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
@@ -320,13 +320,13 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Frequency,
                     settings.Enable150Volts,
                     settings.ReceiverGain,
-                    newFocusPosition,
+                    newFocusDistance,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity)
                 .ApplyAllConstraints();
 
-            LogSettingsChangeResult($"{nameof(WithFocusPosition)}", settings, result);
+            LogSettingsChangeResult($"{nameof(WithFocusDistance)}", settings, result);
 
             return result;
         }
@@ -503,7 +503,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if ((automaticFlags & AutomaticAcousticSettings.FocusPosition) != 0)
             {
                 var windowMidPoint = settings.WindowMidPoint(observedConditions);
-                settings = settings.WithFocusPosition(windowMidPoint);
+                settings = settings.WithFocusDistance(windowMidPoint);
             }
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
