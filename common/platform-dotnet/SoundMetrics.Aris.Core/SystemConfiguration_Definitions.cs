@@ -173,7 +173,7 @@ namespace SoundMetrics.Aris.Core
                 AcousticSettingsRaw MakeSettings(ObservedConditions observedConditions)
                 {
                     var defaultSettings = makeDefaultSettings(observedConditions);
-                    return WindowOperations.ToMediumWindow(
+                    return ChangeWindow.ToMediumWindow(
                         defaultSettings,
                         GuidedSettingsMode.FixedSampleCount,
                         observedConditions,

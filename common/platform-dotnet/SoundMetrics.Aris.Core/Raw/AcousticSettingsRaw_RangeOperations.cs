@@ -669,7 +669,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var sampleStartDelay = 2 * windowStart / sspd;
 
             return
-                WindowOperations.BuildNewWindowSettings(
+                ChangeWindow.BuildNewWindowSettings(
                     settings,
                     observedConditions,
                     sampleStartDelay,

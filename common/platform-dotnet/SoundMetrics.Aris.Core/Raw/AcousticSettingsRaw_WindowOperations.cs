@@ -34,16 +34,16 @@ namespace SoundMetrics.Aris.Core.Raw
             rangeOperationMap = new ReadOnlyDictionary<WindowOperation, AdjustRangeFn>(
                 new Dictionary<WindowOperation, AdjustRangeFn>
                 {
-                    { WindowOperation.SetShortWindow, WindowOperations.ToShortWindow },
-                    { WindowOperation.SetMediumWindow, WindowOperations.ToMediumWindow },
-                    { WindowOperation.SetLongWindow, WindowOperations.ToLongWindow },
+                    { WindowOperation.SetShortWindow, ChangeWindow.ToShortWindow },
+                    { WindowOperation.SetMediumWindow, ChangeWindow.ToMediumWindow },
+                    { WindowOperation.SetLongWindow, ChangeWindow.ToLongWindow },
 
-                    { WindowOperation.MoveWindowStartCloser, WindowOperations.MoveWindowStartCloser},
-                    { WindowOperation.MoveWindowStartFarther, WindowOperations.MoveWindowStartFarther },
-                    { WindowOperation.MoveWindowEndCloser, WindowOperations.MoveWindowEndCloser },
-                    { WindowOperation.MoveWindowEndFarther, WindowOperations.MoveWindowEndFarther },
-                    { WindowOperation.SlideWindowCloser, WindowOperations.SlideWindowCloser },
-                    { WindowOperation.SlideWindowFarther, WindowOperations.SlideWindowFarther },
+                    { WindowOperation.MoveWindowStartCloser, ChangeWindow.MoveWindowStartCloser},
+                    { WindowOperation.MoveWindowStartFarther, ChangeWindow.MoveWindowStartFarther },
+                    { WindowOperation.MoveWindowEndCloser, ChangeWindow.MoveWindowEndCloser },
+                    { WindowOperation.MoveWindowEndFarther, ChangeWindow.MoveWindowEndFarther },
+                    { WindowOperation.SlideWindowCloser, ChangeWindow.SlideWindowCloser },
+                    { WindowOperation.SlideWindowFarther, ChangeWindow.SlideWindowFarther },
                 });
     }
 }

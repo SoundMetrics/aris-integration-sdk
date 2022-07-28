@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Core.Raw
         bool useMaxFrameRate,
         bool useAutoFrequency);
 
-    internal static class WindowOperations
+    internal static class ChangeWindow
     {
         private struct SystemTypeWindowSizing
         {
