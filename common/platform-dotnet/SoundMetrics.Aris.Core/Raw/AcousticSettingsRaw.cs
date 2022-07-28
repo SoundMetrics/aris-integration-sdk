@@ -127,17 +127,25 @@ namespace SoundMetrics.Aris.Core.Raw
             }
         }
 
-        public Distance WindowStart(ObservedConditions observedConditions)
-            => this.CalculateWindowStart(observedConditions, Salinity);
-        public Distance WindowEnd(ObservedConditions observedConditions)
+        private Distance WindowStart(ObservedConditions observedConditions)
+            => SampleStartDelay * observedConditions.SpeedOfSound(Salinity) / 2;
+
+        private Distance WindowEnd(ObservedConditions observedConditions)
             => WindowStart(observedConditions) + WindowLength(observedConditions);
-        public Distance WindowLength(ObservedConditions observedConditions)
-            => this.CalculateWindowLength(observedConditions, Salinity);
+
+        private Distance WindowLength(ObservedConditions observedConditions)
+            => SampleCount * SamplePeriod * observedConditions.SpeedOfSound(Salinity) / 2;
+
+        /// <summary>
+        /// Calculates the bounds of the imaging window.
+        /// </summary>
+        /// <param name="observedConditions">
+        /// Observations necessary for correct calculations.
+        /// </param>
+        /// <returns>The bounds of the imaging window.</returns>
         public WindowBounds WindowBounds(ObservedConditions observedConditions)
             => new WindowBounds(WindowStart(observedConditions), WindowEnd(observedConditions));
 
-        public Distance WindowMidPoint(ObservedConditions observedConditions)
-            => WindowStart(observedConditions)+ (WindowLength(observedConditions) / 2);
         public Distance SampleResolution(ObservedConditions observedConditions)
             => observedConditions.ConvertSamplePeriodToResolution(SamplePeriod, Salinity);
 

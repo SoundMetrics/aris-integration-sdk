@@ -92,7 +92,9 @@ namespace SoundMetrics.Aris.Core.UT
             var startSettings = GetNearRange(SampleCount, addStartDelay: FineDuration.FromMicroseconds(20));
 
             Assert.AreNotEqual(closestRange.SampleStartDelay, startSettings.SampleStartDelay);
-            Assert.AreNotEqual(closestRange.WindowStart(TestConditions), startSettings.WindowStart(TestConditions));
+            Assert.AreNotEqual(
+                closestRange.WindowBounds(TestConditions).WindowStart,
+                startSettings.WindowBounds(TestConditions).WindowStart);
 
             var result = ChangeWindow.MoveWindowStartCloser(
                 startSettings,

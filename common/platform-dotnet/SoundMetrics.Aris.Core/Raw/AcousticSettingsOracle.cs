@@ -505,7 +505,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if ((automaticFlags & AutomaticAcousticSettings.FocusPosition) != 0)
             {
-                var windowMidPoint = settings.WindowMidPoint(observedConditions);
+                var windowMidPoint = settings.WindowBounds(observedConditions).Midpoint;
                 settings = settings.WithFocusDistance(windowMidPoint);
             }
 
@@ -516,7 +516,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
             {
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-                var windowEnd = settings.WindowEnd(observedConditions);
+                var windowEnd = settings.WindowBounds(observedConditions).WindowEnd;
 
                 var frequency = sysCfg.CalculateBestFrequency(
                     observedConditions.WaterTemp,
@@ -533,7 +533,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // Pulse width depends on frequency, so it's addressed *after* frequency.
             if ((automaticFlags & AutomaticAcousticSettings.PulseWidth) != 0)
             {
-                var windowEnd = settings.WindowEnd(observedConditions);
+                var windowEnd = settings.WindowBounds(observedConditions).WindowEnd;
                 var automaticPulseWidth =
                     AcousticSettingsRaw_Aux.CalculateAutoPulseWidth(
                         settings.SystemType,

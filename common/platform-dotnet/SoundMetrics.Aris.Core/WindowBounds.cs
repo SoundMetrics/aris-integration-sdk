@@ -6,9 +6,27 @@ namespace SoundMetrics.Aris.Core
 {
     public struct WindowBounds : IEquatable<WindowBounds>
     {
+        /// <summary>
+        /// The distance to the nearest edge of the imaging window.
+        /// </summary>
         public Distance WindowStart { get; }
+
+        /// <summary>
+        /// The distance to the farthest edge of the imaging window.
+        /// </summary>
         public Distance WindowEnd { get; }
+
+        /// <summary>
+        /// The distance from the nearest edge of the imaging window
+        /// to the farthest edge.
+        /// </summary>
         public Distance WindowLength => WindowEnd - WindowStart;
+
+        /// <summary>
+        /// The distance midway between the nearest edge of the
+        /// imaging window to the farthest edge.
+        /// </summary>
+        public Distance Midpoint => (WindowStart + WindowEnd) / 2;
 
         public WindowBounds(Distance windowStart, Distance windowEnd)
         {

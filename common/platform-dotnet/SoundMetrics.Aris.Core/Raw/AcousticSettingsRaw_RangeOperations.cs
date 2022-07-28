@@ -395,7 +395,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             var sysCfg = settings.SystemType.GetConfiguration();
 
-            var windowLength = settings.WindowLength(observedConditions);
+            var windowLength = settings.WindowBounds(observedConditions).WindowLength;
             var minWindowStart = sysCfg.WindowStartLimits.Minimum;
             var maxWindowStart = sysCfg.WindowEndLimits.Maximum - windowLength;
             return (minWindowStart, maxWindowStart);
