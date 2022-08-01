@@ -12,7 +12,7 @@ namespace SoundMetrics.Aris.Core
     /// <summary>
     /// Distance in meters.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay} m")]
+    [DebuggerDisplay("{DebuggerDisplay}")]
     [DataContract]
     public struct Distance : IComparable<Distance>, IEquatable<Distance>, IConvertible
     {
