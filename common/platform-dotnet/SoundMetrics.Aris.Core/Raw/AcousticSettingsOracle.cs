@@ -14,7 +14,7 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         None = 0,
 
-        FocusPosition = 0b0000_0001,
+        FocusDistance = 0b0000_0001,
         Frequency = 0b0000_0010,
         PulseWidth = 0b0000_0100,
 
@@ -67,7 +67,8 @@ namespace SoundMetrics.Aris.Core.Raw
             return allowed;
         }
 
-        internal static AcousticSettingsRaw ApplyAllConstraints(
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
+        public static AcousticSettingsRaw ApplyAllConstraints(
             this AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
@@ -89,11 +90,21 @@ namespace SoundMetrics.Aris.Core.Raw
                     $"{nameof(ApplyAllConstraints)}",
                     s => $"updated frame rate: [{s.FrameRate}]");
 
+            if (settings2 is null)
+            {
+                throw new NullReferenceException($"return from {nameof(UpdateFrameRate)}");
+            }
+
             var settings3 =
                 settings2.WithLimitedPulseWidth(settings2.PulseWidth)
                     .LogSettingsContext(
                         $"{nameof(ApplyAllConstraints)}",
                         s => $"limited pulse width: [{s.PulseWidth}]");
+
+            if (settings3 is null)
+            {
+                throw new NullReferenceException($"return from {nameof(WithLimitedPulseWidth)}");
+            }
 
             // Last: antialiasing
             var result =
@@ -363,7 +374,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return result;
         }
 
-        internal static AcousticSettingsRaw WithSamplePeriod(
+        public static AcousticSettingsRaw WithSamplePeriod(
             this AcousticSettingsRaw settings,
             FineDuration samplePeriod,
             bool useMaxFrameRate)
@@ -496,14 +507,26 @@ namespace SoundMetrics.Aris.Core.Raw
                 AutomaticAcousticSettings.Frequency);
         }
 
-        internal static AcousticSettingsRaw WithAutomaticSettings(
+        public static AcousticSettingsRaw WithAutomaticFocusDistance(
+            this AcousticSettingsRaw settings,
+            ObservedConditions observedConditions)
+        {
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
+            return settings.WithAutomaticSettings(
+                observedConditions,
+                AutomaticAcousticSettings.FocusDistance);
+        }
+
+        public static AcousticSettingsRaw WithAutomaticSettings(
             this AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
             AutomaticAcousticSettings automaticFlags)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
-            if ((automaticFlags & AutomaticAcousticSettings.FocusPosition) != 0)
+            if ((automaticFlags & AutomaticAcousticSettings.FocusDistance) != 0)
             {
                 var windowMidPoint = settings.WindowBounds(observedConditions).Midpoint;
                 settings = settings.WithFocusDistance(windowMidPoint);
@@ -790,6 +813,11 @@ namespace SoundMetrics.Aris.Core.Raw
             this AcousticSettingsRaw settings,
             FineDuration requestedPulseWidth)
         {
+            if (settings is null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
             var limitedPulseWidth =
                 LimitPulseWidth(
                     settings.SystemType,

@@ -9,7 +9,7 @@ namespace SoundMetrics.Aris.Core.Raw
     using static AcousticSettingsRaw_Aux;
     using static System.Math;
 
-    internal static class AcousticSettingsRawRangeOperations
+    public static class AcousticSettingsRawRangeOperations
     {
         public static AcousticSettingsRaw GetSettingsForSpecificRange(
             this AcousticSettingsRaw settings,
@@ -47,15 +47,13 @@ namespace SoundMetrics.Aris.Core.Raw
                 => CalculateSettingsWithFixedSampleCount(
                         settings,
                         constrainedWindowBounds,
-                        observedConditions,
-                        out var _);
+                        observedConditions);
 
             AcousticSettingsRaw SelectSpecificRange_Guided()
                 => CalculateSettingsWithGuidedSampleCount(
                         settings,
                         constrainedWindowBounds,
-                        observedConditions,
-                        out var _);
+                        observedConditions);
 
             AcousticSettingsRaw SelectSpecificRange_Free()
                 => CalculateFreeSettingsWithRange(
@@ -121,8 +119,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return
                     settings.CalculateSettingsWithGuidedSampleCount(
                         newWindowBounds,
-                        observedConditions,
-                        out var _)
+                        observedConditions)
                         .WithMaxFrameRate(true)
                         .ApplyAllConstraints();
             }
@@ -142,8 +139,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return
                     settings.CalculateSettingsWithFixedSampleCount(
                         newWindowBounds,
-                        observedConditions,
-                        out var _)
+                        observedConditions)
                         .WithMaxFrameRate(useMaxFrameRate)
                         .ApplyAllConstraints();
             }
@@ -265,8 +261,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return
                     settings.CalculateSettingsWithGuidedSampleCount(
                         newWindowBounds,
-                        observedConditions,
-                        out var _)
+                        observedConditions)
                         .WithMaxFrameRate(true)
                         .ApplyAllConstraints();
             }
@@ -284,8 +279,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return
                     settings.CalculateSettingsWithFixedSampleCount(
                         newWindowBounds,
-                        observedConditions,
-                        out var _)
+                        observedConditions)
                         .WithMaxFrameRate(useMaxFrameRate)
                         .ApplyAllConstraints();
             }
@@ -405,7 +399,7 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useAutoFrequency)
         {
             var autoFlags = AutomaticAcousticSettings.None;
-            autoFlags |= AutomaticAcousticSettings.FocusPosition;
+            autoFlags |= AutomaticAcousticSettings.FocusDistance;
             autoFlags |= AutomaticAcousticSettings.PulseWidth;
             autoFlags |= useAutoFrequency ? AutomaticAcousticSettings.Frequency : AutomaticAcousticSettings.None;
             return autoFlags;
@@ -454,8 +448,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return
                     settings.CalculateSettingsWithGuidedSampleCount(
                         newWindowBounds,
-                        observedConditions,
-                        out var _)
+                        observedConditions)
                         .WithMaxFrameRate(true)
                         .ApplyAllConstraints();
             }
@@ -476,8 +469,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 return
                     settings.CalculateSettingsWithFixedSampleCount(
                         newWindowBounds,
-                        observedConditions,
-                        out var _)
+                        observedConditions)
                         .WithMaxFrameRate(useMaxFrameRate)
                         .ApplyAllConstraints();
             }
@@ -520,13 +512,22 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static readonly Distance MinimumSlideDisplacement = (Distance)0.003;
 
-        internal static AcousticSettingsRaw
+        public static AcousticSettingsRaw
             CalculateSettingsWithGuidedSampleCount(
                 this AcousticSettingsRaw settings,
                 WindowBounds windowBounds,
-                ObservedConditions observedConditions,
-                out WindowBounds newWindowBounds)
+                ObservedConditions observedConditions)
         {
+            if (settings is null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            if (observedConditions is null)
+            {
+                throw new ArgumentNullException(nameof(observedConditions));
+            }
+
             /* Per spec
                 When Not Recording
                 1. Calculate Frequency Crossover Range  (Range Xover) from System Type, Temperature, Salinity
@@ -563,7 +564,6 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var correctedWindowEnd =
                 CalculateWindowEnd(windowStart, samplePeriod, sspd, sampleCount);
-            newWindowBounds = new WindowBounds(windowStart, correctedWindowEnd);
 
             var newRawValues =
                 AcousticSettingsRaw.CopyRawWith(
@@ -589,8 +589,7 @@ namespace SoundMetrics.Aris.Core.Raw
             CalculateSettingsWithFixedSampleCount(
                 this AcousticSettingsRaw settings,
                 in WindowBounds windowBounds,
-                ObservedConditions observedConditions,
-                out WindowBounds newWindowBounds)
+                ObservedConditions observedConditions)
         {
             /* Per spec
                 When Manual Recording
@@ -624,7 +623,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     waterTemperature,
                     salinity,
                     correctedWindowEnd);
-            newWindowBounds = new WindowBounds(windowStart, correctedWindowEnd);
 
             var newRawValues =
                 AcousticSettingsRaw.CopyRawWith(
