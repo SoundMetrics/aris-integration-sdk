@@ -674,7 +674,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     samplePeriod,
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
-                    automateFocusPosition: true,
+                    automateFocusDistance: true,
                     useMaxFrameRate,
                     useAutoFrequency);
         }

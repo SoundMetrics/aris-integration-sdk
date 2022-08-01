@@ -38,7 +38,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Frequency frequency,
             bool enable150Volts,
             int receiverGain,
-            Distance focusPosition,
+            Distance focusDistance,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
             Salinity salinity)
@@ -58,7 +58,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 frequency,
                 enable150Volts,
                 receiverGain,
-                focusPosition,
+                focusDistance,
                 antiAliasing,
                 interpacketDelay,
                 salinity);

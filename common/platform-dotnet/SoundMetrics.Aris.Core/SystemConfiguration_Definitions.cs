@@ -196,7 +196,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = (Distance)10;
+                var focusDistance = (Distance)10;
                 var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
@@ -215,7 +215,7 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, salinity)
+                    focusDistance, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
                         observedConditions,
                         AutomaticAcousticSettings.All);
@@ -235,7 +235,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = (Distance)10;
+                var focusDistance = (Distance)10;
                 var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
@@ -254,7 +254,7 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, salinity)
+                    focusDistance, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
                         observedConditions,
                         AutomaticAcousticSettings.All);
@@ -274,7 +274,7 @@ namespace SoundMetrics.Aris.Core
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
                 var enableTransmit = true;
                 var enable150Volts = true;
-                var focusPosition = (Distance)10;
+                var focusDistance = (Distance)10;
                 var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
@@ -293,7 +293,7 @@ namespace SoundMetrics.Aris.Core
                 return new AcousticSettingsRaw(
                     systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
                     pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusPosition, antiAliasing, interpacketDelay, salinity)
+                    focusDistance, antiAliasing, interpacketDelay, salinity)
                     .WithAutomaticSettings(
                         observedConditions,
                         AutomaticAcousticSettings.All);

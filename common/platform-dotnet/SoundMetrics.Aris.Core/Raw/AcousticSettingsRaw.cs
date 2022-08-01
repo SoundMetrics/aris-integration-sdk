@@ -219,7 +219,7 @@ namespace SoundMetrics.Aris.Core.Raw
             => $"systemType={SystemType}; frameRate={FrameRate}; sampleCount={SampleCount}; sampleStartDelay={SampleStartDelay}; "
                 + $"cyclePeriod={CyclePeriod}; samplePeriod={SamplePeriod}; pulseWidth={PulseWidth}; "
                 + $"pingMode={PingMode}; enableTransmit={EnableTransmit}; frequency={Frequency}; enable150Volts={Enable150Volts}; "
-                + $"receiverGain={ReceiverGain}; FocusPosition={FocusDistance}; AntiAliasing={AntiAliasing}; "
+                + $"receiverGain={ReceiverGain}; FocusDistance={FocusDistance}; AntiAliasing={AntiAliasing}; "
                 + $"InterpacketDelay={InterpacketDelay}; Salinity={Salinity}";
 
         PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)

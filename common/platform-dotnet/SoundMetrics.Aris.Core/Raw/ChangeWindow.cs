@@ -148,7 +148,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     samplePeriod,
                     original.AntiAliasing,
                     original.InterpacketDelay,
-                    automateFocusPosition: true,
+                    automateFocusDistance: true,
                     useMaxFrameRate,
                     useAutoFrequency);
 #else
@@ -183,7 +183,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 FineDuration samplePeriod,
                 FineDuration antiAliasing,
                 InterpacketDelaySettings interpacketDelay,
-                bool automateFocusPosition,
+                bool automateFocusDistance,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
@@ -219,8 +219,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     original.Salinity,
                     windowEnd);
 
-            var focusPosition =
-                automateFocusPosition
+            var focusDistance =
+                automateFocusDistance
                     ? windowStart + (windowLength / 2)
                     : original.FocusDistance;
 
@@ -237,7 +237,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     frequency: frequency,
                     enable150Volts: original.Enable150Volts,
                     receiverGain: receiverGain,
-                    focusDistance: focusPosition,
+                    focusDistance: focusDistance,
                     antiAliasing: antiAliasing,
                     interpacketDelay: interpacketDelay,
                     salinity: original.Salinity);
@@ -307,7 +307,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 newSamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                automateFocusPosition: true,
+                automateFocusDistance: true,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
@@ -367,7 +367,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 newSamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                automateFocusPosition: true,
+                automateFocusDistance: true,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
@@ -412,7 +412,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 newSamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                automateFocusPosition: true,
+                automateFocusDistance: true,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
@@ -462,7 +462,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 newSamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                automateFocusPosition: true,
+                automateFocusDistance: true,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
@@ -509,7 +509,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.SamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                automateFocusPosition: true,
+                automateFocusDistance: true,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
@@ -556,7 +556,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings.SamplePeriod,
                 settings.AntiAliasing,
                 settings.InterpacketDelay,
-                automateFocusPosition: true,
+                automateFocusDistance: true,
                 useMaxFrameRate,
                 useAutoFrequency);
         }

@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Core.UT
             var enableTransmit = true;
             var enable150Volts = true;
             var receiverGain = sysCfg.ReceiverGainLimits.Minimum;
-            var focusPosition = (Distance)8;
+            var focusDistance = (Distance)8;
             var salinity = Salinity.Brackish;
 
             return new AcousticSettingsRaw(
@@ -49,7 +49,7 @@ namespace SoundMetrics.Aris.Core.UT
                 frequency,
                 enable150Volts,
                 receiverGain,
-                focusPosition,
+                focusDistance,
                 antiAliasing: FineDuration.Zero,
                 new InterpacketDelaySettings { },
                 salinity);
