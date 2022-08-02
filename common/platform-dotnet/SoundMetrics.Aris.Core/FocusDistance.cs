@@ -28,6 +28,9 @@ namespace SoundMetrics.Aris.Core
         [DataMember]
         public Distance? Distance { get; private set; }
 
+        /// <summary>
+        /// Internal use only, not supported.
+        /// </summary>
         [DataMember]
         public uint? FocusUnits { get; private set; }
 
@@ -44,22 +47,19 @@ namespace SoundMetrics.Aris.Core
             => fd.Distance.Value;
 
         /// <summary>
-        /// Internal device-specific construction. Use a distance instead.
-        /// </summary>
-        /// <param name="focusUnits"></param>
-        public static explicit operator FocusDistance(uint focusUnits)
-            => ToFocusDistance(focusUnits);
-
-        /// <summary>
-        /// Internal device-specific construction. Use a distance instead.
+        /// Internal device-specific construction. Use a Distance instead.
         /// </summary>
         /// <param name="focusUnits"></param>
         /// <returns></returns>
-        public static FocusDistance ToFocusDistance(uint focusUnits)
+        public static FocusDistance FromFocusUnits(uint focusUnits)
             => new FocusDistance(focusUnits);
 
         public override string ToString()
-            => Distance is Distance d ? d.ToString() : $"{FocusUnits} focus units";
+            => Distance is Distance d
+                ? d.ToString()
+                : (FocusUnits is uint u
+                    ? $"{u} focus units"
+                    : "<invalid>");
 
         public override bool Equals(object obj)
             => obj is FocusDistance fd && this.Equals(fd);
