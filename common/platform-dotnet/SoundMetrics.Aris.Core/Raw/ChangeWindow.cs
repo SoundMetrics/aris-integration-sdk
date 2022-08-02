@@ -221,7 +221,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var focusDistance =
                 automateFocusDistance
-                    ? windowStart + (windowLength / 2)
+                    ? (FocusDistance)(windowStart + (windowLength / 2))
                     : original.FocusDistance;
 
             var newSettings =

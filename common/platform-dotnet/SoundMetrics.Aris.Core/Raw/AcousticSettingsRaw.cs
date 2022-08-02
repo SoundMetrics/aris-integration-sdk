@@ -2,6 +2,7 @@
 
 using SoundMetrics.Aris.Core.ApprovalTests;
 using System;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core.Raw
@@ -30,7 +31,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Frequency frequency,
             bool enable150Volts,
             float receiverGain,
-            Distance focusDistance,
+            in FocusDistance focusDistance,
             FineDuration antiAliasing,
             InterpacketDelaySettings interpacketDelay,
             Salinity salinity)
@@ -103,9 +104,19 @@ namespace SoundMetrics.Aris.Core.Raw
         [DataMember]
         public float ReceiverGain { get; private set; }
 
+        [DataMember(Name = "FocusDistance", EmitDefaultValue = false)]
+        private Distance _obsoleteFocusDistance;
+
+        [DataMember(Name = "FocusDistanceV2")]
+        private FocusDistance _focusDistanceV2;
+
         // These are not directly an acoustic setting, but part of the package.
-        [DataMember]
-        public Distance FocusDistance { get; private set; }
+        public FocusDistance FocusDistance
+        {
+            get => _focusDistanceV2;
+            set { _focusDistanceV2 = value; }
+        }
+
         [DataMember]
         public FineDuration AntiAliasing { get; private set; }
         [DataMember]
@@ -213,6 +224,18 @@ namespace SoundMetrics.Aris.Core.Raw
                 ^ AntiAliasing.GetHashCode()
                 ^ InterpacketDelay.GetHashCode()
                 ^ Salinity.GetHashCode();
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext _)
+        {
+            // Update old value type to new and clear the old.
+            if (_obsoleteFocusDistance != default)
+            {
+                FocusDistance = _obsoleteFocusDistance;
+                _obsoleteFocusDistance = default;
+                Trace.TraceInformation("Converted old-format focus distance");
+            }
         }
 
         public override string ToString()
