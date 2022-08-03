@@ -50,6 +50,9 @@ namespace SoundMetrics.Aris.Core
 
 #pragma warning restore CA1822
 
+        /// <summary>
+        /// The preferred limits for sample count as used in SMC software.
+        /// </summary>
         public ValueRange<int> SampleCountPreferredLimits { get; internal set; }
 
         public ValueRange<int> ReceiverGainLimits { get; internal set; }
@@ -143,6 +146,20 @@ namespace SoundMetrics.Aris.Core
 
         private static ValueRange<Distance> RangeOfMeters(double a, double b)
             => new ValueRange<Distance>((Distance)a, (Distance)b);
+
+        // These must be initialized before `configurations`.
+        private static readonly ValueRange<int> sampleCountDeviceLimits
+            = new ValueRange<int>(200, 4000);
+        private static readonly ValueRange<int> pulseWidthDeviceLimits
+            = new ValueRange<int>(4, 80);
+        private static readonly ValueRange<int> sampleStartDelayDeviceLimits
+            = new ValueRange<int>(930, 60000);
+        private static readonly ValueRange<int> samplePeriodDeviceLimits
+            = new ValueRange<int>(4, 100);
+        private static readonly ValueRange<int> focusPositionDeviceLimits
+            = new ValueRange<int>(0, 1000);
+        private static readonly ValueRange<int> cyclePeriodDeviceLimits
+            = new ValueRange<int>(1802, 150000);
 
         private static readonly SystemConfiguration[] configurations = InitializeConfigurations();
     }

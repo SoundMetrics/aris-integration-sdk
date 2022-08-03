@@ -7,19 +7,6 @@ namespace SoundMetrics.Aris.Core
 {
     public sealed partial class SystemConfiguration
     {
-        private static readonly ValueRange<int> sampleCountDeviceLimits
-            = new ValueRange<int>(200, 4000);
-        private static readonly ValueRange<int> pulseWidthDeviceLimits
-            = new ValueRange<int>(4, 80);
-        private static readonly ValueRange<int> sampleStartDelayDeviceLimits
-            = new ValueRange<int>(930, 60000);
-        private static readonly ValueRange<int> samplePeriodDeviceLimits
-            = new ValueRange<int>(4, 100);
-        private static readonly ValueRange<int> focusPositionDeviceLimits
-            = new ValueRange<int>(0, 1000);
-        private static readonly ValueRange<int> cyclePeriodDeviceLimits
-            = new ValueRange<int>(1802, 150000);
-
         private static SystemConfiguration[] InitializeConfigurations()
         {
             var commonReceiverGainLimits = new ValueRange<int>(0, 24);
