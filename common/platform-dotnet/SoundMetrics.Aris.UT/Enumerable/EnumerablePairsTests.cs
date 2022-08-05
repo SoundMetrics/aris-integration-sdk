@@ -2,7 +2,7 @@
 using SoundMetrics.Aris.EnumerableHelpers;
 using System.Linq;
 
-namespace SoundMetrics.Aris.Enumerable.UT
+namespace SoundMetrics.Aris.Enumerable
 {
     [TestClass]
     public sealed class EnumerablePairsTests

@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace SoundMetrics.Aris.Core.UT
+namespace SoundMetrics.Aris.Core
 {
     [TestClass]
     public sealed class SystemConfigurationTest

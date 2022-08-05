@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoundMetrics.Aris.Core.ApprovalTests;
 using SoundMetrics.Aris.Core.Raw;
 
-namespace SoundMetrics.Aris.Core.UT
+namespace SoundMetrics.Aris.Core
 {
     [TestClass]
     [UseReporter(typeof(DiffReporter))]

@@ -1,11 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.File;
 using System;
 using System.IO;
 
-namespace SoundMetrics.Aris.UT.File
+namespace SoundMetrics.Aris.File
 {
     [TestClass]
     public sealed class FileTraitsTest

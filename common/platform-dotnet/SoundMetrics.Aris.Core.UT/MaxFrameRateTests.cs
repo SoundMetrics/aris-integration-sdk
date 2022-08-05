@@ -5,10 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SoundMetrics.Aris.Core.UT
+namespace SoundMetrics.Aris.Core
 {
-    using static System.Math;
-
     [TestClass]
     public class MaxFrameRateTests
     {

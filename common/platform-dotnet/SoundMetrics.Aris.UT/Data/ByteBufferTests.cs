@@ -2,7 +2,7 @@
 using SoundMetrics.Aris.Data;
 using System;
 
-namespace SoundMetrics.Aris.UT
+namespace SoundMetrics.Aris
 {
     [TestClass]
     public sealed class ByteBufferTests

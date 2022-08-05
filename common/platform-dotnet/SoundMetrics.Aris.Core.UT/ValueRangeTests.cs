@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace SoundMetrics.Aris.Core.UT
+namespace SoundMetrics.Aris.Core
 {
     using Range = ValueRange<int>;
 

@@ -4,7 +4,7 @@ using SoundMetrics.Aris.Data;
 using System;
 using System.IO;
 
-namespace SoundMetrics.Aris.UT
+namespace SoundMetrics.Aris
 {
     [TestClass]
     public class ReorderTests

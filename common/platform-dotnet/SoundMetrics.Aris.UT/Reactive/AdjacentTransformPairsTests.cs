@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
 
-namespace SoundMetrics.Aris.Reactive.UT
+namespace SoundMetrics.Aris.Reactive
 {
     [TestClass]
     public sealed class AdjacentTransformPairsTests

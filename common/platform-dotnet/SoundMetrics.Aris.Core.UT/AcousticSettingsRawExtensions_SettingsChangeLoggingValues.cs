@@ -2,7 +2,7 @@
 
 using static SoundMetrics.Aris.Core.Raw.AcousticSettingsRawExtensions;
 
-namespace SoundMetrics.Aris.Core.UT
+namespace SoundMetrics.Aris.Core
 {
 
     [TestClass]

@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Net;
 
-namespace SoundMetrics.Aris.UT
+namespace SoundMetrics.Aris
 {
     [TestClass]
     public class NetworkInterfaceInfoTests
