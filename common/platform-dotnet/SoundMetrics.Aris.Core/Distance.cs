@@ -111,6 +111,8 @@ namespace SoundMetrics.Aris.Core
             return new Distance(meters: a.Meters + b.Meters);
         }
 
+        public static Distance operator -(Distance a) => (Distance)(-a.Meters);
+
         public static Distance operator -(Distance a, Distance b)
         {
             return new Distance(meters: a.Meters - b.Meters);
