@@ -163,5 +163,11 @@ namespace SoundMetrics.Aris.Core.Raw
                 // (2 * WL) / (N * SSPD)
                 ((2 * (windowEnd - windowStart)) / (sampleCount * sspd))
                     .Ceiling;
+
+        public static Distance CalculateWindowLength(
+            FineDuration samplePeriod,
+            int sampleCount,
+            Velocity sspd)
+            => samplePeriod * sampleCount * sspd / 2;
     }
 }

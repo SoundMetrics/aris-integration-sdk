@@ -56,14 +56,20 @@ namespace SoundMetrics.Aris.Core
             windowLength = WindowLength;
         }
 
+        public static implicit operator WindowBounds((float WindowStart, float WindowEnd) bounds)
+            => ToWindowBounds(bounds);
+
+        public static WindowBounds ToWindowBounds((float WindowStart, float WindowEnd) bounds)
+            => new WindowBounds(bounds.WindowStart, bounds.WindowEnd);
+
         public WindowBounds MoveStartTo(Distance requestedStart)
             => new WindowBounds(requestedStart, requestedStart + WindowLength);
 
         public override string ToString()
-            => $"WindowStart=[{WindowStart}]; WindowEnd=[{WindowEnd}; WindowLength=[{WindowLength}]";
+            => $"WindowStart=[{WindowStart}]; WindowEnd=[{WindowEnd}]; WindowLength=[{WindowLength}]";
 
         public string ToShortString()
-            => $"WindowStart=[{WindowStart}]; WindowEnd=[{WindowEnd}";
+            => $"WindowStart=[{WindowStart}]; WindowEnd=[{WindowEnd}]";
 
         public override bool Equals(object obj)
             => obj is WindowBounds other && this.Equals(other);

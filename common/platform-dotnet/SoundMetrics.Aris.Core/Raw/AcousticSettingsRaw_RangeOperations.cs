@@ -1,7 +1,10 @@
 ﻿// Copyright (c) 2022 Sound Metrics Corp.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -63,6 +66,8 @@ namespace SoundMetrics.Aris.Core.Raw
                         useMaxFrameRate,
                         useAutoFrequency);
         }
+
+        private static readonly Distance MinimumSlideDisplacement = (Distance)0.003;
 
         /// <summary>
         /// Moves the range start, attempting to enclose the requested distance.
@@ -215,7 +220,6 @@ namespace SoundMetrics.Aris.Core.Raw
                 GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
                 Distance requestedEnd,
-                SampleCountMode sampleCountMode,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
@@ -292,10 +296,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     2 * windowLength / observedConditions.SpeedOfSound(salinity);
 
                 var autoFlags = GetAutoFlags(useAutoFrequency);
-                var newSettings =
-                    sampleCountMode == SampleCountMode.AllowSampleCountChange
-                        ? MoveAllowingChangeToSampleCount()
-                        : MoveWithNoChangeToSampleCount();
+                var newSettings = MoveAllowingChangeToSampleCount();
 
                 if (newSettings == settings)
                 {
@@ -308,24 +309,6 @@ namespace SoundMetrics.Aris.Core.Raw
                             .WithAutomaticSettings(observedConditions, autoFlags)
                             .WithMaxFrameRate(useMaxFrameRate)
                             .ApplyAllConstraints();
-                }
-
-                AcousticSettingsRaw MoveWithNoChangeToSampleCount()
-                {
-                    var newSamplePeriod =
-                        (newWindowRoughTimeOfFlight / settings.SampleCount)
-                            .RoundToMicroseconds()
-                            .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
-
-                    if (newSamplePeriod == settings.SamplePeriod)
-                    {
-                        // Nothing to do.
-                        return settings;
-                    }
-
-                    return
-                        settings
-                            .WithSamplePeriod(newSamplePeriod, useMaxFrameRate);
                 }
 
                 AcousticSettingsRaw MoveAllowingChangeToSampleCount()
@@ -423,27 +406,29 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            var originalSize = settings.WindowBounds(observedConditions);
+            var originalBounds = settings.WindowBounds(observedConditions);
             var sysCfg = settings.SystemType.GetConfiguration();
 
-            return guidedSettingsMode
+            var newSettings = guidedSettingsMode
                     .DispatchOperation(
                         onFixed: SlideWindow_Fixed,
                         onGuided: SlideWindow_Guided,
                         onFree: SlideWindow_Free);
+
+            return newSettings;
 
             AcousticSettingsRaw SlideWindow_Guided()
             {
                 var constrainedStart =
                     requestedStart.ConstrainTo(
                         GetStartMinMax(settings, observedConditions));
-                if ((constrainedStart - originalSize.WindowStart).Abs() <= MinimumSlideDisplacement)
+                if ((constrainedStart - originalBounds.WindowStart).Abs() <= MinimumSlideDisplacement)
                 {
                     return settings;
                 }
 
                 var newWindowBounds =
-                    new WindowBounds(constrainedStart, constrainedStart + originalSize.WindowLength);
+                    new WindowBounds(constrainedStart, constrainedStart + originalBounds.WindowLength);
 
                 return
                     settings.CalculateSettingsWithGuidedSampleCount(
@@ -458,13 +443,13 @@ namespace SoundMetrics.Aris.Core.Raw
                 var constrainedStart =
                     requestedStart.ConstrainTo(
                         GetStartMinMax(settings, observedConditions));
-                if ((constrainedStart - originalSize.WindowStart).Abs() <= MinimumSlideDisplacement)
+                if ((constrainedStart - originalBounds.WindowStart).Abs() <= MinimumSlideDisplacement)
                 {
                     return settings;
                 }
 
                 var newWindowBounds =
-                    new WindowBounds(constrainedStart, constrainedStart + originalSize.WindowLength);
+                    new WindowBounds(constrainedStart, constrainedStart + originalBounds.WindowLength);
 
                 return
                     settings.CalculateSettingsWithFixedSampleCount(
@@ -478,7 +463,7 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 // Don't adjust the sample count, just adjust the sample start delay.
 
-                var windowStart = originalSize.WindowStart;
+                var windowStart = originalBounds.WindowStart;
 
                 if (requestedStart == windowStart)
                 {
@@ -510,12 +495,27 @@ namespace SoundMetrics.Aris.Core.Raw
                 windowEnd.ConstrainTo(sysCfg.WindowEndLimits));
         }
 
-        private static readonly Distance MinimumSlideDisplacement = (Distance)0.003;
+        public static AcousticSettingsRaw
+            CreateDefaultGuidedSettings(
+                SystemType systemType,
+                Salinity salinity,
+                in WindowBounds windowBounds,
+                ObservedConditions observedConditions)
+        {
+            return
+                systemType
+                    .GetConfiguration()
+                    .GetDefaultSettings(observedConditions)
+                    .CopyRawWith(salinity: salinity)
+                    .CalculateSettingsWithGuidedSampleCount(
+                        windowBounds, observedConditions)
+                    .WithMaxFrameRate(enable: true);
+        }
 
         public static AcousticSettingsRaw
             CalculateSettingsWithGuidedSampleCount(
                 this AcousticSettingsRaw settings,
-                WindowBounds windowBounds,
+                in WindowBounds windowBounds,
                 ObservedConditions observedConditions)
         {
             if (settings is null)
@@ -528,7 +528,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 throw new ArgumentNullException(nameof(observedConditions));
             }
 
-            /* Per spec
+            /* Per spec ["sample count" is used in code rather than "samples per beam"].
                 When Not Recording
                 1. Calculate Frequency Crossover Range  (Range Xover) from System Type, Temperature, Salinity
                 2. Calculate Frequency (HF when Range End <= Range Xover, LF when Range End > Range Xover)
@@ -559,15 +559,17 @@ namespace SoundMetrics.Aris.Core.Raw
                     systemType,
                     waterTemperature,
                     windowEnd);
-            var sampleCount = FitSampleCountPerSamplePeriod();
+            var sampleCount =
+                CalculateGuidedSamplesPerBeam(
+                    systemType,
+                    windowBounds,
+                    sspd,
+                    samplePeriod,
+                    out var _);
             var sampleStartDelay = CalculateSampleStartDelay(windowStart, sspd);
 
-            var correctedWindowEnd =
-                CalculateWindowEnd(windowStart, samplePeriod, sspd, sampleCount);
-
             var newRawValues =
-                AcousticSettingsRaw.CopyRawWith(
-                    settings: settings,
+                settings.CopyRawWith(
                     frequency: frequency,
                     sampleStartDelay: sampleStartDelay,
                     sampleCount: sampleCount,
@@ -576,13 +578,36 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var constrained = newRawValues.ApplyAllConstraints();
             return constrained;
+        }
 
-            int FitSampleCountPerSamplePeriod()
-            {
-                var windowLength = windowEnd - windowStart;
-                var count = (int)Round(2 * windowLength / (sspd * samplePeriod));
-                return count;
-            }
+        private static int CalculateGuidedSamplesPerBeam(
+            SystemType systemType,
+            in WindowBounds windowBounds,
+            Velocity sspd,
+            FineDuration samplePeriod,
+            out Distance adjustedRangeEnd)
+        {
+            /* Per spec ["sample count" is used in code rather than "samples per beam"].
+                SamplesPerBeam Calculated from Sample Period, Range Start, Range End
+                1.  SamplesPerBeam = (Range End - Range Start) / (SSPD/2 * Sample Period)
+                2.  Constrain SamplesPerBeam = max(SamplesPerBeam, Min SPBper System Type)
+                3.  Adjust Range End = Range Start + SamplesPerBeam * SSPD/2 * Sample Period
+             */
+
+            var (windowStart, _, windowLength) = windowBounds;
+
+            var sampleCount = windowLength / (sspd / 2 * samplePeriod);
+            var integralSampleCount = (int)Round(sampleCount);
+            var systemPreferredLimits =
+                systemType.GetConfiguration().SampleCountPreferredLimits;
+            var constrainedSampleCount =
+                integralSampleCount.ConstrainTo(systemPreferredLimits);
+
+            // Likely unnecessary, and solely advisory;
+            // range end is defined by sample period and sample count.
+            adjustedRangeEnd = windowStart + CalculateWindowLength(samplePeriod, integralSampleCount, sspd);
+
+            return constrainedSampleCount;
         }
 
         internal static AcousticSettingsRaw
@@ -625,8 +650,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     correctedWindowEnd);
 
             var newRawValues =
-                AcousticSettingsRaw.CopyRawWith(
-                    settings: settings,
+                settings.CopyRawWith(
                     frequency: frequency,
                     sampleStartDelay: sampleStartDelay,
                     samplePeriod: samplePeriod,

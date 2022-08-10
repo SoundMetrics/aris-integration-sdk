@@ -31,7 +31,7 @@ namespace SoundMetrics.Aris.Core.ApprovalTests
 
             if (value is IPrettyPrintable printable)
             {
-                printable.PrettyPrint(this);
+                printable.PrettyPrint(this, label);
             }
             else
             {
@@ -54,6 +54,18 @@ namespace SoundMetrics.Aris.Core.ApprovalTests
                     builder.AppendLine(value.ToString());
                 }
             }
+        }
+
+        public PrettyPrintHelper Comment(string s)
+        {
+            var indent = indents.Peek();
+            var indentString = new string(' ', indent);
+
+            builder.Append(indentString);
+            builder.Append("# " + s);
+            builder.AppendLine();
+
+            return this;
         }
 
         public IDisposable PushIndent()

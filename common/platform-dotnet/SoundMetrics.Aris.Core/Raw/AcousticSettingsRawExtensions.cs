@@ -17,7 +17,15 @@ namespace SoundMetrics.Aris.Core.Raw
             Salinity salinity)
         {
             var windowStart = acousticSettings.WindowBounds(observedConditions).WindowStart;
-            return 2 * (windowStart / observedConditions.SpeedOfSound(salinity));
+            var speedOfSound = observedConditions.SpeedOfSound(salinity);
+            return CalculateSampleStartDelay(windowStart, speedOfSound);
+        }
+
+        internal static FineDuration CalculateSampleStartDelay(
+            Distance windowStart,
+            Velocity speedOfSound)
+        {
+            return 2 * (windowStart / speedOfSound);
         }
 
         internal static Distance ConvertSamplePeriodToResolution(
@@ -41,6 +49,37 @@ namespace SoundMetrics.Aris.Core.Raw
                         observedConditions.WaterTemp,
                         observedConditions.Depth,
                         (double)salinity));
+        }
+
+        internal static AcousticSettingsRaw CopyRawWith(
+            this AcousticSettingsRaw settings,
+            Salinity? salinity = null,
+            Frequency? frequency = null,
+            FineDuration? sampleStartDelay = null,
+            FineDuration? samplePeriod = null,
+            int? sampleCount = null,
+            FineDuration? pulseWidth = null)
+        {
+            var newSettings = new AcousticSettingsRaw(
+                    settings.SystemType,
+                    settings.FrameRate,
+                    sampleCount ?? settings.SampleCount,
+                    sampleStartDelay ?? settings.SampleStartDelay,
+                    samplePeriod ?? settings.SamplePeriod,
+                    pulseWidth ?? settings.PulseWidth,
+                    settings.PingMode,
+                    settings.EnableTransmit,
+                    frequency ?? settings.Frequency,
+                    settings.Enable150Volts,
+                    settings.ReceiverGain,
+                    settings.FocusDistance,
+                    settings.AntiAliasing,
+                    settings.InterpacketDelay,
+                    salinity ?? settings.Salinity);
+
+            // Prefer keeping the old settings if they're unchanged
+            // (for easier equality/comparison).
+            return settings == newSettings ? settings : newSettings;
         }
 
         //---------------------------------------------------------------------

@@ -92,9 +92,11 @@ namespace SoundMetrics.Aris.Core
             return new ObservedConditions(defaultWaterTemp, defaultDepth);
         }
 
-        PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
+        PrettyPrintHelper IPrettyPrintable.PrettyPrint(
+            PrettyPrintHelper helper,
+            string label)
         {
-            helper.PrintHeading($"{nameof(ObservedConditions)}");
+            helper.PrintHeading($"{label}: {nameof(ObservedConditions)}");
 
             using (var _ = helper.PushIndent())
             {

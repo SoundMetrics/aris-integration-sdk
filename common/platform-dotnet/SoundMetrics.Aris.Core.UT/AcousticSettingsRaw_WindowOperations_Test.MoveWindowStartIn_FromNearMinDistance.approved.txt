@@ -1,5 +1,5 @@
 Inputs: 
-    AcousticSettingsRaw: 
+    startSettings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
         FrameRate: 1/s
         SampleCount: 1200
@@ -13,13 +13,13 @@ Inputs:
         ReceiverGain: 0
         FocusDistance: 8.000 m
         AntiAliasing: 0.000000 s
-        InterpacketDelaySettings: 
+        InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish
         CyclePeriod (calculated): 0.006170 s
 Outputs: 
-    AcousticSettingsRaw: 
+    result: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
         FrameRate: 1/s
         SampleCount: 1200
@@ -33,7 +33,7 @@ Outputs:
         ReceiverGain: 0
         FocusDistance: 3.360 m
         AntiAliasing: 0.000000 s
-        InterpacketDelaySettings: 
+        InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish

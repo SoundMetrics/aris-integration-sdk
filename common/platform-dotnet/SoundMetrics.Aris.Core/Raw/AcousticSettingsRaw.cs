@@ -55,32 +55,6 @@ namespace SoundMetrics.Aris.Core.Raw
             MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
         }
 
-        internal static AcousticSettingsRaw CopyRawWith(
-            AcousticSettingsRaw settings,
-            Frequency? frequency = null,
-            FineDuration? sampleStartDelay = null,
-            FineDuration? samplePeriod = null,
-            int? sampleCount = null,
-            FineDuration? pulseWidth = null)
-        {
-            return new AcousticSettingsRaw(
-                    settings.SystemType,
-                    settings.FrameRate,
-                    sampleCount ?? settings.SampleCount,
-                    sampleStartDelay ?? settings.SampleStartDelay,
-                    samplePeriod ?? settings.SamplePeriod,
-                    pulseWidth ?? settings.PulseWidth,
-                    settings.PingMode,
-                    settings.EnableTransmit,
-                    frequency ?? settings.Frequency,
-                    settings.Enable150Volts,
-                    settings.ReceiverGain,
-                    settings.FocusDistance,
-                    settings.AntiAliasing,
-                    settings.InterpacketDelay,
-                    settings.Salinity);
-        }
-
         [DataMember]
         public SystemType SystemType { get; private set; }
         [DataMember]
@@ -245,9 +219,11 @@ namespace SoundMetrics.Aris.Core.Raw
                 + $"receiverGain={ReceiverGain}; FocusDistance={FocusDistance}; AntiAliasing={AntiAliasing}; "
                 + $"InterpacketDelay={InterpacketDelay}; Salinity={Salinity}";
 
-        PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
+        PrettyPrintHelper IPrettyPrintable.PrettyPrint(
+            PrettyPrintHelper helper,
+            string label)
         {
-            helper.PrintHeading($"{nameof(AcousticSettingsRaw)}");
+            helper.PrintHeading($"{label}: {nameof(AcousticSettingsRaw)}");
 
             using (var _ = helper.PushIndent())
             {

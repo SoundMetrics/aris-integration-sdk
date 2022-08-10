@@ -38,9 +38,11 @@ namespace SoundMetrics.Aris.Core.Raw
             return Enable.GetHashCode() ^ Delay.GetHashCode();
         }
 
-        PrettyPrintHelper IPrettyPrintable.PrettyPrint(PrettyPrintHelper helper)
+        PrettyPrintHelper IPrettyPrintable.PrettyPrint(
+            PrettyPrintHelper helper,
+            string label)
         {
-            helper.PrintHeading($"{nameof(InterpacketDelaySettings)}");
+            helper.PrintHeading($"{label}: {nameof(InterpacketDelaySettings)}");
 
             using (var _ = helper.PushIndent())
             {

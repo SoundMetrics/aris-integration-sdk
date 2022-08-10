@@ -7,6 +7,6 @@ namespace SoundMetrics.Aris.Core.ApprovalTests
     /// </summary>
     public interface IPrettyPrintable
     {
-        PrettyPrintHelper PrettyPrint(PrettyPrintHelper helper);
+        PrettyPrintHelper PrettyPrint(PrettyPrintHelper helper, string label);
     }
 }
