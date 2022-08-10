@@ -153,7 +153,27 @@ namespace SoundMetrics.Aris.Core
                 (MoveType.WindowEnd, -(Distance)1.2),
             };
 
-            var testName = nameof(MoveWindowStart_NotRecording_GuidedSampleCount);
+            var testName = nameof(MoveWindowEnd_NotRecording_GuidedSampleCount);
+            TestRunner(testName, moveSteps, mode);
+        }
+
+        [TestMethod]
+        public void MoveEntireWindow_NotRecording_GuidedSampleCount()
+        {
+            var mode = GuidedSettingsMode.GuidedSampleCount;
+
+            var moveSteps =
+                new StepInputs[]
+            {
+                (MoveType.EntireWindow, (Distance)0.1),
+                (MoveType.EntireWindow, (Distance)0.1),
+                (MoveType.EntireWindow, (Distance)1),
+                (MoveType.EntireWindow, -(Distance)2),
+                (MoveType.EntireWindow, (Distance)2),
+                (MoveType.EntireWindow, -(Distance)1.2),
+            };
+
+            var testName = nameof(MoveEntireWindow_NotRecording_GuidedSampleCount);
             TestRunner(testName, moveSteps, mode);
         }
 
@@ -272,7 +292,18 @@ namespace SoundMetrics.Aris.Core
                         }
                         
                     case MoveType.EntireWindow:
-                        return settings; // ### TODO
+                        {
+                            var bounds = settings.WindowBounds(conditions);
+                            var requestedStart = bounds.WindowStart + distance;
+                            return settings.MoveEntireWindow(
+                                guidedSettingsMode,
+                                conditions,
+                                requestedStart,
+                                useMaxFrameRate: true,
+                                useAutoFrequency: true
+                            );
+                        }
+
                     default:
                         throw new ArgumentException($"Value not handled: [{moveType}]");
                 }

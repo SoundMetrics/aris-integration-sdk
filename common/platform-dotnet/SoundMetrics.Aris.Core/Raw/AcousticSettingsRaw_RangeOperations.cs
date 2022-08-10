@@ -388,7 +388,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return autoFlags;
         }
 
-        public static AcousticSettingsRaw SlideWindow(
+        public static AcousticSettingsRaw MoveEntireWindow(
                 this AcousticSettingsRaw settings,
                 GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
