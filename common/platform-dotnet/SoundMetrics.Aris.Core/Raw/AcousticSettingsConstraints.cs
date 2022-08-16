@@ -74,6 +74,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     .SystemType
                     .GetConfiguration()
                     .RawConfiguration
-                    .MaxAntialiasingFor(settings));
+                    .MaxAntiAliasingFor(settings));
     }
 }

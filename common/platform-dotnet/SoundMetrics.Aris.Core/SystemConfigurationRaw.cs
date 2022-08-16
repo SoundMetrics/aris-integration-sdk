@@ -65,7 +65,7 @@ namespace SoundMetrics.Aris.Core
             return limitedFrameRate;
         }
 
-        public FineDuration MaxAntialiasingFor(AcousticSettingsRaw settings)
+        public FineDuration MaxAntiAliasingFor(AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             return CyclePeriodLimits.Maximum - settings.CyclePeriod;

@@ -1,0 +1,4 @@
+﻿Test Conditions: 
+    conditions: ObservedConditions: 
+        WaterTemp: 20.000 °C
+        Depth: 5.000 m

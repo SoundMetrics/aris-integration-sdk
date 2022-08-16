@@ -1,0 +1,26 @@
+﻿GetStartSettings: 
+    conditions: ObservedConditions: 
+        WaterTemp: 20.000 °C
+        Depth: 5.000 m
+    salinity: Brackish
+    windowBounds: WindowStart=[2.000 m]; WindowEnd=[9.000 m]; WindowLength=[7.000 m]
+Start Settings: 
+    startSettings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 9.769441187964048/s
+        SampleCount: 1167
+        SampleStartDelay: 0.002667 s
+        SamplePeriod: 0.000008 s
+        PulseWidth: 0.000016 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.012423 s

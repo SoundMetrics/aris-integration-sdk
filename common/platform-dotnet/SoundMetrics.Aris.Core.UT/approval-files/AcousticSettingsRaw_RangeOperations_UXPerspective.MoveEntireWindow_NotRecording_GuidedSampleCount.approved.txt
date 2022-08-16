@@ -1,0 +1,165 @@
+﻿MoveEntireWindow_NotRecording_GuidedSampleCount: 
+GetStartSettings: 
+    conditions: ObservedConditions: 
+        WaterTemp: 20.000 °C
+        Depth: 5.000 m
+    salinity: Brackish
+    windowBounds: WindowStart=[2.000 m]; WindowEnd=[9.000 m]; WindowLength=[7.000 m]
+Start Settings: 
+    startSettings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 9.769441187964048/s
+        SampleCount: 1167
+        SampleStartDelay: 0.002667 s
+        SamplePeriod: 0.000008 s
+        PulseWidth: 0.000016 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.012423 s
+Step 0: 
+    StepInputs: StepInputs(MoveType.EntireWindow, 0.100 m)
+    starting: MoveActuals(Bounds(WindowStart=[1.999 m]; WindowEnd=[8.998 m]; WindowLength=[6.999 m]), SamplePeriod=[0.000008 s], SampleCount=[1167])
+    ending: MoveActuals(Bounds(WindowStart=[2.099 m]; WindowEnd=[9.098 m]; WindowLength=[6.999 m]), SamplePeriod=[0.000008 s], SampleCount=[1167])
+    new settings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 9.665944942777605/s
+        SampleCount: 1167
+        SampleStartDelay: 0.002800 s
+        SamplePeriod: 0.000008 s
+        PulseWidth: 0.000016 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.012556 s
+Step 1: 
+    StepInputs: StepInputs(MoveType.EntireWindow, 0.100 m)
+    starting: MoveActuals(Bounds(WindowStart=[2.099 m]; WindowEnd=[9.098 m]; WindowLength=[6.999 m]), SamplePeriod=[0.000008 s], SampleCount=[1167])
+    ending: MoveActuals(Bounds(WindowStart=[2.199 m]; WindowEnd=[9.197 m]; WindowLength=[6.999 m]), SamplePeriod=[0.000008 s], SampleCount=[1167])
+    new settings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 9.564618563011706/s
+        SampleCount: 1167
+        SampleStartDelay: 0.002933 s
+        SamplePeriod: 0.000008 s
+        PulseWidth: 0.000016 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.012689 s
+Step 2: 
+    StepInputs: StepInputs(MoveType.EntireWindow, 1.000 m)
+    starting: MoveActuals(Bounds(WindowStart=[2.199 m]; WindowEnd=[9.197 m]; WindowLength=[6.999 m]), SamplePeriod=[0.000008 s], SampleCount=[1167])
+    ending: MoveActuals(Bounds(WindowStart=[3.198 m]; WindowEnd=[10.194 m]; WindowLength=[6.996 m]), SamplePeriod=[0.000009 s], SampleCount=[1037])
+    new settings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 8.657109218089895/s
+        SampleCount: 1037
+        SampleStartDelay: 0.004266 s
+        SamplePeriod: 0.000009 s
+        PulseWidth: 0.000018 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.014019 s
+Step 3: 
+    StepInputs: StepInputs(MoveType.EntireWindow, -2.000 m)
+    starting: MoveActuals(Bounds(WindowStart=[3.198 m]; WindowEnd=[10.194 m]; WindowLength=[6.996 m]), SamplePeriod=[0.000009 s], SampleCount=[1037])
+    ending: MoveActuals(Bounds(WindowStart=[1.198 m]; WindowEnd=[8.193 m]; WindowLength=[6.995 m]), SamplePeriod=[0.000007 s], SampleCount=[1333])
+    new settings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 10.69381469757892/s
+        SampleCount: 1333
+        SampleStartDelay: 0.001598 s
+        SamplePeriod: 0.000007 s
+        PulseWidth: 0.000014 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.011349 s
+Step 4: 
+    StepInputs: StepInputs(MoveType.EntireWindow, 2.000 m)
+    starting: MoveActuals(Bounds(WindowStart=[1.198 m]; WindowEnd=[8.193 m]; WindowLength=[6.995 m]), SamplePeriod=[0.000007 s], SampleCount=[1333])
+    ending: MoveActuals(Bounds(WindowStart=[3.197 m]; WindowEnd=[10.194 m]; WindowLength=[6.996 m]), SamplePeriod=[0.000009 s], SampleCount=[1037])
+    new settings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 8.657708823936833/s
+        SampleCount: 1037
+        SampleStartDelay: 0.004265 s
+        SamplePeriod: 0.000009 s
+        PulseWidth: 0.000018 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.014018 s
+Step 5: 
+    StepInputs: StepInputs(MoveType.EntireWindow, -1.200 m)
+    starting: MoveActuals(Bounds(WindowStart=[3.197 m]; WindowEnd=[10.194 m]; WindowLength=[6.996 m]), SamplePeriod=[0.000009 s], SampleCount=[1037])
+    ending: MoveActuals(Bounds(WindowStart=[1.997 m]; WindowEnd=[8.996 m]; WindowLength=[6.999 m]), SamplePeriod=[0.000008 s], SampleCount=[1167])
+    new settings: AcousticSettingsRaw: 
+        SystemType: ARIS 3000 (1)
+        FrameRate: 9.771732332707943/s
+        SampleCount: 1167
+        SampleStartDelay: 0.002664 s
+        SamplePeriod: 0.000008 s
+        PulseWidth: 0.000016 s
+        PingMode: PingMode 9, 128 beams
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 12
+        FocusDistance: 3.317 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Brackish
+        CyclePeriod (calculated): 0.012420 s
