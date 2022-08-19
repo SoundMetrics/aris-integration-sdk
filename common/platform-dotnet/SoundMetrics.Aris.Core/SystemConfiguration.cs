@@ -134,10 +134,15 @@ namespace SoundMetrics.Aris.Core
         internal double SmallPeriodAdjustmentFactor { get; set; }
         internal double LargePeriodAdjustmentFactor { get; set; }
 
-        public AcousticSettingsRaw GetDefaultSettings(ObservedConditions observedConditions)
-            => MakeDefaultSettings(observedConditions);
+        public AcousticSettingsRaw GetDefaultSettings(
+            ObservedConditions observedConditions,
+            Salinity salinity)
+            => MakeDefaultSettings(observedConditions, salinity);
 
-        private Func<ObservedConditions, AcousticSettingsRaw> MakeDefaultSettings { get; set; }
+        private delegate AcousticSettingsRaw
+            MakeDefaultSettingsFn(ObservedConditions observedConditions, Salinity salinity);
+
+        private MakeDefaultSettingsFn MakeDefaultSettings { get; set; }
 
         private static ValueRange<FineDuration> RangeOfDuration(double a, double b)
             => new ValueRange<FineDuration>(

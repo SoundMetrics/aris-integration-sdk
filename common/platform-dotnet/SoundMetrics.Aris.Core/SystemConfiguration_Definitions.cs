@@ -53,7 +53,8 @@ namespace SoundMetrics.Aris.Core
                     SmallPeriodAdjustmentFactor = 1.08,
                     LargePeriodAdjustmentFactor = 1.03,
 
-                    MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1800),
+                    MakeDefaultSettings =
+                        CreateSettingsBuilder(MakeDefaultSettings1800),
 
                     FrequencyHigh = Rate.ToRate(1_800_000),
                     FrequencyLow = Rate.ToRate(1_100_000),
@@ -98,7 +99,8 @@ namespace SoundMetrics.Aris.Core
                     SmallPeriodAdjustmentFactor = 1.08,
                     LargePeriodAdjustmentFactor = 1.03,
 
-                    MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings3000),
+                    MakeDefaultSettings =
+                        CreateSettingsBuilder(MakeDefaultSettings3000),
 
                     FrequencyHigh = Rate.ToRate(3_000_000),
                     FrequencyLow = Rate.ToRate(1_800_000),
@@ -143,7 +145,8 @@ namespace SoundMetrics.Aris.Core
                     SmallPeriodAdjustmentFactor = 1.02,
                     LargePeriodAdjustmentFactor = 1.02, // large/small are the same for the 1200
 
-                    MakeDefaultSettings = CreateSettingsBuilder(MakeDefaultSettings1200),
+                    MakeDefaultSettings =
+                        CreateSettingsBuilder(MakeDefaultSettings1200),
 
                     FrequencyHigh = Rate.ToRate(1_200_000),
                     FrequencyLow = Rate.ToRate(700_000),
@@ -151,15 +154,16 @@ namespace SoundMetrics.Aris.Core
 
             return configurations;
 
-            Func<ObservedConditions, AcousticSettingsRaw>
-                CreateSettingsBuilder(
-                    Func<ObservedConditions, AcousticSettingsRaw> makeDefaultSettings)
+            MakeDefaultSettingsFn
+                CreateSettingsBuilder(MakeDefaultSettingsFn makeDefaultSettings)
             {
                 return MakeSettings;
 
-                AcousticSettingsRaw MakeSettings(ObservedConditions observedConditions)
+                AcousticSettingsRaw MakeSettings(
+                    ObservedConditions observedConditions,
+                    Salinity salinity)
                 {
-                    var defaultSettings = makeDefaultSettings(observedConditions);
+                    var defaultSettings = makeDefaultSettings(observedConditions, salinity);
                     return ChangeWindow.ToMediumWindow(
                         defaultSettings,
                         GuidedSettingsMode.FixedSampleCount,
@@ -169,7 +173,9 @@ namespace SoundMetrics.Aris.Core
                 }
             }
 
-            AcousticSettingsRaw MakeDefaultSettings1800(ObservedConditions observedConditions)
+            AcousticSettingsRaw MakeDefaultSettings1800(
+                ObservedConditions observedConditions,
+                Salinity salinity)
             {
                 var systemType = SystemType.Aris1800;
                 var pingMode = PingMode.PingMode3;
@@ -184,7 +190,6 @@ namespace SoundMetrics.Aris.Core
                 var enableTransmit = true;
                 var enable150Volts = true;
                 var focusDistance = (Distance)10;
-                var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
                 // defining system configurations) as we're returning this function via
@@ -208,7 +213,9 @@ namespace SoundMetrics.Aris.Core
                         AutomaticAcousticSettings.All);
             }
 
-            AcousticSettingsRaw MakeDefaultSettings3000(ObservedConditions observedConditions)
+            AcousticSettingsRaw MakeDefaultSettings3000(
+                ObservedConditions observedConditions,
+                Salinity salinity)
             {
                 var systemType = SystemType.Aris3000;
                 var pingMode = PingMode.PingMode9;
@@ -223,7 +230,6 @@ namespace SoundMetrics.Aris.Core
                 var enableTransmit = true;
                 var enable150Volts = true;
                 var focusDistance = (Distance)10;
-                var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
                 // defining system configurations) as we're returning this function via
@@ -247,7 +253,9 @@ namespace SoundMetrics.Aris.Core
                         AutomaticAcousticSettings.All);
             }
 
-            AcousticSettingsRaw MakeDefaultSettings1200(ObservedConditions observedConditions)
+            AcousticSettingsRaw MakeDefaultSettings1200(
+                ObservedConditions observedConditions,
+                Salinity salinity)
             {
                 var systemType = SystemType.Aris1200;
                 var pingMode = PingMode.PingMode1;
@@ -262,7 +270,6 @@ namespace SoundMetrics.Aris.Core
                 var enableTransmit = true;
                 var enable150Volts = true;
                 var focusDistance = (Distance)10;
-                var salinity = Salinity.Brackish;
 
                 // We get away with referencing the system configuration here (while we're
                 // defining system configurations) as we're returning this function via

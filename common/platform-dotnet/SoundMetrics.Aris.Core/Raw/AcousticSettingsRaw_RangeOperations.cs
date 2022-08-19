@@ -1,15 +1,12 @@
 ﻿// Copyright (c) 2022 Sound Metrics Corp.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using static AcousticSettingsRawCalculations;
     using static AcousticSettingsRaw_Aux;
+    using static AcousticSettingsRawCalculations;
     using static System.Math;
 
     public static class AcousticSettingsRawRangeOperations
@@ -505,8 +502,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 systemType
                     .GetConfiguration()
-                    .GetDefaultSettings(observedConditions)
-                    .CopyRawWith(salinity: salinity)
+                    .GetDefaultSettings(observedConditions, salinity)
                     .CalculateSettingsWithGuidedSampleCount(
                         windowBounds, observedConditions)
                     .WithMaxFrameRate(enable: true);
