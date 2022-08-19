@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using System;
 using System.Diagnostics;
@@ -25,6 +25,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         public static explicit operator double(Velocity v) => v._metersPerSecond;
+        public static explicit operator Velocity(double v) => Velocity.FromMetersPerSecond(v);
 
         public static Velocity Zero { get { return zero; } }
         public double MetersPerSecond { get { return _metersPerSecond; } }
