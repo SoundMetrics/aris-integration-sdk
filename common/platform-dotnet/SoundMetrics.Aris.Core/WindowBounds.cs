@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Core
             WindowEnd = windowEnd;
         }
 
-        internal WindowBounds(float windowStart, float windowEnd)
+        internal WindowBounds(double windowStart, double windowEnd)
         {
             WindowStart = (Distance)windowStart;
             WindowEnd = (Distance)windowEnd;
