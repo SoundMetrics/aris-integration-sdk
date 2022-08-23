@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
+using static SoundMetrics.Aris.Core.MathSupport;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -60,7 +61,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         public FineDuration RoundToMicroseconds()
-            => FineDuration.FromMicroseconds(Math.Round(this.TotalMicroseconds));
+            => FineDuration.FromMicroseconds(RoundAway(this.TotalMicroseconds));
 
         /// <summary>
         /// Performs a Floor() on FineDuration's native unit, which is microseconds.
