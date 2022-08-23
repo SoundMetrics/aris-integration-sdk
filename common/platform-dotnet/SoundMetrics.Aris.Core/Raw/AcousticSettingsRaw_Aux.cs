@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using static System.Math;
+using static SoundMetrics.Aris.Core.MathSupport;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -74,14 +76,14 @@ namespace SoundMetrics.Aris.Core.Raw
                 {
                     var slope = Max(2, 2 * 5.00 / crossoverRange.Meters);
                     return (FineDuration)
-                        Round(
+                        RoundAway(
                             Min(16, Max(5, slope * windowEnd.Meters)));
                 }
                 else
                 {
                     var slope = Max(1.75, 8.75 / crossoverRange.Meters);
                     return (FineDuration)
-                        Round(
+                        RoundAway(
                             Min(24, Max(8, 7 + (slope * (windowEnd.Meters - 4)))));
                 }
             }
@@ -91,14 +93,14 @@ namespace SoundMetrics.Aris.Core.Raw
                 {
                     var slope = Max(2, 2 * 15.00 / crossoverRange.Meters);
                     return (FineDuration)
-                        Round(
+                        RoundAway(
                             Min(25, Max(6, slope * (windowEnd.Meters - 5))));
                 }
                 else
                 {
                     var slope = Max(1, 15.00 / crossoverRange.Meters);
                     return (FineDuration)
-                        Round(
+                        RoundAway(
                             Min(40, Max(5, 7 + (slope * windowEnd.Meters))));
 
                 }
@@ -106,7 +108,7 @@ namespace SoundMetrics.Aris.Core.Raw
             else if (systemType == SystemType.Aris1200)
             {
                 return (FineDuration)
-                    Round(
+                    RoundAway(
                         Min(80, Max(8, windowEnd.Meters)));
             }
             else
@@ -128,25 +130,25 @@ namespace SoundMetrics.Aris.Core.Raw
                         ? 0.9 + (0.035 * (referenceTemp - temperature).DegreesCelsius)
                         : 0.9 - (0.020 * (temperature - referenceTemp).DegreesCelsius);
                 double offset = 1.5 - (0.075 * (25 - temperature.DegreesCelsius));
-                return (FineDuration)
-                    Round(
-                        Min(19, Max(4, slope * (windowEnd.Meters + offset))));
+                var result =
+                        Min(19, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
+                return (FineDuration)result;
             }
             else if (systemType == SystemType.Aris1800)
             {
                 var slope = 0.5;
                 var offset = 3.00;
-                return (FineDuration)
-                    Round(
-                        Min(20, Max(4, slope * (windowEnd.Meters + offset))));
+                var result =
+                        Min(20, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
+                return (FineDuration)result;
             }
             else if (systemType == SystemType.Aris1200)
             {
                 var slope = 0.5;
                 var offset = 0.0;
-                return (FineDuration)
-                    Round(
-                        Min(40, Max(4, slope * (windowEnd.Meters + offset))));
+                var result =
+                        Min(40, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
+                return (FineDuration)result;
             }
             else
             {

@@ -191,7 +191,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var frameRate =
                 Rate.Min(
                     original.FrameRate,
-                    MaxFrameRate.DetermineMaximumFrameRateWithIntermediates(
+                    MaxFrameRate.CalculateMaximumFrameRateWithIntermediates(
                         sysCfg,
                         original.PingMode,
                         original.SampleCount,

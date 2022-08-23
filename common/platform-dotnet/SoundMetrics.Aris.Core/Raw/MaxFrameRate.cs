@@ -9,20 +9,20 @@ namespace SoundMetrics.Aris.Core.Raw
     // \\soundserv\Engineering\Test\Results & Reports\ARIS Max Frame Rates
     public static class MaxFrameRate
     {
-        public static Rate DetermineMaximumFrameRate(AcousticSettingsRaw settings)
+        public static Rate CalculateMaximumFrameRate(AcousticSettingsRaw settings)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return DetermineMaximumFrameRate(settings, out var _);
+            return CalculateMaximumFrameRate(settings, out var _);
         }
 
-        public static Rate DetermineMaximumFrameRate(
+        public static Rate CalculateMaximumFrameRate(
             AcousticSettingsRaw settings,
             out FineDuration cyclePeriod)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return DetermineMaximumFrameRateWithIntermediates(
+            return CalculateMaximumFrameRateWithIntermediates(
                 settings.SystemType.GetConfiguration(),
                 settings.PingMode,
                 settings.SampleCount,
@@ -34,14 +34,14 @@ namespace SoundMetrics.Aris.Core.Raw
                 out var _);
         }
 
-        internal static Rate DetermineMaximumFrameRateWithIntermediates(
+        internal static Rate CalculateMaximumFrameRateWithIntermediates(
             AcousticSettingsRaw settings,
             out FineDuration cyclePeriod,
             out IntermediateMaximumFrameRateResults intermediateResults)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
 
-            return DetermineMaximumFrameRateWithIntermediates(
+            return CalculateMaximumFrameRateWithIntermediates(
                 settings.SystemType.GetConfiguration(),
                 settings.PingMode,
                 settings.SampleCount,
@@ -61,7 +61,7 @@ namespace SoundMetrics.Aris.Core.Raw
             public override string ToString() => $"MCP=[{MCP}]; PPF=[{PPF}]";
         }
 
-        internal static Rate DetermineMaximumFrameRate(
+        internal static Rate CalculateMaximumFrameRate(
             SystemConfiguration sysCfg,
             PingMode pingMode,
             int sampleCount,
@@ -71,7 +71,7 @@ namespace SoundMetrics.Aris.Core.Raw
             InterpacketDelaySettings interpacketDelay)
         {
             return
-                DetermineMaximumFrameRateWithIntermediates(
+                CalculateMaximumFrameRateWithIntermediates(
                     sysCfg,
                     pingMode,
                     sampleCount,
@@ -85,7 +85,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         // This variant allows us to return the value for cyclePeriod, which is required for
         // sending raw settings to ARIS.
-        internal static Rate DetermineMaximumFrameRateWithIntermediates(
+        internal static Rate CalculateMaximumFrameRateWithIntermediates(
             SystemConfiguration sysCfg,
             PingMode pingMode,
             int sampleCount,
@@ -120,9 +120,12 @@ namespace SoundMetrics.Aris.Core.Raw
                         * ((FineDuration)16.6 + interpacketDelaySettings.Delay)
                 : (FineDuration)0;
 
-            var cpaFactor = DetermineCyclePeriodAdjustmentFactor(sp, sysCfg);
+            var systemType = sysCfg.SystemType;
+            var mfpa =
+                systemType == SystemType.Aris3000 || systemType == SystemType.Aris1800
+                    ? (sp == (FineDuration)4) ? ppf * ((mcp * 1.08) + aa) + id : ppf * ((mcp * 1.03) + aa) + id
+                    : ppf * ((mcp * 1.02) + aa) + id;
 
-            var mfpa = ppf * ((mcp * cpaFactor) + aa) + id;
             var mfra = 1 / mfpa;
 
             // Back to proper naming
@@ -140,14 +143,6 @@ namespace SoundMetrics.Aris.Core.Raw
                 };
 
             return hz;
-        }
-
-        private static double DetermineCyclePeriodAdjustmentFactor(
-            FineDuration samplePeriod,
-            SystemConfiguration sysCfg)
-        {
-            var isSmallSamplePeriod = samplePeriod <= (FineDuration)4;
-            return isSmallSamplePeriod ? sysCfg.SmallPeriodAdjustmentFactor : sysCfg.LargePeriodAdjustmentFactor;
         }
 
         private static readonly FineDuration CyclePeriodMargin = SystemConfigurationRaw.CyclePeriodMargin;

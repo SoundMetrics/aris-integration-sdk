@@ -131,9 +131,6 @@ namespace SoundMetrics.Aris.Core
         public Rate AsRate(Frequency frequency)
             => frequency == Frequency.High ? FrequencyHigh : FrequencyLow;
 
-        internal double SmallPeriodAdjustmentFactor { get; set; }
-        internal double LargePeriodAdjustmentFactor { get; set; }
-
         public AcousticSettingsRaw GetDefaultSettings(
             ObservedConditions observedConditions,
             Salinity salinity)

@@ -89,7 +89,7 @@ namespace SoundMetrics.Aris.Core
                 var expectedMaximumFrameRate = expected.MaximuimFrameRate;
 
                 var maximumFrameRate =
-                    MaxFrameRate.DetermineMaximumFrameRateWithIntermediates(
+                    MaxFrameRate.CalculateMaximumFrameRateWithIntermediates(
                         settings,
                         out var calculatedCyclePeriod,
                         out var intermediateResults);

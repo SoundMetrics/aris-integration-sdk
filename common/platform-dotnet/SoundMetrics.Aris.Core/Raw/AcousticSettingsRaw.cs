@@ -52,7 +52,7 @@ namespace SoundMetrics.Aris.Core.Raw
             InterpacketDelay = interpacketDelay;
             Salinity = salinity;
 
-            MaximumFrameRate = MaxFrameRate.DetermineMaximumFrameRate(this);
+            MaximumFrameRate = MaxFrameRate.CalculateMaximumFrameRate(this);
         }
 
         [DataMember]
@@ -107,7 +107,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             get
             {
-                var _ = MaxFrameRate.DetermineMaximumFrameRate(this, out var cyclePeriod);
+                var _ = MaxFrameRate.CalculateMaximumFrameRate(this, out var cyclePeriod);
                 return cyclePeriod;
             }
         }

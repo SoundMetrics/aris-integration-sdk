@@ -50,9 +50,6 @@ namespace SoundMetrics.Aris.Core
                                 maxCumulativePulsePerSecond: 300),
                     },
 
-                    SmallPeriodAdjustmentFactor = 1.08,
-                    LargePeriodAdjustmentFactor = 1.03,
-
                     MakeDefaultSettings =
                         CreateSettingsBuilder(MakeDefaultSettings1800),
 
@@ -96,9 +93,6 @@ namespace SoundMetrics.Aris.Core
                                 maxCumulativePulsePerSecond: 240),
                     },
 
-                    SmallPeriodAdjustmentFactor = 1.08,
-                    LargePeriodAdjustmentFactor = 1.03,
-
                     MakeDefaultSettings =
                         CreateSettingsBuilder(MakeDefaultSettings3000),
 
@@ -141,9 +135,6 @@ namespace SoundMetrics.Aris.Core
                                 multiplier: 1.0,
                                 maxCumulativePulsePerSecond: 400),
                     },
-
-                    SmallPeriodAdjustmentFactor = 1.02,
-                    LargePeriodAdjustmentFactor = 1.02, // large/small are the same for the 1200
 
                     MakeDefaultSettings =
                         CreateSettingsBuilder(MakeDefaultSettings1200),
@@ -195,7 +186,7 @@ namespace SoundMetrics.Aris.Core
                 // defining system configurations) as we're returning this function via
                 // `CreateSettingsBuilder` above for later invocation.
                 var maxFrameRate =
-                    MaxFrameRate.DetermineMaximumFrameRate(
+                    MaxFrameRate.CalculateMaximumFrameRate(
                         SystemConfiguration.GetConfiguration(systemType),
                         pingMode,
                         sampleCount,
@@ -235,7 +226,7 @@ namespace SoundMetrics.Aris.Core
                 // defining system configurations) as we're returning this function via
                 // `CreateSettingsBuilder` above for later invocation.
                 var maxFrameRate =
-                    MaxFrameRate.DetermineMaximumFrameRate(
+                    MaxFrameRate.CalculateMaximumFrameRate(
                         SystemConfiguration.GetConfiguration(systemType),
                         pingMode,
                         sampleCount,
@@ -275,7 +266,7 @@ namespace SoundMetrics.Aris.Core
                 // defining system configurations) as we're returning this function via
                 // `CreateSettingsBuilder` above for later invocation.
                 var maxFrameRate =
-                    MaxFrameRate.DetermineMaximumFrameRate(
+                    MaxFrameRate.CalculateMaximumFrameRate(
                         SystemConfiguration.GetConfiguration(systemType),
                         pingMode,
                         sampleCount,

@@ -53,7 +53,7 @@ namespace SoundMetrics.Aris.Core.Raw
             InterpacketDelaySettings interpacketDelay)
         {
             var min = sysCfg.FrameRateLimits.Minimum;
-            var max = MaxFrameRate.DetermineMaximumFrameRate(
+            var max = MaxFrameRate.CalculateMaximumFrameRate(
                         sysCfg,
                         pingMode,
                         sampleCount,

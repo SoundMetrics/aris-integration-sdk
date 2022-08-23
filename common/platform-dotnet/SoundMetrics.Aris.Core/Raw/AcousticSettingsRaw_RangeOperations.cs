@@ -2,12 +2,12 @@
 
 using System;
 using System.Diagnostics;
+using static SoundMetrics.Aris.Core.MathSupport;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsRaw_Aux;
     using static AcousticSettingsRawCalculations;
-    using static System.Math;
 
     public static class AcousticSettingsRawRangeOperations
     {
@@ -345,7 +345,7 @@ namespace SoundMetrics.Aris.Core.Raw
                  * [round]
                  */
                 var windowLength = windowEnd - windowStart;
-                return Math.Round(
+                return RoundAway(
                     2 * windowLength / (speedOfSound * samplePeriod));
             }
 
@@ -593,7 +593,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var (windowStart, _, windowLength) = windowBounds;
 
             var sampleCount = windowLength / (sspd / 2 * samplePeriod);
-            var integralSampleCount = (int)Round(sampleCount);
+            var integralSampleCount = (int)RoundAway(sampleCount);
             var systemPreferredLimits =
                 systemType.GetConfiguration().SampleCountPreferredLimits;
             var constrainedSampleCount =
