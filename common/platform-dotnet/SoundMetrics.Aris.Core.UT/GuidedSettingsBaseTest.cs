@@ -2,12 +2,12 @@
 using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
 namespace SoundMetrics.Aris.Core
 {
+    using static SoundMetrics.Aris.Core.Helpers;
     using static Math;
     using TestCase = GuidedSettingsBaseTest_TestCase;
 
@@ -164,6 +164,13 @@ namespace SoundMetrics.Aris.Core
         private static TestCase ConvertToTestCase(string inputLine)
         {
             var splits = inputLine.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+            var systemTypeLookup =
+                    MakeReadOnlyDictionary(
+                        ("ARIS 3000", SystemType.Aris3000),
+                        ("ARIS 1800", SystemType.Aris1800),
+                        ("ARIS 1200", SystemType.Aris1200));
+            var frequencyLookup =
+                MakeReadOnlyDictionary(("LF", Frequency.Low), ("HF", Frequency.High));
 
             var testCase = new TestCase
             {
@@ -203,23 +210,8 @@ namespace SoundMetrics.Aris.Core
             }
         }
 
-        private static readonly ReadOnlyDictionary<string, SystemType> systemTypeLookup
-            = new ReadOnlyDictionary<string, SystemType>(
-                new Dictionary<string, SystemType>
-                {
-                    { "ARIS 3000", SystemType.Aris3000 },
-                    { "ARIS 1800", SystemType.Aris1800 },
-                    { "ARIS 1200", SystemType.Aris1200 },
-                });
-
-        private static readonly ReadOnlyDictionary<string, Frequency> frequencyLookup
-            = new ReadOnlyDictionary<string, Frequency>(
-                new Dictionary<string, Frequency>
-                {
-                    { "LF", Frequency.Low },
-                    { "HF", Frequency.High },
-                });
-
+        internal static IEnumerable<TestCase> LoadTestCases()
+            => LoadInputLinesFromFile().Select(ConvertToTestCase);
 
         private static IEnumerable<string> LoadInputLinesFromFile()
         {
