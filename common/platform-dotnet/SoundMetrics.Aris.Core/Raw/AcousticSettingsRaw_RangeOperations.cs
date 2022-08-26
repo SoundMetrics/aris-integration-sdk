@@ -536,33 +536,39 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var systemType = settings.SystemType;
             var salinity = settings.Salinity;
-            var (windowStart, windowEnd) = windowBounds;
             var waterTemperature = observedConditions.WaterTemp;
+            var sspd = observedConditions.SpeedOfSound(salinity);
+
+            // Calculate sample start delay first and adjust the requested bounds
+            // to use the new value.
+            var (sampleStartDelay, adjustedBounds) =
+                CalculateWindowBounds(windowBounds, sspd);
 
             var frequency =
                 CalculateFrequencyPerWindowEnd(
-                    systemType, waterTemperature, salinity, windowEnd);
-            var sspd = observedConditions.SpeedOfSound(salinity);
+                    systemType,
+                    waterTemperature,
+                    salinity,
+                    adjustedBounds.WindowEnd);
 
             var pulseWidth =
                 CalculateAutoPulseWidth(
                     systemType,
                     waterTemperature,
                     salinity,
-                    windowEnd);
+                    adjustedBounds.WindowEnd);
             var samplePeriod =
                 CalculateAutoSamplePeriod(
                     systemType,
                     waterTemperature,
-                    windowEnd);
+                    adjustedBounds.WindowEnd);
             var sampleCount =
                 CalculateGuidedSamplesPerBeam(
                     systemType,
-                    windowBounds,
+                    adjustedBounds,
                     sspd,
                     samplePeriod,
                     out var _);
-            var sampleStartDelay = CalculateSampleStartDelay(windowStart, sspd);
 
             var newRawValues =
                 settings.CopyRawWith(
@@ -574,6 +580,22 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var constrained = newRawValues.ApplyAllConstraints();
             return constrained;
+        }
+
+        private static
+            (FineDuration sampleStartDelay, WindowBounds adjustedWindowBounds)
+            CalculateWindowBounds(
+                in WindowBounds bounds,
+                Velocity speedOfSound)
+        {
+            // Also use sample start delay to get proper distance for
+            // the window start.
+
+            var ssd = CalculateSampleStartDelay(bounds.WindowStart, speedOfSound);
+            var adjustedWindowStart = CalculateWindowStart(ssd, speedOfSound);
+            var realBounds = bounds.MoveStartTo(adjustedWindowStart);
+
+            return (ssd, realBounds);
         }
 
         private static int CalculateGuidedSamplesPerBeam(
