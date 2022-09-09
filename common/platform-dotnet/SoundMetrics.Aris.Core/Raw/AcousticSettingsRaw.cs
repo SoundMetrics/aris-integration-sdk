@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using SoundMetrics.Aris.Core.ApprovalTests;
 using System;
@@ -19,7 +19,7 @@ namespace SoundMetrics.Aris.Core.Raw
     public sealed partial class AcousticSettingsRaw
         : IEquatable<AcousticSettingsRaw>, ApprovalTests.IPrettyPrintable
     {
-        internal AcousticSettingsRaw(
+        public AcousticSettingsRaw(
             SystemType systemType,
             Rate frameRate,
             int sampleCount,
@@ -53,6 +53,8 @@ namespace SoundMetrics.Aris.Core.Raw
             Salinity = salinity;
 
             MaximumFrameRate = MaxFrameRate.CalculateMaximumFrameRate(this);
+
+            CheckInvariants(this);
         }
 
         [DataMember]
@@ -88,7 +90,11 @@ namespace SoundMetrics.Aris.Core.Raw
         public FocusDistance FocusDistance
         {
             get => _focusDistanceV2;
-            set { _focusDistanceV2 = value; }
+            set
+            {
+                _focusDistanceV2 = value;
+                CheckInvariants(this);
+            }
         }
 
         [DataMember]
@@ -210,6 +216,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 _obsoleteFocusDistance = default;
                 Trace.TraceInformation("Converted old-format focus distance");
             }
+
+            CheckInvariants(this);
         }
 
         public override string ToString()

@@ -32,12 +32,14 @@ namespace SoundMetrics.Aris.Core
         {
             WindowStart = windowStart;
             WindowEnd = windowEnd;
+            CheckInvariants();
         }
 
         internal WindowBounds(double windowStart, double windowEnd)
         {
             WindowStart = (Distance)windowStart;
             WindowEnd = (Distance)windowEnd;
+            CheckInvariants();
         }
 
         public void Deconstruct(out Distance windowStart, out Distance windowEnd)
@@ -54,6 +56,16 @@ namespace SoundMetrics.Aris.Core
             windowStart = WindowStart;
             windowEnd = WindowEnd;
             windowLength = WindowLength;
+        }
+
+        private void CheckInvariants()
+        {
+            if (!(WindowStart < WindowEnd))
+            {
+                var errorMessage =
+                    $"{nameof(WindowEnd)} must be greater than {nameof(WindowStart)}";
+                throw new ArgumentOutOfRangeException(errorMessage);
+            }
         }
 
         public static implicit operator WindowBounds((float WindowStart, float WindowEnd) bounds)

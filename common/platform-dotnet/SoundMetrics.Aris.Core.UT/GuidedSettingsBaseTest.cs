@@ -39,7 +39,7 @@ namespace SoundMetrics.Aris.Core
         public Rate MaximumFrameRate;
     }
 
-    [TestClass]
+    // Deferred [TestClass]
     public sealed class GuidedSettingsBaseTest
     {
         [TestMethod]
