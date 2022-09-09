@@ -648,6 +648,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var sampleCount = settings.SampleCount;
             var (windowStart, windowEnd) = windowBounds;
             var waterTemperature = observedConditions.WaterTemp;
+            var sysCfg = systemType.GetConfiguration();
+            var rawCfg = sysCfg.RawConfiguration;
 
             var frequency =
                 CalculateFrequencyPerWindowEnd(
@@ -684,7 +686,10 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 var windowlength = windowEnd - windowStart;
                 var samplePeriodPerSampleCount = (2 * windowlength / (sspd * sampleCount)).RoundToMicroseconds();
-                return samplePeriodPerSampleCount;
+
+                var constrainedSamplePeriod =
+                    samplePeriodPerSampleCount.ConstrainTo(rawCfg.SamplePeriodLimits);
+                return constrainedSamplePeriod;
             }
         }
 
