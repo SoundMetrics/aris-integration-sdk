@@ -155,12 +155,15 @@ namespace SoundMetrics.Aris.Core
                     Salinity salinity)
                 {
                     var defaultSettings = makeDefaultSettings(observedConditions, salinity);
-                    return ChangeWindow.ToMediumWindow(
-                        defaultSettings,
-                        GuidedSettingsMode.FixedSampleCount,
-                        observedConditions,
-                        useMaxFrameRate: true,
-                        useAutoFrequency: true);
+                    return
+                        ChangeWindow
+                            .ToMediumWindow(
+                                defaultSettings,
+                                GuidedSettingsMode.FixedSampleCount,
+                                observedConditions,
+                                useMaxFrameRate: true,
+                                useAutoFrequency: true)
+                            .WithAutomaticFocusDistance(observedConditions);
                 }
             }
 
