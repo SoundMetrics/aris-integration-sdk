@@ -179,10 +179,25 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public static bool operator ==(AcousticSettingsRaw a, AcousticSettingsRaw b)
-            => !(a is null) && a.Equals(b);
+        {
+            if (a is null)
+            {
+                if (b is null)
+                {
+                    return true;
+                }
+                else
+                {
+                    // Only a is null
+                    return false;
+                }
+            }
+
+            return a.Equals(b); // Instance method Equals() can handle null arg.
+        }
 
         public static bool operator !=(AcousticSettingsRaw a, AcousticSettingsRaw b)
-            => (a is null) || !a.Equals(b);
+            => !(a == b);
 
         public override int GetHashCode()
         {
