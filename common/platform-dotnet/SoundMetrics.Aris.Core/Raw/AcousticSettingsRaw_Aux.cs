@@ -3,9 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using static System.Math;
 using static SoundMetrics.Aris.Core.MathSupport;
+using static System.Math;
 
 namespace SoundMetrics.Aris.Core.Raw
 {

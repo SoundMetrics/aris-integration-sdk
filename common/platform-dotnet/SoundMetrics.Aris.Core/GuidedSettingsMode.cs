@@ -1,12 +1,13 @@
 ﻿// Copyright (c) 2022 Sound Metrics Corp.
 
+using SoundMetrics.Aris.Core.Raw;
 using System;
 
 namespace SoundMetrics.Aris.Core
 {
     public enum GuidedSettingsMode
     {
-        Invalid = 0,        // Likely uninitialized
+        Invalid = 0,        // Uninitialized
         FixedSampleCount,   // E.g., when recording or in ROV use
         GuidedSampleCount,  // Chooses a sample count for you
         Free,               // Free raw input
@@ -14,26 +15,25 @@ namespace SoundMetrics.Aris.Core
 
     internal static class GuidedSettingsModeExtensions
     {
-        internal static TResult DispatchOperation<TResult>(
-            this GuidedSettingsMode mode,
-            Func<TResult> onFixed,
-            Func<TResult> onGuided,
-            Func<TResult> onFree)
+        internal static IAdjustWindowTerminus GetAdjustWindowOperations(
+            this GuidedSettingsMode mode)
         {
             switch (mode)
             {
                 case GuidedSettingsMode.FixedSampleCount:
-                    return onFixed();
+                    return AdjustWindowTerminusFixed.Instance;
 
                 case GuidedSettingsMode.GuidedSampleCount:
-                    return onGuided();
+                    return AdjustWindowTerminusGuided.Instance;
 
                 case GuidedSettingsMode.Free:
-                    return onFree();
+                    return AdjustWindowTerminusFree.Instance;
 
                 case GuidedSettingsMode.Invalid:
+                    throw new ArgumentException($"Invalid mode: {mode}");
+
                 default:
-                    throw new ArgumentOutOfRangeException(mode.ToString());
+                    throw new ArgumentException($"Unhandled mode: {mode}");
             }
         }
     }

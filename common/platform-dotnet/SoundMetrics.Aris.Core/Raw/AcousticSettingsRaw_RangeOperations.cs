@@ -38,33 +38,16 @@ namespace SoundMetrics.Aris.Core.Raw
                 GetConstrainedWindowBounds(sysCfg, requestedWindow);
 
             return guidedSettingsMode
-                    .DispatchOperation(
-                        onFixed: SelectSpecificRange_Fixed,
-                        onGuided: SelectSpecificRange_Guided,
-                        onFree: SelectSpecificRange_Free);
-
-            AcousticSettingsRaw SelectSpecificRange_Fixed()
-                => CalculateSettingsWithFixedSampleCount(
+                    .GetAdjustWindowOperations()
+                    .SelectSpecificRange(
                         settings,
-                        constrainedWindowBounds,
-                        observedConditions);
-
-            AcousticSettingsRaw SelectSpecificRange_Guided()
-                => CalculateSettingsWithGuidedSampleCount(
-                        settings,
-                        constrainedWindowBounds,
-                        observedConditions);
-
-            AcousticSettingsRaw SelectSpecificRange_Free()
-                => CalculateFreeSettingsWithRange(
-                        settings,
-                        constrainedWindowBounds,
                         observedConditions,
+                        constrainedWindowBounds,
                         useMaxFrameRate,
                         useAutoFrequency);
         }
 
-        private static readonly Distance MinimumSlideDisplacement = (Distance)0.003;
+        internal static readonly Distance MinimumSlideDisplacement = (Distance)0.003;
 
         /// <summary>
         /// Moves the range start, attempting to enclose the requested distance.
@@ -91,8 +74,8 @@ namespace SoundMetrics.Aris.Core.Raw
             // Tactic: what integral sample period covers the smallest range that
             // encloses the requested window start without moving the end?
 
-            var (windowStart, windowEnd, windowLength) =
-                settings.WindowBounds(observedConditions);
+            var windowBounds = settings.WindowBounds(observedConditions);
+            var (_, _, windowLength) = windowBounds;
 
             if (windowLength <= Distance.Zero)
             {
@@ -101,112 +84,14 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             return guidedSettingsMode
-                    .DispatchOperation(
-                        onFixed: MoveWindowStart_Fixed,
-                        onGuided: MoveWindowStart_Guided,
-                        onFree: MoveWindowStart_Free);
-
-            AcousticSettingsRaw MoveWindowStart_Guided()
-            {
-                var constrainedStart =
-                    requestedStart.ConstrainTo(
-                        GetStartMinMax(settings, observedConditions));
-                if ((constrainedStart - windowStart).Abs() <= MinimumSlideDisplacement)
-                {
-                    return settings;
-                }
-
-                var newWindowBounds = new WindowBounds(constrainedStart, windowEnd);
-
-                return
-                    settings.CalculateSettingsWithGuidedSampleCount(
-                        newWindowBounds,
-                        observedConditions)
-                        .WithMaxFrameRate(true)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw MoveWindowStart_Fixed()
-            {
-                var constrainedStart =
-                    requestedStart.ConstrainTo(
-                        GetStartMinMax(settings, observedConditions));
-                if ((constrainedStart - windowStart).Abs() <= MinimumSlideDisplacement)
-                {
-                    return settings;
-                }
-
-                var newWindowBounds = new WindowBounds(constrainedStart, windowEnd);
-
-                return
-                    settings.CalculateSettingsWithFixedSampleCount(
-                        newWindowBounds,
-                        observedConditions)
-                        .WithMaxFrameRate(useMaxFrameRate)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw MoveWindowStart_Free()
-            {
-                var sysCfg = settings.SystemType.GetConfiguration();
-
-                if (windowStart <= requestedStart
-                    && settings.SamplePeriod <= sysCfg.RawConfiguration.SamplePeriodLimits.Minimum)
-                {
-                    // Sample period is already at its minimum.
-                    return settings;
-                }
-
-                if (requestedStart <= windowStart
-                    && settings.SamplePeriod >= sysCfg.RawConfiguration.SamplePeriodLimits.Maximum)
-                {
-                    // Sample period is already at its maximum.
-                    return settings;
-                }
-
-                // Make sure we don't move window end here.
-                // Expand the window by adjusting sample period,
-                // move the window start.
-
-                var salinity = settings.Salinity;
-                var newWindowRoughTimeOfFlight = 2 * windowLength / observedConditions.SpeedOfSound(salinity);
-                var newSamplePeriod =
-                    (newWindowRoughTimeOfFlight / settings.SampleCount)
-                        .RoundToMicroseconds()
-                        .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
-
-                if (newSamplePeriod == settings.SamplePeriod)
-                {
-                    // Nothing to do.
-                    return settings;
-                }
-
-                // Calculate SSD backwards from WindowEnd -- by new [WindowEnd - (sample period * sample count)],
-                // only do it in machine units (microseconds) to avoid conversion to/from distance
-                // (distance is derived from the machine units).
-
-                var newSampleStartDelay = CalculateNewSampleStartDelay();
-                var autoFlags = GetAutoFlags(useAutoFrequency);
-
-                return
-                    settings
-                        .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                        .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                        .WithAutomaticSettings(observedConditions, autoFlags)
-                        .WithMaxFrameRate(useMaxFrameRate)
-                        .ApplyAllConstraints();
-
-                FineDuration CalculateNewSampleStartDelay()
-                {
-                    var oldSampleStartDelay = settings.SampleStartDelay;
-                    var oldSamplePeriod = settings.SamplePeriod;
-                    var oldWindowTimeOfFlight = settings.SampleCount * oldSamplePeriod;
-                    var newWindowTimeOfFlight = settings.SampleCount * newSamplePeriod;
-                    var calculatedEndWindowTime = oldSampleStartDelay + oldWindowTimeOfFlight;
-                    var calculatedSampleStartDelay = calculatedEndWindowTime - newWindowTimeOfFlight;
-                    return calculatedSampleStartDelay;
-                }
-            }
+                    .GetAdjustWindowOperations()
+                    .MoveWindowStart(
+                        settings,
+                        observedConditions,
+                        windowBounds,
+                        requestedStart,
+                        useMaxFrameRate,
+                        useAutoFrequency);
         }
 
         /// <summary>
@@ -235,8 +120,8 @@ namespace SoundMetrics.Aris.Core.Raw
             // encloses the requested window end?
 
             var sysCfg = settings.SystemType.GetConfiguration();
-            var (windowStart, windowEnd, windowLength) =
-                settings.WindowBounds(observedConditions);
+            var windowBounds = settings.WindowBounds(observedConditions);
+            var (_, _, windowLength) = windowBounds;
 
             if (windowLength <= Distance.Zero)
             {
@@ -244,122 +129,15 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
-            return guidedSettingsMode.DispatchOperation(
-                onFixed: MoveWindowEnd_Fixed,
-                onGuided: MoveWindowEnd_Guided,
-                onFree: MoveWindowEnd_Free);
-
-            AcousticSettingsRaw MoveWindowEnd_Guided()
-            {
-                var constrainedEnd = requestedEnd.ConstrainTo(sysCfg.WindowEndLimits);
-                if ((constrainedEnd - windowEnd).Abs() <= MinimumSlideDisplacement)
-                {
-                    return settings;
-                }
-
-                var newWindowBounds = new WindowBounds(windowStart, constrainedEnd);
-
-                return
-                    settings.CalculateSettingsWithGuidedSampleCount(
-                        newWindowBounds,
-                        observedConditions)
-                        .WithMaxFrameRate(true)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw MoveWindowEnd_Fixed()
-            {
-                var constrainedEnd = requestedEnd.ConstrainTo(sysCfg.WindowEndLimits);
-                if ((constrainedEnd - windowEnd).Abs() <= MinimumSlideDisplacement)
-                {
-                    return settings;
-                }
-
-                var newWindowBounds = new WindowBounds(windowStart, constrainedEnd);
-
-                return
-                    settings.CalculateSettingsWithFixedSampleCount(
-                        newWindowBounds,
-                        observedConditions)
-                        .WithMaxFrameRate(useMaxFrameRate)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw MoveWindowEnd_Free()
-            {
-                // rountrip time over the window
-                var salinity = settings.Salinity;
-                var newWindowRoughTimeOfFlight =
-                    2 * windowLength / observedConditions.SpeedOfSound(salinity);
-
-                var autoFlags = GetAutoFlags(useAutoFrequency);
-                var newSettings = MoveAllowingChangeToSampleCount();
-
-                if (newSettings == settings)
-                {
-                    return settings;
-                }
-                else
-                {
-                    return
-                        newSettings
-                            .WithAutomaticSettings(observedConditions, autoFlags)
-                            .WithMaxFrameRate(useMaxFrameRate)
-                            .ApplyAllConstraints();
-                }
-
-                AcousticSettingsRaw MoveAllowingChangeToSampleCount()
-                {
-                    var nominalSampleCount =
-                        CalculateNominalSampleCount(
-                            settings.SamplePeriod,
-                            windowStart,
-                            requestedEnd,
-                            observedConditions.SpeedOfSound(settings.Salinity),
-                            out var _);
-                    return settings.WithSampleCount(nominalSampleCount);
-                }
-            }
-        }
-
-        private static int CalculateNominalSampleCount(
-            FineDuration samplePeriod,
-            Distance windowStart,
-            Distance windowEnd,
-            Velocity speedOfSound,
-            out Distance correctedWindowEnd)
-        {
-            double sampleCount = CalculateSampleCount();
-            correctedWindowEnd = windowStart + CalculatedCorrectedWindowLength();
-            return (int)sampleCount;
-
-            double CalculateSampleCount()
-            {
-                /*
-                 * samplePeriod = 2 * windowLength / (sspd * sampleCount)
-                 *
-                 * samplePeriod * sampleCount = 2 * windowLength / sspd
-                 *
-                 * sampleCount = 2 * windowLength / (sspd * samplePeriod)
-                 *
-                 * [round]
-                 */
-                var windowLength = windowEnd - windowStart;
-                return RoundAway(
-                    2 * windowLength / (speedOfSound * samplePeriod));
-            }
-
-            Distance CalculatedCorrectedWindowLength()
-            {
-                /*
-                 * samplePeriod = 2 * windowLength / (sspd * sampleCount)
-                 *
-                 *      so
-                 *
-                 * windowLength = samplePeriod * sspd * sampleCount / 2
-                 */
-                return samplePeriod * speedOfSound * sampleCount / 2.0;
-            }
+            return guidedSettingsMode
+                    .GetAdjustWindowOperations()
+                    .MoveWindowEnd(
+                        settings,
+                        observedConditions,
+                        windowBounds,
+                        requestedEnd,
+                        useMaxFrameRate,
+                        useAutoFrequency);
         }
 
         internal static (Distance MinStart, Distance MaxStart)
@@ -404,84 +182,22 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var originalBounds = settings.WindowBounds(observedConditions);
-            var sysCfg = settings.SystemType.GetConfiguration();
 
-            var newSettings = guidedSettingsMode
-                    .DispatchOperation(
-                        onFixed: SlideWindow_Fixed,
-                        onGuided: SlideWindow_Guided,
-                        onFree: SlideWindow_Free);
+            var newSettings =
+                guidedSettingsMode
+                    .GetAdjustWindowOperations()
+                    .SlideWindow(
+                        settings,
+                        observedConditions,
+                        originalBounds,
+                        requestedStart,
+                        useMaxFrameRate,
+                        useAutoFrequency);
 
             return newSettings;
-
-            AcousticSettingsRaw SlideWindow_Guided()
-            {
-                var constrainedStart =
-                    requestedStart.ConstrainTo(
-                        GetStartMinMax(settings, observedConditions));
-                if ((constrainedStart - originalBounds.WindowStart).Abs() <= MinimumSlideDisplacement)
-                {
-                    return settings;
-                }
-
-                var newWindowBounds =
-                    new WindowBounds(constrainedStart, constrainedStart + originalBounds.WindowLength);
-
-                return
-                    settings.CalculateSettingsWithGuidedSampleCount(
-                        newWindowBounds,
-                        observedConditions)
-                        .WithMaxFrameRate(true)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw SlideWindow_Fixed()
-            {
-                var constrainedStart =
-                    requestedStart.ConstrainTo(
-                        GetStartMinMax(settings, observedConditions));
-                if ((constrainedStart - originalBounds.WindowStart).Abs() <= MinimumSlideDisplacement)
-                {
-                    return settings;
-                }
-
-                var newWindowBounds =
-                    new WindowBounds(constrainedStart, constrainedStart + originalBounds.WindowLength);
-
-                return
-                    settings.CalculateSettingsWithFixedSampleCount(
-                        newWindowBounds,
-                        observedConditions)
-                        .WithMaxFrameRate(useMaxFrameRate)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw SlideWindow_Free()
-            {
-                // Don't adjust the sample count, just adjust the sample start delay.
-
-                var windowStart = originalBounds.WindowStart;
-
-                if (requestedStart == windowStart)
-                {
-                    return settings;
-                }
-
-                var salinity = settings.Salinity;
-                var newSampleStartDelay =
-                    (2 * requestedStart / observedConditions.SpeedOfSound(salinity))
-                        .ConstrainTo(sysCfg.RawConfiguration.SampleStartDelayLimits);
-                var autoFlags = GetAutoFlags(useAutoFrequency);
-                return
-                    settings
-                        .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                        .WithAutomaticSettings(observedConditions, autoFlags)
-                        .WithMaxFrameRate(useMaxFrameRate)
-                        .ApplyAllConstraints();
-            }
         }
 
-        private static WindowBounds GetConstrainedWindowBounds(
+        internal static WindowBounds GetConstrainedWindowBounds(
             SystemConfiguration sysCfg,
             in WindowBounds windowBounds)
         {
@@ -691,39 +407,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     samplePeriodPerSampleCount.ConstrainTo(rawCfg.SamplePeriodLimits);
                 return constrainedSamplePeriod;
             }
-        }
-
-        internal static AcousticSettingsRaw
-            CalculateFreeSettingsWithRange(
-                this AcousticSettingsRaw settings,
-                in WindowBounds requestedWindow,
-                ObservedConditions observedConditions,
-                bool useMaxFrameRate,
-                bool useAutoFrequency)
-        {
-            var sysCfg = settings.SystemType.GetConfiguration();
-            var constrainedWindowBounds =
-                GetConstrainedWindowBounds(sysCfg, requestedWindow);
-
-            var (windowStart, windowEnd) = constrainedWindowBounds;
-            var sspd = observedConditions.SpeedOfSound(settings.Salinity);
-
-            var samplePeriod =
-                CalculateSamplePeriod(windowStart, windowEnd, settings.SampleCount, sspd)
-                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
-            var sampleStartDelay = 2 * windowStart / sspd;
-
-            return
-                ChangeWindow.BuildNewWindowSettings(
-                    settings,
-                    observedConditions,
-                    sampleStartDelay,
-                    samplePeriod,
-                    settings.AntiAliasing,
-                    settings.InterpacketDelay,
-                    automateFocusDistance: true,
-                    useMaxFrameRate,
-                    useAutoFrequency);
         }
 
         private static Distance CalculateWindowEnd(
