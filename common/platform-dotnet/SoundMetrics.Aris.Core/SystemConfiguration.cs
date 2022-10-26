@@ -42,8 +42,6 @@ namespace SoundMetrics.Aris.Core
 
         internal ValueRange<int> SampleStartDelayDeviceLimits => sampleStartDelayDeviceLimits;
 
-        internal ValueRange<int> SamplePeriodDeviceLimits => samplePeriodDeviceLimits;
-
         internal ValueRange<int> FocusPositionDeviceLimits => focusPositionDeviceLimits;
 
         internal ValueRange<int> CyclePeriodDeviceLimits => cyclePeriodDeviceLimits;
@@ -156,8 +154,6 @@ namespace SoundMetrics.Aris.Core
             = new ValueRange<int>(4, 80);
         private static readonly ValueRange<int> sampleStartDelayDeviceLimits
             = new ValueRange<int>(930, 60000);
-        private static readonly ValueRange<int> samplePeriodDeviceLimits
-            = new ValueRange<int>(4, 100);
         private static readonly ValueRange<int> focusPositionDeviceLimits
             = new ValueRange<int>(0, 1000);
         private static readonly ValueRange<int> cyclePeriodDeviceLimits
