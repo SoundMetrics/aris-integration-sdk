@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using static SoundMetrics.Aris.Core.MathSupport;
 using static System.Math;
 
@@ -58,6 +59,13 @@ namespace SoundMetrics.Aris.Core.Raw
             return windowEnd < crossover ? Frequency.High : Frequency.Low;
         }
 
+        private static FineDuration ConstrainToIntRange(
+            FineDuration duration, ValueRange<int> range)
+        {
+            var asInt = (int)duration.RoundToMicroseconds().TotalMicroseconds;
+            var constrained = asInt.ConstrainTo(range);
+            return (FineDuration)constrained;
+        }
 
         public static FineDuration CalculateAutoPulseWidth(
             SystemType systemType,
@@ -65,54 +73,62 @@ namespace SoundMetrics.Aris.Core.Raw
             Salinity salinity,
             Distance windowEnd)
         {
-            var crossoverRange =
-                CalculateFrequencyCrossoverDistance(systemType, temperature, salinity);
-            var isHighFrequency = windowEnd <= crossoverRange;
+            var rawValue = CalculateRawPulseWidth();
+            var sysCfg = systemType.GetConfiguration();
+            var constrained = ConstrainToIntRange(rawValue, sysCfg.PulseWidthDeviceLimits);
+            return constrained;
 
-            if (systemType == SystemType.Aris3000)
+            FineDuration CalculateRawPulseWidth()
             {
-                if (isHighFrequency)
+                var crossoverRange =
+                    CalculateFrequencyCrossoverDistance(systemType, temperature, salinity);
+                var isHighFrequency = windowEnd <= crossoverRange;
+
+                if (systemType == SystemType.Aris3000)
                 {
-                    var slope = Max(2, 2 * 5.00 / crossoverRange.Meters);
+                    if (isHighFrequency)
+                    {
+                        var slope = Max(2, 2 * 5.00 / crossoverRange.Meters);
+                        return (FineDuration)
+                            RoundAway(
+                                Min(16, Max(5, slope * windowEnd.Meters)));
+                    }
+                    else
+                    {
+                        var slope = Max(1.75, 8.75 / crossoverRange.Meters);
+                        return (FineDuration)
+                            RoundAway(
+                                Min(24, Max(8, 7 + (slope * (windowEnd.Meters - 4)))));
+                    }
+                }
+                else if (systemType == SystemType.Aris1800)
+                {
+                    if (isHighFrequency)
+                    {
+                        var slope = Max(2, 2 * 15.00 / crossoverRange.Meters);
+                        return (FineDuration)
+                            RoundAway(
+                                Min(25, Max(6, slope * (windowEnd.Meters - 5))));
+                    }
+                    else
+                    {
+                        var slope = Max(1, 15.00 / crossoverRange.Meters);
+                        return (FineDuration)
+                            RoundAway(
+                                Min(40, Max(5, 7 + (slope * windowEnd.Meters))));
+
+                    }
+                }
+                else if (systemType == SystemType.Aris1200)
+                {
                     return (FineDuration)
                         RoundAway(
-                            Min(16, Max(5, slope * windowEnd.Meters)));
+                            Min(80, Max(8, windowEnd.Meters)));
                 }
                 else
                 {
-                    var slope = Max(1.75, 8.75 / crossoverRange.Meters);
-                    return (FineDuration)
-                        RoundAway(
-                            Min(24, Max(8, 7 + (slope * (windowEnd.Meters - 4)))));
+                    throw new ArgumentException($"Unhandled system type: [{systemType}]");
                 }
-            }
-            else if (systemType == SystemType.Aris1800)
-            {
-                if (isHighFrequency)
-                {
-                    var slope = Max(2, 2 * 15.00 / crossoverRange.Meters);
-                    return (FineDuration)
-                        RoundAway(
-                            Min(25, Max(6, slope * (windowEnd.Meters - 5))));
-                }
-                else
-                {
-                    var slope = Max(1, 15.00 / crossoverRange.Meters);
-                    return (FineDuration)
-                        RoundAway(
-                            Min(40, Max(5, 7 + (slope * windowEnd.Meters))));
-
-                }
-            }
-            else if (systemType == SystemType.Aris1200)
-            {
-                return (FineDuration)
-                    RoundAway(
-                        Min(80, Max(8, windowEnd.Meters)));
-            }
-            else
-            {
-                throw new ArgumentException($"Unhandled system type: [{systemType}]");
             }
         }
 
@@ -121,37 +137,45 @@ namespace SoundMetrics.Aris.Core.Raw
             Temperature temperature,
             Distance windowEnd)
         {
-            if (systemType == SystemType.Aris3000)
+            var rawValue = CalculateRawSamplePeriod();
+            var sysCfg = systemType.GetConfiguration();
+            var constrained = rawValue.ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
+            return constrained;
+
+            FineDuration CalculateRawSamplePeriod()
             {
-                // No units given.
-                double slope =
-                    temperature < referenceTemp
-                        ? 0.9 + (0.035 * (referenceTemp - temperature).DegreesCelsius)
-                        : 0.9 - (0.020 * (temperature - referenceTemp).DegreesCelsius);
-                double offset = 1.5 - (0.075 * (25 - temperature.DegreesCelsius));
-                var result =
-                        Min(19, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
-                return (FineDuration)result;
-            }
-            else if (systemType == SystemType.Aris1800)
-            {
-                var slope = 0.5;
-                var offset = 3.00;
-                var result =
-                        Min(20, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
-                return (FineDuration)result;
-            }
-            else if (systemType == SystemType.Aris1200)
-            {
-                var slope = 0.5;
-                var offset = 0.0;
-                var result =
-                        Min(40, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
-                return (FineDuration)result;
-            }
-            else
-            {
-                throw new ArgumentException($"Unhandled system type: [{systemType}]");
+                if (systemType == SystemType.Aris3000)
+                {
+                    // No units given.
+                    double slope =
+                        temperature < referenceTemp
+                            ? 0.9 + (0.035 * (referenceTemp - temperature).DegreesCelsius)
+                            : 0.9 - (0.020 * (temperature - referenceTemp).DegreesCelsius);
+                    double offset = 1.5 - (0.075 * (25 - temperature.DegreesCelsius));
+                    var result =
+                            Min(19, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
+                    return (FineDuration)result;
+                }
+                else if (systemType == SystemType.Aris1800)
+                {
+                    var slope = 0.5;
+                    var offset = 3.00;
+                    var result =
+                            Min(20, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
+                    return (FineDuration)result;
+                }
+                else if (systemType == SystemType.Aris1200)
+                {
+                    var slope = 0.5;
+                    var offset = 0.0;
+                    var result =
+                            Min(40, Max(4, RoundAway(slope * (windowEnd.Meters + offset))));
+                    return (FineDuration)result;
+                }
+                else
+                {
+                    throw new ArgumentException($"Unhandled system type: [{systemType}]");
+                }
             }
         }
 
