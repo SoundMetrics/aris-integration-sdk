@@ -90,11 +90,7 @@ namespace SoundMetrics.Aris.Core.Raw
         public FocusDistance FocusDistance
         {
             get => _focusDistanceV2;
-            set
-            {
-                _focusDistanceV2 = value;
-                CheckInvariants(this);
-            }
+            private set => _focusDistanceV2 = value;
         }
 
         [DataMember]
