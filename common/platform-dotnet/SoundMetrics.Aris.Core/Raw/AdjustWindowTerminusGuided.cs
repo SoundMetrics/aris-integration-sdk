@@ -3,6 +3,9 @@
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsRawRangeOperations;
+    using static Distance;
+    using static AcousticSettingsRaw_Aux;
+    using System.Runtime;
 
     internal sealed class AdjustWindowTerminusGuided : IAdjustWindowTerminus
     {
@@ -20,8 +23,9 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             var (windowStart, windowEnd) = windowBounds;
             var constrainedStart =
-                requestedStart.ConstrainTo(
-                    GetStartMinMax(settings, observedConditions));
+                Min(requestedStart.ConstrainTo(
+                        GetStartMinMax(settings, observedConditions)),
+                    GetMaxWindowStart());
             if ((constrainedStart - windowStart).Abs() <= MinimumSlideDisplacement)
             {
                 return settings;
@@ -34,6 +38,12 @@ namespace SoundMetrics.Aris.Core.Raw
                     observedConditions)
                     .WithMaxFrameRate(true)
                     .ApplyAllConstraints();
+
+            Distance GetMaxWindowStart()
+            {
+                var minWindowLength = CalculateMinimumWindowLength(settings, observedConditions);
+                return windowEnd - minWindowLength;
+            }
         }
 
         public AcousticSettingsRaw MoveWindowEnd(
@@ -47,7 +57,10 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = settings.SystemType.GetConfiguration();
             var (windowStart, windowEnd) = windowBounds;
 
-            var constrainedEnd = requestedEnd.ConstrainTo(sysCfg.WindowEndLimits);
+            var constrainedEnd =
+                Max(requestedEnd.ConstrainTo(sysCfg.WindowEndLimits),
+                    GetMinWindowEnd());
+
             if ((constrainedEnd - windowEnd).Abs() <= MinimumSlideDisplacement)
             {
                 return settings;
@@ -60,6 +73,12 @@ namespace SoundMetrics.Aris.Core.Raw
                     observedConditions)
                     .WithMaxFrameRate(true)
                     .ApplyAllConstraints();
+
+            Distance GetMinWindowEnd()
+            {
+                var minWindowLength = CalculateMinimumWindowLength(settings, observedConditions);
+                return windowBounds.WindowStart + minWindowLength;
+            }
         }
 
         public AcousticSettingsRaw SelectSpecificRange(
