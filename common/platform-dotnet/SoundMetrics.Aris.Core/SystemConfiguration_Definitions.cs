@@ -28,7 +28,7 @@ namespace SoundMetrics.Aris.Core
                     RawConfiguration = new SystemConfigurationRaw
                     {
                         SampleStartDelayLimits = RangeOfDuration(930, 36_000),
-                        SamplePeriodLimits = RangeOfDuration(4, 20),
+                        SamplePeriodLimits = RangeOfDuration(4, 32),
                         FocusPositionLimits = focusPositionDeviceLimits,
                         CyclePeriodLimits = RangeOfDuration(1802, 80_000),
 
@@ -71,7 +71,7 @@ namespace SoundMetrics.Aris.Core
                     RawConfiguration = new SystemConfigurationRaw
                     {
                         SampleStartDelayLimits = RangeOfDuration(930, 18_000),
-                        SamplePeriodLimits = RangeOfDuration(4, 12),
+                        SamplePeriodLimits = RangeOfDuration(4, 26),
                         FocusPositionLimits = focusPositionDeviceLimits,
                         CyclePeriodLimits = RangeOfDuration(1802, 40_000),
 
