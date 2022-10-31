@@ -85,10 +85,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.SampleStartDelay,
                     settings.SamplePeriod,
                     settings.AntiAliasing,
-                    settings.InterpacketDelay))
-                .LogSettingsContext(
-                    $"{nameof(ApplyAllConstraints)}",
-                    s => $"updated frame rate: [{s.FrameRate}]");
+                    settings.InterpacketDelay));
 
             if (settings2 is null)
             {
@@ -96,10 +93,7 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var settings3 =
-                settings2.WithLimitedPulseWidth(settings2.PulseWidth)
-                    .LogSettingsContext(
-                        $"{nameof(ApplyAllConstraints)}",
-                        s => $"limited pulse width: [{s.PulseWidth}]");
+                settings2.WithLimitedPulseWidth(settings2.PulseWidth);
 
             if (settings3 is null)
             {
@@ -110,12 +104,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var result =
                 UpdateAntiAliasing(
                     settings3,
-                    settings3.ConstrainAntiAliasing())
-                .LogSettingsContext(
-                    $"{nameof(ApplyAllConstraints)}",
-                    s => $"antialiasing: [{s.AntiAliasing}]");
-
-            LogSettingsChangeResult($"{nameof(ApplyAllConstraints)}", settings, result);
+                    settings3.ConstrainAntiAliasing());
 
             return result;
         }
@@ -130,14 +119,10 @@ namespace SoundMetrics.Aris.Core.Raw
             var validRange = rawCfg.GetPulseWidthLimitsFor(frequency).Limits;
             var constrainedValue = requestedPulseWidth.ConstrainTo(validRange);
 
-            LogSettingsContext($"PulseWidth [{requestedPulseWidth}]->[{constrainedValue}]; validRange={validRange}");
-
             var result =
                 rawCfg
                     .LimitPulseWidthEnergy(frequency, constrainedValue, frameRate)
                     .Floor;
-
-            LogSettingsContext($"PulseWidth after limiting energy: [{result}]");
             return result;
         }
 
@@ -171,8 +156,6 @@ namespace SoundMetrics.Aris.Core.Raw
                         settings.Salinity)
                     .ApplyAllConstraints();
 
-            LogSettingsChangeResult($"{nameof(WithPingMode)}", settings, result);
-
             return result;
         }
 
@@ -201,8 +184,6 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var result = UpdateFrameRate(settings, allowedFrameRate);
 
-            LogSettingsChangeResult($"{nameof(WithFrameRate)}", settings, result);
-
             return result;
         }
 
@@ -215,16 +196,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var result = enable
                 ? settings
                     .WithFrameRate(settings.MaximumFrameRate)
-                    .LogSettingsContext(
-                        $"{nameof(WithMaxFrameRate)}",
-                        s => $"frame rate: [{s.FrameRate}]")
                     .ApplyAllConstraints()
-                    .LogSettingsContext(
-                        $"{nameof(WithMaxFrameRate)}",
-                        s => $"constrained frame rate: [{s.FrameRate}]")
                 : settings;
-
-            LogSettingsChangeResult($"{nameof(WithMaxFrameRate)}", settings, result);
 
             return result;
         }
@@ -250,8 +223,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
-
-            LogSettingsChangeResult($"{nameof(UpdateFrameRate)}", settings, result);
 
             return result;
         }
@@ -281,8 +252,6 @@ namespace SoundMetrics.Aris.Core.Raw
                         settings.InterpacketDelay,
                         settings.Salinity);
 
-            LogSettingsChangeResult($"{nameof(WithTransmit)}", settings, result);
-
             return result;
         }
 
@@ -309,8 +278,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     antiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
-
-            LogSettingsChangeResult($"{nameof(UpdateAntiAliasing)}", settings, result);
 
             return result;
         }
@@ -340,8 +307,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Salinity)
                 .ApplyAllConstraints();
 
-            LogSettingsChangeResult($"{nameof(WithFocusDistance)}", settings, result);
-
             return result;
         }
 
@@ -357,19 +322,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var result =
                 UpdateAntiAliasing(settings, newDelay)
-                    .LogSettingsContext(
-                        $"{nameof(WithAntiAliasing)}",
-                        s => $"antialiasing: [{s.AntiAliasing}]")
                     .WithMaxFrameRate(useMaxFrameRate)
-                    .LogSettingsContext(
-                        $"{nameof(WithAntiAliasing)}",
-                        s => $"frame rate: [{s.FrameRate}]")
-                    .ApplyAllConstraints()
-                    .LogSettingsContext(
-                        $"{nameof(WithAntiAliasing)}",
-                        s => $"constrained antialiasing: [{s.AntiAliasing}]");
-
-            LogSettingsChangeResult($"{nameof(WithAntiAliasing)}", settings, result);
+                    .ApplyAllConstraints();
 
             return result;
         }
@@ -416,19 +370,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var result =
                 newSettings
-                    .LogSettingsContext(
-                        $"{nameof(WithSamplePeriod)}",
-                        s => $"sample period: [{s.SamplePeriod}]")
                     .WithMaxFrameRate(useMaxFrameRate)
-                    .LogSettingsContext(
-                        $"{nameof(WithSamplePeriod)}",
-                        s => $"frame rate: [{s.FrameRate}]")
-                    .ApplyAllConstraints()
-                    .LogSettingsContext(
-                        $"{nameof(WithSamplePeriod)}",
-                        s => $"constrained sample period: [{s.SamplePeriod}]");
-
-            LogSettingsChangeResult($"{nameof(WithSamplePeriod)}", settings, result);
+                    .ApplyAllConstraints();
 
             return result;
         }
@@ -449,10 +392,6 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = settings.SystemType.GetConfiguration();
             var validRange = sysCfg.RawConfiguration.SampleStartDelayLimits;
             var constrained = sampleStartDelay.ConstrainTo(validRange);
-
-            LogSettingsContext($"{nameof(WithSampleStartDelay)} {nameof(validRange )}={validRange}");
-            LogSettingsContext(
-                $"{nameof(WithSampleStartDelay)} requested=[{sampleStartDelay}]; {nameof(constrained )}=[{constrained}]");
 
             if (constrained == settings.SampleStartDelay && !useMaxFrameRate)
             {
@@ -476,22 +415,11 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
-            newSettings.LogSettingsContext(
-                GetLogSettingsPrefix(),
-                s => $"SampleStartDelay=[{s.SampleStartDelay}]");
 
             var result =
                 newSettings
                     .WithMaxFrameRate(useMaxFrameRate)
-                    .LogSettingsContext(
-                        GetLogSettingsPrefix(),
-                        s => $"After max frame rate: ssd=[{s.SampleStartDelay}]")
-                    .ApplyAllConstraints()
-                    .LogSettingsContext(
-                        GetLogSettingsPrefix(),
-                        s => $"After all constraints: ssd=[{s.SampleStartDelay}]");
-
-            LogSettingsChangeResult($"{nameof(WithSampleStartDelay)}", settings, result);
+                    .ApplyAllConstraints();
 
             return result;
         }
@@ -569,8 +497,6 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var result = settings.ApplyAllConstraints();
 
-            LogSettingsChangeResult($"{nameof(WithAutomaticSettings)}", settings, result);
-
             return result;
         }
 
@@ -599,8 +525,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity)
                     .ApplyAllConstraints();
-
-            LogSettingsChangeResult($"{nameof(WithFrequency)}", settings, result);
 
             return result;
         }
@@ -636,8 +560,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
 
-            LogSettingsChangeResult($"{nameof(WithInterpacketDelay)}", settings, result);
-
             return result;
         }
 
@@ -665,8 +587,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     salinity);
-
-            LogSettingsChangeResult($"{nameof(WithSalinity)}", settings, result);
 
             return result;
         }
@@ -699,8 +619,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
-            LogSettingsChangeResult($"{nameof(WithReceiverGain)}", settings, result);
-
             return result;
         }
 
@@ -713,8 +631,6 @@ namespace SoundMetrics.Aris.Core.Raw
             var result = requestedPulseWidth == settings.PulseWidth
                 ? settings
                 : settings.WithLimitedPulseWidth(requestedPulseWidth);
-
-            LogSettingsChangeResult($"{nameof(WithPulseWidth)}", settings, result);
 
             return result;
         }
@@ -744,8 +660,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
-            LogSettingsChangeResult($"{nameof(WithTransmitEnable)}", settings, result);
-
             return result;
         }
 
@@ -774,8 +688,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
-            LogSettingsChangeResult($"{nameof(With150VoltsEnable)}", settings, result);
-
             return result;
         }
 
@@ -803,8 +715,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.AntiAliasing,
                     settings.InterpacketDelay,
                     settings.Salinity);
-
-            LogSettingsChangeResult($"{nameof(WithSampleCount)}", settings, result);
 
             return result;
         }
@@ -844,36 +754,11 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.InterpacketDelay,
                     settings.Salinity);
 
-            LogSettingsChangeResult($"{nameof(WithLimitedPulseWidth)}", settings, result);
-
             return result;
         }
 
         private const string LogSettingsTag = "#aris.settings";
 
-        private static string GetLogSettingsPrefix()
-            => $"{LogSettingsTag} {{{SettingsChangeLoggingCounter}}} ";
-
-        internal static void LogSettingsContext(string context)
-        {
-            if (IsSettingsChangeLoggingEnabled)
-            {
-                Trace.TraceInformation($"{GetLogSettingsPrefix()}context: {context}");
-            }
-        }
-
-        private static void LogSettingsChangeResult(
-            string contextName,
-            AcousticSettingsRaw a,
-            AcousticSettingsRaw b)
-        {
-            if (IsSettingsChangeLoggingEnabled)
-            {
-                if (GetDifferences(a, b, out var differences))
-                {
-                    Trace.TraceInformation($"{GetLogSettingsPrefix()}[{contextName}]: {differences}");
-                }
-            }
-        }
+        private static string GetLogSettingsPrefix() => $"{LogSettingsTag} ";
     }
 }
