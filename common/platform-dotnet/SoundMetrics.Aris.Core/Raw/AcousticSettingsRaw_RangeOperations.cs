@@ -83,12 +83,12 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
+            Debug.WriteLine($"### @@@ ({nameof(MoveWindowStart)}) guidedSettingsMode=[{guidedSettingsMode}]");
             return guidedSettingsMode
                     .GetAdjustWindowOperations()
                     .MoveWindowStart(
                         settings,
                         observedConditions,
-                        windowBounds,
                         requestedStart,
                         useMaxFrameRate,
                         useAutoFrequency);
@@ -134,7 +134,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     .MoveWindowEnd(
                         settings,
                         observedConditions,
-                        windowBounds,
                         requestedEnd,
                         useMaxFrameRate,
                         useAutoFrequency);
@@ -181,15 +180,12 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            var originalBounds = settings.WindowBounds(observedConditions);
-
             var newSettings =
                 guidedSettingsMode
                     .GetAdjustWindowOperations()
                     .SlideWindow(
                         settings,
                         observedConditions,
-                        originalBounds,
                         requestedStart,
                         useMaxFrameRate,
                         useAutoFrequency);

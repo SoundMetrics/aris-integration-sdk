@@ -15,11 +15,11 @@ namespace SoundMetrics.Aris.Core.Raw
         public AcousticSettingsRaw MoveWindowEnd(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, _, windowLength) = windowBounds;
 
             // rountrip time over the window
@@ -59,11 +59,11 @@ namespace SoundMetrics.Aris.Core.Raw
         public AcousticSettingsRaw MoveWindowStart(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, _, windowLength) = windowBounds;
             var sysCfg = settings.SystemType.GetConfiguration();
 
@@ -141,7 +141,6 @@ namespace SoundMetrics.Aris.Core.Raw
         public AcousticSettingsRaw SlideWindow(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds originalBounds,
             Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
@@ -149,6 +148,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // Don't adjust the sample count, just adjust the sample start delay.
 
             var sysCfg = settings.SystemType.GetConfiguration();
+            var originalBounds = settings.WindowBounds(observedConditions);
             var windowStart = originalBounds.WindowStart;
 
             if (requestedStart == windowStart)

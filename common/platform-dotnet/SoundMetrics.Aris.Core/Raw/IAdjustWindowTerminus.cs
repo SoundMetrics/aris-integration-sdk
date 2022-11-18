@@ -7,7 +7,6 @@ namespace SoundMetrics.Aris.Core.Raw
         AcousticSettingsRaw MoveWindowStart(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency);
@@ -15,7 +14,6 @@ namespace SoundMetrics.Aris.Core.Raw
         AcousticSettingsRaw MoveWindowEnd(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency);
@@ -30,7 +28,6 @@ namespace SoundMetrics.Aris.Core.Raw
         AcousticSettingsRaw SlideWindow(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds originalBounds,
             Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency);

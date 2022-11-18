@@ -13,12 +13,12 @@ namespace SoundMetrics.Aris.Core.Raw
         public AcousticSettingsRaw MoveWindowEnd(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
             var sysCfg = settings.SystemType.GetConfiguration();
+            var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, windowEnd) = windowBounds;
             var constrainedEnd = requestedEnd.ConstrainTo(sysCfg.WindowEndLimits);
             if ((constrainedEnd - windowEnd).Abs() <= MinimumSlideDisplacement)
@@ -39,11 +39,11 @@ namespace SoundMetrics.Aris.Core.Raw
         public AcousticSettingsRaw MoveWindowStart(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             Distance requestedStart,
             bool useMaxFrameRate,
             bool _useAutoFrequency)
         {
+            var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, windowEnd) = windowBounds;
             var constrainedStart =
                 requestedStart.ConstrainTo(
@@ -69,18 +69,18 @@ namespace SoundMetrics.Aris.Core.Raw
             WindowBounds windowBounds,
             bool useMaxFrameRate,
             bool useAutoFrequency)
-                => settings.CalculateSettingsWithFixedSampleCount(
+            => settings.CalculateSettingsWithFixedSampleCount(
                         windowBounds,
                         observedConditions);
 
         public AcousticSettingsRaw SlideWindow(
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds originalBounds,
             Distance requestedStart,
             bool useMaxFrameRate,
             bool _useAutoFrequency)
         {
+            var originalBounds = settings.WindowBounds(observedConditions);
             var constrainedStart =
                 requestedStart.ConstrainTo(
                     GetStartMinMax(settings, observedConditions));
