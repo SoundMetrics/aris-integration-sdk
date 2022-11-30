@@ -51,6 +51,18 @@ namespace SoundMetrics.Aris.Core
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
         }
 
+        internal static SystemType GetFromHumanReadableString(string s)
+        {
+            switch (s)
+            {
+                case Aris1200String: return Aris1200;
+                case Aris1800String: return Aris1800;
+                case Aris3000String: return Aris3000;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(s), $"Invalid input [{s}]");
+            }
+        }
+
         private SystemType(int integralValue)
         {
             this.integralValue = integralValue;
@@ -79,14 +91,18 @@ namespace SoundMetrics.Aris.Core
             {
                 switch (integralValue)
                 {
-                    case 0: return "ARIS 1800";
-                    case 1: return "ARIS 3000";
-                    case 2: return "ARIS 1200";
+                    case 0: return Aris1800String;
+                    case 1: return Aris3000String;
+                    case 2: return Aris1200String;
                     default:
                         throw new InvalidOperationException($"Unexpected system type=[{integralValue}]");
                 }
             }
         }
+
+        private const string Aris1200String = "ARIS 1200";
+        private const string Aris1800String = "ARIS 1800";
+        private const string Aris3000String = "ARIS 3000";
 
         [DataMember]
         private readonly int integralValue;
