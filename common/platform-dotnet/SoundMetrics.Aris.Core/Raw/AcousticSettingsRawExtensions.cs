@@ -85,8 +85,8 @@ namespace SoundMetrics.Aris.Core.Raw
         //---------------------------------------------------------------------
         // Diff support
 
-        internal static bool GetDifferences(
-            AcousticSettingsRaw a,
+        internal static bool GetDifference(
+            this AcousticSettingsRaw a,
             AcousticSettingsRaw b,
             out string differences)
         {
@@ -107,7 +107,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return isDifferent;
         }
 
-        internal static bool GetDifferences(
+        private static bool GetDifferences(
             AcousticSettingsRaw a,
             AcousticSettingsRaw b,
             StringBuilder differences)
@@ -148,6 +148,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
                 if (object.Equals(valueA, valueB))
                 {
+                    Debug.WriteLine($"{propertyInfo.Name} unchanged at {GetInvariantFormatttedString(valueA)}");
                     return false;
                 }
                 else

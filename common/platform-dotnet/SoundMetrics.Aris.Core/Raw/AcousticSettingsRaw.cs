@@ -9,7 +9,6 @@ namespace SoundMetrics.Aris.Core.Raw
 {
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-    using static FineDuration;
 
     /// <summary>
     /// This type is ported over from some legacy ARIS Integration SDK work,

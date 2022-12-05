@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using PropertyMap = System.Collections.Generic.Dictionary<string, Func<string, object>>;
+    using PropertyMap = Dictionary<string, Func<string, object>>;
 
     /// <summary>
     /// Serialization methods used for parsing log files and

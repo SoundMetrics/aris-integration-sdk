@@ -123,7 +123,7 @@ Step 4:
     ending: MoveActuals(Bounds(WindowStart=[0.798 m]; WindowEnd=[9.002 m]; WindowLength=[8.204 m]), SamplePeriod=[0.000008 s], SampleCount=[1368])
     new settings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
-        FrameRate: 9.762574195563888/s
+        FrameRate: 9.765625/s
         SampleCount: 1368
         SampleStartDelay: 0.001064 s
         SamplePeriod: 0.000008 s
@@ -146,7 +146,7 @@ Step 5:
     ending: MoveActuals(Bounds(WindowStart=[1.997 m]; WindowEnd=[9.002 m]; WindowLength=[7.005 m]), SamplePeriod=[0.000008 s], SampleCount=[1168])
     new settings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
-        FrameRate: 9.762574195563888/s
+        FrameRate: 9.765625/s
         SampleCount: 1168
         SampleStartDelay: 0.002664 s
         SamplePeriod: 0.000008 s

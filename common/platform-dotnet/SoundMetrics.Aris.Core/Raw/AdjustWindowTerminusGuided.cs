@@ -27,7 +27,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var minimumWindowLength = CalculateMinimumWindowLength(settings, observedConditions);
             var minWindowStart = sysCfg.WindowStartLimits.Minimum;
             var maxWindowStart = windowEnd - minimumWindowLength;
-            var constrainedStart = Max(Min(requestedStart, maxWindowStart), minWindowStart);
+            var constrainedStart = requestedStart.ConstrainTo((minWindowStart, maxWindowStart));
             var newWindowBounds = new WindowBounds(constrainedStart, windowEnd);
 
             Debug.Assert(newWindowBounds.WindowStart < newWindowBounds.WindowEnd);
@@ -37,7 +37,24 @@ namespace SoundMetrics.Aris.Core.Raw
                 return settings;
             }
 
-            return SelectSpecificRange(settings, observedConditions, newWindowBounds, useMaxFrameRate, useAutoFrequency);
+            var newSettings =
+                settings.CalculateSettingsWithGuidedSampleCount(
+                    newWindowBounds,
+                    observedConditions,
+                    WindowPinning.PinToWindowEnd)
+                    .WithMaxFrameRate(true)
+                    .ApplyAllConstraints();
+
+            if (settings.SamplePeriod != newSettings.SamplePeriod)
+            {
+                var windowEndA = windowEnd;
+                var windowEndB = newSettings.WindowBounds(observedConditions).WindowEnd;
+                Debug.WriteLine(
+                    $"{nameof(MoveWindowStart)}: Sample period changed [{settings.SamplePeriod} -> {newSettings.SamplePeriod}]; "
+                    + $"window end [{windowEndA} -> {windowEndB}]");
+            }
+
+            return newSettings;
         }
 
         public AcousticSettingsRaw MoveWindowEnd(
@@ -61,12 +78,20 @@ namespace SoundMetrics.Aris.Core.Raw
             }
 
             var newWindowBounds = new WindowBounds(windowStart, constrainedEnd);
-            return
+            var newSettings =
                 settings.CalculateSettingsWithGuidedSampleCount(
                     newWindowBounds,
-                    observedConditions)
+                    observedConditions,
+                    WindowPinning.PinToWindowStart)
                     .WithMaxFrameRate(true)
                     .ApplyAllConstraints();
+
+            if (settings.SamplePeriod != newSettings.SamplePeriod)
+            {
+                Debug.WriteLine($"{nameof(MoveWindowEnd)}: Sample period changed [{settings.SamplePeriod} -> {newSettings.SamplePeriod}]");
+            }
+
+            return newSettings;
 
             Distance GetMinWindowEnd()
             {
@@ -83,7 +108,8 @@ namespace SoundMetrics.Aris.Core.Raw
             bool _useAutoFrequency)
             => settings.CalculateSettingsWithGuidedSampleCount(
                     windowBounds,
-                    observedConditions);
+                    observedConditions,
+                    WindowPinning.PinToWindowStart);
 
         public AcousticSettingsRaw SlideWindow(
             AcousticSettingsRaw settings,
@@ -107,7 +133,8 @@ namespace SoundMetrics.Aris.Core.Raw
             return
                 settings.CalculateSettingsWithGuidedSampleCount(
                     newWindowBounds,
-                    observedConditions)
+                    observedConditions,
+                    WindowPinning.PinToWindowStart)
                     .WithMaxFrameRate(true)
                     .ApplyAllConstraints();
         }
