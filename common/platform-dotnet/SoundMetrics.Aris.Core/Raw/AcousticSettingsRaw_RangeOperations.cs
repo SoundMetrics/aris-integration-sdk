@@ -373,12 +373,17 @@ namespace SoundMetrics.Aris.Core.Raw
                 sampleCount);
 
             var unconstrainedSettings =
-                settings.CopyRawWith(
-                    frequency: frequency,
-                    sampleStartDelay: sampleStartDelay,
-                    sampleCount: sampleCount,
-                    samplePeriod: samplePeriod,
-                    pulseWidth: pulseWidth);
+                PinWindow(
+                    settings.CopyRawWith(
+                        frequency: frequency,
+                        sampleStartDelay: sampleStartDelay,
+                        sampleCount: sampleCount,
+                        samplePeriod: samplePeriod,
+                        pulseWidth: pulseWidth),
+                    windowBounds,
+                    observedConditions,
+                    salinity,
+                    windowPinning);
 
             var constrainedSettings = unconstrainedSettings.ApplyAllConstraints();
             return constrainedSettings;
@@ -403,6 +408,37 @@ namespace SoundMetrics.Aris.Core.Raw
                 {
                     return candidateSamplePeriod;
                 }
+            }
+        }
+
+        private static AcousticSettingsRaw PinWindow(
+            AcousticSettingsRaw settings,
+            WindowBounds requestedWindowBounds,
+            ObservedConditions observedConditions,
+            Salinity salinity,
+            WindowPinning windowPinning)
+        {
+            if (windowPinning == WindowPinning.PinToWindowEnd)
+            {
+                var bounds = settings.WindowBounds(observedConditions);
+                var determinedWindowEnd = bounds.WindowEnd;
+                var requestedWindowEnd = requestedWindowBounds.WindowEnd;
+
+                var offset = requestedWindowEnd - determinedWindowEnd;
+                var timeOfFlight = offset / observedConditions.SpeedOfSound(salinity);
+                var deltaForSampleStartDelay = timeOfFlight * 2;
+                var oldSampleStartDelay = settings.SampleStartDelay;
+                var newSampleStartDelay = oldSampleStartDelay + deltaForSampleStartDelay;
+                var updatedSettings = settings.WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate: true);
+                var updatedWindowEnd = updatedSettings.WindowBounds(observedConditions).WindowEnd;
+
+                Debug.WriteLine($"({nameof(PinWindow)}) changed SSD {oldSampleStartDelay} -> {newSampleStartDelay}; WindowEnd: {determinedWindowEnd} -> {updatedWindowEnd}");
+
+                return updatedSettings;
+            }
+            else
+            {
+                return settings;
             }
         }
 
