@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2010-2022 Sound Metrics Corp.
 
 using System;
+using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
@@ -451,10 +452,13 @@ namespace SoundMetrics.Aris.Core.Raw
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
+            var windowBounds = settings.WindowBounds(observedConditions);
+
             if ((automaticFlags & AutomaticAcousticSettings.FocusDistance) != 0)
             {
-                var windowMidPoint = settings.WindowBounds(observedConditions).Midpoint;
-                settings = settings.WithFocusDistance(windowMidPoint);
+                var midpoint = windowBounds.Midpoint;
+                Debug.WriteLine($"({nameof(WithAutomaticSettings)}): auto focus to midpoint [{midpoint}]; windowBounds=[{windowBounds}]");
+                settings = settings.WithFocusDistance(midpoint);
             }
 
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
@@ -464,7 +468,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
             {
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
-                var windowEnd = settings.WindowBounds(observedConditions).WindowEnd;
+                var windowEnd = windowBounds.WindowEnd;
 
                 var frequency = sysCfg.CalculateBestFrequency(
                     observedConditions.WaterTemp,
@@ -481,7 +485,7 @@ namespace SoundMetrics.Aris.Core.Raw
             // Pulse width depends on frequency, so it's addressed *after* frequency.
             if ((automaticFlags & AutomaticAcousticSettings.PulseWidth) != 0)
             {
-                var windowEnd = settings.WindowBounds(observedConditions).WindowEnd;
+                var windowEnd = windowBounds.WindowEnd;
                 var automaticPulseWidth =
                     AcousticSettingsRaw_Aux.CalculateAutoPulseWidth(
                         settings.SystemType,
