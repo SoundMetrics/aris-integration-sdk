@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoundMetrics.Aris.Core.ApprovalTests;
 using SoundMetrics.Aris.Core.Raw;
 using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -177,6 +179,84 @@ namespace SoundMetrics.Aris.Core
             TestRunner(testName, moveSteps, mode);
         }
 
+        [TestMethod]
+        public void MoveEntireWindow_GuidedSampleCount_DoNotShrinkWindow()
+        {
+            var mode = GuidedSettingsMode.GuidedSampleCount;
+            var windowStart = new WindowBounds(2, 9.531);
+            var testName = nameof(MoveEntireWindow_GuidedSampleCount_DoNotShrinkWindow);
+
+            var windowStartFromRealLifeData = new double[]
+            {
+                // 2.431,
+                // 6.753,
+                12.471,
+                // 14 /* 12.769 */, // Observed 12.769, actual request unknown
+            };
+
+            //-----------------------
+            // Doesn't quite match TestRunner as this is built from real-world observed data.
+
+            var helper = new PrettyPrintHelper(0);
+            helper.PrintHeading(testName);
+
+            var settings = GetStartSettings(helper, windowStart);
+            var startingBounds = settings.WindowBounds(conditions);
+
+            PrintStartSettings();
+
+            Debug.WriteLine($"Starting bounds: [{startingBounds}]");
+
+            int idxStep = 0;
+
+            foreach (var requestedWindowStart in windowStartFromRealLifeData.Select(start => (Distance)start))
+            {
+                Debug.WriteLine($"Test {idxStep} ---------------------");
+                Debug.WriteLine($"requestedWindowStart: [{requestedWindowStart}]");
+                var newSettings = MoveEntireWindow(settings, requestedWindowStart);
+
+                using (var _ = helper.PushIndent())
+                {
+                    helper.PrintValue("starting", new MoveActuals(settings, conditions));
+                    helper.PrintValue("ending", new MoveActuals(newSettings, conditions));
+                    helper.PrintValue("new settings", newSettings);
+                }
+
+                settings = newSettings;
+                Debug.WriteLine($"New bounds: [{newSettings.WindowBounds(conditions)}]");
+
+                ++idxStep;
+            }
+
+            Assert.IsTrue(settings.SampleCount > 800, "The 12.471 value should allow for >800 samples at a sample period of 11 microseconds");
+
+            Approvals.Verify(helper.ToString());
+
+            AcousticSettingsRaw MoveEntireWindow(AcousticSettingsRaw settings, Distance requestedStart)
+            {
+                var bounds = settings.WindowBounds(conditions);
+                var newSettings = settings.MoveEntireWindow(
+                    mode,
+                    conditions,
+                    requestedStart,
+                    useMaxFrameRate: true,
+                    useAutoFrequency: true
+                );
+
+                return newSettings;
+            }
+
+            void PrintStartSettings()
+            {
+                helper.PrintHeading("Start Settings");
+                using (var _ = helper.PushIndent())
+                {
+                    helper.PrintValue("startSettings", settings);
+                }
+            }
+
+        }
+
         private void TestRunner(string testName, StepInputs[] steps, GuidedSettingsMode guidedSettingsMode)
         {
             var helper = new PrettyPrintHelper(0);
@@ -187,13 +267,13 @@ namespace SoundMetrics.Aris.Core
 
             PrintStartSettings();
 
-            Console.WriteLine($"Starting bounds: [{startingBounds}]");
+            Debug.WriteLine($"Starting bounds: [{startingBounds}]");
 
             int idxStep = 0;
 
             foreach (var step in steps)
             {
-                Console.WriteLine($"Step: [{step}]");
+                Debug.WriteLine($"Step: [{step}]");
                 var newSettings = Move(settings, guidedSettingsMode, idxStep, step, helper);
 
                 using (var _ = helper.PushIndent())
@@ -204,7 +284,7 @@ namespace SoundMetrics.Aris.Core
                 }
 
                 settings = newSettings;
-                Console.WriteLine($"New bounds: [{newSettings.WindowBounds(conditions)}]");
+                Debug.WriteLine($"New bounds: [{newSettings.WindowBounds(conditions)}]");
 
                 ++idxStep;
             }
@@ -227,11 +307,13 @@ namespace SoundMetrics.Aris.Core
         private static readonly SystemType systemType = SystemType.Aris3000;
         private static readonly PingMode pingMode = PingMode.PingMode9;
 
-        private static AcousticSettingsRaw GetStartSettings(PrettyPrintHelper helper)
+        private static AcousticSettingsRaw GetStartSettings(
+            PrettyPrintHelper helper,
+            WindowBounds? windowBoundsArg = null)
         {
             helper.PrintHeading(nameof(GetStartSettings));
 
-            WindowBounds windowBounds = (2, 9);
+            WindowBounds windowBounds = windowBoundsArg ?? new WindowBounds(2, 9);
 
             using (var _ = helper.PushIndent())
             {
@@ -290,7 +372,7 @@ namespace SoundMetrics.Aris.Core
                                 useAutoFrequency: true
                             );
                         }
-                        
+
                     case MoveType.EntireWindow:
                         {
                             var bounds = settings.WindowBounds(conditions);

@@ -246,6 +246,8 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
+            DebugLogInfo(settings, "start");
+
             var newSettings =
                 guidedSettingsMode
                     .GetAdjustWindowOperations()
@@ -256,7 +258,16 @@ namespace SoundMetrics.Aris.Core.Raw
                         useMaxFrameRate,
                         useAutoFrequency);
 
+            DebugLogInfo(newSettings, "end");
+
             return newSettings;
+
+            void DebugLogInfo(AcousticSettingsRaw s, string state)
+            {
+                var fnName = nameof(MoveEntireWindow);
+                Debug.WriteLine($"({fnName}): {state}. WindowBounds=[{s.WindowBounds(observedConditions)}]");
+                Debug.WriteLine($"({fnName}): {state}. SampleCount=[{s.SampleCount}]; SamplePeriod=[{s.SamplePeriod}]");
+            }
         }
 
         internal static WindowBounds GetConstrainedWindowBounds(
@@ -338,8 +349,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             // Calculate sample start delay first and adjust the requested bounds
             // to use the new value.
-            var (sampleStartDelay, adjustedBounds) =
-                CalculateWindowBounds(windowBounds, sspd, settings, observedConditions);
+            var (sampleStartDelay, adjustedBounds) = CalculateWindowBounds(windowBounds, sspd);
 
             var frequency =
                 CalculateFrequencyPerWindowEnd(
@@ -367,10 +377,10 @@ namespace SoundMetrics.Aris.Core.Raw
                     samplePeriod,
                     out var _);
 
-            samplePeriod = OverrideAutoSamplePeriodForSmallWindow(
+            (samplePeriod, sampleCount) = OverrideAutoSamplePeriodForSmallWindow(
                 samplePeriod,
-                sysCfg.RawConfiguration.SamplePeriodLimits.Minimum,
-                sampleCount);
+                sampleCount,
+                sysCfg.RawConfiguration.SamplePeriodLimits.Minimum);
 
             var unconstrainedSettings =
                 PinWindow(
@@ -388,25 +398,36 @@ namespace SoundMetrics.Aris.Core.Raw
             var constrainedSettings = unconstrainedSettings.ApplyAllConstraints();
             return constrainedSettings;
 
-            FineDuration OverrideAutoSamplePeriodForSmallWindow(
-                FineDuration candidateSamplePeriod,
-                FineDuration minSamplePeriod,
-                int autoSampleCount)
+            (FineDuration SamplePeriod, int SampleCount)
+                OverrideAutoSamplePeriodForSmallWindow(
+                    FineDuration candidateSamplePeriod,
+                    int candidateSampleCount,
+                    FineDuration minSamplePeriod)
             {
-                Distance windowLength = CalculateWindowLength(candidateSamplePeriod, autoSampleCount, sspd);
+                Distance windowLength = CalculateWindowLength(candidateSamplePeriod, candidateSampleCount, sspd);
 
-                bool atMinimumSampleCount = autoSampleCount == sysCfg.SampleCountPreferredLimits.Minimum;
+                bool atMinimumSampleCount = candidateSampleCount == sysCfg.SampleCountPreferredLimits.Minimum;
                 bool windowExceedsRequested = windowLength > adjustedBounds.WindowLength;
                 bool spExceedsMinimum = candidateSamplePeriod > minSamplePeriod;
 
                 if (atMinimumSampleCount && windowExceedsRequested && spExceedsMinimum)
                 {
                     var smallerSp = FineDuration.Max(minSamplePeriod, candidateSamplePeriod - FineDuration.OneMicrosecond);
-                    return OverrideAutoSamplePeriodForSmallWindow(smallerSp, minSamplePeriod, autoSampleCount);
+                    var overriddenValues =
+                        OverrideAutoSamplePeriodForSmallWindow(smallerSp, candidateSampleCount, minSamplePeriod);
+                    return overriddenValues;
                 }
                 else
                 {
-                    return candidateSamplePeriod;
+                    var timeOverWindow = 2.0 * adjustedBounds.WindowLength / sspd;
+                    var integralSampleCount = (int)RoundAway(timeOverWindow / candidateSamplePeriod);
+                    var systemPreferredLimits =
+                        systemType.GetConfiguration().SampleCountPreferredLimits;
+                    var constrainedSampleCount =
+                        integralSampleCount.ConstrainTo(systemPreferredLimits);
+
+                    var newValues = (candidateSamplePeriod, constrainedSampleCount);
+                    return newValues;
                 }
             }
         }
@@ -444,11 +465,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static
             (FineDuration sampleStartDelay, WindowBounds adjustedWindowBounds)
-            CalculateWindowBounds(
-                in WindowBounds bounds,
-                Velocity speedOfSound,
-                AcousticSettingsRaw settings,
-                ObservedConditions observedConditions)
+            CalculateWindowBounds(in WindowBounds bounds, Velocity speedOfSound)
         {
             // Also use sample start delay to get proper distance for
             // the window start.
@@ -456,16 +473,6 @@ namespace SoundMetrics.Aris.Core.Raw
             var ssd = CalculateSampleStartDelay(bounds.WindowStart, speedOfSound);
             var adjustedWindowStart = CalculateWindowStart(ssd, speedOfSound);
             var realBounds = bounds.MoveStartTo(adjustedWindowStart);
-
-#if DEBUG
-            Debug.WriteLine($"{nameof(CalculateWindowBounds)}: original bounds=[{settings.WindowBounds(observedConditions)}]");
-            Debug.WriteLine($"{nameof(CalculateWindowBounds)}: {nameof(realBounds)}=[{realBounds}]");
-            Debug.WriteLine($"{nameof(CalculateWindowBounds)}: original ssd=[{settings.SampleStartDelay}]");
-            Debug.WriteLine($"{nameof(CalculateWindowBounds)}: new ssd=[{ssd}]");
-#else
-            _ = settings;
-            _ = observedConditions;
-#endif
 
             return (ssd, realBounds);
         }
