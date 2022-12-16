@@ -52,12 +52,12 @@ namespace SoundMetrics.Aris.Core
 
         public static FineDuration FromMilliseconds(double milliseconds)
         {
-            return new FineDuration((long)(milliseconds * 1000.0));
+            return new FineDuration(milliseconds * 1000.0);
         }
 
         public static FineDuration FromSeconds(double seconds)
         {
-            return new FineDuration((long)(seconds * (1000 * 1000.0)));
+            return new FineDuration(seconds * (1000 * 1000));
         }
 
         public FineDuration RoundToMicroseconds()

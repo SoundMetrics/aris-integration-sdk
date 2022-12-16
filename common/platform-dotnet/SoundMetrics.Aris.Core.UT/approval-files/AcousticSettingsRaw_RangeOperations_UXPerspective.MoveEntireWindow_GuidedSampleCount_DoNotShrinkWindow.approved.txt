@@ -8,9 +8,9 @@ GetStartSettings:
 Start Settings: 
     startSettings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
-        FrameRate: 9.242827565808932/s
+        FrameRate: 9.242144177449168/s
         SampleCount: 1116
-        SampleStartDelay: 0.002667 s
+        SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000009 s
         PulseWidth: 0.000017 s
         PingMode: PingMode 9, 128 beams
@@ -18,18 +18,18 @@ Start Settings:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 5.747 m
+        FocusDistance: 6.217 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish
-        CyclePeriod (calculated): 0.013131 s
-    starting: MoveActuals(Bounds(WindowStart=[1.999 m]; WindowEnd=[9.529 m]; WindowLength=[7.529 m]), SamplePeriod=[0.000009 s], SampleCount=[1116])
-    ending: MoveActuals(Bounds(WindowStart=[12.470 m]; WindowEnd=[20.000 m]; WindowLength=[7.529 m]), SamplePeriod=[0.000012 s], SampleCount=[837])
+        CyclePeriod (calculated): 0.013132 s
+    starting: MoveActuals(Bounds(WindowStart=[2.000 m]; WindowEnd=[9.529 m]; WindowLength=[7.529 m]), SamplePeriod=[0.000009 s], SampleCount=[1116])
+    ending: MoveActuals(Bounds(WindowStart=[12.471 m]; WindowEnd=[20.000 m]; WindowLength=[7.529 m]), SamplePeriod=[0.000012 s], SampleCount=[837])
     new settings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
-        FrameRate: 4.478521013220594/s
+        FrameRate: 4.478360561765549/s
         SampleCount: 837
         SampleStartDelay: 0.016635 s
         SamplePeriod: 0.000012 s
@@ -39,7 +39,7 @@ Start Settings:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 5.747 m
+        FocusDistance: 6.217 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False

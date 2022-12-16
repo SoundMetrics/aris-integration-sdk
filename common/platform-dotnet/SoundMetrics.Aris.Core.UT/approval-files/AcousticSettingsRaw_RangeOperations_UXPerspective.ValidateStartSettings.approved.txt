@@ -7,9 +7,9 @@
 Start Settings: 
     startSettings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
-        FrameRate: 9.769441187964048/s
+        FrameRate: 9.768677711784933/s
         SampleCount: 1167
-        SampleStartDelay: 0.002667 s
+        SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000008 s
         PulseWidth: 0.000016 s
         PingMode: PingMode 9, 128 beams
@@ -17,10 +17,10 @@ Start Settings:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 5.747 m
+        FocusDistance: 6.217 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish
-        CyclePeriod (calculated): 0.012423 s
+        CyclePeriod (calculated): 0.012424 s
