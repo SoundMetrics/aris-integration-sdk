@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using static AcousticSettingsRawCalculations;
+    using static RawCalculations;
     using static AcousticSettingsRaw_Aux;
 
     internal delegate AcousticSettingsRaw AdjustRangeFn(

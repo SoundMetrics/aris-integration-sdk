@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using static SoundMetrics.Aris.Core.MathSupport;
 using static System.Math;
 
@@ -177,34 +176,6 @@ namespace SoundMetrics.Aris.Core.Raw
                     throw new ArgumentException($"Unhandled system type: [{systemType}]");
                 }
             }
-        }
-
-        public static FineDuration CalculateSamplePeriod(
-            Distance windowStart,
-            Distance windowEnd,
-            int sampleCount,
-            Velocity speedOfSound)
-            =>
-                // (2 * WL) / (N * SSPD)
-                ((2 * (windowEnd - windowStart)) / (sampleCount * speedOfSound))
-                    .Ceiling;
-
-        public static Distance CalculateWindowLength(
-            FineDuration samplePeriod,
-            int sampleCount,
-            Velocity speedOfSound)
-            => samplePeriod * sampleCount * speedOfSound / 2;
-
-        public static Distance CalculateMinimumWindowLength(
-            AcousticSettingsRaw settings,
-            ObservedConditions observedConditions)
-        {
-            var sysCfg = settings.SystemType.GetConfiguration();
-
-            return CalculateWindowLength(
-                sysCfg.RawConfiguration.SamplePeriodLimits.Minimum,
-                sysCfg.SampleCountPreferredLimits.Minimum,
-                observedConditions.SpeedOfSound(settings.Salinity));
         }
     }
 }

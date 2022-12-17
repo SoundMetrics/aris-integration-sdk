@@ -7,7 +7,7 @@ using static SoundMetrics.Aris.Core.MathSupport;
 namespace SoundMetrics.Aris.Core.Raw
 {
     using static AcousticSettingsRaw_Aux;
-    using static AcousticSettingsRawCalculations;
+    using static RawCalculations;
 
     public static class AcousticSettingsRawRangeOperations
     {
@@ -404,7 +404,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     int candidateSampleCount,
                     FineDuration minSamplePeriod)
             {
-                Distance windowLength = CalculateWindowLength(candidateSamplePeriod, candidateSampleCount, sspd);
+                Distance windowLength = CalculateWindowLength(candidateSampleCount, candidateSamplePeriod, sspd);
 
                 bool atMinimumSampleCount = candidateSampleCount == sysCfg.SampleCountPreferredLimits.Minimum;
                 bool windowExceedsRequested = windowLength > adjustedBounds.WindowLength;
@@ -502,7 +502,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             // Likely unnecessary, and solely advisory;
             // range end is defined by sample period and sample count.
-            adjustedRangeEnd = windowStart + CalculateWindowLength(samplePeriod, integralSampleCount, sspd);
+            adjustedRangeEnd = windowStart + CalculateWindowLength(integralSampleCount, samplePeriod, sspd);
 
             return constrainedSampleCount;
         }
