@@ -8,7 +8,7 @@ using static System.Math;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    internal static class AcousticSettingsRaw_Aux
+    internal static class AcousticSettingsAuto
     {
         // ********************************************************************
         // Per internal documentation. See

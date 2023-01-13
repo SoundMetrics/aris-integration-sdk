@@ -69,7 +69,7 @@ namespace SoundMetrics.Aris.Core
         internal Distance CalculateFrequencyCrossoverDistance(
             Temperature temperature,
             Salinity salinity)
-            => AcousticSettingsRaw_Aux.CalculateFrequencyCrossoverDistance(
+            => AcousticSettingsAuto.CalculateFrequencyCrossoverDistance(
                     SystemType, temperature, salinity);
 
         /// <summary>

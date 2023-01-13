@@ -1,5 +1,9 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System;
+
 namespace SoundMetrics.Aris.Core.Raw
 {
     /*
@@ -51,5 +55,47 @@ namespace SoundMetrics.Aris.Core.Raw
 
         /// <summary>Slides the whole window farther.</summary>
         SlideWindowFarther,
+    }
+
+    public static class WindowOpeartionOps
+    {
+        public static AcousticSettingsRaw ApplyWindowOperation(
+            this AcousticSettingsRaw settings,
+            WindowOperation operation,
+            GuidedSettingsMode guidedSettingsMode,
+            ObservedConditions observedConditions,
+            bool useMaxFrameRate,
+            bool useAutoFrequency)
+        {
+            if (rangeOperationMap.TryGetValue(operation, out var op))
+            {
+                return op(
+                    settings,
+                    guidedSettingsMode,
+                    observedConditions,
+                    useMaxFrameRate,
+                    useAutoFrequency);
+            }
+            else
+            {
+                throw new NotImplementedException($"Operation '{operation}' is not implemented");
+            }
+        }
+
+        private static readonly ReadOnlyDictionary<WindowOperation, AdjustRangeFn>
+            rangeOperationMap = new ReadOnlyDictionary<WindowOperation, AdjustRangeFn>(
+                new Dictionary<WindowOperation, AdjustRangeFn>
+                {
+                    { WindowOperation.SetShortWindow, PredefinedWindowSizes.ToShortWindow },
+                    { WindowOperation.SetMediumWindow, PredefinedWindowSizes.ToMediumWindow },
+                    { WindowOperation.SetLongWindow, PredefinedWindowSizes.ToLongWindow },
+
+                    { WindowOperation.MoveWindowStartCloser, PredefinedWindowSizes.MoveWindowStartCloser},
+                    { WindowOperation.MoveWindowStartFarther, PredefinedWindowSizes.MoveWindowStartFarther },
+                    { WindowOperation.MoveWindowEndCloser, PredefinedWindowSizes.MoveWindowEndCloser },
+                    { WindowOperation.MoveWindowEndFarther, PredefinedWindowSizes.MoveWindowEndFarther },
+                    { WindowOperation.SlideWindowCloser, PredefinedWindowSizes.SlideWindowCloser },
+                    { WindowOperation.SlideWindowFarther, PredefinedWindowSizes.SlideWindowFarther },
+                });
     }
 }

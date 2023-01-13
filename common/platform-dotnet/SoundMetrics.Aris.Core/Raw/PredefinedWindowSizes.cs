@@ -6,8 +6,8 @@ using System.Collections.ObjectModel;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using static RawCalculations;
-    using static AcousticSettingsRaw_Aux;
+    using static BasicCalculations;
+    using static AcousticSettingsAuto;
 
     internal delegate AcousticSettingsRaw AdjustRangeFn(
         AcousticSettingsRaw settings,
@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Core.Raw
         bool useMaxFrameRate,
         bool useAutoFrequency);
 
-    internal static class ChangeWindow
+    internal static class PredefinedWindowSizes
     {
         private struct SystemTypeWindowSizing
         {

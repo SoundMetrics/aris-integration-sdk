@@ -6,8 +6,8 @@ using static SoundMetrics.Aris.Core.MathSupport;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using static AcousticSettingsRaw_Aux;
-    using static RawCalculations;
+    using static AcousticSettingsAuto;
+    using static BasicCalculations;
 
     public static class AcousticSettingsRawRangeOperations
     {

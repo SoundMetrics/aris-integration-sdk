@@ -3,7 +3,7 @@
 namespace SoundMetrics.Aris.Core.Raw
 {
     using System.Diagnostics;
-    using static AcousticSettingsRaw_Aux;
+    using static AcousticSettingsAuto;
     using static AcousticSettingsRawRangeOperations;
     using static Distance;
 
@@ -25,7 +25,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var (windowStart, windowEnd) = windowBounds;
 
             var minimumWindowLength =
-                RawCalculations.CalculateMinimumWindowLength(settings, observedConditions);
+                BasicCalculations.CalculateMinimumWindowLength(settings, observedConditions);
             var minWindowStart = sysCfg.WindowStartLimits.Minimum;
             var maxWindowStart = windowEnd - minimumWindowLength;
             var constrainedStart = requestedStart.ConstrainTo((minWindowStart, maxWindowStart));
@@ -97,7 +97,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance GetMinWindowEnd()
             {
                 var minWindowLength =
-                    RawCalculations.CalculateMinimumWindowLength(settings, observedConditions);
+                    BasicCalculations.CalculateMinimumWindowLength(settings, observedConditions);
                 return windowBounds.WindowStart + minWindowLength;
             }
         }

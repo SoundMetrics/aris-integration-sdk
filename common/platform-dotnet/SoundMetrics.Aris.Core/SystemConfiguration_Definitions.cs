@@ -156,7 +156,7 @@ namespace SoundMetrics.Aris.Core
                 {
                     var defaultSettings = makeDefaultSettings(observedConditions, salinity);
                     return
-                        ChangeWindow
+                        PredefinedWindowSizes
                             .ToMediumWindow(
                                 defaultSettings,
                                 GuidedSettingsMode.FixedSampleCount,

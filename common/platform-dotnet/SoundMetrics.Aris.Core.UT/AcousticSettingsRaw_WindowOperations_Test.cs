@@ -61,7 +61,7 @@ namespace SoundMetrics.Aris.Core
             const int SampleCount = 1200;
 
             var startSettings = GetClosestRange(SampleCount);
-            var result = ChangeWindow.MoveWindowStartCloser(
+            var result = PredefinedWindowSizes.MoveWindowStartCloser(
                 startSettings,
                 TestConditions,
                 useMaxFrameRate: false,
@@ -96,7 +96,7 @@ namespace SoundMetrics.Aris.Core
                 closestRange.WindowBounds(TestConditions).WindowStart,
                 startSettings.WindowBounds(TestConditions).WindowStart);
 
-            var result = ChangeWindow.MoveWindowStartCloser(
+            var result = PredefinedWindowSizes.MoveWindowStartCloser(
                 startSettings,
                 TestConditions,
                 useMaxFrameRate: false,

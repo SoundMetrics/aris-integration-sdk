@@ -1,11 +1,8 @@
-﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
-
-using System;
-using System.Diagnostics;
+﻿// Copyright (c) 2010-2023 Sound Metrics Corp.
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    internal static class RawCalculations
+    internal static class BasicCalculations
     {
         internal static Distance CalculateWindowStart(
             FineDuration sampleStartDelay,
@@ -37,7 +34,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             var sysCfg = settings.SystemType.GetConfiguration();
 
-            return RawCalculations.CalculateWindowLength(
+            return BasicCalculations.CalculateWindowLength(
                 sysCfg.SampleCountPreferredLimits.Minimum,
                 sysCfg.RawConfiguration.SamplePeriodLimits.Minimum,
                 observedConditions.SpeedOfSound(settings.Salinity));

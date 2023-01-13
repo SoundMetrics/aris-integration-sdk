@@ -27,7 +27,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var windowBounds = settings.WindowBounds(observedConditions);
             var desiredWindowBounds = new WindowBounds(windowBounds.WindowStart, requestedEnd);
             var sampleCountFittedToWindow =
-                RawCalculations.FitSampleCountTo(
+                BasicCalculations.FitSampleCountTo(
                     desiredWindowBounds,
                     settings.SamplePeriod,
                     observedConditions.SpeedOfSound(settings.Salinity));
@@ -68,7 +68,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var windowBounds = settings.WindowBounds(observedConditions);
             var desiredWindowBounds = new WindowBounds(requestedStart, windowBounds.WindowEnd);
             var sampleCountFittedToWindow =
-                RawCalculations.FitSampleCountTo(
+                BasicCalculations.FitSampleCountTo(
                     desiredWindowBounds,
                     settings.SamplePeriod,
                     observedConditions.SpeedOfSound(settings.Salinity));
@@ -152,13 +152,13 @@ namespace SoundMetrics.Aris.Core.Raw
             var sspd = observedConditions.SpeedOfSound(settings.Salinity);
 
             var samplePeriod =
-                RawCalculations.FitSamplePeriodTo(constrainedWindowBounds, settings.SampleCount, sspd)
+                BasicCalculations.FitSamplePeriodTo(constrainedWindowBounds, settings.SampleCount, sspd)
                     .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
             var sampleStartDelay =
-                RawCalculations.CalculateSampleStartDelay(constrainedWindowBounds, sspd);
+                BasicCalculations.CalculateSampleStartDelay(constrainedWindowBounds, sspd);
 
             return
-                ChangeWindow.BuildNewWindowSettings(
+                PredefinedWindowSizes.BuildNewWindowSettings(
                     settings,
                     observedConditions,
                     sampleStartDelay,
@@ -184,11 +184,11 @@ namespace SoundMetrics.Aris.Core.Raw
             int CalculateSampleCount()
             {
                 var windowLength = windowEnd - windowStart;
-                return RawCalculations.FitSampleCountTo(windowLength, samplePeriod, speedOfSound);
+                return BasicCalculations.FitSampleCountTo(windowLength, samplePeriod, speedOfSound);
             }
 
             Distance CalculatedCorrectedWindowLength()
-                => RawCalculations.CalculateWindowLength(sampleCount, samplePeriod, speedOfSound);
+                => BasicCalculations.CalculateWindowLength(sampleCount, samplePeriod, speedOfSound);
         }
     }
 }
