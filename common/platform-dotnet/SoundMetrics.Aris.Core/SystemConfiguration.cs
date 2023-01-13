@@ -92,6 +92,16 @@ namespace SoundMetrics.Aris.Core
             return windowEnd > crossover ? Frequency.Low : Frequency.High;
         }
 
+        public Frequency SelectFrequency(
+            Temperature temperature,
+            Salinity salinity,
+            Distance windowEnd,
+            bool useAutoFrequency,
+            Frequency fallbackValue)
+            => useAutoFrequency
+                ? CalculateBestFrequency(temperature, salinity, windowEnd)
+                : fallbackValue;
+
         public ValueRange<Distance> UsefulImagingRange
             => new ValueRange<Distance>(WindowStartLimits.Minimum, WindowEndLimits.Maximum);
 

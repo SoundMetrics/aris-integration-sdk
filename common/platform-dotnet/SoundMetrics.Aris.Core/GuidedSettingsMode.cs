@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.Core
         Invalid = 0,        // Uninitialized
         FixedSampleCount,   // E.g., when recording or in ROV use
         GuidedSampleCount,  // Chooses a sample count for you
-        Free,               // Free raw input
+        Level2,             // Level 2 input
     }
 
     internal static class GuidedSettingsModeExtensions
@@ -26,8 +26,8 @@ namespace SoundMetrics.Aris.Core
                 case GuidedSettingsMode.GuidedSampleCount:
                     return AdjustWindowTerminusGuided.Instance;
 
-                case GuidedSettingsMode.Free:
-                    return AdjustWindowTerminusFree.Instance;
+                case GuidedSettingsMode.Level2:
+                    return AdjustWindowTerminusLevel2.Instance;
 
                 case GuidedSettingsMode.Invalid:
                     throw new ArgumentException($"Invalid mode: {mode}");

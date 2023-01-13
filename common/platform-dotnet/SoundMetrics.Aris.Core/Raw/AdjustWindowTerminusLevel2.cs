@@ -2,15 +2,14 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    using static AcousticSettingsRaw_Aux;
+    using System.Diagnostics;
     using static AcousticSettingsRawRangeOperations;
-    using static MathSupport;
 
-    internal sealed class AdjustWindowTerminusFree : IAdjustWindowTerminus
+    internal sealed class AdjustWindowTerminusLevel2 : IAdjustWindowTerminus
     {
-        private AdjustWindowTerminusFree() { }
+        private AdjustWindowTerminusLevel2() { }
 
-        public static readonly AdjustWindowTerminusFree Instance = new AdjustWindowTerminusFree();
+        public static readonly AdjustWindowTerminusLevel2 Instance = new AdjustWindowTerminusLevel2();
 
         public AcousticSettingsRaw MoveWindowEnd(
             AcousticSettingsRaw settings,
@@ -19,41 +18,38 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            // Rationale: in this mode we are free to change sample count, so
+            // hold sample period (resolution) constant and adjust sample count
+            // to fit the new window (within limits). The user controls the
+            // sample period.
+
+            var sysCfg = settings.SystemType.GetConfiguration();
             var windowBounds = settings.WindowBounds(observedConditions);
-            var (windowStart, _, windowLength) = windowBounds;
+            var desiredWindowBounds = new WindowBounds(windowBounds.WindowStart, requestedEnd);
+            var sampleCountFittedToWindow =
+                RawCalculations.FitSampleCountTo(
+                    desiredWindowBounds,
+                    settings.SamplePeriod,
+                    observedConditions.SpeedOfSound(settings.Salinity));
 
-            // rountrip time over the window
-            var salinity = settings.Salinity;
-            var newWindowRoughTimeOfFlight =
-                2 * windowLength / observedConditions.SpeedOfSound(salinity);
+            Debug.WriteLine(
+                $"{nameof(MoveWindowEnd)}: [{windowBounds.ToShortString()} -> {desiredWindowBounds.ToShortString()}]; "
+                + $"{nameof(sampleCountFittedToWindow)}=[{sampleCountFittedToWindow}]");
 
-            var autoFlags = GetAutoFlags(useAutoFrequency);
-            var newSettings = MoveAllowingChangeToSampleCount();
+            var newSettings =
+                settings
+                    .WithSampleCount(sampleCountFittedToWindow)
+                    .WithFrequency(
+                        sysCfg.SelectFrequency(
+                            observedConditions.WaterTemp,
+                            settings.Salinity,
+                            desiredWindowBounds.WindowEnd,
+                            useAutoFrequency,
+                            fallbackValue: settings.Frequency))
+                    .WithMaxFrameRate(useMaxFrameRate)
+                    .ApplyAllConstraints();
 
-            if (newSettings == settings)
-            {
-                return settings;
-            }
-            else
-            {
-                return
-                    newSettings
-                        .WithAutomaticSettings(observedConditions, autoFlags)
-                        .WithMaxFrameRate(useMaxFrameRate)
-                        .ApplyAllConstraints();
-            }
-
-            AcousticSettingsRaw MoveAllowingChangeToSampleCount()
-            {
-                var nominalSampleCount =
-                    CalculateNominalSampleCount(
-                        settings.SamplePeriod,
-                        windowStart,
-                        requestedEnd,
-                        observedConditions.SpeedOfSound(settings.Salinity),
-                        out var _);
-                return settings.WithSampleCount(nominalSampleCount);
-            }
+            return newSettings;
         }
 
         public AcousticSettingsRaw MoveWindowStart(
@@ -63,66 +59,38 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
-            var windowBounds = settings.WindowBounds(observedConditions);
-            var (windowStart, _, windowLength) = windowBounds;
+            // Rationale: in this mode we are free to change sample count, so
+            // hold sample period (resolution) constant and adjust sample count
+            // to fit the new window (within limits). The user controls the
+            // sample period.
+
             var sysCfg = settings.SystemType.GetConfiguration();
+            var windowBounds = settings.WindowBounds(observedConditions);
+            var desiredWindowBounds = new WindowBounds(requestedStart, windowBounds.WindowEnd);
+            var sampleCountFittedToWindow =
+                RawCalculations.FitSampleCountTo(
+                    desiredWindowBounds,
+                    settings.SamplePeriod,
+                    observedConditions.SpeedOfSound(settings.Salinity));
 
-            if (windowStart <= requestedStart
-                && settings.SamplePeriod <= sysCfg.RawConfiguration.SamplePeriodLimits.Minimum)
-            {
-                // Sample period is already at its minimum.
-                return settings;
-            }
+            Debug.WriteLine(
+                $"{nameof(MoveWindowStart)}: [{windowBounds.ToShortString()} -> {desiredWindowBounds.ToShortString()}]; "
+                + $"{nameof(sampleCountFittedToWindow)}=[{sampleCountFittedToWindow}]");
 
-            if (requestedStart <= windowStart
-                && settings.SamplePeriod >= sysCfg.RawConfiguration.SamplePeriodLimits.Maximum)
-            {
-                // Sample period is already at its maximum.
-                return settings;
-            }
-
-            // Make sure we don't move window end here.
-            // Expand the window by adjusting sample period,
-            // move the window start.
-
-            var salinity = settings.Salinity;
-            var newWindowRoughTimeOfFlight = 2 * windowLength / observedConditions.SpeedOfSound(salinity);
-            var newSamplePeriod =
-                (newWindowRoughTimeOfFlight / settings.SampleCount)
-                    .RoundToMicroseconds()
-                    .ConstrainTo(sysCfg.RawConfiguration.SamplePeriodLimits);
-
-            if (newSamplePeriod == settings.SamplePeriod)
-            {
-                // Nothing to do.
-                return settings;
-            }
-
-            // Calculate SSD backwards from WindowEnd -- by new [WindowEnd - (sample period * sample count)],
-            // only do it in machine units (microseconds) to avoid conversion to/from distance
-            // (distance is derived from the machine units).
-
-            var newSampleStartDelay = CalculateNewSampleStartDelay();
-            var autoFlags = GetAutoFlags(useAutoFrequency);
-
-            return
+            var newSettings =
                 settings
-                    .WithSamplePeriod(newSamplePeriod, useMaxFrameRate)
-                    .WithSampleStartDelay(newSampleStartDelay, useMaxFrameRate)
-                    .WithAutomaticSettings(observedConditions, autoFlags)
+                    .WithSampleCount(sampleCountFittedToWindow)
+                    .WithFrequency(
+                        sysCfg.SelectFrequency(
+                            observedConditions.WaterTemp,
+                            settings.Salinity,
+                            desiredWindowBounds.WindowEnd,
+                            useAutoFrequency,
+                            fallbackValue: settings.Frequency))
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
 
-            FineDuration CalculateNewSampleStartDelay()
-            {
-                var oldSampleStartDelay = settings.SampleStartDelay;
-                var oldSamplePeriod = settings.SamplePeriod;
-                var oldWindowTimeOfFlight = settings.SampleCount * oldSamplePeriod;
-                var newWindowTimeOfFlight = settings.SampleCount * newSamplePeriod;
-                var calculatedEndWindowTime = oldSampleStartDelay + oldWindowTimeOfFlight;
-                var calculatedSampleStartDelay = calculatedEndWindowTime - newWindowTimeOfFlight;
-                return calculatedSampleStartDelay;
-            }
+            return newSettings;
         }
 
         public AcousticSettingsRaw SelectSpecificRange(
