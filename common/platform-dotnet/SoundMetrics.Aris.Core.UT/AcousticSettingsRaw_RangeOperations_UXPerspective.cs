@@ -236,9 +236,9 @@ namespace SoundMetrics.Aris.Core
             {
                 var bounds = settings.WindowBounds(conditions);
                 var newSettings = settings.MoveEntireWindow(
+                    requestedStart,
                     mode,
                     conditions,
-                    requestedStart,
                     useMaxFrameRate: true,
                     useAutoFrequency: true
                 );
@@ -352,9 +352,9 @@ namespace SoundMetrics.Aris.Core
                             var bounds = settings.WindowBounds(conditions);
                             var requestedStart = bounds.WindowStart + distance;
                             return settings.MoveWindowStart(
+                                requestedStart,
                                 guidedSettingsMode,
                                 conditions,
-                                requestedStart,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true
                             );
@@ -365,9 +365,9 @@ namespace SoundMetrics.Aris.Core
                             var bounds = settings.WindowBounds(conditions);
                             var requestedEnd = bounds.WindowEnd + distance;
                             return settings.MoveWindowEnd(
+                                requestedEnd,
                                 guidedSettingsMode,
                                 conditions,
-                                requestedEnd,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true
                             );
@@ -378,9 +378,9 @@ namespace SoundMetrics.Aris.Core
                             var bounds = settings.WindowBounds(conditions);
                             var requestedStart = bounds.WindowStart + distance;
                             return settings.MoveEntireWindow(
+                                requestedStart,
                                 guidedSettingsMode,
                                 conditions,
-                                requestedStart,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true
                             );

@@ -158,9 +158,9 @@ namespace SoundMetrics.Aris.Core.Raw
             return AcousticSettingsRawRangeOperations
                     .GetSettingsForSpecificRange(
                         currentSettings,
+                        windowBounds,
                         guidedSettingsMode,
                         observedConditions,
-                        windowBounds,
                         useMaxFrameRate,
                         useAutoFrequency);
 

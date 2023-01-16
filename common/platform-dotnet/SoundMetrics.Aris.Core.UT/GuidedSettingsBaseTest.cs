@@ -77,9 +77,9 @@ namespace SoundMetrics.Aris.Core
                 var result =
                     startSettings
                         .GetSettingsForSpecificRange(
+                            tc.WindowBounds,
                             GuidedSettingsMode.GuidedSampleCount,
                             tc.ObservedConditions,
-                            tc.WindowBounds,
                             useMaxFrameRate: true,
                             useAutoFrequency: true);
 

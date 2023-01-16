@@ -13,9 +13,9 @@ namespace SoundMetrics.Aris.Core.Raw
     {
         public static AcousticSettingsRaw GetSettingsForSpecificRange(
             this AcousticSettingsRaw settings,
+            in WindowBounds requestedWindow,
             GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
-            in WindowBounds requestedWindow,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -54,9 +54,9 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         public static AcousticSettingsRaw MoveWindowStart(
             this AcousticSettingsRaw settings,
+            Distance requestedStart,
             GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -73,9 +73,9 @@ namespace SoundMetrics.Aris.Core.Raw
             var constrainedWindowStart = GetConstrainedWindowStart(settings.WindowBounds(observedConditions));
             return MoveWindowStartConstrained(
                 settings,
+                constrainedWindowStart,
                 guidedSettingsMode,
                 observedConditions,
-                constrainedWindowStart,
                 useMaxFrameRate,
                 useAutoFrequency);
 
@@ -99,9 +99,9 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static AcousticSettingsRaw MoveWindowStartConstrained(
             this AcousticSettingsRaw settings,
+            Distance requestedStart,
             GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -134,9 +134,9 @@ namespace SoundMetrics.Aris.Core.Raw
         /// </summary>
         public static AcousticSettingsRaw MoveWindowEnd(
                 this AcousticSettingsRaw settings,
+                Distance requestedEnd,
                 GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
-                Distance requestedEnd,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
@@ -159,9 +159,9 @@ namespace SoundMetrics.Aris.Core.Raw
                     settings.Salinity);
             return MoveWindowEndConstrained(
                 settings,
+                constrainedWindowEnd,
                 guidedSettingsMode,
                 observedConditions,
-                constrainedWindowEnd,
                 useMaxFrameRate,
                 useAutoFrequency);
         }
@@ -189,9 +189,9 @@ namespace SoundMetrics.Aris.Core.Raw
 
         private static AcousticSettingsRaw MoveWindowEndConstrained(
                 this AcousticSettingsRaw settings,
+                Distance requestedEnd,
                 GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
-                Distance requestedEnd,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
@@ -244,9 +244,9 @@ namespace SoundMetrics.Aris.Core.Raw
 
         public static AcousticSettingsRaw MoveEntireWindow(
                 this AcousticSettingsRaw settings,
+                Distance requestedStart,
                 GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
-                Distance requestedStart,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
