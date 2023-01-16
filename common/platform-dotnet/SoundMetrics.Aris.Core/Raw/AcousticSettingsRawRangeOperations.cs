@@ -81,7 +81,9 @@ namespace SoundMetrics.Aris.Core.Raw
 
             Distance GetConstrainedWindowStart(in WindowBounds windowBounds)
             {
-                var maxWindowStart = windowBounds.WindowEnd - CalculateMinimumWindowLength(settings, observedConditions);
+                var sysCfg = settings.SystemType.GetConfiguration();
+                var maxWindowStart =
+                    windowBounds.WindowEnd - CalculateMinimumWindowLength(sysCfg, observedConditions, settings.Salinity);
                 var cfgWindowStartLimits = settings.SystemType.GetConfiguration().WindowStartLimits;
                 var windowStartLimits = (cfgWindowStartLimits.Minimum, maxWindowStart);
                 var constrained = requestedStart.ConstrainTo(windowStartLimits);
@@ -148,7 +150,13 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            var constrainedWindowEnd = GetConstrainedWindowEnd(settings.WindowBounds(observedConditions));
+            var constrainedWindowEnd =
+                GetConstrainedWindowEnd(
+                    requestedEnd,
+                    settings.SystemType.GetConfiguration(),
+                    settings.WindowBounds(observedConditions),
+                    observedConditions,
+                    settings.Salinity);
             return MoveWindowEndConstrained(
                 settings,
                 guidedSettingsMode,
@@ -156,21 +164,27 @@ namespace SoundMetrics.Aris.Core.Raw
                 constrainedWindowEnd,
                 useMaxFrameRate,
                 useAutoFrequency);
+        }
 
-            Distance GetConstrainedWindowEnd(in WindowBounds windowBounds)
+        private static Distance GetConstrainedWindowEnd(
+            Distance requestedEnd,
+            SystemConfiguration sysCfg,
+            in WindowBounds windowBounds,
+            ObservedConditions observedConditions,
+            Salinity salinity)
+        {
+            var minWindowEnd =
+                windowBounds.WindowStart + CalculateMinimumWindowLength(sysCfg, observedConditions, salinity);
+            var cfgWindowEndLimits = sysCfg.WindowEndLimits;
+            var windowEndLimits = (minWindowEnd, cfgWindowEndLimits.Maximum);
+            var constrained = requestedEnd.ConstrainTo(windowEndLimits);
+            if (constrained != requestedEnd)
             {
-                var minWindowEnd = windowBounds.WindowStart + CalculateMinimumWindowLength(settings, observedConditions);
-                var cfgWindowEndLimits = settings.SystemType.GetConfiguration().WindowEndLimits;
-                var windowEndLimits = (minWindowEnd, cfgWindowEndLimits.Maximum);
-                var constrained = requestedEnd.ConstrainTo(windowEndLimits);
-                if (constrained != requestedEnd)
-                {
-                    Debug.WriteLine($"{nameof(MoveWindowEnd)}: {nameof(requestedEnd)} [{requestedEnd}] is constrained to {windowEndLimits}: [{requestedEnd} -> {constrained}]");
-                    Debug.WriteLine($"{nameof(MoveWindowEnd)}: {nameof(minWindowEnd)}=[{minWindowEnd}]");
-                }
-
-                return constrained;
+                Debug.WriteLine($"{nameof(MoveWindowEnd)}: {nameof(requestedEnd)} [{requestedEnd}] is constrained to {windowEndLimits}: [{requestedEnd} -> {constrained}]");
+                Debug.WriteLine($"{nameof(MoveWindowEnd)}: {nameof(minWindowEnd)}=[{minWindowEnd}]");
             }
+
+            return constrained;
         }
 
         private static AcousticSettingsRaw MoveWindowEndConstrained(

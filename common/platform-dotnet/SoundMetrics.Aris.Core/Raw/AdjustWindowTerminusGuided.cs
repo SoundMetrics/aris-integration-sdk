@@ -25,7 +25,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var (windowStart, windowEnd) = windowBounds;
 
             var minimumWindowLength =
-                BasicCalculations.CalculateMinimumWindowLength(settings, observedConditions);
+                BasicCalculations.CalculateMinimumWindowLength(sysCfg, observedConditions, settings.Salinity);
             var minWindowStart = sysCfg.WindowStartLimits.Minimum;
             var maxWindowStart = windowEnd - minimumWindowLength;
             var constrainedStart = requestedStart.ConstrainTo((minWindowStart, maxWindowStart));
@@ -97,7 +97,7 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance GetMinWindowEnd()
             {
                 var minWindowLength =
-                    BasicCalculations.CalculateMinimumWindowLength(settings, observedConditions);
+                    BasicCalculations.CalculateMinimumWindowLength(sysCfg, observedConditions, settings.Salinity);
                 return windowBounds.WindowStart + minWindowLength;
             }
         }

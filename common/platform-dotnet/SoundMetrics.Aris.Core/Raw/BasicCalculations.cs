@@ -29,15 +29,14 @@ namespace SoundMetrics.Aris.Core.Raw
             => samplePeriod * sampleCount * speedOfSound / 2;
 
         public static Distance CalculateMinimumWindowLength(
-            AcousticSettingsRaw settings,
-            ObservedConditions observedConditions)
+            SystemConfiguration sysCfg,
+            ObservedConditions observedConditions,
+            Salinity salinity)
         {
-            var sysCfg = settings.SystemType.GetConfiguration();
-
             return BasicCalculations.CalculateWindowLength(
                 sysCfg.SampleCountPreferredLimits.Minimum,
                 sysCfg.RawConfiguration.SamplePeriodLimits.Minimum,
-                observedConditions.SpeedOfSound(settings.Salinity));
+                observedConditions.SpeedOfSound(salinity));
         }
 
         internal static FineDuration CalculateSampleStartDelay(
