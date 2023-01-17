@@ -12,9 +12,9 @@ namespace SoundMetrics.Aris.Core.Raw
         public static readonly AdjustWindowTerminusLevel2 Instance = new AdjustWindowTerminusLevel2();
 
         public AcousticSettingsRaw MoveWindowEnd(
+            Distance requestedEnd,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -25,7 +25,9 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var sysCfg = settings.SystemType.GetConfiguration();
             var windowBounds = settings.WindowBounds(observedConditions);
-            var desiredWindowBounds = new WindowBounds(windowBounds.WindowStart, requestedEnd);
+            var constrainedWindowEnd = ConstrainWindowEnd(requestedEnd);
+            var desiredWindowBounds = new WindowBounds(windowBounds.WindowStart, constrainedWindowEnd);
+
             var sampleCountFittedToWindow =
                 BasicCalculations.FitSampleCountTo(
                     desiredWindowBounds,
@@ -50,12 +52,27 @@ namespace SoundMetrics.Aris.Core.Raw
                     .ApplyAllConstraints();
 
             return newSettings;
+
+            Distance ConstrainWindowEnd(Distance windowEnd)
+            {
+                var minimumWindowLength =
+                    BasicCalculations.CalculateMinimumWindowLength(
+                        sysCfg,
+                        observedConditions,
+                        settings.Salinity,
+                        SampleCountLimitType.Device,
+                        settings.SamplePeriod);
+
+                var validWindowEndRange = (windowBounds.WindowStart + minimumWindowLength, sysCfg.WindowEndLimits.Maximum);
+                Debug.Assert(validWindowEndRange.Item1 <= validWindowEndRange.Item2);
+                return windowEnd.ConstrainTo(validWindowEndRange);
+            }
         }
 
         public AcousticSettingsRaw MoveWindowStart(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -66,7 +83,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
             var sysCfg = settings.SystemType.GetConfiguration();
             var windowBounds = settings.WindowBounds(observedConditions);
-            var desiredWindowBounds = new WindowBounds(requestedStart, windowBounds.WindowEnd);
+            var constrainedWindowStart = ConstrainWindowStart(requestedStart);
+            var desiredWindowBounds = new WindowBounds(constrainedWindowStart, windowBounds.WindowEnd);
             var sampleCountFittedToWindow =
                 BasicCalculations.FitSampleCountTo(
                     desiredWindowBounds,
@@ -80,6 +98,11 @@ namespace SoundMetrics.Aris.Core.Raw
             var newSettings =
                 settings
                     .WithSampleCount(sampleCountFittedToWindow)
+                    .PinWindow(
+                        WindowPinning.PinToWindowEnd,
+                        desiredWindowBounds,
+                        observedConditions,
+                        settings.Salinity)
                     .WithFrequency(
                         sysCfg.SelectFrequency(
                             observedConditions.WaterTemp,
@@ -91,12 +114,27 @@ namespace SoundMetrics.Aris.Core.Raw
                     .ApplyAllConstraints();
 
             return newSettings;
+
+            Distance ConstrainWindowStart(Distance windowStart)
+            {
+                var minimumWindowLength =
+                    BasicCalculations.CalculateMinimumWindowLength(
+                        sysCfg,
+                        observedConditions,
+                        settings.Salinity,
+                        SampleCountLimitType.Device,
+                        settings.SamplePeriod);
+
+                var validWindowStartRange = (sysCfg.WindowEndLimits.Minimum, windowBounds.WindowEnd - minimumWindowLength);
+                Debug.Assert(validWindowStartRange.Item1 <= validWindowStartRange.Item2);
+                return windowStart.ConstrainTo(validWindowStartRange);
+            }
         }
 
         public AcousticSettingsRaw SelectSpecificRange(
+            WindowBounds windowBounds,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => CalculateFreeSettingsWithRange(
@@ -107,9 +145,9 @@ namespace SoundMetrics.Aris.Core.Raw
                     useAutoFrequency);
 
         public AcousticSettingsRaw SlideWindow(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {

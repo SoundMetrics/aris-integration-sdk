@@ -11,9 +11,9 @@ namespace SoundMetrics.Aris.Core.Raw
         public static readonly AdjustWindowTerminusFixed Instance = new AdjustWindowTerminusFixed();
 
         public AcousticSettingsRaw MoveWindowEnd(
+            Distance requestedEnd,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -37,9 +37,9 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public AcousticSettingsRaw MoveWindowStart(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool _useAutoFrequency)
         {
@@ -64,9 +64,9 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public AcousticSettingsRaw SelectSpecificRange(
+            WindowBounds windowBounds,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => settings.CalculateSettingsWithFixedSampleCount(
@@ -74,9 +74,9 @@ namespace SoundMetrics.Aris.Core.Raw
                         observedConditions);
 
         public AcousticSettingsRaw SlideWindow(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool _useAutoFrequency)
         {

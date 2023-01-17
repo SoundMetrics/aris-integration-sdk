@@ -5,30 +5,30 @@ namespace SoundMetrics.Aris.Core.Raw
     internal interface IAdjustWindowTerminus
     {
         AcousticSettingsRaw MoveWindowStart(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency);
 
         AcousticSettingsRaw MoveWindowEnd(
+            Distance requestedEnd,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency);
 
         AcousticSettingsRaw SelectSpecificRange(
+            WindowBounds windowBounds,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             bool useMaxFrameRate,
             bool useAutoFrequency);
 
         AcousticSettingsRaw SlideWindow(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency);
     }

@@ -14,9 +14,9 @@ namespace SoundMetrics.Aris.Core.Raw
         public static readonly AdjustWindowTerminusGuided Instance = new AdjustWindowTerminusGuided();
 
         public AcousticSettingsRaw MoveWindowStart(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -25,7 +25,11 @@ namespace SoundMetrics.Aris.Core.Raw
             var (windowStart, windowEnd) = windowBounds;
 
             var minimumWindowLength =
-                BasicCalculations.CalculateMinimumWindowLength(sysCfg, observedConditions, settings.Salinity);
+                BasicCalculations.CalculateMinimumWindowLength(
+                    sysCfg,
+                    observedConditions,
+                    settings.Salinity,
+                    SampleCountLimitType.Preferred);
             var minWindowStart = sysCfg.WindowStartLimits.Minimum;
             var maxWindowStart = windowEnd - minimumWindowLength;
             var constrainedStart = requestedStart.ConstrainTo((minWindowStart, maxWindowStart));
@@ -59,9 +63,9 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         public AcousticSettingsRaw MoveWindowEnd(
+            Distance requestedEnd,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedEnd,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -97,15 +101,19 @@ namespace SoundMetrics.Aris.Core.Raw
             Distance GetMinWindowEnd()
             {
                 var minWindowLength =
-                    BasicCalculations.CalculateMinimumWindowLength(sysCfg, observedConditions, settings.Salinity);
+                    BasicCalculations.CalculateMinimumWindowLength(
+                        sysCfg,
+                        observedConditions,
+                        settings.Salinity,
+                        SampleCountLimitType.Preferred);
                 return windowBounds.WindowStart + minWindowLength;
             }
         }
 
         public AcousticSettingsRaw SelectSpecificRange(
+            WindowBounds windowBounds,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            WindowBounds windowBounds,
             bool _useMaxFrameRate,
             bool _useAutoFrequency)
             => settings.CalculateSettingsWithGuidedSampleCount(
@@ -114,9 +122,9 @@ namespace SoundMetrics.Aris.Core.Raw
                     WindowPinning.PinToWindowStart);
 
         public AcousticSettingsRaw SlideWindow(
+            Distance requestedStart,
             AcousticSettingsRaw settings,
             ObservedConditions observedConditions,
-            Distance requestedStart,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {

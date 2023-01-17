@@ -1,5 +1,7 @@
 ﻿// Copyright (c) 2010-2023 Sound Metrics Corp.
 
+using System;
+
 namespace SoundMetrics.Aris.Core.Raw
 {
     internal static class BasicCalculations
@@ -28,14 +30,33 @@ namespace SoundMetrics.Aris.Core.Raw
             Velocity speedOfSound)
             => samplePeriod * sampleCount * speedOfSound / 2;
 
-        public static Distance CalculateMinimumWindowLength(
-            SystemConfiguration sysCfg,
+        internal static Distance CalculateMinimumWindowLength(
+            SystemConfiguration systemConfiguration,
             ObservedConditions observedConditions,
-            Salinity salinity)
+            Salinity salinity,
+            SampleCountLimitType sampleCountLimits)
         {
+            if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             return BasicCalculations.CalculateWindowLength(
-                sysCfg.SampleCountPreferredLimits.Minimum,
-                sysCfg.RawConfiguration.SamplePeriodLimits.Minimum,
+                systemConfiguration.GetSampleCountLimit(sampleCountLimits).Minimum,
+                systemConfiguration.RawConfiguration.SamplePeriodLimits.Minimum,
+                observedConditions.SpeedOfSound(salinity));
+        }
+
+        internal static Distance CalculateMinimumWindowLength(
+            SystemConfiguration systemConfiguration,
+            ObservedConditions observedConditions,
+            Salinity salinity,
+            SampleCountLimitType sampleCountLimits,
+            FineDuration samplePeriod)
+        {
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
+            return BasicCalculations.CalculateWindowLength(
+                systemConfiguration.GetSampleCountLimit(sampleCountLimits).Minimum,
+                samplePeriod,
                 observedConditions.SpeedOfSound(salinity));
         }
 

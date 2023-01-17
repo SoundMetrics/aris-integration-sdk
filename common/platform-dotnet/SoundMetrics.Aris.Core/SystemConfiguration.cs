@@ -13,6 +13,14 @@ namespace SoundMetrics.Aris.Core
             => SystemConfiguration.GetConfiguration(systemType);
     }
 
+    public enum SampleCountLimitType
+    {
+        Invalid = 0,
+        Preferred,
+        Device
+    }
+
+
     public sealed partial class SystemConfiguration
     {
         public static SystemConfiguration GetConfiguration(SystemType systemType)
@@ -56,6 +64,20 @@ namespace SoundMetrics.Aris.Core
         public ValueRange<int> ReceiverGainLimits { get; internal set; }
 
         public ValueRange<Rate> FrameRateLimits { get; internal set; }
+
+        public ValueRange<int> GetSampleCountLimit(SampleCountLimitType limitType)
+        {
+            switch (limitType)
+            {
+                case SampleCountLimitType.Preferred:
+                    return SampleCountPreferredLimits;
+                case SampleCountLimitType.Device:
+                    return SampleCountDeviceLimits;
+                default:
+                    throw new ArgumentException($"Invalid limit type: [{limitType}]");
+
+            }
+        }
 
         /// <summary>
         /// Calculate the crossover distance given water temperature
