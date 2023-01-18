@@ -22,9 +22,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
-            var (windowStart, windowEnd) = requestedWindow;
-
-            if (windowStart <= Distance.Zero)
+            if (requestedWindow.WindowStart <= Distance.Zero)
             {
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(
@@ -69,14 +67,6 @@ namespace SoundMetrics.Aris.Core.Raw
                 throw new ArgumentOutOfRangeException(nameof(requestedStart), "Value is negative or zero");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
-            var windowBounds = settings.WindowBounds(observedConditions);
-            var (_, windowEnd, windowLength) = windowBounds;
-
-            if (windowLength <= Distance.Zero)
-            {
-                Trace.TraceError($"{nameof(MoveWindowStart)}: requested window length is lte zero");
-                return settings;
-            }
 
             var newSettings = guidedSettingsMode
                     .GetAdjustWindowOperations()
@@ -109,16 +99,6 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(nameof(requestedEnd), "Value is negative or zero");
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
-            }
-
-            var sysCfg = settings.SystemType.GetConfiguration();
-            var windowBounds = settings.WindowBounds(observedConditions);
-            var (_, _, windowLength) = windowBounds;
-
-            if (windowLength <= Distance.Zero)
-            {
-                Trace.TraceError($"{nameof(MoveWindowEnd)}: requested window length is lte zero");
-                return settings;
             }
 
             return guidedSettingsMode
