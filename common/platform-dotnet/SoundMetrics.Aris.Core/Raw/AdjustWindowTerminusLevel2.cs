@@ -125,7 +125,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         SampleCountLimitType.Device,
                         settings.SamplePeriod);
 
-                var validWindowStartRange = (sysCfg.WindowEndLimits.Minimum, windowBounds.WindowEnd - minimumWindowLength);
+                var validWindowStartRange = (sysCfg.WindowStartLimits.Minimum, windowBounds.WindowEnd - minimumWindowLength);
                 Debug.Assert(validWindowStartRange.Item1 <= validWindowStartRange.Item2);
                 return windowStart.ConstrainTo(validWindowStartRange);
             }
