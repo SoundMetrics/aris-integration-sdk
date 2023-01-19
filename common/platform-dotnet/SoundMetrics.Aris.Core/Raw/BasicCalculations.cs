@@ -4,7 +4,7 @@ using System;
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    internal static class BasicCalculations
+    public static class BasicCalculations
     {
         internal static Distance CalculateWindowStart(
             FineDuration sampleStartDelay,
@@ -45,13 +45,14 @@ namespace SoundMetrics.Aris.Core.Raw
                 observedConditions.SpeedOfSound(salinity));
         }
 
-        internal static Distance CalculateMinimumWindowLength(
+        public static Distance CalculateMinimumWindowLength(
             SystemConfiguration systemConfiguration,
             ObservedConditions observedConditions,
             Salinity salinity,
             SampleCountLimitType sampleCountLimits,
             FineDuration samplePeriod)
         {
+            if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
             return BasicCalculations.CalculateWindowLength(
