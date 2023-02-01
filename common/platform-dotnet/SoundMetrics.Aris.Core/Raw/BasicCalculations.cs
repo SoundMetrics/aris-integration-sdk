@@ -100,7 +100,7 @@ namespace SoundMetrics.Aris.Core.Raw
         {
             // (2 * WL) / (N * SSPD)
             var samplePeriod = ((2 * windowBounds.WindowLength) / (sampleCount * speedOfSound));
-            var roundedSamplePeriod = samplePeriod.RoundToMicroseconds();
+            var roundedSamplePeriod = samplePeriod.Ceiling;
 
             return roundedSamplePeriod;
         }
