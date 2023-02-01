@@ -28,9 +28,10 @@ namespace SoundMetrics.Aris.Core.Raw
             var constrainedWindowEnd = ConstrainWindowEnd(requestedEnd);
             var desiredWindowBounds = new WindowBounds(windowBounds.WindowStart, constrainedWindowEnd);
 
-            var sampleCountFittedToWindow =
-                BasicCalculations.FitSampleCountTo(
+            var (sampleCountFittedToWindow, samplePeriod)
+                = FitSampleCountSafely(
                     desiredWindowBounds,
+                    sysCfg,
                     settings.SamplePeriod,
                     observedConditions.SpeedOfSound(settings.Salinity));
 
@@ -38,14 +39,19 @@ namespace SoundMetrics.Aris.Core.Raw
                 $"{nameof(MoveWindowEnd)}: [{windowBounds.ToShortString()} -> {desiredWindowBounds.ToShortString()}]; "
                 + $"{nameof(sampleCountFittedToWindow)}=[{sampleCountFittedToWindow}]");
 
-            var newSettings =
+            var withSampleCountAndPeriod =
                 settings
                     .WithSampleCount(sampleCountFittedToWindow)
+                    .WithSamplePeriod(samplePeriod, useMaxFrameRate);
+            var newWindowEnd = withSampleCountAndPeriod.WindowBounds(observedConditions).WindowEnd;
+
+            var newSettings =
+                withSampleCountAndPeriod
                     .WithFrequency(
                         sysCfg.SelectFrequency(
                             observedConditions.WaterTemp,
                             settings.Salinity,
-                            desiredWindowBounds.WindowEnd,
+                            newWindowEnd,
                             useAutoFrequency,
                             fallbackValue: settings.Frequency))
                     .WithMaxFrameRate(useMaxFrameRate)
@@ -67,6 +73,61 @@ namespace SoundMetrics.Aris.Core.Raw
                 Debug.Assert(validWindowEndRange.Item1 <= validWindowEndRange.Item2);
                 return windowEnd.ConstrainTo(validWindowEndRange);
             }
+        }
+
+        private static (int SampleCount, FineDuration SamplePeriod)
+            FitSampleCountSafely(
+                in WindowBounds windowBounds,
+                SystemConfiguration sysCfg,
+                FineDuration samplePeriod,
+                Velocity sspd)
+        {
+            int naiveSampleCount = FitNaively(windowBounds, samplePeriod);
+            var sampleCountDeviceLimits = sysCfg.SampleCountDeviceLimits;
+
+            int newSampleCount;
+            FineDuration newSamplePeriod;
+
+            if (sampleCountDeviceLimits.Contains(naiveSampleCount))
+            {
+                newSampleCount = naiveSampleCount;
+                newSamplePeriod = samplePeriod;
+            }
+            else
+            {
+                Debug.WriteLine(
+                    $"{nameof(FitSampleCountSafely)}: sample count [{naiveSampleCount}] is not in [{sampleCountDeviceLimits}]");
+
+                if (naiveSampleCount < sampleCountDeviceLimits.Minimum)
+                {
+                    newSampleCount = sampleCountDeviceLimits.Minimum;
+                    newSamplePeriod = BasicCalculations.FitSamplePeriodTo(windowBounds, newSampleCount, sspd);
+                }
+                else
+                {
+                    Debug.Assert(naiveSampleCount > sampleCountDeviceLimits.Maximum);
+
+                    // Determine the minimum sample period necessary to bring the sample
+                    // count down to what is allowable.
+                    newSamplePeriod =
+                        BasicCalculations.FitSamplePeriodTo(windowBounds, sampleCountDeviceLimits.Maximum, sspd);
+                    newSampleCount = FitNaively(windowBounds, newSamplePeriod);
+
+                    Debug.Assert(sysCfg.RawConfiguration.SamplePeriodLimits.Contains(newSamplePeriod));
+                    Debug.Assert(sampleCountDeviceLimits.Contains(newSampleCount));
+                    Debug.Assert(newSampleCount != naiveSampleCount);
+                    Debug.Assert(newSamplePeriod != samplePeriod);
+                    Debug.Assert(sysCfg.RawConfiguration.SamplePeriodLimits.Contains(newSamplePeriod));
+                }
+            }
+
+            Debug.WriteLine(
+                $"{nameof(FitSampleCountSafely)}: new values: sample count=[{newSampleCount}]; sample period=[{newSamplePeriod}]");
+
+            return (newSampleCount, newSamplePeriod);
+
+            int FitNaively(in WindowBounds wb, FineDuration sp) // pass wb due to C# 7.3 constraints CS1628
+                => BasicCalculations.FitSampleCountTo(wb, sp, sspd);
         }
 
         public AcousticSettingsRaw MoveWindowStart(
