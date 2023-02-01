@@ -256,7 +256,7 @@ namespace SoundMetrics.Aris.Core.Raw
             return newSettings;
         }
 
-        private static readonly FineDuration WindowTerminusAdjustment = FineDuration.FromMicroseconds(2);
+        private static readonly FineDuration WindowTerminusAdjustment = (FineDuration)2;
 
         internal static AcousticSettingsRaw MoveWindowStartCloser(
             AcousticSettingsRaw settings,

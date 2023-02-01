@@ -89,7 +89,7 @@ namespace SoundMetrics.Aris.Core
             const int SampleCount = 1200;
 
             var closestRange = GetClosestRange(SampleCount);
-            var startSettings = GetNearRange(SampleCount, addStartDelay: FineDuration.FromMicroseconds(20));
+            var startSettings = GetNearRange(SampleCount, addStartDelay: (FineDuration)20);
 
             Assert.AreNotEqual(closestRange.SampleStartDelay, startSettings.SampleStartDelay);
             Assert.AreNotEqual(

@@ -175,9 +175,9 @@ namespace SoundMetrics.Aris.Core
                 var pingMode = PingMode.PingMode3;
                 var frequency = Frequency.High;
                 var sampleCount = 1250;
-                var sampleStartDelay = FineDuration.FromMicroseconds(2000);
-                var samplePeriod = FineDuration.FromMicroseconds(17);
-                var pulseWidth = FineDuration.FromMicroseconds(14);
+                var sampleStartDelay = (FineDuration)2000;
+                var samplePeriod = (FineDuration)17;
+                var pulseWidth = (FineDuration)14;
                 var receiverGain = 18;
                 var antiAliasing = FineDuration.Zero;
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
@@ -215,9 +215,9 @@ namespace SoundMetrics.Aris.Core
                 var pingMode = PingMode.PingMode9;
                 var frequency = Frequency.High;
                 var sampleCount = 1250;
-                var sampleStartDelay = FineDuration.FromMicroseconds(1300);
-                var samplePeriod = FineDuration.FromMicroseconds(5);
-                var pulseWidth = FineDuration.FromMicroseconds(5);
+                var sampleStartDelay = (FineDuration)1300;
+                var samplePeriod = (FineDuration)5;
+                var pulseWidth = (FineDuration)5;
                 var receiverGain = 12;
                 var antiAliasing = FineDuration.Zero;
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };
@@ -255,9 +255,9 @@ namespace SoundMetrics.Aris.Core
                 var pingMode = PingMode.PingMode1;
                 var frequency = Frequency.High;
                 var sampleCount = 1250;
-                var sampleStartDelay = FineDuration.FromMicroseconds(4000);
-                var samplePeriod = FineDuration.FromMicroseconds(28);
-                var pulseWidth = FineDuration.FromMicroseconds(24);
+                var sampleStartDelay = (FineDuration)4000;
+                var samplePeriod = (FineDuration)28;
+                var pulseWidth = (FineDuration)24;
                 var receiverGain = 20;
                 var antiAliasing = FineDuration.Zero;
                 var interpacketDelay = new InterpacketDelaySettings { Enable = false };

@@ -172,9 +172,7 @@ namespace SoundMetrics.Aris.Core
         private MakeDefaultSettingsFn MakeDefaultSettings { get; set; }
 
         private static ValueRange<FineDuration> RangeOfDuration(double a, double b)
-            => new ValueRange<FineDuration>(
-                    FineDuration.FromMicroseconds(a),
-                    FineDuration.FromMicroseconds(b));
+            => new ValueRange<FineDuration>((FineDuration)a, (FineDuration)b);
 
         private static ValueRange<Distance> RangeOfMeters(double a, double b)
             => new ValueRange<Distance>((Distance)a, (Distance)b);

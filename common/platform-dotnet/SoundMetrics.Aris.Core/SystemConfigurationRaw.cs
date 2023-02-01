@@ -71,7 +71,7 @@ namespace SoundMetrics.Aris.Core
             return CyclePeriodLimits.Maximum - settings.CyclePeriod;
         }
 
-        public static readonly FineDuration CyclePeriodMargin = FineDuration.FromMicroseconds(420);
+        public static readonly FineDuration CyclePeriodMargin = (FineDuration)420;
         public const int MinAntialiasing = 0;
 
         public static readonly ValueRange<int> ReceiverGainLimits = new ValueRange<int>(0, 24);

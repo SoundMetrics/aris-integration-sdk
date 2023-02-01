@@ -10,6 +10,11 @@ namespace SoundMetrics.Aris.Core
 {
 #pragma warning disable CA2225 // Operator overloads have named alternates
 
+    /// <summary>
+    /// Represents a fine-grained time span or duration.
+    /// The &quot;default&quot; unit used in construction of or during
+    /// computation within is microseconds.
+    /// </summary>
     [DebuggerDisplay("{TotalSeconds}s")]
     [DataContract]
     public struct FineDuration : IComparable<FineDuration>, IEquatable<FineDuration>
@@ -45,7 +50,7 @@ namespace SoundMetrics.Aris.Core
             return new FineDuration((double)nanoseconds / 1000.0);
         }
 
-        public static FineDuration FromMicroseconds(double microseconds)
+        private static FineDuration FromMicroseconds(double microseconds)
         {
             return new FineDuration(microseconds);
         }
