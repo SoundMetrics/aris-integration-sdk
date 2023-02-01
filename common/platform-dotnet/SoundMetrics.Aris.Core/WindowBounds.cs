@@ -1,9 +1,11 @@
 ﻿// Copyright (c) 2022 Sound Metrics Corp.
 
 using System;
+using System.Diagnostics;
 
 namespace SoundMetrics.Aris.Core
 {
+    [DebuggerDisplay("[{WindowStart} - {WindowEnd}]")]
     public struct WindowBounds : IEquatable<WindowBounds>
     {
         /// <summary>
