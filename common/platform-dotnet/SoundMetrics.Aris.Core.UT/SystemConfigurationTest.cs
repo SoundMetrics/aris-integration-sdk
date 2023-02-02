@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoundMetrics.Aris.Core.Raw;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -18,6 +19,20 @@ namespace SoundMetrics.Aris.Core
                     .SampleCountDeviceLimits
                     .Maximum;
             Assert.AreNotEqual(default, maxDeviceSamples);
+        }
+
+        [TestMethod]
+        public void TestGuidedSampleCountsAvailable()
+        {
+            Assert.AreNotEqual(
+                default,
+                AdjustWindowTerminusGuided.SampleCountLimits[SystemType.Aris1200]);
+            Assert.AreNotEqual(
+                default,
+                AdjustWindowTerminusGuided.SampleCountLimits[SystemType.Aris1800]);
+            Assert.AreNotEqual(
+                default,
+                AdjustWindowTerminusGuided.SampleCountLimits[SystemType.Aris3000]);
         }
     }
 }
