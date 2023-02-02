@@ -33,7 +33,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     sysCfg,
                     observedConditions,
                     settings.Salinity,
-                    SampleCountLimitType.Preferred);
+                    sysCfg.SampleCountPreferredLimits);
             var minWindowStart = sysCfg.WindowStartLimits.Minimum;
             var maxWindowStart = windowEnd - minimumWindowLength;
             var constrainedStart = requestedStart.ConstrainTo((minWindowStart, maxWindowStart));
@@ -112,7 +112,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         sysCfg,
                         observedConditions,
                         settings.Salinity,
-                        SampleCountLimitType.Preferred);
+                        sysCfg.SampleCountPreferredLimits);
                 return windowBounds.WindowStart + minWindowLength;
             }
         }

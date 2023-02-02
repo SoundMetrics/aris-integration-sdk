@@ -72,7 +72,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         sysCfg,
                         observedConditions,
                         settings.Salinity,
-                        SampleCountLimitType.Device,
+                        sysCfg.SampleCountDeviceLimits,
                         settings.SamplePeriod);
 
                 var validWindowEndRange = (windowBounds.WindowStart + minimumWindowLength, sysCfg.WindowEndLimits.Maximum);
@@ -192,7 +192,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         sysCfg,
                         observedConditions,
                         settings.Salinity,
-                        SampleCountLimitType.Device,
+                        sysCfg.SampleCountDeviceLimits,
                         settings.SamplePeriod);
 
                 var validWindowStartRange = (sysCfg.WindowStartLimits.Minimum, windowBounds.WindowEnd - minimumWindowLength);

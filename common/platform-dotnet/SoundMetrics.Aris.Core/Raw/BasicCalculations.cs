@@ -34,13 +34,13 @@ namespace SoundMetrics.Aris.Core.Raw
             SystemConfiguration systemConfiguration,
             ObservedConditions observedConditions,
             Salinity salinity,
-            SampleCountLimitType sampleCountLimits)
+            in ValueRange<int> sampleCountLimits)
         {
             if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
             return BasicCalculations.CalculateWindowLength(
-                systemConfiguration.GetSampleCountLimit(sampleCountLimits).Minimum,
+                sampleCountLimits.Minimum,
                 systemConfiguration.RawConfiguration.SamplePeriodLimits.Minimum,
                 observedConditions.SpeedOfSound(salinity));
         }
@@ -49,14 +49,14 @@ namespace SoundMetrics.Aris.Core.Raw
             SystemConfiguration systemConfiguration,
             ObservedConditions observedConditions,
             Salinity salinity,
-            SampleCountLimitType sampleCountLimits,
+            in ValueRange<int> sampleCountLimits,
             FineDuration samplePeriod)
         {
             if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
             return BasicCalculations.CalculateWindowLength(
-                systemConfiguration.GetSampleCountLimit(sampleCountLimits).Minimum,
+                sampleCountLimits.Minimum,
                 samplePeriod,
                 observedConditions.SpeedOfSound(salinity));
         }
