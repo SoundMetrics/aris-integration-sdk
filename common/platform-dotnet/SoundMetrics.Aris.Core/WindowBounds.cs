@@ -44,6 +44,13 @@ namespace SoundMetrics.Aris.Core
             CheckInvariants();
         }
 
+        public WindowBounds(in ValueRange<Distance> windowLimits)
+        {
+            WindowStart = windowLimits.Minimum;
+            WindowEnd = windowLimits.Maximum;
+            CheckInvariants();
+        }
+
         public void Deconstruct(out Distance windowStart, out Distance windowEnd)
         {
             windowStart = WindowStart;
