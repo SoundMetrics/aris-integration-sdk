@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     observedConditions,
                     settings.Salinity,
                     sysCfg.SampleCountPreferredLimits);
-            var minWindowStart = sysCfg.WindowStartLimits.Minimum;
+            var minWindowStart = sysCfg.WindowLimits.Minimum;
             var maxWindowStart = windowEnd - minimumWindowLength;
             var constrainedStart = requestedStart.ConstrainTo((minWindowStart, maxWindowStart));
             var newWindowBounds = new WindowBounds(constrainedStart, windowEnd);
@@ -81,7 +81,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var (windowStart, windowEnd) = windowBounds;
 
             var constrainedEnd =
-                Max(requestedEnd.ConstrainTo(sysCfg.WindowEndLimits),
+                Max(requestedEnd.ConstrainTo(sysCfg.WindowLimits),
                     GetMinWindowEnd());
 
             if ((constrainedEnd - windowEnd).Abs() <= MinimumSlideDisplacement)

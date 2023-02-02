@@ -121,9 +121,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = settings.SystemType.GetConfiguration();
 
             var windowLength = settings.WindowBounds(observedConditions).WindowLength;
-            var minWindowStart = sysCfg.WindowStartLimits.Minimum;
-            var maxWindowStart = sysCfg.WindowEndLimits.Maximum - windowLength;
-            return (minWindowStart, maxWindowStart);
+            return (sysCfg.WindowLimits.Minimum, sysCfg.WindowLimits.Maximum - windowLength);
         }
 
         internal static AutomaticAcousticSettings GetAutoFlags(
@@ -185,8 +183,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var (windowStart, windowEnd) = windowBounds;
 
             return new WindowBounds(
-                windowStart.ConstrainTo(sysCfg.WindowStartLimits),
-                windowEnd.ConstrainTo(sysCfg.WindowEndLimits));
+                windowStart.ConstrainTo(sysCfg.WindowLimits),
+                windowEnd.ConstrainTo(sysCfg.WindowLimits));
         }
 
         public static AcousticSettingsRaw

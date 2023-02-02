@@ -103,12 +103,7 @@ namespace SoundMetrics.Aris.Core
                 ? CalculateBestFrequency(temperature, salinity, windowEnd)
                 : fallbackValue;
 
-        public ValueRange<Distance> UsefulImagingRange
-            => new ValueRange<Distance>(WindowStartLimits.Minimum, WindowEndLimits.Maximum);
-
-        public ValueRange<Distance> WindowStartLimits { get; internal set; }
-
-        public ValueRange<Distance> WindowEndLimits { get; internal set; }
+        public ValueRange<Distance> WindowLimits { get; internal set; }
 
         public static bool TryGetSampleGeometry(in FrameHeader frameHeader, out SampleGeometry sampleGeometry)
         {

@@ -22,8 +22,7 @@ namespace SoundMetrics.Aris.Core
                     SampleCountPreferredLimits = new ValueRange<int>(1250, sampleCountDeviceLimits.Maximum),
                     ReceiverGainLimits = commonReceiverGainLimits,
                     FrameRateLimits = commonFrameRateLimits,
-                    WindowStartLimits = RangeOfMeters(0.7, 25.0),
-                    WindowEndLimits = RangeOfMeters(1.3, 50.0),
+                    WindowLimits = RangeOfMeters(0.7, 50.0),
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -65,8 +64,7 @@ namespace SoundMetrics.Aris.Core
                     SampleCountPreferredLimits = new ValueRange<int>(800, sampleCountDeviceLimits.Maximum),
                     ReceiverGainLimits = commonReceiverGainLimits,
                     FrameRateLimits = commonFrameRateLimits,
-                    WindowStartLimits = RangeOfMeters(0.7, 12.0),
-                    WindowEndLimits = RangeOfMeters(1.3, 20.0),
+                    WindowLimits = RangeOfMeters(0.7, 20.0),
 
                     RawConfiguration = new SystemConfigurationRaw
                     {
@@ -108,8 +106,7 @@ namespace SoundMetrics.Aris.Core
                     SampleCountPreferredLimits = new ValueRange<int>(1750, sampleCountDeviceLimits.Maximum),
                     ReceiverGainLimits = commonReceiverGainLimits,
                     FrameRateLimits = commonFrameRateLimits,
-                    WindowStartLimits = RangeOfMeters(0.7, 40.0),
-                    WindowEndLimits = RangeOfMeters(1.3, 100.0),
+                    WindowLimits = RangeOfMeters(0.7, 100.0),
 
                     RawConfiguration = new SystemConfigurationRaw
                     {

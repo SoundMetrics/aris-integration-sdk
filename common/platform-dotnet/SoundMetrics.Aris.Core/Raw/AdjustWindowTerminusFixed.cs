@@ -24,7 +24,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var sysCfg = settings.SystemType.GetConfiguration();
             var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, windowEnd) = windowBounds;
-            var constrainedEnd = requestedEnd.ConstrainTo(sysCfg.WindowEndLimits);
+            var constrainedEnd = requestedEnd.ConstrainTo(sysCfg.WindowLimits);
             if ((constrainedEnd - windowEnd).Abs() <= MinimumSlideDisplacement)
             {
                 return settings;
