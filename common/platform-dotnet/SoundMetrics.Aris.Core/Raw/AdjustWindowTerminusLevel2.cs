@@ -155,9 +155,11 @@ namespace SoundMetrics.Aris.Core.Raw
             var windowBounds = settings.WindowBounds(observedConditions);
             var constrainedWindowStart = ConstrainWindowStart(requestedStart);
             var desiredWindowBounds = new WindowBounds(constrainedWindowStart, windowBounds.WindowEnd);
-            var sampleCountFittedToWindow =
-                BasicCalculations.FitSampleCountTo(
+
+            var (sampleCountFittedToWindow, samplePeriod) =
+                FitSampleCountSafely(
                     desiredWindowBounds,
+                    sysCfg,
                     settings.SamplePeriod,
                     observedConditions.SpeedOfSound(settings.Salinity));
 
@@ -165,9 +167,14 @@ namespace SoundMetrics.Aris.Core.Raw
                 $"{nameof(MoveWindowStart)}: [{windowBounds.ToShortString()} -> {desiredWindowBounds.ToShortString()}]; "
                 + $"{nameof(sampleCountFittedToWindow)}=[{sampleCountFittedToWindow}]");
 
-            var newSettings =
+            var withSampleCountAndPeriod =
                 settings
                     .WithSampleCount(sampleCountFittedToWindow)
+                    .WithSamplePeriod(samplePeriod, useMaxFrameRate);
+
+#pragma warning disable CA1062 // Validate arguments of public methods [it's complaining about withSampleCountAndPeriod]
+            var newSettings =
+                withSampleCountAndPeriod
                     .PinWindow(
                         WindowPinning.PinToWindowEnd,
                         desiredWindowBounds,
@@ -182,6 +189,7 @@ namespace SoundMetrics.Aris.Core.Raw
                             fallbackValue: settings.Frequency))
                     .WithMaxFrameRate(useMaxFrameRate)
                     .ApplyAllConstraints();
+#pragma warning restore CA1062 // Validate arguments of public methods
 
             return newSettings;
 
