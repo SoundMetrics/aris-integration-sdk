@@ -312,7 +312,9 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 Distance windowLength = CalculateWindowLength(candidateSampleCount, candidateSamplePeriod, sspd);
 
-                bool atMinimumSampleCount = candidateSampleCount == sysCfg.SampleCountPreferredLimits.Minimum;
+                var sampleCountLimits = AdjustWindowTerminusGuided.SampleCountLimits[systemType];
+
+                bool atMinimumSampleCount = candidateSampleCount == sampleCountLimits.Minimum;
                 bool windowExceedsRequested = windowLength > adjustedBounds.WindowLength;
                 bool spExceedsMinimum = candidateSamplePeriod > minSamplePeriod;
 
@@ -327,10 +329,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 {
                     var timeOverWindow = 2.0 * adjustedBounds.WindowLength / sspd;
                     var integralSampleCount = (int)RoundAway(timeOverWindow / candidateSamplePeriod);
-                    var systemPreferredLimits =
-                        systemType.GetConfiguration().SampleCountPreferredLimits;
-                    var constrainedSampleCount =
-                        integralSampleCount.ConstrainTo(systemPreferredLimits);
+                    var systemPreferredLimits = sampleCountLimits;
+                    var constrainedSampleCount = integralSampleCount.ConstrainTo(systemPreferredLimits);
 
                     var newValues = (candidateSamplePeriod, constrainedSampleCount);
                     return newValues;
@@ -397,12 +397,13 @@ namespace SoundMetrics.Aris.Core.Raw
                 3.  Adjust Range End = Range Start + SamplesPerBeam * SSPD/2 * Sample Period
              */
 
+            var sampleCountLimits = AdjustWindowTerminusGuided.SampleCountLimits[systemType];
+
             var (windowStart, _, windowLength) = windowBounds;
 
             var sampleCount = windowLength / (sspd / 2 * samplePeriod);
             var integralSampleCount = (int)RoundAway(sampleCount);
-            var systemPreferredLimits =
-                systemType.GetConfiguration().SampleCountPreferredLimits;
+            var systemPreferredLimits = sampleCountLimits;
             var constrainedSampleCount =
                 integralSampleCount.ConstrainTo(systemPreferredLimits);
 

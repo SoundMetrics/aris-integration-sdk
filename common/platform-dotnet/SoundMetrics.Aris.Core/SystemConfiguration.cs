@@ -49,11 +49,6 @@ namespace SoundMetrics.Aris.Core
 
 #pragma warning restore CA1822
 
-        /// <summary>
-        /// The preferred limits for sample count as used in SMC software.
-        /// </summary>
-        public ValueRange<int> SampleCountPreferredLimits { get; internal set; }
-
         public ValueRange<int> ReceiverGainLimits { get; internal set; }
 
         public ValueRange<Rate> FrameRateLimits { get; internal set; }

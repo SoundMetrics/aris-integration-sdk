@@ -19,7 +19,6 @@ namespace SoundMetrics.Aris.Core
                 {
                     AvailablePingModes = new[] { PingMode.PingMode1, PingMode.PingMode3 },
                     DefaultPingMode = PingMode.PingMode3,
-                    SampleCountPreferredLimits = new ValueRange<int>(1250, sampleCountDeviceLimits.Maximum),
                     ReceiverGainLimits = commonReceiverGainLimits,
                     FrameRateLimits = commonFrameRateLimits,
                     WindowLimits = RangeOfMeters(0.7, 50.0),
@@ -61,7 +60,6 @@ namespace SoundMetrics.Aris.Core
                 {
                     AvailablePingModes = new[] { PingMode.PingMode6, PingMode.PingMode9 },
                     DefaultPingMode = PingMode.PingMode9,
-                    SampleCountPreferredLimits = new ValueRange<int>(800, sampleCountDeviceLimits.Maximum),
                     ReceiverGainLimits = commonReceiverGainLimits,
                     FrameRateLimits = commonFrameRateLimits,
                     WindowLimits = RangeOfMeters(0.7, 20.0),
@@ -103,7 +101,6 @@ namespace SoundMetrics.Aris.Core
                 {
                     AvailablePingModes = new[] { PingMode.PingMode1 },
                     DefaultPingMode = PingMode.PingMode1,
-                    SampleCountPreferredLimits = new ValueRange<int>(1750, sampleCountDeviceLimits.Maximum),
                     ReceiverGainLimits = commonReceiverGainLimits,
                     FrameRateLimits = commonFrameRateLimits,
                     WindowLimits = RangeOfMeters(0.7, 100.0),

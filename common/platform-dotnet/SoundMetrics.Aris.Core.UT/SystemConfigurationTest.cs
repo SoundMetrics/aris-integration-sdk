@@ -15,7 +15,7 @@ namespace SoundMetrics.Aris.Core
             var maxDeviceSamples =
                 SystemType.Aris3000
                     .GetConfiguration()
-                    .SampleCountPreferredLimits
+                    .SampleCountDeviceLimits
                     .Maximum;
             Assert.AreNotEqual(default, maxDeviceSamples);
         }
