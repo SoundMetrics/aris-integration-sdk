@@ -122,7 +122,7 @@ namespace SoundMetrics.Aris.Core
         [TestMethod]
         public void MoveWindowStart_NotRecording_GuidedSampleCount()
         {
-            var mode = GuidedSettingsMode.GuidedSampleCount;
+            var mode = AdjustWindowTerminusGuided.Instance;
 
             var moveSteps =
                 new StepInputs[]
@@ -142,7 +142,7 @@ namespace SoundMetrics.Aris.Core
         [TestMethod]
         public void MoveWindowEnd_NotRecording_GuidedSampleCount()
         {
-            var mode = GuidedSettingsMode.GuidedSampleCount;
+            var mode = AdjustWindowTerminusGuided.Instance;
 
             var moveSteps =
                 new StepInputs[]
@@ -162,7 +162,7 @@ namespace SoundMetrics.Aris.Core
         [TestMethod]
         public void MoveEntireWindow_NotRecording_GuidedSampleCount()
         {
-            var mode = GuidedSettingsMode.GuidedSampleCount;
+            var mode = AdjustWindowTerminusGuided.Instance;
 
             var moveSteps =
                 new StepInputs[]
@@ -182,7 +182,7 @@ namespace SoundMetrics.Aris.Core
         [TestMethod]
         public void MoveEntireWindow_GuidedSampleCount_DoNotShrinkWindow()
         {
-            var mode = GuidedSettingsMode.GuidedSampleCount;
+            var mode = AdjustWindowTerminusGuided.Instance;
             var windowStart = new WindowBounds(2, 9.531);
             var testName = nameof(MoveEntireWindow_GuidedSampleCount_DoNotShrinkWindow);
 
@@ -237,8 +237,8 @@ namespace SoundMetrics.Aris.Core
                 var bounds = settings.WindowBounds(conditions);
                 var newSettings = settings.MoveEntireWindow(
                     requestedStart,
-                    mode,
                     conditions,
+                    mode,
                     useMaxFrameRate: true,
                     useAutoFrequency: true
                 );
@@ -257,7 +257,7 @@ namespace SoundMetrics.Aris.Core
 
         }
 
-        private void TestRunner(string testName, StepInputs[] steps, GuidedSettingsMode guidedSettingsMode)
+        private void TestRunner(string testName, StepInputs[] steps, IAdjustWindowTerminus adjustmentStrategy)
         {
             var helper = new PrettyPrintHelper(0);
             helper.PrintHeading(testName);
@@ -274,7 +274,7 @@ namespace SoundMetrics.Aris.Core
             foreach (var step in steps)
             {
                 Debug.WriteLine($"Step: [{step}]");
-                var newSettings = Move(settings, guidedSettingsMode, idxStep, step, helper);
+                var newSettings = Move(settings, adjustmentStrategy, idxStep, step, helper);
 
                 using (var _ = helper.PushIndent())
                 {
@@ -332,7 +332,7 @@ namespace SoundMetrics.Aris.Core
 
         private static AcousticSettingsRaw Move(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode guidedSettingsMode,
+            IAdjustWindowTerminus adjustmentStrategy,
             int idxStep,
             in StepInputs stepInputs,
             PrettyPrintHelper helper)
@@ -353,8 +353,8 @@ namespace SoundMetrics.Aris.Core
                             var requestedStart = bounds.WindowStart + distance;
                             return settings.MoveWindowStart(
                                 requestedStart,
-                                guidedSettingsMode,
                                 conditions,
+                                adjustmentStrategy,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true
                             );
@@ -366,8 +366,8 @@ namespace SoundMetrics.Aris.Core
                             var requestedEnd = bounds.WindowEnd + distance;
                             return settings.MoveWindowEnd(
                                 requestedEnd,
-                                guidedSettingsMode,
                                 conditions,
+                                adjustmentStrategy,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true
                             );
@@ -379,8 +379,8 @@ namespace SoundMetrics.Aris.Core
                             var requestedStart = bounds.WindowStart + distance;
                             return settings.MoveEntireWindow(
                                 requestedStart,
-                                guidedSettingsMode,
                                 conditions,
+                                adjustmentStrategy,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true
                             );

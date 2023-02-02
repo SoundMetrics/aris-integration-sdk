@@ -2,7 +2,7 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
-    internal interface IAdjustWindowTerminus
+    public interface IAdjustWindowTerminus
     {
         AcousticSettingsRaw MoveWindowStart(
             Distance requestedStart,

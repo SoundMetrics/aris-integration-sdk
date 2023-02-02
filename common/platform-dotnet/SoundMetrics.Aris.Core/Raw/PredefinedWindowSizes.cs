@@ -11,8 +11,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
     internal delegate AcousticSettingsRaw AdjustRangeFn(
         AcousticSettingsRaw settings,
-        GuidedSettingsMode guidedSettingsMode,
         ObservedConditions observedConditions,
+        IAdjustWindowTerminus adjustmentStrategy,
         bool useMaxFrameRate,
         bool useAutoFrequency);
 
@@ -67,8 +67,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 });
         internal static AcousticSettingsRaw ToShortWindow(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -77,8 +77,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var sizingInfo = windowSizingInfo[settings.SystemType];
             return ToFixedWindow(
                 settings,
-                guidedSettingsMode,
                 observedConditions,
+                adjustmentStrategy,
                 sizingInfo.FixedWindowSizeShort,
                 useMaxFrameRate,
                 useAutoFrequency);
@@ -86,8 +86,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw ToMediumWindow(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -96,8 +96,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var sizingInfo = windowSizingInfo[settings.SystemType];
             return ToFixedWindow(
                 settings,
-                guidedSettingsMode,
                 observedConditions,
+                adjustmentStrategy,
                 sizingInfo.FixedWindowSizeMedium,
                 useMaxFrameRate,
                 useAutoFrequency);
@@ -105,8 +105,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw ToLongWindow(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -115,8 +115,8 @@ namespace SoundMetrics.Aris.Core.Raw
             var sizingInfo = windowSizingInfo[settings.SystemType];
             return ToFixedWindow(
                 settings,
-                guidedSettingsMode,
                 observedConditions,
+                adjustmentStrategy,
                 sizingInfo.FixedWindowSizeLong,
                 useMaxFrameRate,
                 useAutoFrequency);
@@ -124,8 +124,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw ToFixedWindow(
             AcousticSettingsRaw currentSettings,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             in WindowBounds windowBounds,
             bool useMaxFrameRate,
             bool useAutoFrequency)
@@ -159,8 +159,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     .GetSettingsForSpecificRange(
                         currentSettings,
                         windowBounds,
-                        guidedSettingsMode,
                         observedConditions,
+                        adjustmentStrategy,
                         useMaxFrameRate,
                         useAutoFrequency);
 
@@ -260,8 +260,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw MoveWindowStartCloser(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode _,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus _,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => MoveWindowStartCloser(
@@ -320,8 +320,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw MoveWindowStartFarther(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode _,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus _,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => MoveWindowStartFarther(
@@ -374,8 +374,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw MoveWindowEndCloser(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode _,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus _,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => MoveWindowEndCloser(
@@ -419,8 +419,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw MoveWindowEndFarther(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode _,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus _,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => MoveWindowEndFarther(
@@ -469,8 +469,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw SlideWindowCloser(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode _,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus _,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => SlideWindowCloser(
@@ -516,8 +516,8 @@ namespace SoundMetrics.Aris.Core.Raw
 
         internal static AcousticSettingsRaw SlideWindowFarther(
             AcousticSettingsRaw settings,
-            GuidedSettingsMode _,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus _,
             bool useMaxFrameRate,
             bool useAutoFrequency)
             => SlideWindowFarther(

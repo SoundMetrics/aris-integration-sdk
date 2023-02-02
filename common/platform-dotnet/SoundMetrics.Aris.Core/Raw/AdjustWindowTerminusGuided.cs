@@ -2,12 +2,13 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    using System;
     using System.Diagnostics;
     using static AcousticSettingsAuto;
     using static AcousticSettingsRawRangeOperations;
     using static Distance;
 
-    internal sealed class AdjustWindowTerminusGuided : IAdjustWindowTerminus
+    public sealed class AdjustWindowTerminusGuided : IAdjustWindowTerminus
     {
         private AdjustWindowTerminusGuided() { }
 
@@ -20,6 +21,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             var sysCfg = settings.SystemType.GetConfiguration();
             var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, windowEnd) = windowBounds;
@@ -69,6 +73,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             var sysCfg = settings.SystemType.GetConfiguration();
             var windowBounds = settings.WindowBounds(observedConditions);
             var (windowStart, windowEnd) = windowBounds;
@@ -128,6 +135,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             var originalBounds = settings.WindowBounds(observedConditions);
             var constrainedStart =
                 requestedStart.ConstrainTo(

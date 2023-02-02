@@ -2,10 +2,11 @@
 
 namespace SoundMetrics.Aris.Core.Raw
 {
+    using System;
     using System.Diagnostics;
     using static AcousticSettingsRawRangeOperations;
 
-    internal sealed class AdjustWindowTerminusLevel2 : IAdjustWindowTerminus
+    public sealed class AdjustWindowTerminusLevel2 : IAdjustWindowTerminus
     {
         private AdjustWindowTerminusLevel2() { }
 
@@ -18,6 +19,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             // Rationale: in this mode we are free to change sample count, so
             // hold sample period (resolution) constant and adjust sample count
             // to fit the new window (within limits). The user controls the
@@ -43,7 +47,9 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings
                     .WithSampleCount(sampleCountFittedToWindow)
                     .WithSamplePeriod(samplePeriod, useMaxFrameRate);
+#pragma warning disable CA1062 // Validate arguments of public methods - spurious compile error even though we're checking 'settings' for null
             var newWindowEnd = withSampleCountAndPeriod.WindowBounds(observedConditions).WindowEnd;
+#pragma warning restore CA1062 // Validate arguments of public methods
 
             var newSettings =
                 withSampleCountAndPeriod
@@ -137,6 +143,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             // Rationale: in this mode we are free to change sample count, so
             // hold sample period (resolution) constant and adjust sample count
             // to fit the new window (within limits). The user controls the
@@ -198,12 +207,17 @@ namespace SoundMetrics.Aris.Core.Raw
             ObservedConditions observedConditions,
             bool useMaxFrameRate,
             bool useAutoFrequency)
-            => CalculateFreeSettingsWithRange(
+        {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
+            return CalculateFreeSettingsWithRange(
                     settings,
                     windowBounds,
                     observedConditions,
                     useMaxFrameRate,
                     useAutoFrequency);
+        }
 
         public AcousticSettingsRaw SlideWindow(
             Distance requestedStart,
@@ -212,6 +226,9 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+
             // Don't adjust the sample count, just adjust the sample start delay.
 
             var sysCfg = settings.SystemType.GetConfiguration();

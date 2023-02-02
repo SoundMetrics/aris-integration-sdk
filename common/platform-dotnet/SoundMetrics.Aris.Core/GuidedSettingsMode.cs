@@ -15,7 +15,7 @@ namespace SoundMetrics.Aris.Core
 
     internal static class GuidedSettingsModeExtensions
     {
-        internal static IAdjustWindowTerminus GetAdjustWindowOperations(
+        private static IAdjustWindowTerminus GetAdjustWindowOperations(
             this GuidedSettingsMode mode)
         {
             switch (mode)

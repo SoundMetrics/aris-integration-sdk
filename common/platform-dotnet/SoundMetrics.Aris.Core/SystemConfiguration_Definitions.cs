@@ -159,8 +159,8 @@ namespace SoundMetrics.Aris.Core
                         PredefinedWindowSizes
                             .ToMediumWindow(
                                 defaultSettings,
-                                GuidedSettingsMode.FixedSampleCount,
                                 observedConditions,
+                                AdjustWindowTerminusFixed.Instance,
                                 useMaxFrameRate: true,
                                 useAutoFrequency: true)
                             .WithAutomaticFocusDistance(observedConditions);

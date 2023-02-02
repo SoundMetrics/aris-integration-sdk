@@ -14,13 +14,14 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw GetSettingsForSpecificRange(
             this AcousticSettingsRaw settings,
             in WindowBounds requestedWindow,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+            if (adjustmentStrategy is null) throw new ArgumentNullException(nameof(adjustmentStrategy));
 
             if (requestedWindow.WindowStart <= Distance.Zero)
             {
@@ -35,8 +36,7 @@ namespace SoundMetrics.Aris.Core.Raw
             var constrainedWindowBounds =
                 GetConstrainedWindowBounds(sysCfg, requestedWindow);
 
-            return guidedSettingsMode
-                    .GetAdjustWindowOperations()
+            return adjustmentStrategy
                     .SelectSpecificRange(
                         constrainedWindowBounds,
                         settings,
@@ -53,13 +53,14 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw MoveWindowStart(
             this AcousticSettingsRaw settings,
             Distance requestedStart,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+            if (adjustmentStrategy is null) throw new ArgumentNullException(nameof(adjustmentStrategy));
 
             if (requestedStart <= Distance.Zero)
             {
@@ -68,8 +69,8 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            var newSettings = guidedSettingsMode
-                    .GetAdjustWindowOperations()
+            var newSettings =
+                adjustmentStrategy
                     .MoveWindowStart(
                         requestedStart,
                         settings,
@@ -86,13 +87,14 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw MoveWindowEnd(
                 this AcousticSettingsRaw settings,
                 Distance requestedEnd,
-                GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
+                IAdjustWindowTerminus adjustmentStrategy,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+            if (adjustmentStrategy is null) throw new ArgumentNullException(nameof(adjustmentStrategy));
 
             if (requestedEnd <= Distance.Zero)
             {
@@ -101,8 +103,8 @@ namespace SoundMetrics.Aris.Core.Raw
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            return guidedSettingsMode
-                    .GetAdjustWindowOperations()
+            return
+                adjustmentStrategy
                     .MoveWindowEnd(
                         requestedEnd,
                         settings,
@@ -137,13 +139,14 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw MoveEntireWindow(
                 this AcousticSettingsRaw settings,
                 Distance requestedStart,
-                GuidedSettingsMode guidedSettingsMode,
                 ObservedConditions observedConditions,
+                IAdjustWindowTerminus adjustmentStrategy,
                 bool useMaxFrameRate,
                 bool useAutoFrequency)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+            if (adjustmentStrategy is null) throw new ArgumentNullException(nameof(adjustmentStrategy));
 
             if (requestedStart <= Distance.Zero)
             {
@@ -155,8 +158,7 @@ namespace SoundMetrics.Aris.Core.Raw
             DebugLogInfo(settings, "start");
 
             var newSettings =
-                guidedSettingsMode
-                    .GetAdjustWindowOperations()
+                adjustmentStrategy
                     .SlideWindow(
                         requestedStart,
                         settings,

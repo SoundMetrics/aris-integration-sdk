@@ -62,8 +62,8 @@ namespace SoundMetrics.Aris.Core.Raw
         public static AcousticSettingsRaw ApplyWindowOperation(
             this AcousticSettingsRaw settings,
             WindowOperation operation,
-            GuidedSettingsMode guidedSettingsMode,
             ObservedConditions observedConditions,
+            IAdjustWindowTerminus adjustmentStrategy,
             bool useMaxFrameRate,
             bool useAutoFrequency)
         {
@@ -71,8 +71,8 @@ namespace SoundMetrics.Aris.Core.Raw
             {
                 return op(
                     settings,
-                    guidedSettingsMode,
                     observedConditions,
+                    adjustmentStrategy,
                     useMaxFrameRate,
                     useAutoFrequency);
             }
