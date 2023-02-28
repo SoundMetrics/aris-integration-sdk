@@ -34,6 +34,8 @@ namespace SoundMetrics.Aris.Core
 
         public PingMode DefaultPingMode { get; internal set; }
 
+        public bool SupportsTelephotoLens { get; internal set; }
+
 #pragma warning disable CA1822 // does not access instance data and can be marked as static
         // May eventually use instance data; don't mess up APIs just for warnings
 
