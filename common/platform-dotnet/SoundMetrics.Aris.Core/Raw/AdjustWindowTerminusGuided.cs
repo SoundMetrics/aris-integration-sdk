@@ -25,8 +25,8 @@ namespace SoundMetrics.Aris.Core.Raw
                 new Dictionary<SystemType, ValueRange<int>>()
                 {
                     { SystemType.Aris1200, new ValueRange<int>(1750, maxSampleCount) },
-                    { SystemType.Aris1800, new ValueRange<int>(1250, maxSampleCount) },
-                    { SystemType.Aris3000, new ValueRange<int>(800, maxSampleCount) },
+                    { SystemType.Aris1800, new ValueRange<int>(800, maxSampleCount) },
+                    { SystemType.Aris3000, new ValueRange<int>(400, maxSampleCount) },
                 };
         }
 

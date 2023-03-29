@@ -228,7 +228,11 @@ namespace SoundMetrics.Aris.Core
                 ++idxStep;
             }
 
-            Assert.IsTrue(settings.SampleCount > 800, "The 12.471 value should allow for >800 samples at a sample period of 11 microseconds");
+            var minSampleCount = new PreferredGuidedSampleCounts()[settings.SystemType].Minimum;
+            Assert.IsTrue(
+                settings.SampleCount > minSampleCount,
+                $"The 12.471 value should allow for >={minSampleCount} samples at a sample period of 11 microseconds. "
+                + $"SampleCount=[{settings.SampleCount}]");
 
             Approvals.Verify(helper.ToString());
 

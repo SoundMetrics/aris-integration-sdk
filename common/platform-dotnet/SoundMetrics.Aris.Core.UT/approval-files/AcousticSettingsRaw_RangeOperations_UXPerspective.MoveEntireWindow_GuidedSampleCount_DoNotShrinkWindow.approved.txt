@@ -26,13 +26,13 @@ Start Settings:
         Salinity: Brackish
         CyclePeriod (calculated): 0.013132 s
     starting: MoveActuals(Bounds(WindowStart=[2.000 m]; WindowEnd=[9.529 m]; WindowLength=[7.529 m]), SamplePeriod=[0.000009 s], SampleCount=[1116])
-    ending: MoveActuals(Bounds(WindowStart=[12.471 m]; WindowEnd=[20.000 m]; WindowLength=[7.529 m]), SamplePeriod=[0.000012 s], SampleCount=[837])
+    ending: MoveActuals(Bounds(WindowStart=[12.471 m]; WindowEnd=[20.002 m]; WindowLength=[7.532 m]), SamplePeriod=[0.000017 s], SampleCount=[591])
     new settings: AcousticSettingsRaw: 
         SystemType: ARIS 3000 (1)
-        FrameRate: 4.478360561765549/s
-        SampleCount: 837
+        FrameRate: 4.4778792763747095/s
+        SampleCount: 591
         SampleStartDelay: 0.016635 s
-        SamplePeriod: 0.000012 s
+        SamplePeriod: 0.000017 s
         PulseWidth: 0.000024 s
         PingMode: PingMode 9, 128 beams
         EnableTransmit: True
@@ -45,4 +45,4 @@ Start Settings:
             Enable: False
             Delay: 0.000000 s
         Salinity: Brackish
-        CyclePeriod (calculated): 0.027099 s
+        CyclePeriod (calculated): 0.027102 s
