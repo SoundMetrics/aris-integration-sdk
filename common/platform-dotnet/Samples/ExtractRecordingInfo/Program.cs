@@ -11,14 +11,15 @@ namespace ExtractRecordingInfo
 
         static int Main(string[] args)
         {
-            Console.WriteLine("Starting {0}", Process.GetCurrentProcess().ProcessName);
+            Console.WriteLine("# Starting {0}", Process.GetCurrentProcess().ProcessName);
 
             return
                 Parser.Default
-                    .ParseArguments<GpsOptions, DepthOptions>(args)
+                    .ParseArguments<GpsOptions, DepthOptions, OrientationOptions>(args)
                     .MapResult(
                         (GpsOptions opts) => GPSProcessor.ProcessGPS(opts),
                         (DepthOptions opts) => DepthProcessor.ProcessDepth(opts),
+                        (OrientationOptions opts) => OrientationProcessor.ProcessOrientation(opts),
                         _ => StartupError // errors
                     );
         }

@@ -19,7 +19,7 @@ namespace ExtractRecordingInfo
                 options.Summary ? (FileAction)SummarizeGpsInfo : DumpGpsInfo;
             var recordingPath = options.Path;
 
-            console.WriteLine($"Recording=[{recordingPath}]");
+            console.WriteLine($"# Recording=[{recordingPath}]");
             if (File.Exists(recordingPath))
             {
                 process(recordingPath, console);
