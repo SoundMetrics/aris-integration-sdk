@@ -3,10 +3,12 @@ SETLOCAL
 SET SCRIPT=%~nx0
 SET PREFIX=%SCRIPT%:
 
-ECHO %PREFIX% ProjectDir=[%1]
-ECHO %PREFIX% SolutionDir=[%2]
+SET PROJECT_DIR=%1
+SET SOLUTION_DIR=%2
 SHIFT /1
 SHIFT /1
+ECHO %PREFIX% PROJECT_DIR=[%PROJECT_DIR%]
+ECHO %PREFIX% SOLUTION_DIR=[%SOLUTION_DIR%]
 
 SET DEST=.\generated
 ECHO %PREFIX% DEST=[%DEST%]
@@ -18,7 +20,7 @@ DEL/Q %DEST%\*.*
 
 ECHO %PREFIX% Generating protobuf output...
 
-SET PROTOC=..\packages\Google.Protobuf.Tools.3.5.1\tools\windows_x86\protoc.exe
+SET PROTOC=%SOLUTION_DIR%\packages\Google.Protobuf.Tools.3.23.2\tools\windows_x86\protoc.exe
 ECHO %PREFIX% PROTOC=[%PROTOC%]
 CALL :NORMALIZEPATH %PROTOC%
 ECHO %PREFIX% PROTOC=[%RETVAL%]
