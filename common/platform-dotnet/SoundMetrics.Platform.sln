@@ -1,11 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoundMetrics.Aris.Messages", "SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj", "{847203F0-D0A0-4459-9DA4-8A2172F115E5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57705067-6871-4C9B-B788-0EE9D0694EBC} = {57705067-6871-4C9B-B788-0EE9D0694EBC}
+		{C257A627-5838-45B9-8A1B-1D1532F30ADE} = {C257A627-5838-45B9-8A1B-1D1532F30ADE}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetProtobufTools", "GetProtobufTools\GetProtobufTools.csproj", "{C257A627-5838-45B9-8A1B-1D1532F30ADE}"

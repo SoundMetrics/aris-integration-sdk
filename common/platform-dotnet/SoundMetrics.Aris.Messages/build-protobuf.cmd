@@ -20,7 +20,13 @@ DEL/Q %DEST%\*.*
 
 ECHO %PREFIX% Generating protobuf output...
 
-SET PROTOC=%SOLUTION_DIR%\packages\Google.Protobuf.Tools.3.23.2\tools\windows_x86\protoc.exe
+SET PROTOBUF_TOOLS_VER=3.5.1
+SET PROTOC=%SOLUTION_DIR%\packages\Google.Protobuf.Tools.%PROTOBUF_TOOLS_VER%\tools\windows_x86\protoc.exe
+
+IF EXIST "%PROTOC%" GOTO :PROTOC_FOUND
+SET PROTOC=..\packages\Google.Protobuf.Tools.%PROTOBUF_TOOLS_VER%\tools\windows_x86\protoc.exe
+
+:PROTOC_FOUND
 ECHO %PREFIX% PROTOC=[%PROTOC%]
 CALL :NORMALIZEPATH %PROTOC%
 ECHO %PREFIX% PROTOC=[%RETVAL%]
