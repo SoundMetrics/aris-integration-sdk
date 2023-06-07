@@ -20,7 +20,7 @@ DEL/Q %DEST%\*.*
 
 ECHO %PREFIX% Generating protobuf output...
 
-SET PROTOBUF_TOOLS_VER=3.5.1
+SET PROTOBUF_TOOLS_VER=3.23.2
 SET PROTOC=%SOLUTION_DIR%\packages\Google.Protobuf.Tools.%PROTOBUF_TOOLS_VER%\tools\windows_x86\protoc.exe
 
 IF EXIST "%PROTOC%" GOTO :PROTOC_FOUND
