@@ -28,6 +28,7 @@ BuildInfo.cs
 BuildInfo.fs
 BuildInfo.h
 common/platform-dotnet/built-nuget-packages/
+local_nuget/
 
 # Visual Studo 2015 cache/options directory
 .vs/
