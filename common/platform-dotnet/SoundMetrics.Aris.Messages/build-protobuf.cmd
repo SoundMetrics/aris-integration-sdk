@@ -4,11 +4,8 @@ SET SCRIPT=%~nx0
 SET PREFIX=%SCRIPT%:
 
 SET PROJECT_DIR=%1
-SET SOLUTION_DIR=%2
-SHIFT /1
 SHIFT /1
 ECHO %PREFIX% PROJECT_DIR=[%PROJECT_DIR%]
-ECHO %PREFIX% SOLUTION_DIR=[%SOLUTION_DIR%]
 
 SET DEST=.\generated
 ECHO %PREFIX% DEST=[%DEST%]
@@ -18,18 +15,25 @@ IF NOT EXIST %DEST% MKDIR %DEST%
 
 DEL/Q %DEST%\*.*
 
+ECHO %PREFIX% Getting Google.Protobuf.Tools
+
+SET LOCAL_NUGET=%PROJECT_DIR%local_nuget
+ECHO LOCAL_NUGET=[%LOCAL_NUGET%]
+IF NOT EXIST %LOCAL_NUGET% MKDIR %LOCAL_NUGET%
+
+SET DESIRED_PROTOC_VERSION=3.23.2
+%PROJECT_DIR%\..\.nuget\nuget.exe install Google.Protobuf.Tools -OutputDirectory %LOCAL_NUGET% -Version %DESIRED_PROTOC_VERSION%
+
 ECHO %PREFIX% Generating protobuf output...
 
-SET PROTOBUF_TOOLS_VER=3.23.2
-SET PROTOC=%SOLUTION_DIR%\packages\Google.Protobuf.Tools.%PROTOBUF_TOOLS_VER%\tools\windows_x86\protoc.exe
+REM SET PROTOC=..\%PROJECT_DIR%\packages\Google.Protobuf.Tools.%PROTOBUF_TOOLS_VER%\tools\windows_x86\protoc.exe
+SET PROTOC=%PROJECT_DIR%\local_nuget\Google.Protobuf.Tools.3.23.2\tools\windows_x86\protoc.exe
 
-IF EXIST "%PROTOC%" GOTO :PROTOC_FOUND
-SET PROTOC=..\packages\Google.Protobuf.Tools.%PROTOBUF_TOOLS_VER%\tools\windows_x86\protoc.exe
-
-:PROTOC_FOUND
 ECHO %PREFIX% PROTOC=[%PROTOC%]
 CALL :NORMALIZEPATH %PROTOC%
 ECHO %PREFIX% PROTOC=[%RETVAL%]
+
+DIR %PROTOC%
 %PROTOC% --version
 
 set PGEN=%PROTOC% --csharp_out=%DEST% --error_format=msvs %1 %2
