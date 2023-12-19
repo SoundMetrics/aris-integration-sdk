@@ -5,7 +5,7 @@ using System;
 namespace SoundMetrics.Aris.Network
 {
 
-    internal static class NetworkConstants
+    public static class NetworkConstants
     {
         [Obsolete]
         public const int ArisAvailabilityListenerPortV1 = 56123; // DEFAULT_ARIS_TS_DISCOVERY_LISTEN_PORT  = 56123,
