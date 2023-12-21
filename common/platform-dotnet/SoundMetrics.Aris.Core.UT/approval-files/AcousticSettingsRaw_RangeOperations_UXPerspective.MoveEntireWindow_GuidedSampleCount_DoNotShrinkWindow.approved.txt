@@ -13,7 +13,7 @@ Start Settings:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000009 s
         PulseWidth: 0.000017 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -34,7 +34,7 @@ Start Settings:
         SampleStartDelay: 0.016635 s
         SamplePeriod: 0.000017 s
         PulseWidth: 0.000024 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True

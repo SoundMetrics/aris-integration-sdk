@@ -13,7 +13,7 @@ Start Settings:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000008 s
         PulseWidth: 0.000016 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -36,7 +36,7 @@ Step 0:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000008 s
         PulseWidth: 0.000016 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -59,7 +59,7 @@ Step 1:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000008 s
         PulseWidth: 0.000016 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -82,7 +82,7 @@ Step 2:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000009 s
         PulseWidth: 0.000018 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -105,7 +105,7 @@ Step 3:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000007 s
         PulseWidth: 0.000014 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -128,7 +128,7 @@ Step 4:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000009 s
         PulseWidth: 0.000018 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
@@ -151,7 +151,7 @@ Step 5:
         SampleStartDelay: 0.002668 s
         SamplePeriod: 0.000008 s
         PulseWidth: 0.000016 s
-        PingMode: PingMode 9, 128 beams
+        PingMode: PingMode 9, 128 beams, 8 pings per frame
         EnableTransmit: True
         Frequency: Low
         Enable150Volts: True
