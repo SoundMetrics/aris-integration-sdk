@@ -19,7 +19,7 @@ namespace SoundMetrics.Aris.Data
         public delegate void TransformBufferFn(
             ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
 
-        internal ByteBuffer(int length, InitializeBufferFn initializeBuffer)
+        public ByteBuffer(int length, InitializeBufferFn initializeBuffer)
             : base(ownsHandle: true)
         {
             if (length < 0)
