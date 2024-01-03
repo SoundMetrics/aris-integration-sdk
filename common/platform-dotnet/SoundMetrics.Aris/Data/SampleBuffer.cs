@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.Data
     /// allocated as managed memory. Allocating on the native heap
     /// instead avoids the overhead of thrashing the LOH.
     /// </summary>
-    public sealed class ByteBuffer : SafeHandleZeroOrMinusOneIsInvalid
+    public sealed class SampleBuffer : SafeHandleZeroOrMinusOneIsInvalid
     {
         public delegate void InitializeBufferSpan(Span<byte> buffer);
         public unsafe delegate void InitializeBufferUnsafe(byte* buffer, int length);
@@ -21,7 +21,7 @@ namespace SoundMetrics.Aris.Data
         public delegate void TransformBufferFn(
             ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
 
-        public static ByteBuffer Create(int length, InitializeBufferSpan initializeBuffer)
+        public static SampleBuffer Create(int length, InitializeBufferSpan initializeBuffer)
         {
             if (length < 0)
             {
@@ -53,10 +53,10 @@ namespace SoundMetrics.Aris.Data
                 throw;
             }
 
-            return new ByteBuffer(buffer, length);
+            return new SampleBuffer(buffer, length);
         }
 
-        public unsafe static ByteBuffer Create(int length, InitializeBufferUnsafe initializeBuffer)
+        public unsafe static SampleBuffer Create(int length, InitializeBufferUnsafe initializeBuffer)
         {
             if (length < 0)
             {
@@ -88,10 +88,10 @@ namespace SoundMetrics.Aris.Data
                 throw;
             }
 
-            return new ByteBuffer(buffer, length);
+            return new SampleBuffer(buffer, length);
         }
 
-        public unsafe static ByteBuffer Create(ReadOnlySpan<byte> source)
+        public unsafe static SampleBuffer Create(ReadOnlySpan<byte> source)
         {
             var length = source.Length;
             var buffer = Marshal.AllocHGlobal(length);
@@ -102,7 +102,7 @@ namespace SoundMetrics.Aris.Data
                 {
                     var destination = new Span<byte>(buffer.ToPointer(), length);
                     source.CopyTo(destination);
-                    return new ByteBuffer(buffer, length);
+                    return new SampleBuffer(buffer, length);
                 }
             }
             catch
@@ -115,7 +115,7 @@ namespace SoundMetrics.Aris.Data
         /// <summary>
         /// Construct from a list of buffers.
         /// </summary>
-        public unsafe static ByteBuffer Create(IEnumerable<ReadOnlyMemory<byte>> sourceBuffers)
+        public unsafe static SampleBuffer Create(IEnumerable<ReadOnlyMemory<byte>> sourceBuffers)
         {
             var sources = sourceBuffers.ToArray();
             var totalLength = sources.Sum(source => source.Length);
@@ -133,7 +133,7 @@ namespace SoundMetrics.Aris.Data
                     offset += partialOutput.Length;
                 }
 
-                return new ByteBuffer(buffer, totalLength);
+                return new SampleBuffer(buffer, totalLength);
             }
             catch
             {
@@ -145,7 +145,7 @@ namespace SoundMetrics.Aris.Data
         /// <summary>
         /// Build from an existing buffer. Generally not prefered.
         /// </summary>
-        internal ByteBuffer(IntPtr buffer, int bufferLength)
+        internal SampleBuffer(IntPtr buffer, int bufferLength)
             : base(ownsHandle: true)
         {
             if (bufferLength < 0)
@@ -181,11 +181,11 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        public ByteBuffer Transform(TransformBufferFn transformBuffer)
+        public SampleBuffer Transform(TransformBufferFn transformBuffer)
         {
             void initialize(Span<byte> output) => transformBuffer(this.Span, output);
 
-            var newBuffer = ByteBuffer.Create(length, initialize);
+            var newBuffer = SampleBuffer.Create(length, initialize);
             return newBuffer;
         }
 

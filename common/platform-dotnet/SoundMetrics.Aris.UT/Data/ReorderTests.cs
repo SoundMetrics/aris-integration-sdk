@@ -68,7 +68,7 @@ namespace SoundMetrics.Aris
                 SamplesPerBeam = (uint)samplesPerBeam,
             };
 
-            if (Frame.TryCreate(frameHeader, ByteBuffer.Create(samples.Span), out var frame))
+            if (Frame.TryCreate(frameHeader, SampleBuffer.Create(samples.Span), out var frame))
             {
                 return frame;
             }
@@ -78,7 +78,7 @@ namespace SoundMetrics.Aris
             }
         }
 
-        private static bool AreEqual(ReadOnlySpan<byte> a, ByteBuffer b)
+        private static bool AreEqual(ReadOnlySpan<byte> a, SampleBuffer b)
         {
             if (a.Length != b.Length)
             {

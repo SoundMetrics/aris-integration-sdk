@@ -42,7 +42,7 @@ namespace SoundMetrics.Aris.Data
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
                     // Ownership of `orderedSamples` is given away.
-                    var orderedSamples = new ByteBuffer(output, outputLength);
+                    var orderedSamples = new SampleBuffer(output, outputLength);
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     if (Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame))
                     {
