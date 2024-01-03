@@ -7,30 +7,32 @@ namespace SoundMetrics.Aris
     [TestClass]
     public sealed class ByteBufferTests
     {
-        private void InitializeTo42(Span<byte> buffer)
+        private static void InitializeTo42(Span<byte> buffer)
         {
             InitializeTo(buffer, 42);
         }
 
-        private void InitializeTo(Span<byte> buffer, byte value)
+        private static void InitializeTo(Span<byte> buffer, byte value)
         {
-            for (int index = 0; index < buffer.Length; ++index)
-            {
-                buffer[index] = value;
-            }
+            buffer.Fill(value);
+        }
+
+        private static unsafe void InitializeToUnsafe(byte* buffer, int length, byte value)
+        {
+            new Span<byte>(buffer, length).Fill(value);
         }
 
         [TestMethod]
         public void NegativeSizedBuffer()
         {
             _ = Assert.ThrowsException<ArgumentOutOfRangeException>(
-                () => new ByteBuffer(-1, InitializeTo42));
+                () => ByteBuffer.Create(-1, InitializeTo42));
         }
 
         [TestMethod]
         public void EmptyBuffer()
         {
-            var buffer = new ByteBuffer(0, InitializeTo42);
+            var buffer = ByteBuffer.Create(0, InitializeTo42);
             Assert.AreEqual(0, buffer.Length);
             Assert.AreEqual(0, buffer.Span.Length);
         }
@@ -39,7 +41,17 @@ namespace SoundMetrics.Aris
         public void SingletonBuffer()
         {
             var expected = (byte)(new Random().Next(0, 255));
-            var buffer = new ByteBuffer(1, buf => InitializeTo(buf, expected));
+            var buffer = ByteBuffer.Create(1, buf => InitializeTo(buf, expected));
+            var actual = buffer.Span[0];
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public unsafe void SingletonBufferUnsafe()
+        {
+            var expected = (byte)(new Random().Next(0, 255));
+            var buffer = ByteBuffer.Create(1, (buf, length) => InitializeToUnsafe(buf, length, expected));
             var actual = buffer.Span[0];
 
             Assert.AreEqual(expected, actual);
@@ -57,7 +69,7 @@ namespace SoundMetrics.Aris
             }
 
             var expected = 42 * 2;
-            var buffer1 = new ByteBuffer(8, InitializeTo42);
+            var buffer1 = ByteBuffer.Create(8, InitializeTo42);
             var buffer2 = buffer1.Transform(TransformFn);
 
             Assert.IsNotNull(buffer2);

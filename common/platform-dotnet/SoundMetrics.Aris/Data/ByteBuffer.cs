@@ -15,11 +15,55 @@ namespace SoundMetrics.Aris.Data
     /// </summary>
     public sealed class ByteBuffer : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public delegate void InitializeBufferFn(Span<byte> buffer);
+        public delegate void InitializeBufferSpan(Span<byte> buffer);
+        public unsafe delegate void InitializeBufferUnsafe(byte* buffer, int length);
+
         public delegate void TransformBufferFn(
             ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
 
-        public ByteBuffer(int length, InitializeBufferFn initializeBuffer)
+        public static ByteBuffer Create(int length, InitializeBufferSpan initializeBuffer)
+        {
+            if (initializeBuffer is null)
+            {
+                throw new ArgumentNullException(nameof(initializeBuffer));
+            }
+
+            return new ByteBuffer(length, initializeBuffer);
+        }
+
+        public unsafe static ByteBuffer Create(int length, InitializeBufferUnsafe initializeBuffer)
+        {
+            if (initializeBuffer is null)
+            {
+                throw new ArgumentNullException(nameof(initializeBuffer));
+            }
+
+            return new ByteBuffer(length, initializeBuffer);
+        }
+
+        private unsafe ByteBuffer(int length, InitializeBufferUnsafe initializeBuffer)
+            : base(ownsHandle: true)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(length),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                    $"{nameof(length)} must be greater than zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
+            this.length = length;
+            base.SetHandle(Marshal.AllocHGlobal(length));
+
+            unsafe
+            {
+                var ptr = DangerousGetHandle().ToPointer();
+                initializeBuffer((byte*)ptr, length);
+            }
+        }
+
+        private unsafe ByteBuffer(int length, InitializeBufferSpan initializeBuffer)
             : base(ownsHandle: true)
         {
             if (length < 0)
@@ -80,7 +124,7 @@ namespace SoundMetrics.Aris.Data
         private static int SumBufferLengths(List<ReadOnlyMemory<byte>> buffers) =>
             buffers.Sum(buffer => buffer.Length);
 
-        private static InitializeBufferFn CreateInitializer(ReadOnlyMemory<byte> source)
+        private static InitializeBufferSpan CreateInitializer(ReadOnlyMemory<byte> source)
         {
             return output =>
             {
@@ -88,7 +132,7 @@ namespace SoundMetrics.Aris.Data
             };
         }
 
-        private static InitializeBufferFn CreateInitializer(
+        private static InitializeBufferSpan CreateInitializer(
             List<ReadOnlyMemory<byte>> sourceBuffers)
         {
             return output =>

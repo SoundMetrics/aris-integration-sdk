@@ -104,7 +104,7 @@ namespace SoundMetrics.Aris.File
                 if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
                 {
                     samples =
-                        new ByteBuffer(
+                        ByteBuffer.Create(
                             length: sampleGeometry.TotalSampleCount,
                             initializeBuffer: (Span<byte> buffer) =>
                             {
