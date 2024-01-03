@@ -58,6 +58,14 @@ namespace SoundMetrics.Aris
         }
 
         [TestMethod]
+        public void FailAllocation()
+        {
+            const int OversizedBufferSize = int.MaxValue; // Successful test depends on the UT assembly being 32-bit.
+            _ = Assert.ThrowsException<OutOfMemoryException>(
+                () => ByteBuffer.Create(OversizedBufferSize, InitializeTo42));
+        }
+
+        [TestMethod]
         public void Transform()
         {
             void TransformFn(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer)

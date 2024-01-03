@@ -23,75 +23,123 @@ namespace SoundMetrics.Aris.Data
 
         public static ByteBuffer Create(int length, InitializeBufferSpan initializeBuffer)
         {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(length),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                    $"{nameof(length)} must be greater than zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
             if (initializeBuffer is null)
             {
                 throw new ArgumentNullException(nameof(initializeBuffer));
             }
 
-            return new ByteBuffer(length, initializeBuffer);
+            var buffer = Marshal.AllocHGlobal(length);
+
+            try
+            {
+                unsafe
+                {
+                    var writeableBuffer = new Span<byte>(buffer.ToPointer(), length);
+                    initializeBuffer(writeableBuffer);
+                }
+            }
+            catch
+            {
+                Marshal.FreeHGlobal(buffer);
+                throw;
+            }
+
+            return new ByteBuffer(buffer, length);
         }
 
         public unsafe static ByteBuffer Create(int length, InitializeBufferUnsafe initializeBuffer)
         {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(length),
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                    $"{nameof(length)} must be greater than zero");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
             if (initializeBuffer is null)
             {
                 throw new ArgumentNullException(nameof(initializeBuffer));
             }
 
-            return new ByteBuffer(length, initializeBuffer);
+            var buffer = Marshal.AllocHGlobal(length);
+
+            try
+            {
+                unsafe
+                {
+                    var ptr = buffer.ToPointer();
+                    initializeBuffer((byte*)ptr, length);
+                }
+            }
+            catch
+            {
+                Marshal.FreeHGlobal(buffer);
+                throw;
+            }
+
+            return new ByteBuffer(buffer, length);
         }
 
-        private unsafe ByteBuffer(int length, InitializeBufferUnsafe initializeBuffer)
-            : base(ownsHandle: true)
+        public unsafe static ByteBuffer Create(ReadOnlySpan<byte> source)
         {
-            if (length < 0)
+            var length = source.Length;
+            var buffer = Marshal.AllocHGlobal(length);
+
+            try
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(length),
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-                    $"{nameof(length)} must be greater than zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
+                unsafe
+                {
+                    var destination = new Span<byte>(buffer.ToPointer(), length);
+                    source.CopyTo(destination);
+                    return new ByteBuffer(buffer, length);
+                }
             }
-
-            this.length = length;
-            base.SetHandle(Marshal.AllocHGlobal(length));
-
-            unsafe
+            catch
             {
-                var ptr = DangerousGetHandle().ToPointer();
-                initializeBuffer((byte*)ptr, length);
-            }
-        }
-
-        private unsafe ByteBuffer(int length, InitializeBufferSpan initializeBuffer)
-            : base(ownsHandle: true)
-        {
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(length),
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-                    $"{nameof(length)} must be greater than zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
-            }
-
-            this.length = length;
-            base.SetHandle(Marshal.AllocHGlobal(length));
-
-            unsafe
-            {
-                var writeableBuffer =
-                    new Span<byte>(DangerousGetHandle().ToPointer(), length);
-                initializeBuffer(writeableBuffer);
+                Marshal.FreeHGlobal(buffer);
+                throw;
             }
         }
 
         /// <summary>
-        /// Construct from existing memory.
+        /// Construct from a list of buffers.
         /// </summary>
-        public ByteBuffer(ReadOnlyMemory<byte> source)
-            : this(source.Length, CreateInitializer(source))
+        public unsafe static ByteBuffer Create(IEnumerable<ReadOnlyMemory<byte>> sourceBuffers)
         {
+            var sources = sourceBuffers.ToArray();
+            var totalLength = sources.Sum(source => source.Length);
+            var buffer = Marshal.AllocHGlobal(totalLength);
+
+            try
+            {
+                var fullDestination = new Span<byte>(buffer.ToPointer(), totalLength);
+                int offset = 0;
+
+                foreach (var source in sources)
+                {
+                    var partialOutput = fullDestination.Slice(offset, source.Length);
+                    source.Span.CopyTo(partialOutput);
+                    offset += partialOutput.Length;
+                }
+
+                return new ByteBuffer(buffer, totalLength);
+            }
+            catch
+            {
+                Marshal.FreeHGlobal(buffer);
+                throw;
+            }
         }
 
         /// <summary>
@@ -111,40 +159,6 @@ namespace SoundMetrics.Aris.Data
 
             this.length = bufferLength;
             this.SetHandle(buffer);
-        }
-
-        /// <summary>
-        /// Construct from a list of buffers.
-        /// </summary>
-        internal ByteBuffer(List<ReadOnlyMemory<byte>> sourceBuffers)
-            : this(SumBufferLengths(sourceBuffers), CreateInitializer(sourceBuffers))
-        {
-        }
-
-        private static int SumBufferLengths(List<ReadOnlyMemory<byte>> buffers) =>
-            buffers.Sum(buffer => buffer.Length);
-
-        private static InitializeBufferSpan CreateInitializer(ReadOnlyMemory<byte> source)
-        {
-            return output =>
-            {
-                source.Span.CopyTo(output);
-            };
-        }
-
-        private static InitializeBufferSpan CreateInitializer(
-            List<ReadOnlyMemory<byte>> sourceBuffers)
-        {
-            return output =>
-            {
-                int offset = 0;
-                foreach (var buffer in sourceBuffers)
-                {
-                    var dest = output.Slice(offset, buffer.Length);
-                    buffer.Span.CopyTo(dest);
-                    offset += buffer.Length;
-                }
-            };
         }
 
         protected override bool ReleaseHandle()
@@ -171,7 +185,7 @@ namespace SoundMetrics.Aris.Data
         {
             void initialize(Span<byte> output) => transformBuffer(this.Span, output);
 
-            var newBuffer = new ByteBuffer(length, initialize);
+            var newBuffer = ByteBuffer.Create(length, initialize);
             return newBuffer;
         }
 

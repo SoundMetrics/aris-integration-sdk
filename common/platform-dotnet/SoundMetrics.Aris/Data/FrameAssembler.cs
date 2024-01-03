@@ -66,7 +66,7 @@ namespace SoundMetrics.Aris.Data
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
             // Ownership of `samples` is given away.
-            var samples = new ByteBuffer(sampleParts);
+            var samples = ByteBuffer.Create(sampleParts);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             try
             {

@@ -68,7 +68,7 @@ namespace SoundMetrics.Aris
                 SamplesPerBeam = (uint)samplesPerBeam,
             };
 
-            if (Frame.TryCreate(frameHeader, new ByteBuffer(samples), out var frame))
+            if (Frame.TryCreate(frameHeader, ByteBuffer.Create(samples.Span), out var frame))
             {
                 return frame;
             }
