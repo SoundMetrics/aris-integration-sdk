@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -18,6 +19,8 @@ namespace SampleBufferBenchmarks
 
         public SpanVsPointersBoxFilter()
         {
+            AssertValidity();
+
             const int BufferSize = Rows * Columns;
 
             (inputBuffer, bufferSize) = AllocateBuffer(BufferSize);
@@ -27,7 +30,6 @@ namespace SampleBufferBenchmarks
         [Benchmark]
         public void SpanBoxFilter()
         {
-            AssertValidity();
             SpanBoxFilterCore(InputBufferSpan, OutputBufferSpan, Rows, Columns);
         }
 
@@ -61,6 +63,79 @@ namespace SampleBufferBenchmarks
                     ++previousRowOffset;
                     ++currentRowOffset;
                     ++nextRowOffset;
+                }
+            }
+        }
+
+        [Benchmark,
+            Arguments(-1),
+            Arguments(2),
+            Arguments(4),
+            Arguments(8),
+            Arguments(16)]
+        public void SpanBoxFilterParallel(int maxDegreeOfParallelism)
+        {
+            SpanBoxFilterParallelCore(InputBufferSpan, OutputBufferSpan, Rows, Columns, maxDegreeOfParallelism);
+        }
+
+        private unsafe static void SpanBoxFilterParallelCore(
+            ReadOnlySpan<byte> input,
+            Span<byte> output,
+            int rows,
+            int columns,
+            int maxDegreeOfParallelism = -1)
+        {
+            var parellelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism };
+
+            // Implements a naive box filter, skipping the edge cases.
+            // This operation transforms a source buffer into a destination buffer.
+
+            // Span<T> is 1-dimension, work around that as if it were 2
+            // (iterate from 1 to N-1 on each dimension).
+            // Assume there is no padding or alignment in the data structures.
+
+            // Cells around the current position are labeled 1-9, from the left-top
+            // numbered clockwise.
+
+            // We cannot capture a Span<T>, but we can turn it into a fixed pointer
+            // that we capture, then convert the fixed pointer to a span in the loop
+            // action.
+            fixed (byte* pInput = input)
+            fixed (byte* pOutput = output)
+            {
+                var pIn = pInput; // Chicanery: the compiler thinks we've considered the consequences.
+                var pOut = pOutput; // Chicanery: the compiler thinks we've considered the consequences.
+
+                // Consequences: otherwise, we couldn't use the pointer to recreate the span, which we
+                // cannot pass in the lambda capture.
+
+                Parallel.For(1, rows - 1, parellelOptions, row =>
+                {
+                    var input2 = new Span<byte>(pIn, rows * columns);
+                    var output2 = new Span<byte>(pOut, rows * columns);
+
+                    ProcessRow(row, input2, output2);
+                });
+
+                void ProcessRow(int row, ReadOnlySpan<byte> input, Span<byte> output)
+                {
+                    int previousRowOffset = (row - 1) * columns + 1;
+                    int currentRowOffset = (row + 0) * columns + 1;
+                    int nextRowOffset = (row + 1) * columns + 1;
+
+                    for (int col = 1; col < columns - 1; col++)
+                    {
+                        var sum =
+                            input[previousRowOffset - 1] + input[previousRowOffset + 0] + input[previousRowOffset + 1]
+                            + input[currentRowOffset - 1] + input[currentRowOffset + 0] + input[currentRowOffset + 1]
+                            + input[nextRowOffset - 1] + input[nextRowOffset + 0] + input[nextRowOffset + 1];
+
+                        output[currentRowOffset] = (byte)(sum / 9);
+
+                        ++previousRowOffset;
+                        ++currentRowOffset;
+                        ++nextRowOffset;
+                    }
                 }
             }
         }
@@ -127,13 +202,24 @@ namespace SampleBufferBenchmarks
             var (generatedInput, expected, expectedDescription) = CreateInputAndExpected();
 
             AssertSpanWorks();
+            AssertSpanParallelWorks();
             AssertPointerWorks();
+
+            Console.WriteLine($"// ### {nameof(AssertValidity)} passed.");
 
             void AssertSpanWorks()
             {
                 var output = new byte[expected.Length];
 
                 SpanBoxFilterCore(generatedInput.Span, output, Rows, Columns);
+                AssertAreEqual(expected.Span, output, nameof(AssertSpanWorks));
+            }
+
+            void AssertSpanParallelWorks()
+            {
+                var output = new byte[expected.Length];
+
+                SpanBoxFilterParallelCore(generatedInput.Span, output, Rows, Columns);
                 AssertAreEqual(expected.Span, output, nameof(AssertSpanWorks));
             }
 

@@ -3,6 +3,6 @@
 using BenchmarkDotNet.Running;
 using SampleBufferBenchmarks;
 
-_ = BenchmarkRunner.Run<SpanVsPointersFill>();
-_ = BenchmarkRunner.Run<SpanVsPointersAddOne>();
+//_ = BenchmarkRunner.Run<SpanVsPointersFill>();
+//_ = BenchmarkRunner.Run<SpanVsPointersAddOne>();
 _ = BenchmarkRunner.Run<SpanVsPointersBoxFilter>();

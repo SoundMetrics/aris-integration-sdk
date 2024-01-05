@@ -62,10 +62,15 @@ Intel Core i7-6700 CPU 3.40GHz (Skylake), 1 CPU, 8 logical and 4 physical cores
 
 
 ```
-| Method           | Mean     | Error     | StdDev    |
-|----------------- |---------:|----------:|----------:|
-| SpanBoxFilter    | 5.264 ms | 0.0798 ms | 0.0746 ms |
-| PointerBoxFilter | 2.463 ms | 0.0466 ms | 0.0479 ms |
+| Method                | maxDegreeOfParallelism | Mean     | Error     | StdDev    |
+|---------------------- |----------------------- |---------:|----------:|----------:|
+| **SpanBoxFilter**         | **?**                      | **5.133 ms** | **0.0717 ms** | **0.0636 ms** |
+| PointerBoxFilter      | ?                      | 2.361 ms | 0.0399 ms | 0.0373 ms |
+| **SpanBoxFilterParallel** | **-1**                     | **1.549 ms** | **0.0208 ms** | **0.0194 ms** |
+| **SpanBoxFilterParallel** | **2**                      | **3.087 ms** | **0.0392 ms** | **0.0367 ms** |
+| **SpanBoxFilterParallel** | **4**                      | **1.506 ms** | **0.0294 ms** | **0.0538 ms** |
+| **SpanBoxFilterParallel** | **8**                      | **1.536 ms** | **0.0119 ms** | **0.0105 ms** |
+| **SpanBoxFilterParallel** | **16**                     | **1.452 ms** | **0.0266 ms** | **0.0236 ms** |
 
 ## Reproduction of Benchmark Results
 
