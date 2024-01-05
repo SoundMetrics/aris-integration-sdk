@@ -213,3 +213,6 @@ sample-code/vc-using-framestream/vc-using-framestream/output.aris
 
 # Approval test temp files
 *.received.*
+
+# BenchmarkDotNet outputs
+BenchmarkDotNet.Artifacts/
