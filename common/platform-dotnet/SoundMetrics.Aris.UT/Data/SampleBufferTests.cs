@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoundMetrics.Aris.Data;
 using System;
+using System.Linq;
+using Linq = System.Linq;
 
 namespace SoundMetrics.Aris
 {
@@ -17,9 +19,14 @@ namespace SoundMetrics.Aris
             buffer.Fill(value);
         }
 
-        private static unsafe void InitializeToUnsafe(byte* buffer, int length, byte value)
+        private static unsafe void InitializeToUnsafe(IntPtr buffer, int length, byte value)
         {
-            new Span<byte>(buffer, length).Fill(value);
+            new Span<byte>(buffer.ToPointer(), length).Fill(value);
+        }
+
+        private static unsafe void InitializeToUnsafe(IntPtr buffer, int length, Span<byte> values)
+        {
+            values.Slice(0, length).CopyTo(new Span<byte>(buffer.ToPointer(), length));
         }
 
         [TestMethod]
@@ -50,8 +57,20 @@ namespace SoundMetrics.Aris
         [TestMethod]
         public unsafe void SingletonBufferUnsafe()
         {
-            var expected = (byte)(new Random().Next(0, 255));
+            byte expected = 0x7e;
             var buffer = SampleBuffer.Create(1, (buf, length) => InitializeToUnsafe(buf, length, expected));
+            var actual = buffer.Span[0];
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public unsafe void SingletonBufferUnsafe2()
+        {
+            int bufferLength = 3;
+            byte[] initialValue = Linq.Enumerable.Range(101, 100).Select(i => (byte)i).ToArray();
+            var buffer = SampleBuffer.Create(bufferLength, (buf, length) => InitializeToUnsafe(buf, length, initialValue));
+            var expected = initialValue[0];
             var actual = buffer.Span[0];
 
             Assert.AreEqual(expected, actual);

@@ -2,10 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.Data
 {
+    internal sealed class HGlobalSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public HGlobalSafeHandle(IntPtr buffer)
+            : base(ownsHandle: true)
+        {
+            SetHandle(buffer);
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            Marshal.FreeHGlobal(handle);
+            return true;
+        }
+    }
+
     /// <summary>
     /// Implements a buffer in native heap so it doesn't live
     /// on the Large Object Heap (LOH). Most frames' sample size
@@ -13,13 +29,20 @@ namespace SoundMetrics.Aris.Data
     /// allocated as managed memory. Allocating on the native heap
     /// instead avoids the overhead of thrashing the LOH.
     /// </summary>
-    public sealed class SampleBuffer : SafeHandleZeroOrMinusOneIsInvalid
+    public sealed class SampleBuffer : IDisposable
     {
         public delegate void InitializeBufferSpan(Span<byte> buffer);
-        public unsafe delegate void InitializeBufferUnsafe(byte* buffer, int length);
+        public delegate void InitializeBuffer(IntPtr buffer, int length);
 
-        public delegate void TransformBufferFn(
-            ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
+        public delegate void TransformBufferSpan(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
+        public delegate void TransformBuffer(IntPtr inputBuffer, IntPtr outputBuffer, int length);
+
+        private SampleBuffer(HGlobalSafeHandle handle, IntPtr alignedBuffer, int length)
+        {
+            this.handle = handle;
+            this.alignedBuffer = alignedBuffer;
+            this.length = length;
+        }
 
         public static SampleBuffer Create(int length, InitializeBufferSpan initializeBuffer)
         {
@@ -37,26 +60,14 @@ namespace SoundMetrics.Aris.Data
                 throw new ArgumentNullException(nameof(initializeBuffer));
             }
 
-            var buffer = Marshal.AllocHGlobal(length);
+            var sampleBuffer = CreateBuffer(length);
 
-            try
-            {
-                unsafe
-                {
-                    var writeableBuffer = new Span<byte>(buffer.ToPointer(), length);
-                    initializeBuffer(writeableBuffer);
-                }
-            }
-            catch
-            {
-                Marshal.FreeHGlobal(buffer);
-                throw;
-            }
+            initializeBuffer(sampleBuffer.WriteableSpan);
 
-            return new SampleBuffer(buffer, length);
+            return sampleBuffer;
         }
 
-        public unsafe static SampleBuffer Create(int length, InitializeBufferUnsafe initializeBuffer)
+        public static SampleBuffer Create(int length, InitializeBuffer initializeBuffer)
         {
             if (length < 0)
             {
@@ -72,44 +83,20 @@ namespace SoundMetrics.Aris.Data
                 throw new ArgumentNullException(nameof(initializeBuffer));
             }
 
-            var buffer = Marshal.AllocHGlobal(length);
+            var sampleBuffer = CreateBuffer(length);
 
-            try
-            {
-                unsafe
-                {
-                    var ptr = buffer.ToPointer();
-                    initializeBuffer((byte*)ptr, length);
-                }
-            }
-            catch
-            {
-                Marshal.FreeHGlobal(buffer);
-                throw;
-            }
+            initializeBuffer(sampleBuffer.alignedBuffer, length);
 
-            return new SampleBuffer(buffer, length);
+            return sampleBuffer;
         }
 
-        public unsafe static SampleBuffer Create(ReadOnlySpan<byte> source)
+        public static SampleBuffer Create(ReadOnlySpan<byte> source)
         {
-            var length = source.Length;
-            var buffer = Marshal.AllocHGlobal(length);
+            var sampleBuffer = CreateBuffer(source.Length);
 
-            try
-            {
-                unsafe
-                {
-                    var destination = new Span<byte>(buffer.ToPointer(), length);
-                    source.CopyTo(destination);
-                    return new SampleBuffer(buffer, length);
-                }
-            }
-            catch
-            {
-                Marshal.FreeHGlobal(buffer);
-                throw;
-            }
+            source.CopyTo(sampleBuffer.WriteableSpan);
+
+            return sampleBuffer;
         }
 
         /// <summary>
@@ -119,52 +106,36 @@ namespace SoundMetrics.Aris.Data
         {
             var sources = sourceBuffers.ToArray();
             var totalLength = sources.Sum(source => source.Length);
-            var buffer = Marshal.AllocHGlobal(totalLength);
 
-            try
+            var sampleBuffer = CreateBuffer(totalLength);
+
+            var fullDestination = sampleBuffer.WriteableSpan;
+            int offset = 0;
+
+            foreach (var source in sources)
             {
-                var fullDestination = new Span<byte>(buffer.ToPointer(), totalLength);
-                int offset = 0;
-
-                foreach (var source in sources)
-                {
-                    var partialOutput = fullDestination.Slice(offset, source.Length);
-                    source.Span.CopyTo(partialOutput);
-                    offset += partialOutput.Length;
-                }
-
-                return new SampleBuffer(buffer, totalLength);
+                var partialOutput = fullDestination.Slice(offset, source.Length);
+                source.Span.CopyTo(partialOutput);
+                offset += partialOutput.Length;
             }
-            catch
-            {
-                Marshal.FreeHGlobal(buffer);
-                throw;
-            }
+
+            return sampleBuffer;
         }
 
-        /// <summary>
-        /// Build from an existing buffer. Generally not prefered.
-        /// </summary>
-        internal SampleBuffer(IntPtr buffer, int bufferLength)
-            : base(ownsHandle: true)
+        public SampleBuffer Transform(TransformBufferSpan transformBuffer)
         {
-            if (bufferLength < 0)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(bufferLength),
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-                    $"{nameof(bufferLength)} must be greater than zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
-            }
-
-            this.length = bufferLength;
-            this.SetHandle(buffer);
+            void initialize(Span<byte> output) => transformBuffer(this.Span, output);
+            var newBuffer = SampleBuffer.Create(length, initialize);
+            return newBuffer;
         }
 
-        protected override bool ReleaseHandle()
+        public unsafe SampleBuffer Transform(TransformBuffer transformBufferUnsafe)
         {
-            Marshal.FreeHGlobal(DangerousGetHandle());
-            return true;
+            void initialize(IntPtr outputBuffer, int length)
+                => transformBufferUnsafe(alignedBuffer, outputBuffer, length);
+
+            var newBuffer = SampleBuffer.Create(length, initialize);
+            return newBuffer;
         }
 
         public int Length => length;
@@ -175,20 +146,60 @@ namespace SoundMetrics.Aris.Data
             {
                 unsafe
                 {
-                    return new ReadOnlySpan<byte>(
-                        DangerousGetHandle().ToPointer(), length);
+                    return new ReadOnlySpan<byte>(alignedBuffer.ToPointer(), length);
                 }
             }
         }
 
-        public SampleBuffer Transform(TransformBufferFn transformBuffer)
+        private Span<byte> WriteableSpan
         {
-            void initialize(Span<byte> output) => transformBuffer(this.Span, output);
-
-            var newBuffer = SampleBuffer.Create(length, initialize);
-            return newBuffer;
+            get
+            {
+                unsafe
+                {
+                    return new Span<byte>(alignedBuffer.ToPointer(), length);
+                }
+            }
         }
 
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+                handle.Dispose();
+            }
+        }
+
+        private static SampleBuffer CreateBuffer(int length)
+        {
+            int alignment = VectorByteSize;
+            int alignedBufferSize = CalculateLengthWithAlignmentAndPadding(length);
+            var buffer = Marshal.AllocHGlobal(alignedBufferSize);
+            var alignedBuffer = AlignBufferStart(buffer, alignment);
+
+            var handle = new HGlobalSafeHandle(buffer);
+            var sampleBuffer = new SampleBuffer(handle, alignedBuffer, length);
+            return sampleBuffer;
+        }
+
+        // Allows for alignment at buffer start and for a complete stride overrun at the
+        // end of the buffer (where stride is Vector<byte>.Count).
+        private static int CalculateLengthWithAlignmentAndPadding(int length) => length + (2 * VectorByteSize);
+
+        private static IntPtr AlignBufferStart(IntPtr buffer, int alignment)
+        {
+            long bufAddr = buffer.ToInt64();
+            long startAddr = ((bufAddr + alignment - 1) / alignment) * alignment;
+            return new IntPtr(startAddr);
+        }
+
+        private static readonly int VectorByteSize = Vector<byte>.Count;
+
+        private readonly HGlobalSafeHandle handle;
+        private readonly IntPtr alignedBuffer;
         private readonly int length;
+
+        private bool disposed;
     }
 }

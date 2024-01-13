@@ -26,38 +26,34 @@ namespace SoundMetrics.Aris.Data
 
             if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry))
             {
-                var pingMode = (int)frame.FrameHeader.PingMode;
-                var outputLength = sampleGeometry.TotalSampleCount;
-                var output = Marshal.AllocHGlobal(outputLength);
-
-                try
-                {
-                    IntPtr input = frame.Samples.DangerousGetHandle();
-                    UnsafeReorderFrame(
-                        sampleGeometry.PingsPerFrame,
-                        sampleGeometry.BeamCount,
-                        sampleGeometry.SampleCount,
-                        input,
-                        output);
-
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                    // Ownership of `orderedSamples` is given away.
-                    var orderedSamples = new SampleBuffer(output, outputLength);
+                var orderedSamples = frame.Samples.Transform(
+                        (inputPtr, outputPtr, length) =>
+                        {
+                            if (length != sampleGeometry.TotalSampleCount)
+                            {
+                                var msg =
+                                    $"Unmatched buffer size: length=[{length}]; sampleGeometry.TotalSampleCount=[{sampleGeometry.TotalSampleCount}]";
+                                throw new Exception(msg);
+                            }
+
+                            UnsafeReorderFrame(
+                                sampleGeometry.PingsPerFrame,
+                                sampleGeometry.BeamCount,
+                                sampleGeometry.SampleCount,
+                                inputPtr,
+                                outputPtr);
+                        });
 #pragma warning restore CA2000 // Dispose objects before losing scope
-                    if (Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        orderedSamples.Dispose();
-                        return false;
-                    }
-                }
-                catch
+
+                if (Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame))
                 {
-                    Marshal.FreeHGlobal(output);
-                    throw;
+                    return true;
+                }
+                else
+                {
+                    orderedSamples.Dispose();
+                    return false;
                 }
             }
             else
