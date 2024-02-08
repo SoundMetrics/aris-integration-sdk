@@ -27,7 +27,7 @@ namespace SoundMetrics.Aris.Core
         public bool ContainsValue(T value)
         {
             return
-                minimum.CompareTo(value) <= 0 && value.CompareTo(maximum) <= 0;
+                minimum.CompareTo(value) <= 0 && value.CompareTo(maximum) < 0;
         }
 
         public bool ContainsRange(Range<T> other)

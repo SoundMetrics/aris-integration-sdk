@@ -70,7 +70,7 @@ namespace SoundMetrics.Aris.Core
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            return @this.Minimum.CompareTo(value) <= 0 && value.CompareTo(@this.Maximum) <= 0;
+            return @this.Minimum.CompareTo(value) <= 0 && value.CompareTo(@this.Maximum) < 0;
         }
 
         public static bool Contains<T>(this ValueRange<T> @this, ValueRange<T> other)
