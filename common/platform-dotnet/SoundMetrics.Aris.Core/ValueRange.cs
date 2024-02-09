@@ -113,6 +113,14 @@ namespace SoundMetrics.Aris.Core
             where T : struct, IComparable<T>
             => t.ConstrainTo<T>(new ValueRange<T>(range));
 
+        public static bool Intersects<T>(
+            this in ValueRange<T> a,
+            in ValueRange<T> b)
+            where T : struct, IComparable<T>
+        {
+            return !a.Intersect(b).IsEmpty;
+        }
+
         public static ValueRange<T> Intersect<T>(
             this in ValueRange<T> a,
             in ValueRange<T> b)
