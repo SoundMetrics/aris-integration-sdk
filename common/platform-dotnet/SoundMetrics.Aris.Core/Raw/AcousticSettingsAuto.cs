@@ -59,7 +59,7 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         private static FineDuration ConstrainToIntRange(
-            FineDuration duration, ValueRange<int> range)
+            FineDuration duration, InclusiveValueRange<int> range)
         {
             var asInt = (int)duration.RoundToMicroseconds().TotalMicroseconds;
             var constrained = asInt.ConstrainTo(range);

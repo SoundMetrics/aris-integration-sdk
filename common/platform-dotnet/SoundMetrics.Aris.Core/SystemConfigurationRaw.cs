@@ -12,11 +12,11 @@ namespace SoundMetrics.Aris.Core
     {
         internal SystemConfigurationRaw() {}
 
-        public ValueRange<int> FocusPositionLimits { get; internal set; }
-        public ValueRange<FineDuration> SampleStartDelayLimits { get; internal set; }
-        public ValueRange<FineDuration> CyclePeriodLimits { get; internal set; }
-        public ValueRange<FineDuration> SamplePeriodLimits { get; internal set; }
-        //public ValueRange<FineDuration> PulseWidthLimits { get; internal set; }
+        public InclusiveValueRange<int> FocusPositionLimits { get; internal set; }
+        public InclusiveValueRange<FineDuration> SampleStartDelayLimits { get; internal set; }
+        public InclusiveValueRange<FineDuration> CyclePeriodLimits { get; internal set; }
+        public InclusiveValueRange<FineDuration> SamplePeriodLimits { get; internal set; }
+        //public InclusiveValueRange<FineDuration> PulseWidthLimits { get; internal set; }
 
         internal PulseWidthLimits PulseWidthLimitsLowFrequency { get; set; }
         internal PulseWidthLimits PulseWidthLimitsHighFrequency { get; set; }
@@ -35,7 +35,7 @@ namespace SoundMetrics.Aris.Core
         internal double GetPulseWidthMultiplierFor(Frequency frequency)
             => GetPulseWidthLimitsFor(frequency).Multiplier;
 
-        internal ValueRange<FineDuration> AllowedPulseWidthRangeFor(Frequency frequency)
+        internal InclusiveValueRange<FineDuration> AllowedPulseWidthRangeFor(Frequency frequency)
             => GetPulseWidthLimitsFor(frequency).Limits;
 
         public FineDuration LimitPulseWidthEnergy(Frequency frequency, FineDuration pulseWidth, Rate frameRate)
@@ -74,11 +74,11 @@ namespace SoundMetrics.Aris.Core
         public static readonly FineDuration CyclePeriodMargin = (FineDuration)420;
         public const int MinAntialiasing = 0;
 
-        public static readonly ValueRange<int> ReceiverGainLimits = new ValueRange<int>(0, 24);
-        public static readonly ValueRange<double> FrameRateLimits = new ValueRange<double>(1.0, 15.0);
+        public static readonly InclusiveValueRange<int> ReceiverGainLimits = new InclusiveValueRange<int>(0, 24);
+        public static readonly InclusiveValueRange<double> FrameRateLimits = new InclusiveValueRange<double>(1.0, 15.0);
 
-        public static readonly ValueRange<double> WindowStartLimits = new ValueRange<double>(0.7, 40.0);
-        public static readonly ValueRange<double> WindowEndLimits = new ValueRange<double>(1.3, 100.0);
+        public static readonly InclusiveValueRange<double> WindowStartLimits = new InclusiveValueRange<double>(0.7, 40.0);
+        public static readonly InclusiveValueRange<double> WindowEndLimits = new InclusiveValueRange<double>(1.3, 100.0);
 
     }
 }

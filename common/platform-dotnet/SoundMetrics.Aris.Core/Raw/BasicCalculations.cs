@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Core.Raw
             SystemConfiguration systemConfiguration,
             ObservedConditions observedConditions,
             Salinity salinity,
-            in ValueRange<int> sampleCountLimits)
+            in InclusiveValueRange<int> sampleCountLimits)
         {
             if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
             if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
@@ -49,7 +49,7 @@ namespace SoundMetrics.Aris.Core.Raw
             SystemConfiguration systemConfiguration,
             ObservedConditions observedConditions,
             Salinity salinity,
-            in ValueRange<int> sampleCountLimits,
+            in InclusiveValueRange<int> sampleCountLimits,
             FineDuration samplePeriod)
         {
             if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));

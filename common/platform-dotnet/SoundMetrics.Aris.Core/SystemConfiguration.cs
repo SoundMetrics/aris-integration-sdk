@@ -39,21 +39,21 @@ namespace SoundMetrics.Aris.Core
 #pragma warning disable CA1822 // does not access instance data and can be marked as static
         // May eventually use instance data; don't mess up APIs just for warnings
 
-        public ValueRange<int> SampleCountDeviceLimits => sampleCountDeviceLimits;
+        public InclusiveValueRange<int> SampleCountDeviceLimits => sampleCountDeviceLimits;
 
-        internal ValueRange<int> PulseWidthDeviceLimits => pulseWidthDeviceLimits;
+        internal InclusiveValueRange<int> PulseWidthDeviceLimits => pulseWidthDeviceLimits;
 
-        internal ValueRange<int> SampleStartDelayDeviceLimits => sampleStartDelayDeviceLimits;
+        internal InclusiveValueRange<int> SampleStartDelayDeviceLimits => sampleStartDelayDeviceLimits;
 
-        internal ValueRange<int> FocusPositionDeviceLimits => focusPositionDeviceLimits;
+        internal InclusiveValueRange<int> FocusPositionDeviceLimits => focusPositionDeviceLimits;
 
-        internal ValueRange<int> CyclePeriodDeviceLimits => cyclePeriodDeviceLimits;
+        internal InclusiveValueRange<int> CyclePeriodDeviceLimits => cyclePeriodDeviceLimits;
 
 #pragma warning restore CA1822
 
-        public ValueRange<int> ReceiverGainLimits { get; internal set; }
+        public InclusiveValueRange<int> ReceiverGainLimits { get; internal set; }
 
-        public ValueRange<Rate> FrameRateLimits { get; internal set; }
+        public InclusiveValueRange<Rate> FrameRateLimits { get; internal set; }
 
         /// <summary>
         /// Calculate the crossover distance given water temperature
@@ -100,7 +100,7 @@ namespace SoundMetrics.Aris.Core
                 ? CalculateBestFrequency(temperature, salinity, windowEnd)
                 : fallbackValue;
 
-        public ValueRange<Distance> WindowLimits { get; internal set; }
+        public InclusiveValueRange<Distance> WindowLimits { get; internal set; }
 
         public static bool TryGetSampleGeometry(in FrameHeader frameHeader, out SampleGeometry sampleGeometry)
         {
@@ -142,23 +142,23 @@ namespace SoundMetrics.Aris.Core
 
         private MakeDefaultSettingsFn MakeDefaultSettings { get; set; }
 
-        private static ValueRange<FineDuration> RangeOfDuration(double a, double b)
-            => new ValueRange<FineDuration>((FineDuration)a, (FineDuration)b);
+        private static InclusiveValueRange<FineDuration> RangeOfDuration(double a, double b)
+            => new InclusiveValueRange<FineDuration>((FineDuration)a, (FineDuration)b);
 
-        private static ValueRange<Distance> RangeOfMeters(double a, double b)
-            => new ValueRange<Distance>((Distance)a, (Distance)b);
+        private static InclusiveValueRange<Distance> RangeOfMeters(double a, double b)
+            => new InclusiveValueRange<Distance>((Distance)a, (Distance)b);
 
         // These must be initialized before `configurations`.
-        private static readonly ValueRange<int> sampleCountDeviceLimits
-            = new ValueRange<int>(200, 4000);
-        private static readonly ValueRange<int> pulseWidthDeviceLimits
-            = new ValueRange<int>(4, 80);
-        private static readonly ValueRange<int> sampleStartDelayDeviceLimits
-            = new ValueRange<int>(930, 60000);
-        private static readonly ValueRange<int> focusPositionDeviceLimits
-            = new ValueRange<int>(0, 1000);
-        private static readonly ValueRange<int> cyclePeriodDeviceLimits
-            = new ValueRange<int>(1802, 150000);
+        private static readonly InclusiveValueRange<int> sampleCountDeviceLimits
+            = new InclusiveValueRange<int>(200, 4000);
+        private static readonly InclusiveValueRange<int> pulseWidthDeviceLimits
+            = new InclusiveValueRange<int>(4, 80);
+        private static readonly InclusiveValueRange<int> sampleStartDelayDeviceLimits
+            = new InclusiveValueRange<int>(930, 60000);
+        private static readonly InclusiveValueRange<int> focusPositionDeviceLimits
+            = new InclusiveValueRange<int>(0, 1000);
+        private static readonly InclusiveValueRange<int> cyclePeriodDeviceLimits
+            = new InclusiveValueRange<int>(1802, 150000);
 
         private static readonly SystemConfiguration[] configurations = InitializeConfigurations();
     }

@@ -9,8 +9,8 @@ namespace SoundMetrics.Aris.Core
     {
         private static SystemConfiguration[] InitializeConfigurations()
         {
-            var commonReceiverGainLimits = new ValueRange<int>(0, 24);
-            var commonFrameRateLimits = new ValueRange<Rate>(Rate.ToRate(1), Rate.ToRate(15));
+            var commonReceiverGainLimits = new InclusiveValueRange<int>(0, 24);
+            var commonFrameRateLimits = new InclusiveValueRange<Rate>(Rate.ToRate(1), Rate.ToRate(15));
 
             var configurations = new SystemConfiguration[3];
 

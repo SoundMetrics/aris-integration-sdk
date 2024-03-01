@@ -12,25 +12,25 @@ namespace SoundMetrics.Aris.Core.Raw
     {
 #pragma warning disable CA1043 // Use Integral Or String Argument For Indexers
 #pragma warning disable CA1822 // Member this[] does not access instance data and can be marked as static
-        public ValueRange<int> this[SystemType systemType] => sampleCountLimitMap[systemType];
+        public InclusiveValueRange<int> this[SystemType systemType] => sampleCountLimitMap[systemType];
 #pragma warning restore CA1043 // Use Integral Or String Argument For Indexers
 #pragma warning restore CA1822
 
-        private static IReadOnlyDictionary<SystemType, ValueRange<int>> GenerateSampleCountLimitMap()
+        private static IReadOnlyDictionary<SystemType, InclusiveValueRange<int>> GenerateSampleCountLimitMap()
         {
             var maxSampleCount = 4000;
             Debug.Assert(maxSampleCount == SystemType.Aris3000.GetConfiguration().SampleCountDeviceLimits.Maximum);
 
             return
-                new Dictionary<SystemType, ValueRange<int>>()
+                new Dictionary<SystemType, InclusiveValueRange<int>>()
                 {
-                    { SystemType.Aris1200, new ValueRange<int>(1750, maxSampleCount) },
-                    { SystemType.Aris1800, new ValueRange<int>(800, maxSampleCount) },
-                    { SystemType.Aris3000, new ValueRange<int>(400, maxSampleCount) },
+                    { SystemType.Aris1200, new InclusiveValueRange<int>(1750, maxSampleCount) },
+                    { SystemType.Aris1800, new InclusiveValueRange<int>(800, maxSampleCount) },
+                    { SystemType.Aris3000, new InclusiveValueRange<int>(400, maxSampleCount) },
                 };
         }
 
-        private static readonly IReadOnlyDictionary<SystemType, ValueRange<int>>
+        private static readonly IReadOnlyDictionary<SystemType, InclusiveValueRange<int>>
             sampleCountLimitMap = GenerateSampleCountLimitMap();
     }
 

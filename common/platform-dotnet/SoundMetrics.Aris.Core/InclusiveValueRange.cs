@@ -6,19 +6,19 @@ using System.Diagnostics;
 namespace SoundMetrics.Aris.Core
 {
     /// <summary>
-    /// Describes a range [a,b) of `T`.
+    /// Describes an inclusive range [a,b] of `T`.
     /// </summary>
     [DebuggerDisplay("[{Minimum}, {Maximum}]")]
-    public struct ValueRange<T> : IEquatable<ValueRange<T>>
+    public struct InclusiveValueRange<T> : IEquatable<InclusiveValueRange<T>>
         where T : struct, IComparable<T>
     {
-        public ValueRange(T min, T max)
+        public InclusiveValueRange(T min, T max)
         {
             Minimum = min;
             Maximum = max;
         }
 
-        public ValueRange(in (T min, T max) range)
+        public InclusiveValueRange(in (T min, T max) range)
             : this(range.min, range.max)
         {
         }
@@ -42,25 +42,25 @@ namespace SoundMetrics.Aris.Core
         }
 
         public override bool Equals(object obj)
-            => obj is ValueRange<T> other && this.Equals(other);
+            => obj is InclusiveValueRange<T> other && this.Equals(other);
 
-        public bool Equals(ValueRange<T> other)
+        public bool Equals(InclusiveValueRange<T> other)
             => this.Minimum.Equals(other.Minimum)
                 && this.Maximum.Equals(other.Maximum);
 
         public override int GetHashCode()
             => Minimum.GetHashCode() ^ Maximum.GetHashCode();
 
-        public static bool operator ==(ValueRange<T> left, ValueRange<T> right)
+        public static bool operator ==(InclusiveValueRange<T> left, InclusiveValueRange<T> right)
             => left.Equals(right);
 
-        public static bool operator !=(ValueRange<T> left, ValueRange<T> right)
+        public static bool operator !=(InclusiveValueRange<T> left, InclusiveValueRange<T> right)
             => !(left == right);
     }
 
-    public static class RangeExtensions
+    public static class InclusiveRangeExtensions
     {
-        public static bool Contains<T>(this ValueRange<T> @this, T value)
+        public static bool Contains<T>(this InclusiveValueRange<T> @this, T value)
             where T : struct, IComparable<T>
         {
             if (@this.IsReverseRange)
@@ -70,26 +70,60 @@ namespace SoundMetrics.Aris.Core
 #pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
-            return @this.Minimum.CompareTo(value) <= 0 && value.CompareTo(@this.Maximum) < 0;
+            return @this.Minimum.CompareTo(value) <= 0 && value.CompareTo(@this.Maximum) <= 0;
         }
 
-        public static bool Contains<T>(this ValueRange<T> @this, ValueRange<T> other)
+        public static bool Contains<T>(this InclusiveValueRange<T> @this, InclusiveValueRange<T> other)
             where T : struct, IComparable<T>
         {
             return @this.Contains(other.Minimum) && @this.Contains(other.Maximum);
         }
 
+        private static InclusiveValueRange<T> ConstrainTo<T>(
+            this InclusiveValueRange<T> @this,
+            T? min,
+            T? max)
+            where T : struct, IComparable<T>
+        {
+            if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
+            {
+#pragma warning disable CA1303 // Do not pass literals as localized parameters
+                throw new ArgumentException($"{nameof(min)} may not be greater than {nameof(max)}");
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
+            }
+
+            T newMin = Greater(@this.Minimum, min);
+            T newMax = Lesser(@this.Maximum, max);
+
+            return new InclusiveValueRange<T>(newMin, newMax);
+        }
+
+        public static InclusiveValueRange<T> ConstrainTo<T>(this InclusiveValueRange<T> @this, in InclusiveValueRange<T> that)
+            where T : struct, IComparable<T>
+            =>
+                @this.ConstrainTo(that.Minimum, that.Maximum);
+
+        public static T ConstrainTo<T>(this T t, in InclusiveValueRange<T> range)
+            where T : struct, IComparable<T>
+            => Greater(
+                range.Minimum,
+                Lesser(range.Maximum, t));
+
+        public static T ConstrainTo<T>(this T t, in (T min, T max) range)
+            where T : struct, IComparable<T>
+            => t.ConstrainTo<T>(new InclusiveValueRange<T>(range));
+
         public static bool Intersects<T>(
-            this in ValueRange<T> a,
-            in ValueRange<T> b)
+            this in InclusiveValueRange<T> a,
+            in InclusiveValueRange<T> b)
             where T : struct, IComparable<T>
         {
             return !a.Intersect(b).IsEmpty;
         }
 
-        public static ValueRange<T> Intersect<T>(
-            this in ValueRange<T> a,
-            in ValueRange<T> b)
+        public static InclusiveValueRange<T> Intersect<T>(
+            this in InclusiveValueRange<T> a,
+            in InclusiveValueRange<T> b)
             where T : struct, IComparable<T>
         {
             var aIsLess = a.Minimum.CompareTo(b.Minimum) <= 0;
@@ -98,18 +132,18 @@ namespace SoundMetrics.Aris.Core
 
             if (right.Minimum.CompareTo(left.Maximum) >= 0)
             {
-                return new ValueRange<T>(left.Maximum, left.Maximum);
+                return new InclusiveValueRange<T>(left.Maximum, left.Maximum);
             }
             else
             {
                 var lesserMax = Lesser(left.Maximum, right.Maximum);
-                return new ValueRange<T>(right.Minimum, lesserMax);
+                return new InclusiveValueRange<T>(right.Minimum, lesserMax);
             }
         }
 
-        public static ValueRange<T> Union<T>(
-            this ValueRange<T> @this,
-            in ValueRange<T> that)
+        public static InclusiveValueRange<T> Union<T>(
+            this InclusiveValueRange<T> @this,
+            in InclusiveValueRange<T> that)
             where T : struct, IComparable<T>
         {
             if (@this.IsEmpty) return that;
@@ -128,10 +162,10 @@ namespace SoundMetrics.Aris.Core
 
             var leastMin = Lesser(@this.Minimum, that.Minimum);
             var greatestMax = Greater(@this.Maximum, that.Maximum);
-            return new ValueRange<T>(leastMin, greatestMax);
+            return new InclusiveValueRange<T>(leastMin, greatestMax);
         }
 
-        internal static bool IsAdjacent<T>(this in ValueRange<T> a, in ValueRange<T> b)
+        internal static bool IsAdjacent<T>(this in InclusiveValueRange<T> a, in InclusiveValueRange<T> b)
             where T : struct, IComparable<T>
         {
             var (left, right) = Order(a, b);
@@ -142,9 +176,9 @@ namespace SoundMetrics.Aris.Core
         /// Returns a tuple of `a` and `b` in ascending order
         /// based on the value of `Minimum`.
         /// </summary>
-        internal static (ValueRange<T>, ValueRange<T>) Order<T>(
-            in ValueRange<T> a,
-            in ValueRange<T> b)
+        internal static (InclusiveValueRange<T>, InclusiveValueRange<T>) Order<T>(
+            in InclusiveValueRange<T> a,
+            in InclusiveValueRange<T> b)
             where T : struct, IComparable<T>
             => (a.Minimum.CompareTo(b.Minimum) <= 0) ? (a, b) : (b, a);
 

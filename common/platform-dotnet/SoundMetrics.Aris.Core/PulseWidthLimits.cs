@@ -12,7 +12,7 @@ namespace SoundMetrics.Aris.Core
             double multiplier,
             int maxCumulativePulsePerSecond)
         {
-            Limits = new ValueRange<FineDuration>(
+            Limits = new InclusiveValueRange<FineDuration>(
                 (FineDuration)limits.Min, (FineDuration)limits.Max);
             Narrow = (FineDuration)narrow;
             Medium = (FineDuration)medium;
@@ -21,7 +21,7 @@ namespace SoundMetrics.Aris.Core
             MaxCumulativePulsePerSecond = (FineDuration)maxCumulativePulsePerSecond;
         }
 
-        public ValueRange<FineDuration> Limits { get; }
+        public InclusiveValueRange<FineDuration> Limits { get; }
         public FineDuration Narrow { get; }
         public FineDuration Medium { get; }
         public FineDuration Wide { get; }

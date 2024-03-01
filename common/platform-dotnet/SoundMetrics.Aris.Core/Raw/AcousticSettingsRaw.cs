@@ -253,7 +253,7 @@ namespace SoundMetrics.Aris.Core.Raw
         private static void ValidateRange<TValue>(
             string valueName,
             in TValue value,
-            in ValueRange<TValue> valueRange)
+            in InclusiveValueRange<TValue> valueRange)
             where TValue : struct, IComparable<TValue>
         {
             if (!valueRange.Contains(value))
@@ -270,7 +270,7 @@ namespace SoundMetrics.Aris.Core.Raw
         private static string BuildRangeValidationErrorMessage<TValue>(
             string valueName,
             in TValue value,
-            in ValueRange<TValue> valueRange)
+            in InclusiveValueRange<TValue> valueRange)
             where TValue : struct, IComparable<TValue>
             =>
             $"Value '{valueName}' is [{value}]; this is not in range [{valueRange}]";

@@ -62,7 +62,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         antiAliasing,
                         interpacketDelay);
 
-            var goodRange = new ValueRange<Rate>(min, max);
+            var goodRange = new InclusiveValueRange<Rate>(min, max);
             return requestedFrameRate.ConstrainTo(goodRange);
         }
 

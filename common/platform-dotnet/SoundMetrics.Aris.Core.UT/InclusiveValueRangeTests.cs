@@ -3,16 +3,16 @@ using System;
 
 namespace SoundMetrics.Aris.Core
 {
-    using Range = ValueRange<int>;
+    using Range = InclusiveValueRange<int>;
 
     [TestClass]
-    public class RangeTests
+    public class InclusiveValueRangeTests
     {
         private static Range R(int minimum, int maximum) => new Range(minimum, maximum);
 
-        private static ValueRange<T> R<T>(T minimum, T maximum)
+        private static InclusiveValueRange<T> R<T>(T minimum, T maximum)
             where T : struct, IComparable<T>
-            => new ValueRange<T>(minimum, maximum);
+            => new InclusiveValueRange<T>(minimum, maximum);
 
         [TestMethod]
         public void TestEqual()
