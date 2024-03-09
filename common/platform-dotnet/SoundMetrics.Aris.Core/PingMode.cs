@@ -2,10 +2,12 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
     [DataContract]
+    [JsonConverter(typeof(PingModeJsonConverter))]
     public struct PingMode : IEquatable<PingMode>
     {
         private PingMode(int integralValue, int beamCount, int pingsPerFrame)
