@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
-    public sealed class SystemTypeConverter : JsonConverter<SystemType>
+    public sealed class SystemTypeJsonConverter : JsonConverter<SystemType>
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
             Justification = "Internal.")]
