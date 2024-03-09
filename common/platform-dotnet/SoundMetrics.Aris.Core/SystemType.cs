@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -11,6 +12,7 @@ namespace SoundMetrics.Aris.Core
     /// a Voyager may all be an ARIS 3000.
     /// </summary>
     [DataContract]
+    [JsonConverter(typeof(SystemTypeConverter))]
     public struct SystemType : IEquatable<SystemType>
     {
         public static readonly SystemType Aris1200 = new SystemType(2);
