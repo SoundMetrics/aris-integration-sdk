@@ -17,6 +17,7 @@ namespace SoundMetrics.Aris.Core
         public static ReadOnlyDictionary<TKey, TValue>
             MakeReadOnlyDictionary<TKey, TValue>(
                 params (TKey key, TValue value)[] keyValuePairs)
+            where TKey : notnull
         {
             var dictionary = new Dictionary<TKey, TValue>();
             foreach (var (key, value) in keyValuePairs)

@@ -30,7 +30,7 @@ namespace SoundMetrics.Aris.Core
         public static Velocity FromMetersPerSecond(double meters)
             => new Velocity((Distance)meters, FineDuration.FromSeconds(1.0));
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is Velocity other && this.Equals(other);
 
         public bool Equals(Velocity other)

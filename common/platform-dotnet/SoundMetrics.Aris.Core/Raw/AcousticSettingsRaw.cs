@@ -117,9 +117,9 @@ namespace SoundMetrics.Aris.Core.Raw
         public Distance SampleResolution(ObservedConditions observedConditions)
             => observedConditions.ConvertSamplePeriodToResolution(SamplePeriod, Salinity);
 
-        public override bool Equals(object obj) => Equals(obj as AcousticSettingsRaw);
+        public override bool Equals(object? obj) => Equals(obj as AcousticSettingsRaw);
 
-        public bool Equals(AcousticSettingsRaw other)
+        public bool Equals(AcousticSettingsRaw? other)
         {
             if (other is null)
             {

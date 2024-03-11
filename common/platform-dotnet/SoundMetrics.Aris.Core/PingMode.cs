@@ -61,7 +61,7 @@ namespace SoundMetrics.Aris.Core
             throw new ArgumentOutOfRangeException(nameof(integralValue));
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => (obj is PingMode) ? Equals((PingMode)obj) : false;
 
         public bool Equals(PingMode other) =>

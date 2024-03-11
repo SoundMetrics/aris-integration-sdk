@@ -26,9 +26,9 @@ namespace SoundMetrics.Aris.Core
         public Temperature WaterTemp => _waterTemp;
         public Distance Depth => _depth;
 
-        public override bool Equals(object obj) => Equals(obj as ObservedConditions);
+        public override bool Equals(object? obj) => Equals(obj as ObservedConditions);
 
-        public bool Equals(ObservedConditions other)
+        public bool Equals(ObservedConditions? other)
         {
             if (other is null)
             {

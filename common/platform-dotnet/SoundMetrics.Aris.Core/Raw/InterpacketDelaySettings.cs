@@ -20,7 +20,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
         public static readonly InterpacketDelaySettings Off = new InterpacketDelaySettings { Enable = false };
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => (obj is InterpacketDelaySettings) ? Equals((InterpacketDelaySettings)obj) : false;
 
         public bool Equals(InterpacketDelaySettings other)

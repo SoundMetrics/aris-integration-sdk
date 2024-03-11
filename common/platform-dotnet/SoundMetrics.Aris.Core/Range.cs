@@ -52,7 +52,7 @@ namespace SoundMetrics.Aris.Core
 
         public override string ToString() => $"[{Minimum}-{Maximum}]";
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is Range<T> other && this.Equals(other);
 
         public bool Equals(Range<T> other)

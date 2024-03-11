@@ -3,6 +3,7 @@
 using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SoundMetrics.Aris.Core
@@ -24,6 +25,8 @@ namespace SoundMetrics.Aris.Core
         internal SystemConfiguration(SystemType systemType)
         {
             SystemType = systemType;
+            AvailablePingModes = new List<PingMode>();
+            RawConfiguration = new SystemConfigurationRaw();
         }
 
         public SystemType SystemType { get; }
@@ -135,12 +138,15 @@ namespace SoundMetrics.Aris.Core
         public AcousticSettingsRaw GetDefaultSettings(
             ObservedConditions observedConditions,
             Salinity salinity)
-            => MakeDefaultSettings(observedConditions, salinity);
+        {
+            Debug.Assert(MakeDefaultSettings is not null);
+            return MakeDefaultSettings(observedConditions, salinity);
+        }
 
         private delegate AcousticSettingsRaw
             MakeDefaultSettingsFn(ObservedConditions observedConditions, Salinity salinity);
 
-        private MakeDefaultSettingsFn MakeDefaultSettings { get; set; }
+        private MakeDefaultSettingsFn? MakeDefaultSettings { get; set; }
 
         private static InclusiveValueRange<FineDuration> RangeOfDuration(double a, double b)
             => new InclusiveValueRange<FineDuration>((FineDuration)a, (FineDuration)b);

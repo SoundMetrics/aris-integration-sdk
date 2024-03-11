@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.Core
         {
             var input = 1.125;
             var expected = "1.125";
-            var actual = GetInvariantFormatttedString(input);
+            var actual = GetInvariantFormattedString(input);
             Assert.AreEqual(expected, actual);
         }
 
@@ -22,7 +22,7 @@ namespace SoundMetrics.Aris.Core
         {
             var input = 1.125f;
             var expected = "1.125";
-            var actual = GetInvariantFormatttedString(input);
+            var actual = GetInvariantFormattedString(input);
             Assert.AreEqual(expected, actual);
         }
 
@@ -31,7 +31,7 @@ namespace SoundMetrics.Aris.Core
         {
             var input = 1.125m;
             var expected = "1.125";
-            var actual = GetInvariantFormatttedString(input);
+            var actual = GetInvariantFormattedString(input);
             Assert.AreEqual(expected, actual);
         }
     }

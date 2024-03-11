@@ -88,9 +88,9 @@ namespace SoundMetrics.Aris.Data
             IntPtr inputBuffer,
             IntPtr outputBuffer)
         {
-            if (inputBuffer == null)
+            if (inputBuffer == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(inputBuffer));
-            if (outputBuffer == null)
+            if (outputBuffer == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(outputBuffer));
 
             const int beamsPerPing = 16;

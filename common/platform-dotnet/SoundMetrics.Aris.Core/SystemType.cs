@@ -70,7 +70,7 @@ namespace SoundMetrics.Aris.Core
 
         public override string ToString() => $"{HumanReadableString} ({integralValue})";
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is SystemType other && this.Equals(other);
 
         public bool Equals(SystemType other) => this.integralValue == other.integralValue;

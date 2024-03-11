@@ -77,7 +77,7 @@ namespace SoundMetrics.Aris.Core
         /// </summary>
         public FineDuration Ceiling => FineDuration.FromMicroseconds(Math.Ceiling(TotalMicroseconds));
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => (obj is FineDuration) ? Equals((FineDuration)obj) : false;
 
         public bool Equals(FineDuration other) => this._microseconds == other._microseconds;

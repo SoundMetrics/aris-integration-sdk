@@ -85,7 +85,7 @@ namespace SoundMetrics.Aris.Core
         public static Rate Min(Rate a, Rate b) => a < b ? a : b;
         public static Rate Max(Rate a, Rate b) => a > b ? a : b;
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => (obj is Rate) ? Equals((Rate)obj) : false;
 
         public bool Equals(Rate other) => this.Hz == other.Hz;
@@ -98,21 +98,29 @@ namespace SoundMetrics.Aris.Core
         internal string ToSerializationString()
             => string.Format(CultureInfo.InvariantCulture, "{0}/{1}", _count, _duration.TotalMicroseconds);
 
-        internal static bool TryParseSerializationString(string s, out Rate result)
+        internal static bool TryParseSerializationString(string? s, out Rate result)
         {
-            // After upgrading past .NET Standard 2.0, convert input to ReadOnlySpan<char>.
-            var splits = s.Split(SerializationSeparatorList, 3, StringSplitOptions.RemoveEmptyEntries);
-            if (splits.Length == 2
-                && double.TryParse(splits[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var count)
-                && double.TryParse(splits[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var duration))
-            {
-                result = new Rate(count, (FineDuration)duration);
-                return true;
-            }
-            else
+            if (s is null)
             {
                 result = default;
                 return false;
+            }
+            else
+            {
+                // After upgrading past .NET Standard 2.0, convert input to ReadOnlySpan<char>.
+                var splits = s.Split(SerializationSeparatorList, 3, StringSplitOptions.RemoveEmptyEntries);
+                if (splits.Length == 2
+                    && double.TryParse(splits[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var count)
+                    && double.TryParse(splits[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var duration))
+                {
+                    result = new Rate(count, (FineDuration)duration);
+                    return true;
+                }
+                else
+                {
+                    result = default;
+                    return false;
+                }
             }
         }
 

@@ -50,7 +50,7 @@ namespace SoundMetrics.Aris.Core
         /// </summary>
         public Distance Ceiling => (Distance)Math.Ceiling(_meters);
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Distance d)
             {

@@ -92,7 +92,7 @@ namespace SoundMetrics.Aris.Core
         public string ToShortString()
             => $"WindowStart=[{WindowStart}]; WindowEnd=[{WindowEnd}]";
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is WindowBounds other && this.Equals(other);
 
         public override int GetHashCode()

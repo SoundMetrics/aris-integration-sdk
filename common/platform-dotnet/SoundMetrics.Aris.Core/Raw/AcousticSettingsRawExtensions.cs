@@ -148,7 +148,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
                 if (object.Equals(valueA, valueB))
                 {
-                    Debug.WriteLine($"{propertyInfo.Name} unchanged at {GetInvariantFormatttedString(valueA)}");
+                    Debug.WriteLine($"{propertyInfo.Name} unchanged at {GetInvariantFormattedString(valueA)}");
                     return false;
                 }
                 else
@@ -158,8 +158,8 @@ namespace SoundMetrics.Aris.Core.Raw
                         _ = differences.Append("; ");
                     }
 
-                    var valueStringA = GetInvariantFormatttedString(valueA);
-                    var valueStringB = GetInvariantFormatttedString(valueB);
+                    var valueStringA = GetInvariantFormattedString(valueA);
+                    var valueStringB = GetInvariantFormattedString(valueB);
                     var difference = $"{propertyInfo.Name} [{valueStringA}]->[{valueStringB}]";
 
                     _ = differences.Append(difference);
@@ -170,7 +170,7 @@ namespace SoundMetrics.Aris.Core.Raw
         }
 
         // Gets an invariant formatted version of the value.
-        internal static string GetInvariantFormatttedString(object value)
+        internal static string GetInvariantFormattedString(object? value)
             => value is null
                 ? "(null)"
                 : string.Format(CultureInfo.InvariantCulture, "{0}", value);

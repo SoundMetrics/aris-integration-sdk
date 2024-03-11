@@ -36,11 +36,11 @@ namespace SoundMetrics.Aris.Core
         public static FocusDistance ToFocusDistance(Distance distance)
             => new FocusDistance(distance);
 
-        public static implicit operator Distance(in FocusDistance fd)
-            => fd.Distance.Value;
+        //public static implicit operator Distance(in FocusDistance fd)
+        //    => fd.Distance.Value;
 
-        public static Distance ToDistance(in FocusDistance fd)
-            => fd.Distance.Value;
+        //public static Distance ToDistance(in FocusDistance fd)
+        //    => fd.Distance.Value;
 
         /// <summary>
         /// Internal device-specific construction. Use a Distance instead.
@@ -57,7 +57,7 @@ namespace SoundMetrics.Aris.Core
                     ? $"{u} focus units"
                     : "<invalid>");
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is FocusDistance fd && this.Equals(fd);
 
         public bool Equals(FocusDistance other)

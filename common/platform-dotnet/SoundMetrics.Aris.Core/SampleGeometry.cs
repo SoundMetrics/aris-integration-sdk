@@ -44,7 +44,7 @@ namespace SoundMetrics.Aris.Core
 
         // Equality -----------------------------------------------------
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is SampleGeometry other && this.Equals(other);
 
         public bool Equals(SampleGeometry other)

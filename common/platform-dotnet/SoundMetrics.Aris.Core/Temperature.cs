@@ -30,7 +30,7 @@ namespace SoundMetrics.Aris.Core
 
         public double DegreesCelsius => _degreesC;
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Temperature t)
             {
@@ -128,38 +128,38 @@ namespace SoundMetrics.Aris.Core
 
         TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
 
-        bool IConvertible.ToBoolean(IFormatProvider provider) => throw new InvalidCastException();
+        bool IConvertible.ToBoolean(IFormatProvider? provider) => throw new InvalidCastException();
 
-        byte IConvertible.ToByte(IFormatProvider provider) => throw new InvalidCastException();
+        byte IConvertible.ToByte(IFormatProvider? provider) => throw new InvalidCastException();
 
-        char IConvertible.ToChar(IFormatProvider provider) => throw new InvalidCastException();
+        char IConvertible.ToChar(IFormatProvider? provider) => throw new InvalidCastException();
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider) => throw new InvalidCastException();
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        decimal IConvertible.ToDecimal(IFormatProvider? provider)
             => Convert.ToDecimal(_degreesC, provider);
 
-        double IConvertible.ToDouble(IFormatProvider provider)
+        double IConvertible.ToDouble(IFormatProvider? provider)
             => Convert.ToDouble(_degreesC, provider);
 
-        short IConvertible.ToInt16(IFormatProvider provider)
+        short IConvertible.ToInt16(IFormatProvider? provider)
             => Convert.ToInt16(_degreesC, provider);
 
-        int IConvertible.ToInt32(IFormatProvider provider)
+        int IConvertible.ToInt32(IFormatProvider? provider)
             => Convert.ToInt32(_degreesC, provider);
 
-        long IConvertible.ToInt64(IFormatProvider provider)
+        long IConvertible.ToInt64(IFormatProvider? provider)
             => Convert.ToInt64(_degreesC, provider);
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider) => throw new InvalidCastException();
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) => throw new InvalidCastException();
 
-        float IConvertible.ToSingle(IFormatProvider provider)
+        float IConvertible.ToSingle(IFormatProvider? provider)
             => Convert.ToSingle(_degreesC, provider);
 
-        string IConvertible.ToString(IFormatProvider provider)
+        string IConvertible.ToString(IFormatProvider? provider)
             => this.ToString();
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider provider)
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
         {
             if (conversionType == typeof(string))
             {
@@ -171,13 +171,13 @@ namespace SoundMetrics.Aris.Core
             }
         }
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
+        ushort IConvertible.ToUInt16(IFormatProvider? provider)
             => Convert.ToUInt16(_degreesC, provider);
 
-        uint IConvertible.ToUInt32(IFormatProvider provider)
+        uint IConvertible.ToUInt32(IFormatProvider? provider)
             => Convert.ToUInt32(_degreesC, provider);
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
+        ulong IConvertible.ToUInt64(IFormatProvider? provider)
             => Convert.ToUInt64(_degreesC, provider);
 
         #endregion // IConvertible
