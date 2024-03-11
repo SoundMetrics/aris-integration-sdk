@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -12,6 +13,7 @@ namespace SoundMetrics.Aris.Core
 
     [DebuggerDisplay("{Hz}/s"), TypeConverter(typeof(Converters.RateConverter))]
     [DataContract]
+    [JsonConverter(typeof(RateJsonConverter))]
     public struct Rate : IComparable<Rate>, IEquatable<Rate>
     {
         [DataMember]
@@ -90,6 +92,31 @@ namespace SoundMetrics.Aris.Core
 
         public override string ToString()
             => string.Format(CultureInfo.CurrentCulture, "{0}/s", this.Hz);
+
+        internal string ToSerializationString()
+            => string.Format(CultureInfo.InvariantCulture, "{0}/{1}", _count, _duration.TotalMicroseconds);
+
+        internal static bool TryParseSerializationString(string s, out Rate result)
+        {
+            // After upgrading past .NET Standard 2.0, convert input to ReadOnlySpan<char>.
+            var splits = s.Split(SerializationSeparatorList, 3, StringSplitOptions.RemoveEmptyEntries);
+            if (splits.Length == 3
+                && double.TryParse(splits[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var count)
+                && splits[1] == SerializationSeparator
+                && double.TryParse(splits[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var duration))
+            {
+                result = new Rate(count, (FineDuration)duration);
+                return true;
+            }
+            else
+            {
+                result = default;
+                return false;
+            }
+        }
+
+        private const string SerializationSeparator = "/";
+        private static readonly string[] SerializationSeparatorList = new[] { SerializationSeparator };
 
         public int CompareTo(Rate other)
             => Hz.CompareTo(other.Hz);

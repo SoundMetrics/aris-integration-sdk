@@ -7,13 +7,15 @@ namespace SoundMetrics.Aris.Core
     [TestClass]
     public sealed class DistanceJsonTest
     {
+        public record TestContainer(Distance Distance);
+
         [TestMethod]
         public void RountTripDistance()
         {
-            Distance original = Distance.FromMeters(1.25);
-            Distance expected = original;
+            TestContainer original = new(Distance.FromMeters(1.25));
+            TestContainer expected = original;
             string serialized = JsonConvert.SerializeObject(original);
-            Distance actual = JsonConvert.DeserializeObject<Distance>(serialized);
+            TestContainer actual = JsonConvert.DeserializeObject<TestContainer>(serialized);
 
             Console.WriteLine($"serialized=[{serialized}]");
 
