@@ -232,7 +232,14 @@ namespace SoundMetrics.Aris.Core
 
         object IConvertible.ToType(Type conversionType, IFormatProvider provider)
         {
-            throw new InvalidCastException();
+            if (conversionType == typeof(string))
+            {
+                return Meters.ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                throw new InvalidCastException();
+            }
         }
 
         ushort IConvertible.ToUInt16(IFormatProvider provider)
