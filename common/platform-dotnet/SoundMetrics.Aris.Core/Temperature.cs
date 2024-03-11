@@ -127,7 +127,7 @@ namespace SoundMetrics.Aris.Core
 
         #region IConvertible
 
-        TypeCode IConvertible.GetTypeCode() => throw new InvalidCastException();
+        TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
 
         bool IConvertible.ToBoolean(IFormatProvider provider) => throw new InvalidCastException();
 
@@ -161,7 +161,16 @@ namespace SoundMetrics.Aris.Core
             => this.ToString();
 
         object IConvertible.ToType(Type conversionType, IFormatProvider provider)
-            => throw new InvalidCastException();
+        {
+            if (conversionType == typeof(string))
+            {
+                return _degreesC.ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                throw new InvalidCastException();
+            }
+        }
 
         ushort IConvertible.ToUInt16(IFormatProvider provider)
             => Convert.ToUInt16(_degreesC, provider);
