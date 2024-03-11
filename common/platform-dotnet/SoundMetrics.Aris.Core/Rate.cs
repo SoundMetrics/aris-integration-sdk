@@ -100,10 +100,9 @@ namespace SoundMetrics.Aris.Core
         {
             // After upgrading past .NET Standard 2.0, convert input to ReadOnlySpan<char>.
             var splits = s.Split(SerializationSeparatorList, 3, StringSplitOptions.RemoveEmptyEntries);
-            if (splits.Length == 3
+            if (splits.Length == 2
                 && double.TryParse(splits[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var count)
-                && splits[1] == SerializationSeparator
-                && double.TryParse(splits[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var duration))
+                && double.TryParse(splits[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var duration))
             {
                 result = new Rate(count, (FineDuration)duration);
                 return true;
@@ -115,8 +114,7 @@ namespace SoundMetrics.Aris.Core
             }
         }
 
-        private const string SerializationSeparator = "/";
-        private static readonly string[] SerializationSeparatorList = new[] { SerializationSeparator };
+        private static readonly string[] SerializationSeparatorList = new[] { "/" };
 
         public int CompareTo(Rate other)
             => Hz.CompareTo(other.Hz);

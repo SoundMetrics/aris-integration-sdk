@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using System;
+using System.Text.Json;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -12,8 +12,8 @@ namespace SoundMetrics.Aris.Core
         {
             var original = new Rate(3, (FineDuration)5);
             var expected = original;
-            var serialized = JsonConvert.SerializeObject(original);
-            var actual = JsonConvert.DeserializeObject<Rate>(serialized);
+            var serialized = JsonSerializer.Serialize(original);
+            var actual = JsonSerializer.Deserialize<Rate>(serialized);
 
             Console.WriteLine($"serialized=[{serialized}]");
 

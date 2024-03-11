@@ -1,21 +1,19 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using System;
+using System.Text.Json;
 
 namespace SoundMetrics.Aris.Core
 {
     [TestClass]
     public sealed class DistanceJsonTest
     {
-        public record TestContainer(Distance Distance);
-
         [TestMethod]
         public void RountTripDistance()
         {
-            TestContainer original = new(Distance.FromMeters(1.25));
-            TestContainer expected = original;
-            string serialized = JsonConvert.SerializeObject(original);
-            TestContainer actual = JsonConvert.DeserializeObject<TestContainer>(serialized);
+            Distance original = Distance.FromMeters(1.25);
+            Distance expected = original;
+            string serialized = JsonSerializer.Serialize(original);
+            Distance actual = JsonSerializer.Deserialize<Distance>(serialized);
 
             Console.WriteLine($"serialized=[{serialized}]");
 
