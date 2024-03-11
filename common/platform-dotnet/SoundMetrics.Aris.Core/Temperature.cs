@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
@@ -20,8 +19,7 @@ namespace SoundMetrics.Aris.Core
         [DataMember]
         private readonly double _degreesC;
 
-        [JsonConstructor]
-        public Temperature(double degreesC)
+        private Temperature(double degreesC)
         {
             _degreesC = degreesC;
         }
