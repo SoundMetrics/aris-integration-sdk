@@ -1,18 +1,14 @@
 ﻿using SoundMetrics.Aris.Core.ApprovalTests;
 using System;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
     [DebuggerDisplay("{Description}")]
-    [DataContract]
     public sealed class ObservedConditions
         : IEquatable<ObservedConditions>, IPrettyPrintable
     {
-        [DataMember]
         private readonly Temperature _waterTemp;
-        [DataMember]
         private readonly Distance _depth;
 
         private static readonly Lazy<ObservedConditions> _default =

@@ -14,7 +14,6 @@ namespace SoundMetrics.Aris.Core.Raw
     /// This type is ported over from some legacy ARIS Integration SDK work,
     /// and will continue in new ARIS Integration SDK work.
     /// </summary>
-    [DataContract]
     public sealed partial class AcousticSettingsRaw
         : IEquatable<AcousticSettingsRaw>, ApprovalTests.IPrettyPrintable
     {
@@ -56,33 +55,20 @@ namespace SoundMetrics.Aris.Core.Raw
             CheckInvariants(this);
         }
 
-        [DataMember]
         public SystemType SystemType { get; private set; }
-        [DataMember]
         public Rate FrameRate { get; private set; }
-        [DataMember]
         public int SampleCount { get; private set; }
-        [DataMember]
         public FineDuration SampleStartDelay { get; private set; }
-        [DataMember]
         public FineDuration SamplePeriod { get; private set; }
-        [DataMember]
         public FineDuration PulseWidth { get; private set; }
-        [DataMember]
         public PingMode PingMode { get; private set; }
-        [DataMember]
         public bool EnableTransmit { get; private set; }
-        [DataMember]
         public Frequency Frequency { get; private set; }
-        [DataMember]
         public bool Enable150Volts { get; private set; }
-        [DataMember]
         public float ReceiverGain { get; private set; }
 
-        [DataMember(Name = "FocusDistance", EmitDefaultValue = false)]
         private Distance _obsoleteFocusDistance;
 
-        [DataMember(Name = "FocusDistanceV2")]
         private FocusDistance _focusDistanceV2;
 
         // These are not directly an acoustic setting, but part of the package.
@@ -92,16 +78,12 @@ namespace SoundMetrics.Aris.Core.Raw
             private set => _focusDistanceV2 = value;
         }
 
-        [DataMember]
         public FineDuration AntiAliasing { get; private set; }
-        [DataMember]
         public InterpacketDelaySettings InterpacketDelay { get; private set; }
-        [DataMember]
         public Rate MaximumFrameRate { get; private set; }
 
         public static Rate MinimumFrameRate => Rate.OneHertz;
 
-        [DataMember]
         public Salinity Salinity { get; private set; }
 
         public FineDuration CyclePeriod

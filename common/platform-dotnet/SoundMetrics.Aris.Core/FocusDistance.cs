@@ -2,11 +2,9 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
-    [DataContract]
     public struct FocusDistance : IEquatable<FocusDistance>
     {
         public FocusDistance(Distance distance)
@@ -25,13 +23,11 @@ namespace SoundMetrics.Aris.Core
             CheckInvariants(this);
         }
 
-        [DataMember]
         public Distance? Distance { get; private set; }
 
         /// <summary>
         /// Internal use only, not supported.
         /// </summary>
-        [DataMember]
         public uint? FocusUnits { get; private set; }
 
         public static implicit operator FocusDistance(Distance distance)

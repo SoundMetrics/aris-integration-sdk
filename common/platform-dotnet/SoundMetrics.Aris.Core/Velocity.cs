@@ -3,20 +3,17 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
 #pragma warning disable CA2225 // Operator overloads have named alternates
 
     [DebuggerDisplay("{MetersPerSecond} m/s")]
-    [DataContract]
     public struct Velocity : IComparable<Velocity>, IEquatable<Velocity>
     {
         private static readonly Velocity zero =
             new Velocity((Distance)0, FineDuration.FromSeconds(1));
 
-        [DataMember]
         private readonly double _metersPerSecond;
 
         public Velocity(Distance distance, FineDuration time)

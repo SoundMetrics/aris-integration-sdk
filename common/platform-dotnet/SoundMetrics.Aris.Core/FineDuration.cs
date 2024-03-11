@@ -3,7 +3,6 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using static SoundMetrics.Aris.Core.MathSupport;
 
@@ -17,14 +16,12 @@ namespace SoundMetrics.Aris.Core
     /// computation within is microseconds.
     /// </summary>
     [DebuggerDisplay("{TotalSeconds}s")]
-    [DataContract]
     [JsonConverter(typeof(FineDurationJsonConverter))]
     public struct FineDuration : IComparable<FineDuration>, IEquatable<FineDuration>
     {
         public static readonly FineDuration Zero = FineDuration.FromMicroseconds(0);
         public static readonly FineDuration OneMicrosecond = FineDuration.FromMicroseconds(1);
 
-        [DataMember]
         private readonly double _microseconds;
 
         private FineDuration(long microseconds)
