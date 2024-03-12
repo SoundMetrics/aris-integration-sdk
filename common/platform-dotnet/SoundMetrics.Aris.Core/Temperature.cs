@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
@@ -13,9 +14,11 @@ namespace SoundMetrics.Aris.Core
     /// Temperature in degrees Celsius.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay} m")]
+    [DataContract]
     [JsonConverter(typeof(TemperatureJsonConverter))]
     public struct Temperature : IComparable<Temperature>, IEquatable<Temperature>, IConvertible
     {
+        [DataMember]
         private readonly double _degreesC;
 
         private Temperature(double degreesC)

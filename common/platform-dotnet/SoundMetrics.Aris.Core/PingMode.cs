@@ -1,10 +1,12 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
 {
+    [DataContract]
     [JsonConverter(typeof(PingModeJsonConverter))]
     public struct PingMode : IEquatable<PingMode>
     {
@@ -77,10 +79,13 @@ namespace SoundMetrics.Aris.Core
         public override int GetHashCode() =>
             integralValue.GetHashCode() ^ beamCount.GetHashCode() ^ pingsPerFrame.GetHashCode();
 
+        [DataMember]
         private readonly int integralValue;
 
+        [DataMember]
         private readonly int beamCount;
 
+        [DataMember]
         private readonly int pingsPerFrame;
     }
 }

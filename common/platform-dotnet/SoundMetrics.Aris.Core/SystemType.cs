@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2010-2021 Sound Metrics Corp.
 
 using System;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
@@ -10,6 +11,7 @@ namespace SoundMetrics.Aris.Core
     /// System types span across ARIS models, so an Explorer, a Defender, and
     /// a Voyager may all be an ARIS 3000.
     /// </summary>
+    [DataContract]
     [JsonConverter(typeof(SystemTypeJsonConverter))]
     public struct SystemType : IEquatable<SystemType>
     {
@@ -104,6 +106,7 @@ namespace SoundMetrics.Aris.Core
         private const string Aris1800String = "ARIS 1800";
         private const string Aris3000String = "ARIS 3000";
 
+        [DataMember]
         private readonly int integralValue;
     }
 }

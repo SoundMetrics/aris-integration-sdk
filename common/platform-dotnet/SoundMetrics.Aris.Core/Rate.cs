@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace SoundMetrics.Aris.Core
@@ -11,11 +12,14 @@ namespace SoundMetrics.Aris.Core
 #pragma warning disable CA2225 // Operator overloads have named alternates
 
     [DebuggerDisplay("{Hz}/s"), TypeConverter(typeof(Converters.RateConverter))]
+    [DataContract]
     [JsonConverter(typeof(RateJsonConverter))]
     public struct Rate : IComparable<Rate>, IEquatable<Rate>
     {
+        [DataMember]
         private readonly double _count;
 
+        [DataMember]
         private readonly FineDuration _duration;
 
         internal Rate(double count, FineDuration duration)
