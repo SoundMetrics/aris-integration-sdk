@@ -100,7 +100,7 @@ namespace SoundMetrics.Aris.Core
             => string.Format(CultureInfo.CurrentCulture, "{0}/s", this.Hz);
 
         internal string ToSerializationString()
-            => string.Format(CultureInfo.InvariantCulture, "{0}/{1}", _count, _duration.TotalMicroseconds);
+            => string.Format(CultureInfo.InvariantCulture, "{0}:{1}", _count, _duration.TotalMicroseconds);
 
         internal static bool TryParseSerializationString(string? s, out Rate result)
         {
@@ -128,7 +128,7 @@ namespace SoundMetrics.Aris.Core
             }
         }
 
-        private static readonly string[] SerializationSeparatorList = new[] { "/" };
+        private static readonly string[] SerializationSeparatorList = [":"];
 
         public int CompareTo(Rate other)
             => Hz.CompareTo(other.Hz);
