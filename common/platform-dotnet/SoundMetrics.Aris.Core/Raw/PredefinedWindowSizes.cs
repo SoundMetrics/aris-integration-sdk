@@ -36,7 +36,7 @@ namespace SoundMetrics.Aris.Core.Raw
                         new SystemTypeWindowSizing
                         {
                             FixedWindowSizeShort = new WindowBounds(3, 15),
-                            FixedWindowSizeMedium = new WindowBounds(5, 60),
+                            FixedWindowSizeMedium = new WindowBounds(5, 30),
                             FixedWindowSizeLong = new WindowBounds(15, 60),
                             SystemConfiguration = SystemConfiguration.GetConfiguration(SystemType.Aris1200),
                             StepwisePercent = 10,
