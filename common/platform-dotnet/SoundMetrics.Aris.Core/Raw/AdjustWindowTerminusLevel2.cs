@@ -8,9 +8,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
     public sealed class AdjustWindowTerminusLevel2 : IAdjustWindowTerminus
     {
-        private AdjustWindowTerminusLevel2() { }
-
-        public static readonly AdjustWindowTerminusLevel2 Instance = new AdjustWindowTerminusLevel2();
+        public AdjustWindowTerminusLevel2() { }
 
         public AcousticSettingsRaw MoveWindowEnd(
             Distance requestedEnd,
