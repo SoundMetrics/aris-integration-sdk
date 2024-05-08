@@ -53,12 +53,10 @@ module BunnyHill =
             let newProjection =
                 match change with
                 | ChangeWindowStart value ->
-                    { projection with
-                        DownrangeWindow =
+                    { DownrangeWindow =
                             { projection.DownrangeWindow with Start = value } }
                 | ChangeWindowEnd value ->
-                    { projection with
-                        DownrangeWindow =
+                    { DownrangeWindow =
                             { projection.DownrangeWindow with End = value } }
                 | All newSettings -> newSettings
 
