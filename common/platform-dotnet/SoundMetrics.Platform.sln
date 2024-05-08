@@ -146,8 +146,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleBufferBenchmarks", "benchmarks\SampleBufferBenchmarks\SampleBufferBenchmarks.csproj", "{BDE01E6B-82C0-44B2-A592-F2AE1271E3E3}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ArisScriptTest", "test\ArisScriptTest\ArisScriptTest.fsproj", "{D8BE66C2-42C4-4A05-ABFB-EAB63F202E3D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -314,10 +312,6 @@ Global
 		{BDE01E6B-82C0-44B2-A592-F2AE1271E3E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDE01E6B-82C0-44B2-A592-F2AE1271E3E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDE01E6B-82C0-44B2-A592-F2AE1271E3E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8BE66C2-42C4-4A05-ABFB-EAB63F202E3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8BE66C2-42C4-4A05-ABFB-EAB63F202E3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8BE66C2-42C4-4A05-ABFB-EAB63F202E3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8BE66C2-42C4-4A05-ABFB-EAB63F202E3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -341,7 +335,6 @@ Global
 		{54328139-3467-4231-BE06-9410A03168FE} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
 		{14AE749F-8AFF-4242-9CA7-2FC23BF0E983} = {CB7E5BDF-01A7-465C-BF80-069DDA22379D}
 		{BDE01E6B-82C0-44B2-A592-F2AE1271E3E3} = {0319164E-FED2-40FE-B83A-08B807EA9CFA}
-		{D8BE66C2-42C4-4A05-ABFB-EAB63F202E3D} = {41D1886B-1540-4597-A6AA-6D9CFC1EE247}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A9E1D0-8599-4605-8DE4-62F545891404}
