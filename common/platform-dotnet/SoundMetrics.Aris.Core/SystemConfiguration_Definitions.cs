@@ -49,9 +49,8 @@ namespace SoundMetrics.Aris.Core
                                 maxCumulativePulsePerSecond: 300),
                     },
 
-                    MakeDefaultSettings =
-                        CreateSettingsBuilder(MakeDefaultSettings1800),
-
+                    DefaultReceiverGain = 18f,
+                    DefaultWindow = new((Distance)3.0, (Distance)20.0),
                     FrequencyHigh = Rate.ToRate(1_800_000),
                     FrequencyLow = Rate.ToRate(1_100_000),
                 };
@@ -91,9 +90,8 @@ namespace SoundMetrics.Aris.Core
                                 maxCumulativePulsePerSecond: 240),
                     },
 
-                    MakeDefaultSettings =
-                        CreateSettingsBuilder(MakeDefaultSettings3000),
-
+                    DefaultReceiverGain = 12f,
+                    DefaultWindow = new((Distance)2.0, (Distance)10.0),
                     FrequencyHigh = Rate.ToRate(3_000_000),
                     FrequencyLow = Rate.ToRate(1_800_000),
                 };
@@ -133,156 +131,13 @@ namespace SoundMetrics.Aris.Core
                                 maxCumulativePulsePerSecond: 400),
                     },
 
-                    MakeDefaultSettings =
-                        CreateSettingsBuilder(MakeDefaultSettings1200),
-
+                    DefaultReceiverGain = 20f,
+                    DefaultWindow = new((Distance)4.0, (Distance)40.0),
                     FrequencyHigh = Rate.ToRate(1_200_000),
                     FrequencyLow = Rate.ToRate(700_000),
                 };
 
             return configurations;
-
-            MakeDefaultSettingsFn
-                CreateSettingsBuilder(MakeDefaultSettingsFn makeDefaultSettings)
-            {
-                return MakeSettings;
-
-                AcousticSettingsRaw MakeSettings(
-                    ObservedConditions observedConditions,
-                    Salinity salinity)
-                {
-                    var defaultSettings = makeDefaultSettings(observedConditions, salinity);
-                    return
-                        PredefinedWindowSizes
-                            .ToMediumWindow(
-                                defaultSettings,
-                                observedConditions,
-                                AdjustWindowTerminusFixed.Instance,
-                                useMaxFrameRate: true,
-                                useAutoFrequency: true)
-                            .WithAutomaticFocusDistance(observedConditions);
-                }
-            }
-
-            AcousticSettingsRaw MakeDefaultSettings1800(
-                ObservedConditions observedConditions,
-                Salinity salinity)
-            {
-                var systemType = SystemType.Aris1800;
-                var pingMode = PingMode.PingMode3;
-                var frequency = Frequency.High;
-                var sampleCount = 1250;
-                var sampleStartDelay = (FineDuration)2000;
-                var samplePeriod = (FineDuration)17;
-                var pulseWidth = (FineDuration)14;
-                var receiverGain = 18;
-                var antiAliasing = FineDuration.Zero;
-                var interpacketDelay = new InterpacketDelaySettings { Enable = false };
-                var enableTransmit = true;
-                var enable150Volts = true;
-                var focusDistance = (Distance)10;
-
-                // We get away with referencing the system configuration here (while we're
-                // defining system configurations) as we're returning this function via
-                // `CreateSettingsBuilder` above for later invocation.
-                var maxFrameRate =
-                    MaxFrameRate.CalculateMaximumFrameRate(
-                        SystemConfiguration.GetConfiguration(systemType),
-                        pingMode,
-                        sampleCount,
-                        sampleStartDelay,
-                        samplePeriod,
-                        antiAliasing,
-                        interpacketDelay);
-
-                return new AcousticSettingsRaw(
-                    systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
-                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusDistance, antiAliasing, interpacketDelay, salinity)
-                    .WithAutomaticSettings(
-                        observedConditions,
-                        AutomaticAcousticSettings.All);
-            }
-
-            AcousticSettingsRaw MakeDefaultSettings3000(
-                ObservedConditions observedConditions,
-                Salinity salinity)
-            {
-                var systemType = SystemType.Aris3000;
-                var pingMode = PingMode.PingMode9;
-                var frequency = Frequency.High;
-                var sampleCount = 1250;
-                var sampleStartDelay = (FineDuration)1300;
-                var samplePeriod = (FineDuration)5;
-                var pulseWidth = (FineDuration)5;
-                var receiverGain = 12;
-                var antiAliasing = FineDuration.Zero;
-                var interpacketDelay = new InterpacketDelaySettings { Enable = false };
-                var enableTransmit = true;
-                var enable150Volts = true;
-                var focusDistance = (Distance)10;
-
-                // We get away with referencing the system configuration here (while we're
-                // defining system configurations) as we're returning this function via
-                // `CreateSettingsBuilder` above for later invocation.
-                var maxFrameRate =
-                    MaxFrameRate.CalculateMaximumFrameRate(
-                        SystemConfiguration.GetConfiguration(systemType),
-                        pingMode,
-                        sampleCount,
-                        sampleStartDelay,
-                        samplePeriod,
-                        antiAliasing,
-                        interpacketDelay);
-
-                return new AcousticSettingsRaw(
-                    systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
-                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusDistance, antiAliasing, interpacketDelay, salinity)
-                    .WithAutomaticSettings(
-                        observedConditions,
-                        AutomaticAcousticSettings.All);
-            }
-
-            AcousticSettingsRaw MakeDefaultSettings1200(
-                ObservedConditions observedConditions,
-                Salinity salinity)
-            {
-                var systemType = SystemType.Aris1200;
-                var pingMode = PingMode.PingMode1;
-                var frequency = Frequency.High;
-                var sampleCount = 1250;
-                var sampleStartDelay = (FineDuration)4000;
-                var samplePeriod = (FineDuration)28;
-                var pulseWidth = (FineDuration)24;
-                var receiverGain = 20;
-                var antiAliasing = FineDuration.Zero;
-                var interpacketDelay = new InterpacketDelaySettings { Enable = false };
-                var enableTransmit = true;
-                var enable150Volts = true;
-                var focusDistance = (Distance)10;
-
-                // We get away with referencing the system configuration here (while we're
-                // defining system configurations) as we're returning this function via
-                // `CreateSettingsBuilder` above for later invocation.
-                var maxFrameRate =
-                    MaxFrameRate.CalculateMaximumFrameRate(
-                        SystemConfiguration.GetConfiguration(systemType),
-                        pingMode,
-                        sampleCount,
-                        sampleStartDelay,
-                        samplePeriod,
-                        antiAliasing,
-                        interpacketDelay);
-
-                return new AcousticSettingsRaw(
-                    systemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
-                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
-                    focusDistance, antiAliasing, interpacketDelay, salinity)
-                    .WithAutomaticSettings(
-                        observedConditions,
-                        AutomaticAcousticSettings.All);
-            }
         }
     }
 }

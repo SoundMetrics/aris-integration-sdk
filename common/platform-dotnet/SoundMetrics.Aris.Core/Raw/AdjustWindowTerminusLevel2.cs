@@ -292,7 +292,7 @@ namespace SoundMetrics.Aris.Core.Raw
                     useAutoFrequency);
         }
 
-        private static int CalculateNominalSampleCount(
+        internal static int CalculateNominalSampleCount(
             FineDuration samplePeriod,
             Distance windowStart,
             Distance windowEnd,

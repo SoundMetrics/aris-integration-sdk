@@ -54,6 +54,8 @@ namespace SoundMetrics.Aris.Core
 
 #pragma warning restore CA1822
 
+        public float DefaultReceiverGain { get; init; }
+
         public InclusiveValueRange<int> ReceiverGainLimits { get; internal set; }
 
         public InclusiveValueRange<Rate> FrameRateLimits { get; internal set; }
@@ -135,18 +137,80 @@ namespace SoundMetrics.Aris.Core
         public Rate AsRate(Frequency frequency)
             => frequency == Frequency.High ? FrequencyHigh : FrequencyLow;
 
+        public WindowBounds DefaultWindow { get; init; }
+
         public AcousticSettingsRaw GetDefaultSettings(
             ObservedConditions observedConditions,
             Salinity salinity)
         {
-            Debug.Assert(MakeDefaultSettings is not null);
-            return MakeDefaultSettings(observedConditions, salinity);
+            var window = DefaultWindow;
+            var sspd = observedConditions.SpeedOfSound(salinity);
+            var pingMode = DefaultPingMode;
+            var antiAliasing = FineDuration.Zero;
+            var interpacketDelay = InterpacketDelaySettings.Off;
+
+            var samplePeriod =
+                AcousticSettingsAuto.CalculateAutoSamplePeriod(
+                    SystemType,
+                    observedConditions.WaterTemp,
+                    window.WindowEnd);
+
+            var sampleCount =
+                AdjustWindowTerminusLevel2.CalculateNominalSampleCount(
+                    samplePeriod,
+                    window.WindowStart,
+                    window.WindowEnd,
+                    sspd,
+                    out var correctedWindowEnd);
+
+            // NOTE: correcting the window end to fit sample count and sample period.
+            window = new WindowBounds(window.WindowStart, correctedWindowEnd);
+
+            var pulseWidth =
+                AcousticSettingsAuto.CalculateAutoPulseWidth(
+                    SystemType,
+                    observedConditions.WaterTemp,
+                    salinity,
+                    window.WindowEnd);
+            var frequency =
+                AcousticSettingsAuto.CalculateFrequencyPerWindowEnd(
+                    SystemType,
+                    observedConditions.WaterTemp,
+                    salinity,
+                    window.WindowEnd);
+
+
+            var sampleStartDelay =
+                BasicCalculations.CalculateSampleStartDelay(
+                    window.WindowStart,
+                    sspd);
+
+            var maxFrameRate =
+                MaxFrameRate.CalculateMaximumFrameRate(
+                    this,
+                    pingMode,
+                    sampleCount,
+                    sampleStartDelay,
+                    samplePeriod,
+                    antiAliasing,
+                    interpacketDelay);
+
+            // -------------------------------------------------------
+
+            var receiverGain = DefaultReceiverGain;
+            var enableTransmit = true;
+            var enable150Volts = true;
+            var fakeFocusDistance = (Distance)10;
+
+
+            return new AcousticSettingsRaw(
+                    SystemType, maxFrameRate, sampleCount, sampleStartDelay, samplePeriod,
+                    pulseWidth, pingMode, enableTransmit, frequency, enable150Volts, receiverGain,
+                    fakeFocusDistance, antiAliasing, interpacketDelay, salinity)
+                .WithAutomaticSettings(
+                    observedConditions,
+                    AutomaticAcousticSettings.FocusDistance);
         }
-
-        private delegate AcousticSettingsRaw
-            MakeDefaultSettingsFn(ObservedConditions observedConditions, Salinity salinity);
-
-        private MakeDefaultSettingsFn? MakeDefaultSettings { get; set; }
 
         private static InclusiveValueRange<FineDuration> RangeOfDuration(double a, double b)
             => new InclusiveValueRange<FineDuration>((FineDuration)a, (FineDuration)b);

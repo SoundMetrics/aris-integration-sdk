@@ -200,7 +200,8 @@ namespace SoundMetrics.Aris.Core.Raw
                     .GetDefaultSettings(observedConditions, salinity)
                     .CalculateSettingsWithGuidedSampleCount(
                         windowBounds, observedConditions, WindowPinning.PinToWindowStart)
-                    .WithMaxFrameRate(enable: true);
+                    .WithMaxFrameRate(enable: true)
+                    .WithAutomaticFocusDistance(observedConditions);
         }
 
         public enum WindowPinning { Invalid, PinToWindowStart, PinToWindowEnd };

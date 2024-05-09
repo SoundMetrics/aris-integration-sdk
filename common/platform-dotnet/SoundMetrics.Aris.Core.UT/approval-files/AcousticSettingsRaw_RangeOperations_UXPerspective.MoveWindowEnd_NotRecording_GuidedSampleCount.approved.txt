@@ -18,7 +18,7 @@ Start Settings:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 5.499 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
@@ -41,7 +41,7 @@ Step 0:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 5.550 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
@@ -64,7 +64,7 @@ Step 1:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 5.601 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
@@ -87,7 +87,7 @@ Step 2:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 6.102 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
@@ -110,7 +110,7 @@ Step 3:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 5.101 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
@@ -133,7 +133,7 @@ Step 4:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 6.102 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
@@ -156,7 +156,7 @@ Step 5:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 5.502 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False

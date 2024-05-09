@@ -343,7 +343,7 @@ namespace SoundMetrics.Aris.Core
         {
             PrintStep(stepInputs);
 
-            return Dispatch(stepInputs);
+            return Dispatch(stepInputs).WithAutomaticFocusDistance(conditions);
 
             AcousticSettingsRaw Dispatch(in StepInputs inputs)
             {

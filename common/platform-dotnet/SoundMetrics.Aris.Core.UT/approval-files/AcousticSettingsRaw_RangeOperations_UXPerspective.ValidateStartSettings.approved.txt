@@ -17,7 +17,7 @@ Start Settings:
         Frequency: Low
         Enable150Volts: True
         ReceiverGain: 12
-        FocusDistance: 6.217 m
+        FocusDistance: 5.499 m
         AntiAliasing: 0.000000 s
         InterpacketDelay: InterpacketDelaySettings: 
             Enable: False
