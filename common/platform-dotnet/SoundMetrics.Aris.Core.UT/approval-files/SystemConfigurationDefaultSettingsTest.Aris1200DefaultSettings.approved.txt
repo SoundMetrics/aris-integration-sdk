@@ -1,0 +1,27 @@
+﻿Aris1200DefaultSettings: 
+Inputs: 
+    observedConditions: ObservedConditions: 
+        WaterTemp: 15.000 °C
+        Depth: 5.000 m
+    salinity: Fresh
+Default settings for [ARIS 1200 (2)]: 
+    windowBounds: WindowStart=[4.000 m]; WindowEnd=[40.006 m]; WindowLength=[36.006 m]
+    defaultSettings: AcousticSettingsRaw: 
+        SystemType: ARIS 1200 (2)
+        FrameRate: 5.942194333523484/s
+        SampleCount: 2456
+        SampleStartDelay: 0.005457 s
+        SamplePeriod: 0.000020 s
+        PulseWidth: 0.000040 s
+        PingMode: PingMode 1, 48 beams, 3 pings per frame
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 20
+        FocusDistance: 22.003 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Fresh
+        CyclePeriod (calculated): 0.054997 s

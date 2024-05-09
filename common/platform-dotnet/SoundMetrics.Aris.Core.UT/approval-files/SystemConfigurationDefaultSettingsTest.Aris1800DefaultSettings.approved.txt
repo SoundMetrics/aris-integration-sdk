@@ -1,0 +1,27 @@
+﻿Aris1800DefaultSettings: 
+Inputs: 
+    observedConditions: ObservedConditions: 
+        WaterTemp: 15.000 °C
+        Depth: 5.000 m
+    salinity: Fresh
+Default settings for [ARIS 1800 (0)]: 
+    windowBounds: WindowStart=[3.000 m]; WindowEnd=[20.003 m]; WindowLength=[17.003 m]
+    defaultSettings: AcousticSettingsRaw: 
+        SystemType: ARIS 1800 (0)
+        FrameRate: 5.8399616898513145/s
+        SampleCount: 1933
+        SampleStartDelay: 0.004093 s
+        SamplePeriod: 0.000012 s
+        PulseWidth: 0.000027 s
+        PingMode: PingMode 3, 96 beams, 6 pings per frame
+        EnableTransmit: True
+        Frequency: Low
+        Enable150Volts: True
+        ReceiverGain: 18
+        FocusDistance: 11.502 m
+        AntiAliasing: 0.000000 s
+        InterpacketDelay: InterpacketDelaySettings: 
+            Enable: False
+            Delay: 0.000000 s
+        Salinity: Fresh
+        CyclePeriod (calculated): 0.027709 s
