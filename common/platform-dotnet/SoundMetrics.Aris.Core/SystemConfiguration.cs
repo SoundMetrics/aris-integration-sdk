@@ -142,8 +142,15 @@ namespace SoundMetrics.Aris.Core
         public AcousticSettingsRaw GetDefaultSettings(
             ObservedConditions observedConditions,
             Salinity salinity)
+            => GetDefaultSettings(observedConditions, salinity, out var _);
+
+        public AcousticSettingsRaw GetDefaultSettings(
+            ObservedConditions observedConditions,
+            Salinity salinity,
+            out WindowBounds window)
         {
-            var window = DefaultWindow;
+            window = DefaultWindow;
+
             var sspd = observedConditions.SpeedOfSound(salinity);
             var pingMode = DefaultPingMode;
             var antiAliasing = FineDuration.Zero;
