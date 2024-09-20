@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -15,7 +16,8 @@ namespace SoundMetrics.Aris.Connection
         /// </summary>
         public ConnectionIO(TcpClient tcp)
         {
-            this.tcp = tcp;
+            this.tcp = tcp ?? throw new ArgumentNullException(nameof(tcp));
+            this.LocalEndpoint = GetSafeLocalEndPoint(tcp);
 
             try
             {
@@ -33,7 +35,20 @@ namespace SoundMetrics.Aris.Connection
             }
         }
 
-        public IPEndPoint LocalEndpoint => (IPEndPoint)tcp.Client.LocalEndPoint;
+        private static IPEndPoint GetSafeLocalEndPoint(TcpClient tcp)
+        {
+            if (tcp is null)
+            {
+                throw new ArgumentNullException(nameof(tcp));
+            }
+
+            Debug.Assert(tcp.Client is not null);
+
+            var ep = tcp.Client.LocalEndPoint;
+            return ep is null ? new IPEndPoint(IPAddress.Loopback, 42) : (IPEndPoint)ep;
+        }
+
+        public IPEndPoint LocalEndpoint { get; }
 
         public CommandResponse SendCommand(ICommand command)
         {

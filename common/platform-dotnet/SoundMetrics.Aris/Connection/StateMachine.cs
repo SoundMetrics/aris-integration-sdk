@@ -46,13 +46,13 @@ namespace SoundMetrics.Aris.Connection
             return newSettingsCookie;
         }
 
-        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        private void NetworkChange_NetworkAvailabilityChanged(object? sender, NetworkAvailabilityEventArgs e)
         {
             events.Post(
                 MakeEvent(MachineEventType.NetworkAvailabilityChanged));
         }
 
-        private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
+        private void NetworkChange_NetworkAddressChanged(object? sender, EventArgs e)
         {
             events.Post(
                 MakeEvent(MachineEventType.NetworkAddressChanged));

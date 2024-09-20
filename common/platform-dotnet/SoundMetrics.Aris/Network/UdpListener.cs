@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
@@ -36,6 +37,8 @@ namespace SoundMetrics.Aris.Network
             int port,
             bool reuseAddress)
         {
+            LocalEndPoint = GetSafeLocalEndPoint(udp);
+
             udp.Client.SetSocketOption(
                 SocketOptionLevel.Socket,
                 SocketOptionName.ReuseAddress,
@@ -56,7 +59,17 @@ namespace SoundMetrics.Aris.Network
             Task.Run(() => Listen(port));
         }
 
-        public IPEndPoint LocalEndPoint => (IPEndPoint)udp.Client.LocalEndPoint;
+
+        private static IPEndPoint GetSafeLocalEndPoint(UdpClient udp)
+        {
+            ArgumentNullException.ThrowIfNull(udp);
+            Debug.Assert(udp.Client is not null);
+
+            var ep = udp.Client.LocalEndPoint;
+            return ep is null ? new IPEndPoint(IPAddress.Loopback, 42) : (IPEndPoint)ep;
+        }
+
+        public IPEndPoint LocalEndPoint { get; }
 
         public IObservable<UdpReceived> Packets => receivedSubject;
 
