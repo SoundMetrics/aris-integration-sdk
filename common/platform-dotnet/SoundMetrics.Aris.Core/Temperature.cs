@@ -80,6 +80,10 @@ namespace SoundMetrics.Aris.Core
             return a.CompareTo(b) >= 0;
         }
 
+        public static Temperature Max(in Temperature a, in Temperature b) => a > b ? a : b;
+
+        public static Temperature Min(in Temperature a, in Temperature b) => a < b ? a : b;
+
         public int CompareTo(Temperature other)
         {
             double difference = this._degreesC - other._degreesC;
