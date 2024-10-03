@@ -24,10 +24,28 @@ namespace SoundMetrics.Aris.Core
         public T Minimum => minimum;
         public T Maximum => maximum;
 
+        /// <summary>
+        /// Checks whether the range includes the value; i.e.,
+        /// minimum &le; value &lt; maximum.
+        /// </summary>
+        /// <param name="value">The checked value.</param>
+        /// <returns>True if the value is contained by the range.</returns>
         public bool ContainsValue(T value)
         {
             return
                 minimum.CompareTo(value) <= 0 && value.CompareTo(maximum) < 0;
+        }
+
+        /// <summary>
+        /// Checks whether the range includes the value; i.e.,
+        /// minimum &le; value &le; maximum.
+        /// </summary>
+        /// <param name="value">The checked value.</param>
+        /// <returns>True if the value is contained by the range.</returns>
+        public bool ContainsValueInclusive(T value)
+        {
+            return
+                minimum.CompareTo(value) <= 0 && value.CompareTo(maximum) <= 0;
         }
 
         public bool ContainsRange(Range<T> other)
