@@ -21,6 +21,11 @@ namespace SoundMetrics.Aris.Core
             this.maximum = maximum;
         }
 
+        public Range(in (T minimum, T maximum) pair)
+            : this(pair.minimum, pair.maximum)
+        {
+        }
+
         public T Minimum => minimum;
         public T Maximum => maximum;
 
