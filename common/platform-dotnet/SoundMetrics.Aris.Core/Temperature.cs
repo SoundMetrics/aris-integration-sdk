@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Core
     [DebuggerDisplay("{DebuggerDisplay} m")]
     [DataContract]
     [JsonConverter(typeof(TemperatureJsonConverter))]
-    public struct Temperature : IComparable<Temperature>, IEquatable<Temperature>, IConvertible
+    public struct Temperature : IComparable, IComparable<Temperature>, IEquatable<Temperature>, IConvertible
     {
         [DataMember]
         private readonly double _degreesC;
@@ -89,6 +89,12 @@ namespace SoundMetrics.Aris.Core
             double difference = this._degreesC - other._degreesC;
             return difference < 0 ? -1 : (difference == 0 ? 0 : +1);
         }
+
+
+        public int CompareTo(object? obj) 
+            => obj is Temperature other 
+                    ? CompareTo(other) 
+                    : throw new ArgumentException($"Unexpected type: [{obj?.GetType().Name}]");
 
         public Temperature Abs()
         {
