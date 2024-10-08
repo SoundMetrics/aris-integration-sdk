@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Core
     [DebuggerDisplay("{DebuggerDisplay}")]
     [DataContract]
     [JsonConverter(typeof(DistanceJsonConverter))]
-    public struct Distance : IComparable<Distance>, IEquatable<Distance>
+    public struct Distance : IComparable, IComparable<Distance>, IEquatable<Distance>
         //, IConvertible
     {
         [DataMember]
@@ -98,6 +98,18 @@ namespace SoundMetrics.Aris.Core
         public static bool operator >=(Distance a, Distance b)
         {
             return a.CompareTo(b) >= 0;
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is Distance other)
+            {
+                return this.CompareTo(other);
+            }
+            else
+            {
+                throw new ArgumentException("Pass object is of the wrong type", nameof(obj));
+            }
         }
 
         public int CompareTo(Distance other)
