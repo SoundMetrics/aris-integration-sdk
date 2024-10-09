@@ -14,7 +14,7 @@ namespace SoundMetrics.Aris.Core
     [DebuggerDisplay("{Hz}/s"), TypeConverter(typeof(Converters.RateConverter))]
     [DataContract]
     [JsonConverter(typeof(RateJsonConverter))]
-    public struct Rate : IComparable<Rate>, IEquatable<Rate>
+    public struct Rate : IComparable, IComparable<Rate>, IEquatable<Rate>
     {
         [DataMember]
         private readonly double _count;
@@ -132,6 +132,18 @@ namespace SoundMetrics.Aris.Core
 
         public int CompareTo(Rate other)
             => Hz.CompareTo(other.Hz);
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is Rate other)
+            {
+                return CompareTo(other);
+            }
+            else
+            { 
+                throw new ArgumentException("Passed object is of the wrong type", nameof(obj));
+            }
+        }
     }
 
 #pragma warning restore CA2225 // Operator overloads have named alternates

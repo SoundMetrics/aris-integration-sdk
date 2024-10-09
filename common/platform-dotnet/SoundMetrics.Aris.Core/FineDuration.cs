@@ -19,7 +19,7 @@ namespace SoundMetrics.Aris.Core
     [DebuggerDisplay("{TotalSeconds}s")]
     [DataContract]
     [JsonConverter(typeof(FineDurationJsonConverter))]
-    public struct FineDuration : IComparable<FineDuration>, IEquatable<FineDuration>
+    public struct FineDuration : IComparable, IComparable<FineDuration>, IEquatable<FineDuration>
     {
         public static readonly FineDuration Zero = FineDuration.FromMicroseconds(0);
         public static readonly FineDuration OneMicrosecond = FineDuration.FromMicroseconds(1);
@@ -178,6 +178,18 @@ namespace SoundMetrics.Aris.Core
         public static FineDuration Max(FineDuration a, FineDuration b)
         {
             return a._microseconds > b._microseconds ? a : b;
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is FineDuration other)
+            {
+                return CompareTo(other);
+            }
+            else
+            {
+                throw new ArgumentException("Passed object is of the wrong type", nameof(obj));
+            }
         }
 
         public int CompareTo(FineDuration other)
