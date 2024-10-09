@@ -11,7 +11,7 @@ namespace SoundMetrics.Aris.Core
         private static Range R(int minimum, int maximum) => new Range(minimum, maximum);
 
         private static InclusiveValueRange<T> R<T>(T minimum, T maximum)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             => new InclusiveValueRange<T>(minimum, maximum);
 
         [TestMethod]

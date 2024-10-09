@@ -254,7 +254,7 @@ namespace SoundMetrics.Aris.Core.Raw
             string valueName,
             in TValue value,
             in InclusiveValueRange<TValue> valueRange)
-            where TValue : struct, IComparable<TValue>
+            where TValue : struct, IComparable
         {
             if (!valueRange.Contains(value))
             {
@@ -271,7 +271,7 @@ namespace SoundMetrics.Aris.Core.Raw
             string valueName,
             in TValue value,
             in InclusiveValueRange<TValue> valueRange)
-            where TValue : struct, IComparable<TValue>
+            where TValue : struct, IComparable
             =>
             $"Value '{valueName}' is [{value}]; this is not in range [{valueRange}]";
 

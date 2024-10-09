@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris.Core
     /// </summary>
     [DebuggerDisplay("[{Minimum}, {Maximum}]")]
     public struct ValueRange<T> : IEquatable<ValueRange<T>>
-        where T : struct, IComparable<T>
+        where T : struct, IComparable
     {
         public ValueRange(T min, T max)
         {
@@ -61,7 +61,7 @@ namespace SoundMetrics.Aris.Core
     public static class RangeExtensions
     {
         public static bool Contains<T>(this ValueRange<T> @this, T value)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             if (@this.IsReverseRange)
             {
@@ -74,7 +74,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         public static bool Contains<T>(this ValueRange<T> @this, ValueRange<T> other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             return @this.Contains(other.Minimum) && @this.Contains(other.Maximum);
         }
@@ -82,7 +82,7 @@ namespace SoundMetrics.Aris.Core
         public static bool Intersects<T>(
             this in ValueRange<T> a,
             in ValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             return !a.Intersect(b).IsEmpty;
         }
@@ -90,7 +90,7 @@ namespace SoundMetrics.Aris.Core
         public static ValueRange<T> Intersect<T>(
             this in ValueRange<T> a,
             in ValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             var aIsLess = a.Minimum.CompareTo(b.Minimum) <= 0;
             var left = aIsLess ? a : b;
@@ -110,7 +110,7 @@ namespace SoundMetrics.Aris.Core
         public static ValueRange<T> Union<T>(
             this ValueRange<T> @this,
             in ValueRange<T> that)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             if (@this.IsEmpty) return that;
             if (that.IsEmpty) return @this;
@@ -132,7 +132,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         internal static bool IsAdjacent<T>(this in ValueRange<T> a, in ValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             var (left, right) = Order(a, b);
             return left.Maximum.Equals(right.Minimum);
@@ -145,26 +145,26 @@ namespace SoundMetrics.Aris.Core
         internal static (ValueRange<T>, ValueRange<T>) Order<T>(
             in ValueRange<T> a,
             in ValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             => (a.Minimum.CompareTo(b.Minimum) <= 0) ? (a, b) : (b, a);
 
         internal static T Lesser<T>(in T t, in T? other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 other.HasValue ? Lesser(t, other.Value) : t;
 
         internal static T Lesser<T>(in T t, in T other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 t.CompareTo(other) < 0 ? t : other;
 
         internal static T Greater<T>(in T t, in T? other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 other.HasValue ? Greater(t, other.Value) : t;
 
         internal static T Greater<T>(in T t, in T other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 t.CompareTo(other) > 0 ? t : other;
     }

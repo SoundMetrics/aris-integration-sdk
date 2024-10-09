@@ -9,8 +9,9 @@ namespace SoundMetrics.Aris.Core
     /// Describes an inclusive range [a,b] of `T`.
     /// </summary>
     [DebuggerDisplay("[{Minimum}, {Maximum}]")]
-    public struct InclusiveValueRange<T> : IEquatable<InclusiveValueRange<T>>
-        where T : struct, IComparable<T>
+    public struct InclusiveValueRange<T> 
+        : IComparable, IComparable<InclusiveValueRange<T>>, IEquatable<InclusiveValueRange<T>>
+        where T : struct, IComparable
     {
         public InclusiveValueRange(T min, T max)
         {
@@ -51,6 +52,31 @@ namespace SoundMetrics.Aris.Core
         public override int GetHashCode()
             => Minimum.GetHashCode() ^ Maximum.GetHashCode();
 
+        public int CompareTo(object? obj)
+        {
+            if (obj is InclusiveValueRange<T> other)
+            {
+                return this.CompareTo(other);
+            }
+            else
+            {
+                throw new ArgumentException("Passed object is of the wrong type", nameof(obj));
+            }
+        }
+
+        public int CompareTo(InclusiveValueRange<T> other)
+        {
+            int compareMinimum = this.Minimum.CompareTo(other.Minimum);
+            if (compareMinimum != 0)
+            {
+                return compareMinimum;
+            }
+            else
+            {
+                return this.Maximum.CompareTo(other.Maximum);
+            }
+        }
+
         public static bool operator ==(InclusiveValueRange<T> left, InclusiveValueRange<T> right)
             => left.Equals(right);
 
@@ -61,7 +87,7 @@ namespace SoundMetrics.Aris.Core
     public static class InclusiveRangeExtensions
     {
         public static bool Contains<T>(this InclusiveValueRange<T> @this, T value)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             if (@this.IsReverseRange)
             {
@@ -74,7 +100,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         public static bool Contains<T>(this InclusiveValueRange<T> @this, InclusiveValueRange<T> other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             return @this.Contains(other.Minimum) && @this.Contains(other.Maximum);
         }
@@ -83,7 +109,7 @@ namespace SoundMetrics.Aris.Core
             this InclusiveValueRange<T> @this,
             T? min,
             T? max)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
             {
@@ -99,24 +125,24 @@ namespace SoundMetrics.Aris.Core
         }
 
         public static InclusiveValueRange<T> ConstrainTo<T>(this InclusiveValueRange<T> @this, in InclusiveValueRange<T> that)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 @this.ConstrainTo(that.Minimum, that.Maximum);
 
         public static T ConstrainTo<T>(this T t, in InclusiveValueRange<T> range)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             => Greater(
                 range.Minimum,
                 Lesser(range.Maximum, t));
 
         public static T ConstrainTo<T>(this T t, in (T min, T max) range)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             => t.ConstrainTo<T>(new InclusiveValueRange<T>(range));
 
         public static bool Intersects<T>(
             this in InclusiveValueRange<T> a,
             in InclusiveValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             return !a.Intersect(b).IsEmpty;
         }
@@ -124,7 +150,7 @@ namespace SoundMetrics.Aris.Core
         public static InclusiveValueRange<T> Intersect<T>(
             this in InclusiveValueRange<T> a,
             in InclusiveValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             var aIsLess = a.Minimum.CompareTo(b.Minimum) <= 0;
             var left = aIsLess ? a : b;
@@ -144,7 +170,7 @@ namespace SoundMetrics.Aris.Core
         public static InclusiveValueRange<T> Union<T>(
             this InclusiveValueRange<T> @this,
             in InclusiveValueRange<T> that)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             if (@this.IsEmpty) return that;
             if (that.IsEmpty) return @this;
@@ -166,7 +192,7 @@ namespace SoundMetrics.Aris.Core
         }
 
         internal static bool IsAdjacent<T>(this in InclusiveValueRange<T> a, in InclusiveValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
         {
             var (left, right) = Order(a, b);
             return left.Maximum.Equals(right.Minimum);
@@ -179,26 +205,26 @@ namespace SoundMetrics.Aris.Core
         internal static (InclusiveValueRange<T>, InclusiveValueRange<T>) Order<T>(
             in InclusiveValueRange<T> a,
             in InclusiveValueRange<T> b)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             => (a.Minimum.CompareTo(b.Minimum) <= 0) ? (a, b) : (b, a);
 
         internal static T Lesser<T>(in T t, in T? other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 other.HasValue ? Lesser(t, other.Value) : t;
 
         internal static T Lesser<T>(in T t, in T other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 t.CompareTo(other) < 0 ? t : other;
 
         internal static T Greater<T>(in T t, in T? other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 other.HasValue ? Greater(t, other.Value) : t;
 
         internal static T Greater<T>(in T t, in T other)
-            where T : struct, IComparable<T>
+            where T : struct, IComparable
             =>
                 t.CompareTo(other) > 0 ? t : other;
     }
