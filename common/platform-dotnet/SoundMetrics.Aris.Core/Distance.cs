@@ -108,7 +108,7 @@ namespace SoundMetrics.Aris.Core
             }
             else
             {
-                throw new ArgumentException("Pass object is of the wrong type", nameof(obj));
+                throw new ArgumentException("Passed object is of the wrong type", nameof(obj));
             }
         }
 
