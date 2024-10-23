@@ -27,9 +27,11 @@ namespace SoundMetrics.Aris.Core
         public T Minimum { get; private set; }
         public T Maximum { get; private set; }
 
-        public bool IsEmpty => Minimum.Equals(Maximum) || Minimum.CompareTo(Maximum) > 0;
+        public readonly bool IsEmpty => Minimum.Equals(Maximum) || Minimum.CompareTo(Maximum) > 0;
 
-        public bool IsReverseRange => Minimum.CompareTo(Maximum) > 0;
+        public readonly bool IsReverseRange => Minimum.CompareTo(Maximum) > 0;
+
+        public readonly InclusiveValueRange<T> Reverse() => new(this.Maximum, this.Minimum);
 
         public void Deconstruct(out T minimum, out T maximum)
         {
