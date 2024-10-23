@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.Core
     /// <summary>
     /// Temperature in degrees Celsius.
     /// </summary>
-    [DebuggerDisplay("{DebuggerDisplay} m")]
+    [DebuggerDisplay("{DebuggerDisplay}")]
     [DataContract]
     [JsonConverter(typeof(TemperatureJsonConverter))]
     public struct Temperature : IComparable, IComparable<Temperature>, IEquatable<Temperature>, IConvertible
