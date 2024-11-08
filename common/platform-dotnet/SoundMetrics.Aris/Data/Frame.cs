@@ -20,7 +20,7 @@ namespace SoundMetrics.Aris.Data
                         $"Sample count doesn't match frame header; expected [{sampleGeometry.TotalSampleCount}], found [{samples.Length}]");
                 }
 
-                frame = new Frame(frameHeader, samples);
+                frame = new Frame(frameHeader, sampleGeometry, samples);
                 return true;
             }
             else
@@ -31,13 +31,20 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        private Frame(in FrameHeader frameHeader, SampleBuffer samples)
+        private Frame(
+            in FrameHeader frameHeader,
+            in SampleGeometry sampleGeometry,
+            SampleBuffer samples)
         {
             FrameHeader = frameHeader;
+            SampleGeometry = sampleGeometry;
             Samples = samples;
         }
 
         public FrameHeader FrameHeader { get; private set; }
+
         public SampleBuffer Samples { get; private set; }
+
+        public SampleGeometry SampleGeometry { get; private set; }
     }
 }
