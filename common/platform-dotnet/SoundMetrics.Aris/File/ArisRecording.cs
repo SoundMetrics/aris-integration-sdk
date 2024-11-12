@@ -68,12 +68,13 @@ namespace SoundMetrics.Aris.File
 
         public static IEnumerable<Frame> EnumerateFrames(string arisFilePath)
         {
-            using var file = System.IO.File.OpenRead(arisFilePath);
-            return EnumerateFrames(file);
+            return EnumerateFrames(System.IO.File.OpenRead(arisFilePath));
         }
 
         public static IEnumerable<Frame> EnumerateFrames(FileStream stream)
         {
+            using var _ = stream;
+
             if (ReadFileHeader(stream, out var fileHeader, out var issue))
             {
                 while (true)
