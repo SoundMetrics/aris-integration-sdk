@@ -167,10 +167,7 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        /// <summary>
-        /// For use when creating multiple buffers or for "ping pong" transforms.
-        /// </summary>
-        public static SampleBuffer CreateBuffer(int length)
+        private static SampleBuffer CreateBuffer(int length)
         {
             int alignment = VectorByteSize;
             int alignedBufferSize = CalculateLengthWithAlignmentAndPadding(length);
