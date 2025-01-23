@@ -5,7 +5,7 @@ namespace SoundMetrics.Aris.Data
 {
     public sealed class Frame
     {
-        public static bool TryCreate(in FrameHeader frameHeader, SampleBuffer samples, out Frame? frame)
+        public static bool TryCreate(in FrameHeader frameHeader, ReadOnlySampleBuffer samples, out Frame? frame)
         {
             if (samples is null)
             {
@@ -34,7 +34,7 @@ namespace SoundMetrics.Aris.Data
         private Frame(
             in FrameHeader frameHeader,
             in SampleGeometry sampleGeometry,
-            SampleBuffer samples)
+            ReadOnlySampleBuffer samples)
         {
             FrameHeader = frameHeader;
             SampleGeometry = sampleGeometry;
@@ -43,7 +43,7 @@ namespace SoundMetrics.Aris.Data
 
         public FrameHeader FrameHeader { get; private set; }
 
-        public SampleBuffer Samples { get; private set; }
+        public ReadOnlySampleBuffer Samples { get; private set; }
 
         public SampleGeometry SampleGeometry { get; private set; }
     }

@@ -33,13 +33,13 @@ namespace SoundMetrics.Aris
         public void NegativeSizedBuffer()
         {
             _ = Assert.ThrowsException<ArgumentOutOfRangeException>(
-                () => SampleBuffer.Create(-1, InitializeTo42));
+                () => ReadOnlySampleBuffer.Create(-1, InitializeTo42));
         }
 
         [TestMethod]
         public void EmptyBuffer()
         {
-            var buffer = SampleBuffer.Create(0, InitializeTo42);
+            var buffer = ReadOnlySampleBuffer.Create(0, InitializeTo42);
             Assert.AreEqual(0, buffer.Length);
             Assert.AreEqual(0, buffer.Span.Length);
         }
@@ -48,7 +48,7 @@ namespace SoundMetrics.Aris
         public void SingletonBuffer()
         {
             var expected = (byte)(new Random().Next(0, 255));
-            var buffer = SampleBuffer.Create(1, buf => InitializeTo(buf, expected));
+            var buffer = ReadOnlySampleBuffer.Create(1, buf => InitializeTo(buf, expected));
             var actual = buffer.Span[0];
 
             Assert.AreEqual(expected, actual);
@@ -58,7 +58,7 @@ namespace SoundMetrics.Aris
         public unsafe void SingletonBufferUnsafe()
         {
             byte expected = 0x7e;
-            var buffer = SampleBuffer.Create(1, (buf, length) => InitializeToUnsafe(buf, length, expected));
+            var buffer = ReadOnlySampleBuffer.Create(1, (buf, length) => InitializeToUnsafe(buf, length, expected));
             var actual = buffer.Span[0];
 
             Assert.AreEqual(expected, actual);
@@ -69,7 +69,7 @@ namespace SoundMetrics.Aris
         {
             int bufferLength = 3;
             byte[] initialValue = Linq.Enumerable.Range(101, 100).Select(i => (byte)i).ToArray();
-            var buffer = SampleBuffer.Create(bufferLength, (buf, length) => InitializeToUnsafe(buf, length, initialValue));
+            var buffer = ReadOnlySampleBuffer.Create(bufferLength, (buf, length) => InitializeToUnsafe(buf, length, initialValue));
             var expected = initialValue[0];
             var actual = buffer.Span[0];
 
@@ -81,7 +81,7 @@ namespace SoundMetrics.Aris
         {
             const int OversizedBufferSize = int.MaxValue; // Successful test depends on the UT assembly being 32-bit.
             _ = Assert.ThrowsException<OutOfMemoryException>(
-                () => SampleBuffer.Create(OversizedBufferSize, InitializeTo42));
+                () => ReadOnlySampleBuffer.Create(OversizedBufferSize, InitializeTo42));
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace SoundMetrics.Aris
         {
             ReadOnlySpan<byte> source = new byte[] { 1, 2, 3 };
             var expected = source;
-            var actual = SampleBuffer.Create(source);
+            var actual = ReadOnlySampleBuffer.Create(source);
 
             CollectionAssert.AreEqual(expected.ToArray(), actual.Span.ToArray());
         }
@@ -103,7 +103,7 @@ namespace SoundMetrics.Aris
                 new ReadOnlyMemory<byte>(new byte[] { 3, 4 }),
             };
             ReadOnlySpan<byte> expected = new byte[] { 1, 2, 3, 4 };
-            var actual = SampleBuffer.Create(sources);
+            var actual = ReadOnlySampleBuffer.Create(sources);
 
             CollectionAssert.AreEqual(expected.ToArray(), actual.Span.ToArray());
         }
@@ -120,7 +120,7 @@ namespace SoundMetrics.Aris
             }
 
             var expected = 42 * 2;
-            var buffer1 = SampleBuffer.Create(8, InitializeTo42);
+            var buffer1 = ReadOnlySampleBuffer.Create(8, InitializeTo42);
             var buffer2 = buffer1.Transform(TransformFn);
 
             Assert.IsNotNull(buffer2);

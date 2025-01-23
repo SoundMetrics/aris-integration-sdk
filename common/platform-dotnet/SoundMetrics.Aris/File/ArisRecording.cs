@@ -100,12 +100,12 @@ namespace SoundMetrics.Aris.File
                 throw new Data.FormatException(FileIssueDescriptions.GetFlagDescription(issue));
             }
 
-            bool TryReadSamples(Stream stream, in FrameHeader frameHeader, out SampleBuffer? samples)
+            bool TryReadSamples(Stream stream, in FrameHeader frameHeader, out ReadOnlySampleBuffer? samples)
             {
                 if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
                 {
                     samples =
-                        SampleBuffer.Create(
+                        ReadOnlySampleBuffer.Create(
                             length: sampleGeometry.TotalSampleCount,
                             initializeBuffer: (Span<byte> buffer) =>
                             {

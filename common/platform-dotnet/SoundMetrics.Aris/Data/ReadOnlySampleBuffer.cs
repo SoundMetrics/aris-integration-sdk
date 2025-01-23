@@ -13,7 +13,7 @@ namespace SoundMetrics.Aris.Data
     /// allocated as managed memory. Allocating on the native heap
     /// instead avoids the overhead of thrashing the LOH.
     /// </summary>
-    public sealed class SampleBuffer : IDisposable
+    public sealed class ReadOnlySampleBuffer : IDisposable
     {
         public delegate void InitializeBufferSpan(Span<byte> buffer);
         public delegate void InitializeBuffer(IntPtr buffer, int length);
@@ -21,14 +21,14 @@ namespace SoundMetrics.Aris.Data
         public delegate void TransformBufferSpan(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
         public delegate void TransformBuffer(IntPtr inputBuffer, IntPtr outputBuffer, int length);
 
-        private SampleBuffer(HGlobalSafeHandle handle, IntPtr alignedBuffer, int length)
+        private ReadOnlySampleBuffer(HGlobalSafeHandle handle, IntPtr alignedBuffer, int length)
         {
             this.handle = handle;
             this.alignedBuffer = alignedBuffer;
             this.length = length;
         }
 
-        public static SampleBuffer Create(int length, InitializeBufferSpan initializeBuffer)
+        public static ReadOnlySampleBuffer Create(int length, InitializeBufferSpan initializeBuffer)
         {
             if (length < 0)
             {
@@ -49,7 +49,7 @@ namespace SoundMetrics.Aris.Data
             return sampleBuffer;
         }
 
-        public static SampleBuffer Create(int length, InitializeBuffer initializeBuffer)
+        public static ReadOnlySampleBuffer Create(int length, InitializeBuffer initializeBuffer)
         {
             if (length < 0)
             {
@@ -70,7 +70,7 @@ namespace SoundMetrics.Aris.Data
             return sampleBuffer;
         }
 
-        public static SampleBuffer Create(ReadOnlySpan<byte> source)
+        public static ReadOnlySampleBuffer Create(ReadOnlySpan<byte> source)
         {
             var sampleBuffer = CreateBuffer(source.Length);
 
@@ -82,7 +82,7 @@ namespace SoundMetrics.Aris.Data
         /// <summary>
         /// Construct from a list of buffers.
         /// </summary>
-        public unsafe static SampleBuffer Create(IEnumerable<ReadOnlyMemory<byte>> sourceBuffers)
+        public unsafe static ReadOnlySampleBuffer Create(IEnumerable<ReadOnlyMemory<byte>> sourceBuffers)
         {
             var sources = sourceBuffers.ToArray();
             var totalLength = sources.Sum(source => source.Length);
@@ -102,19 +102,19 @@ namespace SoundMetrics.Aris.Data
             return sampleBuffer;
         }
 
-        public SampleBuffer Transform(TransformBufferSpan transformBuffer)
+        public ReadOnlySampleBuffer Transform(TransformBufferSpan transformBuffer)
         {
             void initialize(Span<byte> output) => transformBuffer(this.Span, output);
-            var newBuffer = SampleBuffer.Create(length, initialize);
+            var newBuffer = ReadOnlySampleBuffer.Create(length, initialize);
             return newBuffer;
         }
 
-        public unsafe SampleBuffer Transform(TransformBuffer transformBufferUnsafe)
+        public unsafe ReadOnlySampleBuffer Transform(TransformBuffer transformBufferUnsafe)
         {
             void initialize(IntPtr outputBuffer, int length)
                 => transformBufferUnsafe(alignedBuffer, outputBuffer, length);
 
-            var newBuffer = SampleBuffer.Create(length, initialize);
+            var newBuffer = ReadOnlySampleBuffer.Create(length, initialize);
             return newBuffer;
         }
 
@@ -151,7 +151,7 @@ namespace SoundMetrics.Aris.Data
             }
         }
 
-        private static SampleBuffer CreateBuffer(int length)
+        private static ReadOnlySampleBuffer CreateBuffer(int length)
         {
             int alignment = VectorByteSize;
             int alignedBufferSize = CalculateLengthWithAlignmentAndPadding(length);
@@ -159,7 +159,7 @@ namespace SoundMetrics.Aris.Data
             var alignedBuffer = AlignBufferStart(buffer, alignment);
 
             var handle = new HGlobalSafeHandle(buffer);
-            var sampleBuffer = new SampleBuffer(handle, alignedBuffer, length);
+            var sampleBuffer = new ReadOnlySampleBuffer(handle, alignedBuffer, length);
             return sampleBuffer;
         }
 
