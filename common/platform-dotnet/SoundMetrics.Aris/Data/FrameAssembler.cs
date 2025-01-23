@@ -68,17 +68,10 @@ namespace SoundMetrics.Aris.Data
             // Ownership of `samples` is given away.
             var samples = ReadOnlySampleBuffer.Create(sampleParts);
 #pragma warning restore CA2000 // Dispose objects before losing scope
-            try
-            {
-                return Frame.TryCreate(frameHeader, samples, out var newFrame)
-                            && !(newFrame is null)
-                            && FrameSampleOrder.TryReorderFrame(newFrame, out frame);
-            }
-            catch
-            {
-                samples.Dispose();
-                throw;
-            }
+
+            return Frame.TryCreate(frameHeader, samples, out var newFrame)
+                        && !(newFrame is null)
+                        && FrameSampleOrder.TryReorderFrame(newFrame, out frame);
         }
 
         private FrameHeader? frameHeader;

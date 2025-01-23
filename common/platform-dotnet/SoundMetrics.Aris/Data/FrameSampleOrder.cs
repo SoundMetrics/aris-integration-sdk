@@ -46,15 +46,7 @@ namespace SoundMetrics.Aris.Data
                         });
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
-                if (Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame))
-                {
-                    return true;
-                }
-                else
-                {
-                    orderedSamples.Dispose();
-                    return false;
-                }
+                return Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame);
             }
             else
             {
