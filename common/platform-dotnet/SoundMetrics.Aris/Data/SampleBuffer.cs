@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,21 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.Data
 {
-    internal sealed class HGlobalSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        public HGlobalSafeHandle(IntPtr buffer)
-            : base(ownsHandle: true)
-        {
-            SetHandle(buffer);
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            Marshal.FreeHGlobal(handle);
-            return true;
-        }
-    }
-
     /// <summary>
     /// Implements a buffer in native heap so it doesn't live
     /// on the Large Object Heap (LOH). Most frames' sample size
