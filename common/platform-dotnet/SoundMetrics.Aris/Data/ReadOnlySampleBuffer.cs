@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SoundMetrics.Aris.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -15,18 +16,33 @@ namespace SoundMetrics.Aris.Data;
 /// </summary>
 public sealed class ReadOnlySampleBuffer
 {
-    public delegate void InitializeBufferSpan(Span<byte> buffer);
-    public delegate void InitializeBuffer(IntPtr buffer, int length);
+    public delegate void InitializeBufferSpan(
+        SampleGeometry sampleGeometry,
+        Span<byte> buffer);
+    public delegate void InitializeBuffer(
+        SampleGeometry sampleGeometry,
+        IntPtr buffer,
+        int length);
 
-    public delegate void TransformBufferSpan(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer);
-    public delegate void TransformBuffer(IntPtr inputBuffer, IntPtr outputBuffer, int length);
+    public delegate void TransformBufferSpan(
+        SampleGeometry sampleGeometry,
+        ReadOnlySpan<byte> inputBuffer,
+        Span<byte> outputBuffer);
+    public delegate void TransformBuffer(
+        SampleGeometry sampleGeometry,
+        IntPtr inputBuffer,
+        IntPtr outputBuffer,
+        int length);
 
     private ReadOnlySampleBuffer(SampleBuffer sampleBuffer)
     {
         buffer = sampleBuffer;
     }
 
-    public static ReadOnlySampleBuffer Create(int length, InitializeBufferSpan initializeBuffer)
+    public static ReadOnlySampleBuffer Create(
+        SampleGeometry sampleGeometry,
+        int length,
+        InitializeBufferSpan initializeBuffer)
     {
         if (length < 0)
         {
@@ -41,12 +57,15 @@ public sealed class ReadOnlySampleBuffer
         }
 
         var writeableBuffer = new SampleBuffer(length);
-        initializeBuffer(writeableBuffer.Span);
+        initializeBuffer(sampleGeometry, writeableBuffer.Span);
 
         return new ReadOnlySampleBuffer(writeableBuffer);
     }
 
-    public static ReadOnlySampleBuffer Create(int length, InitializeBuffer initializeBuffer)
+    public static ReadOnlySampleBuffer Create(
+        SampleGeometry sampleGeometry,
+        int length, 
+        InitializeBuffer initializeBuffer)
     {
         if (length < 0)
         {
@@ -61,7 +80,7 @@ public sealed class ReadOnlySampleBuffer
         }
 
         var writeableBuffer = new SampleBuffer(length);
-        initializeBuffer(writeableBuffer.UnsafeBuffer, length);
+        initializeBuffer(sampleGeometry, writeableBuffer.UnsafeBuffer, length);
 
         return new ReadOnlySampleBuffer(writeableBuffer);
     }
@@ -97,19 +116,25 @@ public sealed class ReadOnlySampleBuffer
         return new ReadOnlySampleBuffer(writeableBuffer);
     }
 
-    public ReadOnlySampleBuffer Transform(TransformBufferSpan transformBuffer)
+    public ReadOnlySampleBuffer Transform(
+        SampleGeometry sampleGeometry,
+        TransformBufferSpan transformBuffer)
     {
-        void initialize(Span<byte> output) => transformBuffer(this.Span, output);
-        var newBuffer = ReadOnlySampleBuffer.Create(buffer.Length, initialize);
+        void initialize(SampleGeometry sampleGeometry, Span<byte> output) 
+            => transformBuffer(sampleGeometry, this.Span, output);
+
+        var newBuffer = ReadOnlySampleBuffer.Create(sampleGeometry, buffer.Length, initialize);
         return newBuffer;
     }
 
-    public unsafe ReadOnlySampleBuffer Transform(TransformBuffer transformBufferUnsafe)
+    public unsafe ReadOnlySampleBuffer Transform(
+        SampleGeometry sampleGeometry,
+        TransformBuffer transformBufferUnsafe)
     {
-        void initialize(IntPtr outputBuffer, int length)
-            => transformBufferUnsafe(buffer.UnsafeBuffer, outputBuffer, length);
+        void initialize(SampleGeometry sampleGeometry, IntPtr outputBuffer, int length)
+            => transformBufferUnsafe(sampleGeometry, buffer.UnsafeBuffer, outputBuffer, length);
 
-        var newBuffer = ReadOnlySampleBuffer.Create(buffer.Length, initialize);
+        var newBuffer = ReadOnlySampleBuffer.Create(sampleGeometry, buffer.Length, initialize);
         return newBuffer;
     }
 

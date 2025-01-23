@@ -28,7 +28,8 @@ namespace SoundMetrics.Aris.Data
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope
                 var orderedSamples = frame.Samples.Transform(
-                        (inputPtr, outputPtr, length) =>
+                        sampleGeometry,
+                        (sampleGeometry, inputPtr, outputPtr, length) =>
                         {
                             if (length != sampleGeometry.TotalSampleCount)
                             {

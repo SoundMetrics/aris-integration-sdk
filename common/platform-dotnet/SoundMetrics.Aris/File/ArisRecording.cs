@@ -106,8 +106,9 @@ namespace SoundMetrics.Aris.File
                 {
                     samples =
                         ReadOnlySampleBuffer.Create(
+                            sampleGeometry,
                             length: sampleGeometry.TotalSampleCount,
-                            initializeBuffer: (Span<byte> buffer) =>
+                            initializeBuffer: (SampleGeometry sampleGeometry, Span<byte> buffer) =>
                             {
                                 var bytesRead = stream.Read(buffer);
                                 if (bytesRead != sampleGeometry.TotalSampleCount)
