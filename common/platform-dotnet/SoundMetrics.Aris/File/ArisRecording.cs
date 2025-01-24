@@ -77,15 +77,14 @@ namespace SoundMetrics.Aris.File
 
             if (ReadFileHeader(stream, out var fileHeader, out var issue))
             {
+                Frame frame;
+
                 while (true)
                 {
                     if (ReadFrameHeaderWithValidation(stream, out var frameHeader)
-#pragma warning disable CA2000 // Dispose objects before losing scope
                         && TryReadSamples(stream, frameHeader, out var samples)
-#pragma warning restore CA2000 // Dispose objects before losing scope
                         && !(samples is null)
-                        && Frame.TryCreate(frameHeader, samples, out var frame)
-                        && !(frame is null))
+                        && (frame = Frame.Create(frameHeader, samples)) is not null)
                     {
                         yield return frame;
                     }

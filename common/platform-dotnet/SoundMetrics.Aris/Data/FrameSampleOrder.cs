@@ -26,7 +26,6 @@ namespace SoundMetrics.Aris.Data
 
             if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry))
             {
-#pragma warning disable CA2000 // Dispose objects before losing scope
                 var orderedSamples = frame.Samples.Transform(
                         sampleGeometry,
                         (sampleGeometry, inputPtr, outputPtr, length) =>
@@ -45,9 +44,17 @@ namespace SoundMetrics.Aris.Data
                                 inputPtr,
                                 outputPtr);
                         });
-#pragma warning restore CA2000 // Dispose objects before losing scope
 
-                return Frame.TryCreate(UpdateFrameHeader(frame.FrameHeader), orderedSamples, out reorderedFrame);
+                try
+                {
+                    reorderedFrame = Frame.Create(UpdateFrameHeader(frame.FrameHeader), orderedSamples);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    reorderedFrame = default;
+                    return false;
+                }
             }
             else
             {

@@ -62,16 +62,19 @@ namespace SoundMetrics.Aris.Data
             List<ReadOnlyMemory<byte>> sampleParts,
             out Frame? frame)
         {
-            frame = default;
-
-#pragma warning disable CA2000 // Dispose objects before losing scope
             // Ownership of `samples` is given away.
             var samples = ReadOnlySampleBuffer.Create(sampleParts);
-#pragma warning restore CA2000 // Dispose objects before losing scope
 
-            return Frame.TryCreate(frameHeader, samples, out var newFrame)
-                        && !(newFrame is null)
-                        && FrameSampleOrder.TryReorderFrame(newFrame, out frame);
+            try
+            {
+                frame = Frame.Create(frameHeader, samples);
+                return FrameSampleOrder.TryReorderFrame(frame, out frame);
+            }
+            catch (Exception)
+            {
+                frame = null;
+                return false;
+            }
         }
 
         private FrameHeader? frameHeader;

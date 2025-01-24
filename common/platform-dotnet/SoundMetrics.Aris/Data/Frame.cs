@@ -5,7 +5,7 @@ namespace SoundMetrics.Aris.Data
 {
     public sealed class Frame
     {
-        public static bool TryCreate(in FrameHeader frameHeader, ReadOnlySampleBuffer samples, out Frame? frame)
+        public static Frame Create(in FrameHeader frameHeader, ReadOnlySampleBuffer samples)
         {
             if (samples is null)
             {
@@ -20,14 +20,13 @@ namespace SoundMetrics.Aris.Data
                         $"Sample count doesn't match frame header; expected [{sampleGeometry.TotalSampleCount}], found [{samples.Length}]");
                 }
 
-                frame = new Frame(frameHeader, sampleGeometry, samples);
-                return true;
+                return new Frame(frameHeader, sampleGeometry, samples);
             }
             else
             {
                 // Invalid frame header, couldn't determine frame geometry
-                frame = default;
-                return false;
+                var msg = $"Could not grok the sample geometry from the frame header";
+                throw new ArgumentException(msg, nameof(frameHeader));
             }
         }
 
