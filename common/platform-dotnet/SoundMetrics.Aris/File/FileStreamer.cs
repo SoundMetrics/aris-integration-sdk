@@ -28,7 +28,7 @@ namespace SoundMetrics.Aris.File
 
             frameSub = frames
                 .Where(frame =>
-                    Math.Max(frame.FrameHeader.AppliedSettings, frame.FrameHeader.ConstrainedSettings)
+                    Math.Max(frame.FrameHeader.Value.AppliedSettings, frame.FrameHeader.Value.ConstrainedSettings)
                         >= earliestAllowedCookie)
                 .Subscribe(frame => incomingQueue.Post(frame));
         }
@@ -38,7 +38,7 @@ namespace SoundMetrics.Aris.File
         private void HandleIncomingFrame(Frame frame)
         {
             bool foundGeometry =
-                SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry);
+                SystemConfiguration.TryGetSampleGeometry(in frame.FrameHeader.Value, out var sampleGeometry);
 
             if (allowedGeometry is SampleGeometry expectedGeometry)
             {

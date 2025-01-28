@@ -15,7 +15,9 @@ namespace SoundMetrics.Aris.Data
         /// <returns>A Frame instance with reordered data.</returns>
         public static bool TryReorderFrame(Frame frame, out Frame? reorderedFrame)
         {
-            if (frame.FrameHeader.ReorderedSamples != 0)
+            ref readonly FrameHeader fh = ref frame.FrameHeader.Value;
+
+            if (fh.ReorderedSamples != 0)
             {
                 // The frame is already reordered. Other than the code that
                 // initially creates the frame storage, virtually no code
@@ -24,7 +26,7 @@ namespace SoundMetrics.Aris.Data
                 return true;
             }
 
-            if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry))
+            if (SystemConfiguration.TryGetSampleGeometry(in fh, out var sampleGeometry))
             {
                 var orderedSamples = frame.Samples.Transform(
                         sampleGeometry!,
@@ -47,7 +49,7 @@ namespace SoundMetrics.Aris.Data
 
                 try
                 {
-                    reorderedFrame = Frame.Create(UpdateFrameHeader(frame.FrameHeader), orderedSamples);
+                    reorderedFrame = Frame.Create(UpdateFrameHeader(in fh), orderedSamples);
                     return true;
                 }
                 catch (Exception)

@@ -4,7 +4,7 @@ using System;
 namespace SoundMetrics.Aris.Data
 {
     public record class Frame(
-        FrameHeader FrameHeader,
+        FrameHeaderRef FrameHeader,
         SampleGeometry SampleGeometry,
         ReadOnlySampleBuffer Samples)
     {
@@ -21,7 +21,7 @@ namespace SoundMetrics.Aris.Data
                         $"Sample count doesn't match frame header; expected [{sg.TotalSampleCount}], found [{samples.Length}]");
                 }
 
-                return new Frame(frameHeader, sg, samples);
+                return new Frame(new FrameHeaderRef(frameHeader), sg, samples);
             }
             else
             {

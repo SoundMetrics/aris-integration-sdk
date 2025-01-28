@@ -39,7 +39,7 @@ namespace SoundMetrics.Aris.File
             if (firstFrame is null) throw new ArgumentNullException(nameof(firstFrame));
             if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentNullException(nameof(filePath));
 
-            var writer = CreateNew(firstFrame.FrameHeader, filePath);
+            var writer = CreateNew(in firstFrame.FrameHeader.Value, filePath);
 
             try
             {
@@ -114,7 +114,7 @@ namespace SoundMetrics.Aris.File
 
             try
             {
-                if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var geometry))
+                if (SystemConfiguration.TryGetSampleGeometry(in frame.FrameHeader.Value, out var geometry))
                 {
                     if (geometry != sampleGeometry)
                     {
@@ -125,7 +125,7 @@ namespace SoundMetrics.Aris.File
                     }
 
                     var frameIndex = frameCount;
-                    var headerForUpdate = frame.FrameHeader;
+                    FrameHeader headerForUpdate = frame.FrameHeader.Value;
                     headerForUpdate.FrameIndex = frameIndex;
 
                     fileStream.WriteStruct(headerForUpdate);
