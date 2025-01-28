@@ -14,7 +14,7 @@ namespace SoundMetrics.Aris.Data
 
             if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
             {
-                if (sampleGeometry.TotalSampleCount != samples.Length)
+                if (sampleGeometry!.TotalSampleCount != samples.Length)
                 {
                     throw new ArgumentException(
                         $"Sample count doesn't match frame header; expected [{sampleGeometry.TotalSampleCount}], found [{samples.Length}]");

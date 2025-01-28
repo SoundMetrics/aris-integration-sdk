@@ -45,7 +45,7 @@ namespace SoundMetrics.Aris.File
             {
                 if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
                 {
-                    var totalSampleCount = sampleGeometry.TotalSampleCount;
+                    var totalSampleCount = sampleGeometry!.TotalSampleCount;
                     var pos = file.Position;
 
                     if (file.Seek(totalSampleCount, SeekOrigin.Current) == pos + totalSampleCount)
@@ -105,8 +105,8 @@ namespace SoundMetrics.Aris.File
                 {
                     samples =
                         ReadOnlySampleBuffer.Create(
-                            sampleGeometry,
-                            length: sampleGeometry.TotalSampleCount,
+                            sampleGeometry!,
+                            length: sampleGeometry!.TotalSampleCount,
                             initializeBuffer: (SampleGeometry sampleGeometry, Span<byte> buffer) =>
                             {
                                 var bytesRead = stream.Read(buffer);
@@ -245,7 +245,7 @@ namespace SoundMetrics.Aris.File
                 return false;
             }
 
-            if (PingMode.TryGet((int)frameHeader.PingMode, out var pingMode))
+            if (PingMode.TryGetFrom((int)frameHeader.PingMode, out var pingMode))
             {
                 reason = "";
                 return true;

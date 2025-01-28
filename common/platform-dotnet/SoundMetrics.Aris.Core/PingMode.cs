@@ -28,40 +28,32 @@ namespace SoundMetrics.Aris.Core
         public static readonly PingMode PingMode6 = new PingMode(6, beamCount: 64, pingsPerFrame: 4);
         public static readonly PingMode PingMode9 = new PingMode(9, beamCount: 128, pingsPerFrame: 8);
 
-        internal static bool TryGet(int integralValue, out PingMode pingMode)
+        internal static bool TryGetFrom(int integralValue, out PingMode? pingMode)
         {
-            switch (integralValue)
+            try
             {
-                case 1:
-                    pingMode = PingMode1;
-                    break;
-                case 3:
-                    pingMode = PingMode3;
-                    break;
-                case 6:
-                    pingMode = PingMode6;
-                    break;
-                case 9:
-                    pingMode = PingMode9;
-                    break;
-
-                default:
-                    pingMode = default;
-                    return false;
+                pingMode = GetFrom(integralValue);
+                return true;
             }
-
-            return true;
+            catch
+            {
+                pingMode = default;
+                return false;
+            }
         }
 
         internal static PingMode GetFrom(int integralValue)
-        {
-            if (TryGet(integralValue, out var pingMode))
+            => integralValue switch
             {
-                return pingMode;
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(integralValue));
-        }
+                1 => PingMode1,
+                3 => PingMode3,
+                6 => PingMode6,
+                9 => PingMode9,
+                _ =>
+                    throw new ArgumentOutOfRangeException(
+                        nameof(integralValue),
+                        $"Unexpected value: [{integralValue}]")
+            };
 
         public override bool Equals(object? obj)
             => (obj is PingMode) ? Equals((PingMode)obj) : false;

@@ -27,7 +27,7 @@ namespace SoundMetrics.Aris.Data
             if (SystemConfiguration.TryGetSampleGeometry(frame.FrameHeader, out var sampleGeometry))
             {
                 var orderedSamples = frame.Samples.Transform(
-                        sampleGeometry,
+                        sampleGeometry!,
                         (sampleGeometry, inputPtr, outputPtr, length) =>
                         {
                             if (length != sampleGeometry.TotalSampleCount)

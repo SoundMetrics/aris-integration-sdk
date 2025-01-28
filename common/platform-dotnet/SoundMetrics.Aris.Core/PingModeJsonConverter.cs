@@ -15,9 +15,9 @@ namespace SoundMetrics.Aris.Core
         {
             var s = reader.GetString();
             if (int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var i)
-                && PingMode.TryGet(i, out var pingMode))
+                && PingMode.TryGetFrom(i, out var pingMode))
             {
-                return pingMode;
+                return pingMode!.Value;
             }
             else
             {

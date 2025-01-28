@@ -16,7 +16,7 @@ namespace SoundMetrics.Aris.Data
 
             if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
             {
-                expectedSampleCount = sampleGeometry.TotalSampleCount;
+                expectedSampleCount = sampleGeometry!.TotalSampleCount;
             }
             else
             {

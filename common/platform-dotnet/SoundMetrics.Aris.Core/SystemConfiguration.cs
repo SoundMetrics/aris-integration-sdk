@@ -107,22 +107,23 @@ namespace SoundMetrics.Aris.Core
 
         public InclusiveValueRange<Distance> WindowLimits { get; internal set; }
 
-        public static bool TryGetSampleGeometry(in FrameHeader frameHeader, out SampleGeometry sampleGeometry)
+        public static bool TryGetSampleGeometry(in FrameHeader frameHeader, out SampleGeometry? sampleGeometry)
         {
-            if (PingMode.TryGet((int)frameHeader.PingMode, out var pingMode))
+            try
             {
+                var pingMode = PingMode.GetFrom((int)frameHeader.PingMode);
                 var beamCount = pingMode.BeamCount;
                 var totalSampleCount = beamCount * (int)frameHeader.SamplesPerBeam;
 
                 sampleGeometry =
                     new SampleGeometry(
-                        beamCount: beamCount,
-                        sampleCount: (int)frameHeader.SamplesPerBeam,
-                        totalSampleCount: totalSampleCount,
-                        pingsPerFrame: pingMode.PingsPerFrame);
+                        BeamCount: beamCount,
+                        SampleCount: (int)frameHeader.SamplesPerBeam,
+                        TotalSampleCount: totalSampleCount,
+                        PingsPerFrame: pingMode.PingsPerFrame);
                 return true;
             }
-            else
+            catch
             {
                 sampleGeometry = default;
                 return false;

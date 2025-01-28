@@ -10,7 +10,7 @@ namespace SoundMetrics.Aris
     [TestClass]
     public sealed class SampleBufferTests
     {
-        private static readonly SampleGeometry dummySampleGeometry = new();
+        private static readonly SampleGeometry dummySampleGeometry = SampleGeometry.Invalid;
 
         private static void InitializeTo42(SampleGeometry sampleGeometry, Span<byte> buffer)
         {

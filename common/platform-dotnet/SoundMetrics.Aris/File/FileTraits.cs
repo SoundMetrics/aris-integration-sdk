@@ -2,21 +2,21 @@
 using SoundMetrics.Aris.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.File
 {
-    public class FileTraits
+    public record class FileTraits(
+        long FileLength,
+        SampleGeometry Geometry,
+        int SerializedFrameSize,
+        int FileHeaderFrameCount,
+        double CalculatedFrameCount,
+        int? ValidFrameHeaderCount,
+        FileIssues Issues)
     {
-        public long FileLength { get; private set; }
-        public SampleGeometry Geometry { get; private set; }
-        public int SerializedFrameSize { get; private set; }
-        public int FileHeaderFrameCount { get; private set; }
-        public double CalculatedFrameCount { get; private set; }
-        public int? ValidFrameHeaderCount { get; private set; }
-        public FileIssues Issues { get; private set; }
-
         public bool HasIssues => Issues != 0;
 
         public bool HasIssue(FileIssues issue) => ((int)Issues & (int)issue) != 0;
@@ -67,7 +67,7 @@ namespace SoundMetrics.Aris.File
 
                         if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var geometry))
                         {
-                            var serializedFrameSize = geometry.TotalSampleCount + frameHeaderSize;
+                            var serializedFrameSize = geometry!.TotalSampleCount + frameHeaderSize;
                             var calculatedFrameCount =
                                 (double)(fileSize - fileHeaderSize) / serializedFrameSize;
                             var wholeFrames = Math.Floor(calculatedFrameCount);
@@ -82,42 +82,53 @@ namespace SoundMetrics.Aris.File
                                     ? issues | FileIssues.InvalidFrameHeaders
                                     : issues;
 
-                            return new FileTraits
-                            {
-                                FileLength = fileSize,
-                                Geometry = geometry,
-                                SerializedFrameSize = serializedFrameSize,
-                                FileHeaderFrameCount = (int)fileHeader.FrameCount,
-                                CalculatedFrameCount = calculatedFrameCount,
-                                ValidFrameHeaderCount = validFrameHeaderCount,
-                                Issues = issues,
-                            };
+                            return new FileTraits(
+                                FileLength: fileSize,
+                                Geometry: geometry,
+                                SerializedFrameSize: serializedFrameSize,
+                                FileHeaderFrameCount: (int)fileHeader.FrameCount,
+                                CalculatedFrameCount: calculatedFrameCount,
+                                ValidFrameHeaderCount: validFrameHeaderCount,
+                                Issues: issues
+                            );
                         }
                         else
                         {
-                            return new FileTraits
-                            {
-                                FileLength = fileSize,
-                                Issues = FileIssues.InvalidFirstFrameHeader,
-                            };
+                            return new FileTraits(
+                                FileLength: fileSize,
+                                Geometry: SampleGeometry.Invalid,
+                                SerializedFrameSize: 0,
+                                FileHeaderFrameCount: 0,
+                                CalculatedFrameCount: 0,
+                                ValidFrameHeaderCount: 0,
+                                Issues: FileIssues.InvalidFirstFrameHeader
+                                );
                         }
                     }
                     else
                     {
-                        return new FileTraits
-                        {
-                            FileLength = fileSize,
-                            Issues = FileIssues.InvalidFirstFrameHeader,
-                        };
+                        return new FileTraits(
+                            FileLength: fileSize,
+                            Geometry: SampleGeometry.Invalid,
+                            SerializedFrameSize: 0,
+                            FileHeaderFrameCount: 0,
+                            CalculatedFrameCount: 0,
+                            ValidFrameHeaderCount: 0,
+                            Issues: FileIssues.InvalidFirstFrameHeader
+                            );
                     }
                 }
                 else
                 {
-                    return new FileTraits
-                    {
-                        FileLength = fileSize,
-                        Issues = issue,
-                    };
+                    return new FileTraits(
+                        FileLength: fileSize,
+                        Geometry: SampleGeometry.Invalid,
+                        SerializedFrameSize: 0,
+                        FileHeaderFrameCount: 0,
+                        CalculatedFrameCount: 0,
+                        ValidFrameHeaderCount: 0,
+                        Issues: issue
+                        );
                 }
             }
             finally

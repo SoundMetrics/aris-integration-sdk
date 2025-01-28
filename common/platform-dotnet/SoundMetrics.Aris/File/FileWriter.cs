@@ -77,10 +77,10 @@ namespace SoundMetrics.Aris.File
             {
                 if (SystemConfiguration.TryGetSampleGeometry(firstFrameHeader, out var sampleGeometry))
                 {
-                    this.sampleGeometry = sampleGeometry;
+                    this.sampleGeometry = sampleGeometry!;
                     this.fileStream = fileStream;
 
-                    WriteNewFileHeader(fileStream, firstFrameHeader, sampleGeometry);
+                    WriteNewFileHeader(fileStream, firstFrameHeader, sampleGeometry!);
                 }
                 else
                 {
