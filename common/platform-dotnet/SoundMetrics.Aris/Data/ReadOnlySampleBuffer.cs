@@ -23,10 +23,12 @@ public sealed class ReadOnlySampleBuffer
         int length);
 
     public delegate void TransformBufferSpan(
+        FrameHeaderRef frameHeaderRef,
         SampleGeometry sampleGeometry,
         ReadOnlySpan<byte> inputBuffer,
         Span<byte> outputBuffer);
     public delegate void TransformBuffer(
+        FrameHeaderRef frameHeaderRef,
         SampleGeometry sampleGeometry,
         IntPtr inputBuffer,
         IntPtr outputBuffer,
@@ -115,22 +117,24 @@ public sealed class ReadOnlySampleBuffer
     }
 
     public ReadOnlySampleBuffer Transform(
+        FrameHeaderRef frameHeaderRef,
         SampleGeometry sampleGeometry,
         TransformBufferSpan transformBuffer)
     {
         void initialize(SampleGeometry sampleGeometry, Span<byte> output) 
-            => transformBuffer(sampleGeometry, this.Span, output);
+            => transformBuffer(frameHeaderRef, sampleGeometry, this.Span, output);
 
         var newBuffer = ReadOnlySampleBuffer.Create(sampleGeometry, buffer.Length, initialize);
         return newBuffer;
     }
 
     public unsafe ReadOnlySampleBuffer Transform(
+        FrameHeaderRef frameHeaderRef,
         SampleGeometry sampleGeometry,
         TransformBuffer transformBufferUnsafe)
     {
         void initialize(SampleGeometry sampleGeometry, IntPtr outputBuffer, int length)
-            => transformBufferUnsafe(sampleGeometry, buffer.UnsafeBuffer, outputBuffer, length);
+            => transformBufferUnsafe(frameHeaderRef, sampleGeometry, buffer.UnsafeBuffer, outputBuffer, length);
 
         var newBuffer = ReadOnlySampleBuffer.Create(sampleGeometry, buffer.Length, initialize);
         return newBuffer;

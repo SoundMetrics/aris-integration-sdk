@@ -11,6 +11,7 @@ namespace SoundMetrics.Aris
     public sealed class SampleBufferTests
     {
         private static readonly SampleGeometry dummySampleGeometry = SampleGeometry.Invalid;
+        private static readonly FrameHeaderRef dummyFrameHeaderRef = new(new());
 
         private static void InitializeTo42(SampleGeometry sampleGeometry, Span<byte> buffer)
         {
@@ -124,7 +125,11 @@ namespace SoundMetrics.Aris
         [TestMethod]
         public void Transform()
         {
-            void TransformFn(SampleGeometry sampleGeometry, ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer)
+            void TransformFn(
+                FrameHeaderRef frameHeaderRef,
+                SampleGeometry sampleGeometry,
+                ReadOnlySpan<byte> inputBuffer,
+                Span<byte> outputBuffer)
             {
                 for (int index = 0; index < inputBuffer.Length; ++index)
                 {
@@ -134,7 +139,7 @@ namespace SoundMetrics.Aris
 
             var expected = 42 * 2;
             var buffer1 = ReadOnlySampleBuffer.Create(dummySampleGeometry, 8, InitializeTo42);
-            var buffer2 = buffer1.Transform(dummySampleGeometry, TransformFn);
+            var buffer2 = buffer1.Transform(dummyFrameHeaderRef, dummySampleGeometry, TransformFn);
 
             Assert.IsNotNull(buffer2);
             Assert.AreEqual(buffer1.Length, buffer2.Length);
