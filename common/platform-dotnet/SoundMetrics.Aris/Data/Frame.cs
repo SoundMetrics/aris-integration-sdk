@@ -8,6 +8,11 @@ namespace SoundMetrics.Aris.Data
         SampleGeometry SampleGeometry,
         ReadOnlySampleBuffer Samples)
     {
+        public static Frame Create(FrameHeaderRef frameHeader, ReadOnlySampleBuffer samples)
+        {
+            return Create(in frameHeader.Value, samples);
+        }
+
         public static Frame Create(in FrameHeader frameHeader, ReadOnlySampleBuffer samples)
         {
             ArgumentNullException.ThrowIfNull(samples);
