@@ -125,6 +125,94 @@ namespace SoundMetrics.Aris.File
             }
         }
 
+        public static IEnumerable<Frame> EnumerateFramesInReverse(string arisFilePath)
+        {
+            int fileHeaderLength = Marshal.SizeOf<FileHeader>();
+            int frameHeaderLength = Marshal.SizeOf<FrameHeader>();
+            using var stream = System.IO.File.OpenRead(arisFilePath);
+
+            if (ReadFileHeader(stream, out var fileHeader, out var issue))
+            {
+                var (frameCount, sampleGeometry) = CountWholeFrames();
+                int frameSize = frameHeaderLength + sampleGeometry.TotalSampleCount;
+
+                Frame frame;
+
+                for (long frameIndex = frameCount - 1; frameIndex >= 0; frameIndex--)
+                {
+                    long framePosition = CalculateFrameFilePosition(frameIndex, sampleGeometry);
+
+                    if (stream.Seek(framePosition, SeekOrigin.Begin) != framePosition)
+                    {
+                        break;
+                    }
+
+                    if (ReadFrameHeaderWithValidation(stream, out var frameHeader)
+                        && TryReadSamples(stream, frameHeader, out var samples)
+                        && !(samples is null)
+                        && (frame = Frame.Create(frameHeader, samples)) is not null)
+                    {
+                        yield return frame;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                long CalculateFrameFilePosition(long frameIndex, SampleGeometry sampleGeometry)
+                    => fileHeaderLength + (frameIndex * frameSize);
+            }
+            else
+            {
+                throw new Data.FormatException(FileIssueDescriptions.GetFlagDescription(issue));
+            }
+
+            bool TryReadSamples(Stream stream, in FrameHeader frameHeader, out ReadOnlySampleBuffer? samples)
+            {
+                if (SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
+                {
+                    samples =
+                        ReadOnlySampleBuffer.Create(
+                            sampleGeometry!,
+                            length: sampleGeometry!.TotalSampleCount,
+                            initializeBuffer: (SampleGeometry sampleGeometry, Span<byte> buffer) =>
+                            {
+                                var bytesRead = stream.Read(buffer);
+                                if (bytesRead != sampleGeometry.TotalSampleCount)
+                                {
+                                    throw new Data.FormatException("Couldn't read all frame samples");
+                                }
+                            });
+                    return true;
+                }
+                else
+                {
+                    samples = default;
+                    return false;
+                }
+            }
+
+            (long FrameCount, SampleGeometry SampleGeometry) CountWholeFrames()
+            {
+                if (stream.Seek(fileHeaderLength, SeekOrigin.Begin) == fileHeaderLength
+                    && ReadFrameHeaderWithValidation(stream, out var frameHeader)
+                    && SystemConfiguration.TryGetSampleGeometry(frameHeader, out var sampleGeometry))
+                {
+                    int frameHeaderLength = Marshal.SizeOf<FrameHeader>();
+                    int frameLengthInFile = frameHeaderLength + sampleGeometry!.TotalSampleCount;
+                    long fileLength = stream.Length;
+                    long frameDataLength = fileLength - fileHeaderLength;
+                    long wholeFrameCount = (long)Math.Floor((double)fileLength / frameLengthInFile);
+                    return (wholeFrameCount, sampleGeometry);
+                }
+                else
+                {
+                    return (0, new(0, 0, 0, 0));
+                }
+            }
+        }
+
         public static FileTraits CheckFileForProblems()
         {
             throw new NotImplementedException();
