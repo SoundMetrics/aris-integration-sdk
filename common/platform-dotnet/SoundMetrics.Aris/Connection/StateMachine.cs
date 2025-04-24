@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
 {
-    using HandlerMap = Dictionary<ConnectionState, StateHandler>;
+    using HandlerMap = Dictionary<ConnectionState, IStateHandler>;
 
     internal sealed partial class StateMachine : IDisposable
     {

@@ -6,9 +6,9 @@ using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Connection;
 
-internal sealed class StateHandlerAttemptingConnection : StateHandler
+internal sealed class StateHandlerAttemptingConnection : IStateHandler
 {
-    public override void OnEnter(StateMachineContext context)
+    public void OnEnter(StateMachineContext context)
     {
         Log.Information(
             "Attempting connection to {deviceAddress}",
@@ -25,7 +25,7 @@ internal sealed class StateHandlerAttemptingConnection : StateHandler
         failureLogCountdown = 5;
     }
 
-    public override ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
     {
         return (ev.EventType, ev.CompoundEvent) switch
         {
@@ -102,7 +102,7 @@ internal sealed class StateHandlerAttemptingConnection : StateHandler
                 }
             }
 
-            return NoStateChange;
+            return IStateHandler.NoStateChange;
 
             bool ShouldTryNow(DateTimeOffset timestamp)
             {
@@ -135,7 +135,7 @@ internal sealed class StateHandlerAttemptingConnection : StateHandler
         }
     }
 
-    public override void OnLeave(StateMachineContext context)
+    public void OnLeave(StateMachineContext context)
     {
         InitializeState();
     }

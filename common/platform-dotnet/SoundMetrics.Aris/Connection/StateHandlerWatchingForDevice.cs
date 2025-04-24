@@ -3,14 +3,14 @@ using System.Net;
 
 namespace SoundMetrics.Aris.Connection;
 
-internal sealed class StateHandlerWatchingForDevice : StateHandler
+internal sealed class StateHandlerWatchingForDevice : IStateHandler
 {
-    public override void OnEnter(StateMachineContext context)
+    public void OnEnter(StateMachineContext context)
     {
         Log.Information("Watching for device");
     }
 
-    public override ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
     {
         switch (ev.EventType, ev.DeviceAddress)
         {
@@ -21,7 +21,12 @@ internal sealed class StateHandlerWatchingForDevice : StateHandler
                 return ConnectionState.AttemptingConnection;
 
             default:
-                return default;
+                return IStateHandler.NoStateChange;
         }
+    }
+
+    public void OnLeave(StateMachineContext context)
+    {
+        // Do nothing.
     }
 }

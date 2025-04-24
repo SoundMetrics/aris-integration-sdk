@@ -2,9 +2,9 @@
 
 namespace SoundMetrics.Aris.Connection;
 
-internal sealed class StateHandlerConnectionTerminated : StateHandler
+internal sealed class StateHandlerConnectionTerminated : IStateHandler
 {
-    public override void OnEnter(StateMachineContext context)
+    public void OnEnter(StateMachineContext context)
     {
         Log.Information("Connection terminated");
 
@@ -12,8 +12,13 @@ internal sealed class StateHandlerConnectionTerminated : StateHandler
         context.CommandConnection = null;
     }
 
-    public override ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
     {
-        return NoStateChange;
+        return IStateHandler.NoStateChange;
+    }
+
+    public void OnLeave(StateMachineContext context)
+    {
+        // Do nothing.
     }
 }

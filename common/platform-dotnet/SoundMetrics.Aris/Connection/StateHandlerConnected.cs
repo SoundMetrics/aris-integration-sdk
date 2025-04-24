@@ -4,9 +4,9 @@ using System.Globalization;
 
 namespace SoundMetrics.Aris.Connection;
 
-internal sealed class StateHandlerConnected : StateHandler
+internal sealed class StateHandlerConnected : IStateHandler
 {
-    public override void OnEnter(StateMachineContext context)
+    public void OnEnter(StateMachineContext context)
     {
         Log.Information("Connected to device at {deviceAddress} from {localEndpoint}",
             context.DeviceAddress, context.CommandConnection?.LocalEndpoint);
@@ -16,7 +16,7 @@ internal sealed class StateHandlerConnected : StateHandler
         ApplySettingsRequest(context, context.LatestSettingsRequest);
     }
 
-    public override ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
     {
         switch (ev.EventType, ev.CompoundEvent)
         {
@@ -43,7 +43,7 @@ internal sealed class StateHandlerConnected : StateHandler
                 break;
         }
 
-        return NoStateChange;
+        return IStateHandler.NoStateChange;
     }
 
     private static void ApplySettingsRequest(
@@ -55,6 +55,11 @@ internal sealed class StateHandlerConnected : StateHandler
             Log.Debug("Sending settings type [{settingsType}]", req.SettingsType.Name);
             connection.SendCommand(req);
         }
+    }
+
+    public void OnLeave(StateMachineContext context)
+    {
+        // Do nothing.
     }
 
     private static readonly TimeSpan FramePartReceiptTimeout = TimeSpan.FromSeconds(5);
