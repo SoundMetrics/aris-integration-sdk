@@ -207,10 +207,7 @@ namespace SoundMetrics.Aris.Core.Raw
             bool useMaxFrameRate)
         {
             if (settings is null) throw new ArgumentNullException(nameof(settings));
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
             if (newDelay < FineDuration.Zero) throw new ArgumentOutOfRangeException(nameof(newDelay), "Argument value is negative");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
-
             var result =
                 UpdateAntiAliasing(settings, newDelay)
                     .WithMaxFrameRate(useMaxFrameRate)
@@ -227,9 +224,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (samplePeriod <= FineDuration.Zero)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(nameof(samplePeriod), "Negative or zero value");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var sysCfg = settings.SystemType.GetConfiguration();
@@ -275,9 +270,7 @@ namespace SoundMetrics.Aris.Core.Raw
             if (settings is null) throw new ArgumentNullException(nameof(settings));
             if (sampleStartDelay <= FineDuration.Zero)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(nameof(sampleStartDelay), "Negative or zero value");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var sysCfg = settings.SystemType.GetConfiguration();
@@ -354,10 +347,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings = settings.WithFocusDistance(midpoint);
             }
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
             if (settings is null) throw new Exception("Settings became null");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
-
             if ((automaticFlags & AutomaticAcousticSettings.Frequency) != 0)
             {
                 var sysCfg = SystemConfiguration.GetConfiguration(settings.SystemType);
@@ -371,9 +361,7 @@ namespace SoundMetrics.Aris.Core.Raw
                 settings = settings.WithFrequency(frequency);
             }
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
             if (settings is null) throw new Exception("Settings became null");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
 
             // Pulse width depends on frequency, so it's addressed *after* frequency.
             if ((automaticFlags & AutomaticAcousticSettings.PulseWidth) != 0)

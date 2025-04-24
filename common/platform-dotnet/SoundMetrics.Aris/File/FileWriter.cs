@@ -84,9 +84,7 @@ namespace SoundMetrics.Aris.File
                 }
                 else
                 {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     throw new Exception("Couldn't determine sample geometry");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
                 }
             }
             catch (Exception ex)
@@ -119,9 +117,7 @@ namespace SoundMetrics.Aris.File
                     if (geometry != sampleGeometry)
                     {
                         throw new InvalidOperationException(
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                             "Cannot change the sample geometry within a recording");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
                     }
 
                     var frameIndex = frameCount;
@@ -138,9 +134,7 @@ namespace SoundMetrics.Aris.File
                 }
                 else
                 {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     throw new Exception("Couldn't determine sample geometry");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
                 }
             }
             finally

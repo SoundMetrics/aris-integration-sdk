@@ -80,9 +80,7 @@ namespace SoundMetrics.Aris.Threading
 
         public override void Send(SendOrPostCallback _callback, object? _state)
         {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
             throw new InvalidOperationException("Send is not supported");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
         }
 
         private void RunOnCurrentThread(CancellationToken ct)

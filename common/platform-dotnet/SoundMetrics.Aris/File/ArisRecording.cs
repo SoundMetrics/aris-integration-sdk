@@ -240,9 +240,7 @@ namespace SoundMetrics.Aris.File
             var pos = stream.Seek(fileHeaderSize, SeekOrigin.Begin);
             if (pos != fileHeaderSize)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new Exception("Incomplete file header");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
         }
 

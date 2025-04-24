@@ -48,9 +48,7 @@ namespace SoundMetrics.Aris.Core
                 return systemType;
             }
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
             throw new ArgumentOutOfRangeException(nameof(integralValue), "Unrecognized system type");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
         }
 
         internal static SystemType GetFromHumanReadableString(string s)

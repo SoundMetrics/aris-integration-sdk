@@ -264,9 +264,7 @@ namespace SoundMetrics.Aris.SimplifiedConnection
                 events.Post(MakeEvent(new Stop(doneSignal)));
                 if (!doneSignal.Wait(TimeSpan.FromSeconds(30)))
                 {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     throw new Exception("ShutDown timed out");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
                 }
             }
 

@@ -20,9 +20,7 @@ namespace SoundMetrics.Aris.Data
             }
             else
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Invalid frame header provided: sample geometry");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
         }
 

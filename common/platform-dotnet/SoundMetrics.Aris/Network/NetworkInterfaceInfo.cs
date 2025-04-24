@@ -58,9 +58,7 @@ namespace SoundMetrics.Aris.Network
         {
             if (a.Length != mask.Length)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Mismatched argument lengths", nameof(a));
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var output = new byte[a.Length];

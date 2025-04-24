@@ -28,9 +28,7 @@ namespace SoundMetrics.Aris
         {
             if (!uint.TryParse(serialNumber, out var _))
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException("Cannot parse", nameof(serialNumber));
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             if (syncContext is null)

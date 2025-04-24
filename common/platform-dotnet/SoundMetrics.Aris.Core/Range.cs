@@ -13,9 +13,7 @@ namespace SoundMetrics.Aris.Core
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(maximum),
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     "Maximum must not be less than minimum");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             this.minimum = minimum;

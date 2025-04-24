@@ -48,9 +48,7 @@ namespace SoundMetrics.Aris.Availability
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(timeout),
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     $"{nameof(timeout)} cannot be zero or less");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             this.timeout = timeout;

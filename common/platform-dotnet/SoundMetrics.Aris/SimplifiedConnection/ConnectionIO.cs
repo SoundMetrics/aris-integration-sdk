@@ -81,9 +81,7 @@ namespace SoundMetrics.Aris.SimplifiedConnection
 
             if (line is null)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new Exception("Connection failed");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var success = GetStatusCode() == "200";

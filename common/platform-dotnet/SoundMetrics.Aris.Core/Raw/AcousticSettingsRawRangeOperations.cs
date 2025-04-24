@@ -25,11 +25,9 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if (requestedWindow.WindowStart <= Distance.Zero)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(
                     nameof(requestedWindow),
                     $"Value of {nameof(requestedWindow.WindowStart)} is negative or zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var sysCfg = settings.SystemType.GetConfiguration();
@@ -64,9 +62,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if (requestedStart <= Distance.Zero)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(nameof(requestedStart), "Value is negative or zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var newSettings =
@@ -98,9 +94,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if (requestedEnd <= Distance.Zero)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(nameof(requestedEnd), "Value is negative or zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             return
@@ -148,9 +142,7 @@ namespace SoundMetrics.Aris.Core.Raw
 
             if (requestedStart <= Distance.Zero)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentOutOfRangeException(nameof(requestedStart), "Value is negative or zero");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             DebugLogInfo(settings, "start");

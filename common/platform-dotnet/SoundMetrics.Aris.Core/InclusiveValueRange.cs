@@ -93,9 +93,7 @@ namespace SoundMetrics.Aris.Core
         {
             if (@this.IsReverseRange)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new InvalidOperationException("Negative range is not allowed.");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             return @this.Minimum.CompareTo(value) <= 0 && value.CompareTo(@this.Maximum) <= 0;
@@ -115,9 +113,7 @@ namespace SoundMetrics.Aris.Core
         {
             if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
             {
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                 throw new ArgumentException($"{nameof(min)} may not be greater than {nameof(max)}");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             T newMin = Greater(@this.Minimum, min);
@@ -183,9 +179,7 @@ namespace SoundMetrics.Aris.Core
             if (@this.Intersect(that).IsEmpty && !@this.IsAdjacent(that))
             {
                 throw new InvalidOperationException(
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
                     $"Cannot represent a sparse range, given {@this} & {that}");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
             }
 
             var leastMin = Lesser(@this.Minimum, that.Minimum);

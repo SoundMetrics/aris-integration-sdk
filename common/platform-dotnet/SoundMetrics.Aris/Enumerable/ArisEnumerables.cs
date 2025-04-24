@@ -40,17 +40,11 @@ namespace SoundMetrics.Aris.EnumerableHelpers
 
             public (T, T) Current =>
                 hasCurrentPair
-                    ? currentPair[0]
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-                    : throw new Exception("No current value");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
+                    ? currentPair[0] : throw new Exception("No current value");
 
             object? IEnumerator.Current =>
                 hasCurrentPair
-                    ? currentPair[0]
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-                    : throw new Exception("No current value");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
+                    ? currentPair[0] : throw new Exception("No current value");
 
             public void Dispose() => ets.Dispose();
 
