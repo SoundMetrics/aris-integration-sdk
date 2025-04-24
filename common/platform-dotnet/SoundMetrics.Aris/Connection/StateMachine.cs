@@ -89,6 +89,8 @@ namespace SoundMetrics.Aris.Connection
             {
                 try
                 {
+                    // ### TODO This switch could stand to disappear, as there's little to
+                    // ### differentiate how the event types are handled.
                     switch (ev.EventType, ev.CompoundEvent)
                     {
                         case (StateMachineEventType.Compound, ApplySettingsRequest request):
