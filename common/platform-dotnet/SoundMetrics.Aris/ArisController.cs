@@ -14,8 +14,8 @@ namespace SoundMetrics.Aris
     [DebuggerDisplay("ArisController for {SerialNumber}")]
     public sealed class ArisController : IDisposable
     {
-        public ArisController(string serialNumber)
-            : this(serialNumber,
+        public ArisController(ArisBeacon arisBeacon)
+            : this(arisBeacon,
                    ValidateSynchronizationContext(
                       SynchronizationContext.Current,
                       "There is no current SynchronizationContext"))
@@ -23,7 +23,7 @@ namespace SoundMetrics.Aris
         }
 
         public ArisController(
-            string serialNumber,
+            ArisBeacon arisBeacon,
             SynchronizationContext syncContext)
         {
             if (!uint.TryParse(serialNumber, out var _))
@@ -38,11 +38,11 @@ namespace SoundMetrics.Aris
                 throw new ArgumentNullException(nameof(syncContext));
             }
 
-            this.serialNumber = serialNumber;
+            this.serialNumber = arisBeacon.SerialNumber;
 
             // Create the state machine before setting up the inputs
             // that drive it.
-            stateMachine = new StateMachine(serialNumber);
+            stateMachine = new StateMachine(serialNumber, arisBeacon.SystemType);
 
             availability = new Availability.AvailabilityStatus(
                 TimeSpan.FromSeconds(5),

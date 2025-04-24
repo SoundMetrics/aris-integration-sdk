@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
 using System;
@@ -12,18 +13,20 @@ using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
 {
-    using HandlerMap = Dictionary<ConnectionState, StateMachine.StateHandler>;
+    using HandlerMap = Dictionary<ConnectionState, StateHandler>;
 
     internal sealed partial class StateMachine : IDisposable
     {
-        public StateMachine(string serialNumber)
+        public StateMachine(string serialNumber, SystemType systemType)
         {
             Log.Debug("ARIS {serialNumber} StateMachine.ctor", serialNumber);
 
             this.serialNumber = serialNumber;
-            stateHandlers = InitializeHandlerMap();
+            context.SystemType = systemType;
 
-            events = new BufferedMessageQueue<MachineEvent>(ProcessEvent);
+            stateHandlers = MakeHandlerMap();
+
+            events = new BufferedMessageQueue<MachineEvent>(DispatchEvent);
 
             var tickTimerPeriod = TimeSpan.FromSeconds(1);
             var nextDue = tickTimerPeriod;
@@ -82,7 +85,7 @@ namespace SoundMetrics.Aris.Connection
         private void OnTimerTick(object? _) =>
             events.Post(MakeEvent(MachineEventType.Tick));
 
-        private void ProcessEvent(MachineEvent ev)
+        private void DispatchEvent(MachineEvent ev)
         {
             try
             {
@@ -91,25 +94,31 @@ namespace SoundMetrics.Aris.Connection
                     switch (ev.EventType, ev.CompoundEvent)
                     {
                         case (MachineEventType.Compound, ApplySettingsRequest request):
-                            InvokeDoProcessing(ev);
+                            InvokeStateProcessing(ev);
                             context.LatestSettingsRequest = request;
                             break;
 
                         case (MachineEventType.Compound, Stop stop):
-                            Transition(ConnectionState.End, context, ev);
-                            stop.MarkComplete();
-                            Debug.Assert(state == ConnectionState.End);
+                            try
+                            {
+                                Transition(ConnectionState.End, context, ev);
+                                Debug.Assert(state == ConnectionState.End);
+                            }
+                            finally
+                            {
+                                stop.MarkComplete();
+                            }
                             break;
 
                         case (MachineEventType.Compound, ICompoundMachineEvent evt):
-                            InvokeDoProcessing(ev);
+                            InvokeStateProcessing(ev);
                             break;
 
                         case (MachineEventType.Tick, _):
                         case (MachineEventType.NetworkAddressChanged, _):
                         case (MachineEventType.NetworkAvailabilityChanged, _):
                         case (MachineEventType.MarkFrameDataReceived, _):
-                            InvokeDoProcessing(ev);
+                            InvokeStateProcessing(ev);
                             break;
 
                         default:
@@ -154,80 +163,44 @@ namespace SoundMetrics.Aris.Connection
 
                 oldState = state;
 
-                stateHandlers[oldState].OnLeave?.Invoke(context);
+                stateHandlers[oldState].OnLeave(context);
                 state = next;
-                stateHandlers[next].OnEnter?.Invoke(context);
+                stateHandlers[next].OnEnter(context);
 
-                nextState = stateHandlers[next].DoProcessing?.Invoke(context, ev);
+                nextState = stateHandlers[next].DoProcessing(context, ev);
             }
 
             return true;
         }
 
-        private void InvokeDoProcessing(MachineEvent ev)
+        private void InvokeStateProcessing(MachineEvent ev)
         {
             try
             {
-                if (stateHandlers[state].DoProcessing is DoProcessingFn doProcessing)
+                var requestedState = stateHandlers[state].DoProcessing(context, ev);
+                if (requestedState is ConnectionState newState)
                 {
-                    try
-                    {
-                        var requestedState = doProcessing(context, ev);
-                        if (requestedState is ConnectionState newState)
-                        {
-                            Transition(newState, context, ev);
-                        }
-                    }
-#pragma warning disable CA1031 // Do not catch general exception types
-                    catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-                    {
-                        Log.Warning($"Exception during state transition: [{ex.Message}]");
-                        Log.Warning("Terminating connection");
-                        Transition(ConnectionState.ConnectionTerminated, context, ev);
-                    }
-                }
-                else
-                {
-                    // Nothing to do.
+                    Transition(newState, context, ev);
                 }
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
-                var msg = $"Handler for state {state} is not implemented";
-                Log.Error(msg);
-                throw new NotImplementedException(msg, ex);
+                Log.Warning($"Exception during state transition: [{ex.Message}]");
+                Log.Warning("Terminating connection");
+                Transition(ConnectionState.ConnectionTerminated, context, ev);
             }
         }
 
-        private HandlerMap InitializeHandlerMap()
+        private static HandlerMap MakeHandlerMap()
         {
             return new HandlerMap
-            {
                 {
-                    ConnectionState.Start,
-                    new StateHandler(default, default, default)
-                },
-                {
-                    ConnectionState.WatchingForDevice,
-                    WatchingForDevice.StateHandler
-                },
-                {
-                    ConnectionState.AttemptingConnection,
-                    attemptingConnectionHandler.StateHandler
-                },
-                {
-                    ConnectionState.Connected,
-                    Connected.StateHandler
-                },
-                {
-                    ConnectionState.End,
-                    End.StateHandler
-                },
-                {
-                    ConnectionState.ConnectionTerminated,
-                    ConnectionTerminated.StateHandler
-                }
+                    { ConnectionState.Start, new StateHandlerNull() },
+                    { ConnectionState.WatchingForDevice, new StateHandlerWatchingForDevice() },
+                    { ConnectionState.AttemptingConnection, new StateHandlerAttemptingConnection() },
+                    { ConnectionState.Connected, new StateHandlerConnected() },
+                    { ConnectionState.End, new StateHandlerEnd() },
+                    { ConnectionState.ConnectionTerminated, new StateHandlerConnectionTerminated() }
             };
         }
 
@@ -307,7 +280,7 @@ namespace SoundMetrics.Aris.Connection
                         // at a period greater than the sample period.
                         .Sample(TimeSpan.FromSeconds(1))
                         .Subscribe(timestamp =>
-                        events.Post(MakeEvent(MachineEventType.MarkFrameDataReceived))
+                            events.Post(MakeEvent(MachineEventType.MarkFrameDataReceived))
                     );
                 context.ReceiverPort = frameListener.LocalEndPoint.Port;
             }
@@ -347,8 +320,6 @@ namespace SoundMetrics.Aris.Connection
                 compoundEvent);
 
         private readonly HandlerMap stateHandlers;
-        private readonly AttemptingConnection attemptingConnectionHandler =
-            new AttemptingConnection();
         private readonly BufferedMessageQueue<MachineEvent> events;
         private readonly Timer tickSource;
         private readonly string serialNumber;

@@ -12,6 +12,11 @@ namespace SoundMetrics.Aris.Connection
         public IPAddress? DeviceAddress { get; set; }
 
         /// <summary>
+        /// The system type of the connected device.
+        /// </summary>
+        public SystemType SystemType { get; set; }
+
+        /// <summary>
         /// The UDP port on which we wish to receive frames.
         /// </summary>
         public int? ReceiverPort { get; set;  }

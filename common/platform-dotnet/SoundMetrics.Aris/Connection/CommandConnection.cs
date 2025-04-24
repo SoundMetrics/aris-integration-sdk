@@ -10,6 +10,7 @@ namespace SoundMetrics.Aris.Connection
     {
         public static CommandConnection Create(
             IPAddress deviceAddress,
+            SystemType systemType,
             int receiverPort,
             Salinity salinity)
         {
