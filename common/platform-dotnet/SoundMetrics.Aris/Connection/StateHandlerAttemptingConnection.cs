@@ -25,14 +25,14 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
         failureLogCountdown = 5;
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
     {
         return (ev.EventType, ev.CompoundEvent) switch
         {
-            (MachineEventType.Compound, DeviceAddressChanged _) =>
+            (StateMachineEventType.Compound, DeviceAddressChanged _) =>
                 ConnectionState.ConnectionTerminated,
 
-            (MachineEventType.Tick, _) =>
+            (StateMachineEventType.Tick, _) =>
                 AttemptConnection(ev.Timestamp),
 
             _ => default

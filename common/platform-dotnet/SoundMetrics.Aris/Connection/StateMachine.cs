@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.Connection
 
             stateHandlers = MakeHandlerMap();
 
-            events = new BufferedMessageQueue<MachineEvent>(DispatchEvent);
+            events = new BufferedMessageQueue<StateMachineEvent>(DispatchEvent);
 
             var tickTimerPeriod = TimeSpan.FromSeconds(1);
             var nextDue = tickTimerPeriod;
@@ -38,27 +38,27 @@ namespace SoundMetrics.Aris.Connection
             Transition(
                 ConnectionState.WatchingForDevice,
                 context: context,
-                ev: MakeEvent(MachineEventType.Tick));
+                ev: new StateMachineEvent(
+                        StateMachineEventType.Tick,
+                        DateTimeOffset.Now,
+                        targetAddress));
         }
 
         public int ApplySettings(ISettings settings)
         {
             var newSettingsCookie = Interlocked.Increment(ref settingsCookie);
-            events.Post(
-                MakeEvent(new ApplySettingsRequest(newSettingsCookie, settings)));
+            PostEvent(new ApplySettingsRequest(newSettingsCookie, settings));
             return newSettingsCookie;
         }
 
         private void NetworkChange_NetworkAvailabilityChanged(object? sender, NetworkAvailabilityEventArgs e)
         {
-            events.Post(
-                MakeEvent(MachineEventType.NetworkAvailabilityChanged));
+            PostEvent(StateMachineEventType.NetworkAvailabilityChanged);
         }
 
         private void NetworkChange_NetworkAddressChanged(object? sender, EventArgs e)
         {
-            events.Post(
-                MakeEvent(MachineEventType.NetworkAddressChanged));
+            PostEvent(StateMachineEventType.NetworkAddressChanged);
         }
 
         public void SetTargetAddress(IPAddress? targetAddress)
@@ -76,16 +76,14 @@ namespace SoundMetrics.Aris.Connection
             this.targetAddress = targetAddress;
 
             SetFrameListener(oldTargetAddress, targetAddress);
-            events.Post(
-                MakeEvent(new DeviceAddressChanged(oldTargetAddress, targetAddress)));
+            PostEvent(new DeviceAddressChanged(oldTargetAddress, targetAddress));
         }
 
         public IObservable<Frame> Frames => frameSubject;
 
-        private void OnTimerTick(object? _) =>
-            events.Post(MakeEvent(MachineEventType.Tick));
+        private void OnTimerTick(object? _) => PostEvent(StateMachineEventType.Tick);
 
-        private void DispatchEvent(MachineEvent ev)
+        private void DispatchEvent(StateMachineEvent ev)
         {
             try
             {
@@ -93,12 +91,12 @@ namespace SoundMetrics.Aris.Connection
                 {
                     switch (ev.EventType, ev.CompoundEvent)
                     {
-                        case (MachineEventType.Compound, ApplySettingsRequest request):
+                        case (StateMachineEventType.Compound, ApplySettingsRequest request):
                             InvokeStateProcessing(ev);
                             context.LatestSettingsRequest = request;
                             break;
 
-                        case (MachineEventType.Compound, Stop stop):
+                        case (StateMachineEventType.Compound, Stop stop):
                             try
                             {
                                 Transition(ConnectionState.End, context, ev);
@@ -110,14 +108,14 @@ namespace SoundMetrics.Aris.Connection
                             }
                             break;
 
-                        case (MachineEventType.Compound, ICompoundMachineEvent evt):
+                        case (StateMachineEventType.Compound, ICompoundMachineEvent evt):
                             InvokeStateProcessing(ev);
                             break;
 
-                        case (MachineEventType.Tick, _):
-                        case (MachineEventType.NetworkAddressChanged, _):
-                        case (MachineEventType.NetworkAvailabilityChanged, _):
-                        case (MachineEventType.MarkFrameDataReceived, _):
+                        case (StateMachineEventType.Tick, _):
+                        case (StateMachineEventType.NetworkAddressChanged, _):
+                        case (StateMachineEventType.NetworkAvailabilityChanged, _):
+                        case (StateMachineEventType.MarkFrameDataReceived, _):
                             InvokeStateProcessing(ev);
                             break;
 
@@ -145,7 +143,7 @@ namespace SoundMetrics.Aris.Connection
         private bool Transition(
             ConnectionState newState,
             StateMachineContext context,
-            in MachineEvent ev)
+            in StateMachineEvent ev)
         {
             var oldState = state;
             if (oldState == newState)
@@ -173,7 +171,7 @@ namespace SoundMetrics.Aris.Connection
             return true;
         }
 
-        private void InvokeStateProcessing(MachineEvent ev)
+        private void InvokeStateProcessing(StateMachineEvent ev)
         {
             try
             {
@@ -234,7 +232,7 @@ namespace SoundMetrics.Aris.Connection
         {
             using (var doneSignal = new ManualResetEventSlim(false))
             {
-                events.Post(MakeEvent(new Stop(doneSignal)));
+                PostEvent(new Stop(doneSignal));
                 if (!doneSignal.Wait(TimeSpan.FromSeconds(30)))
                 {
                     throw new Exception("ShutDown timed out");
@@ -278,7 +276,7 @@ namespace SoundMetrics.Aris.Connection
                         // at a period greater than the sample period.
                         .Sample(TimeSpan.FromSeconds(1))
                         .Subscribe(timestamp =>
-                            events.Post(MakeEvent(MachineEventType.MarkFrameDataReceived))
+                            PostEvent(StateMachineEventType.MarkFrameDataReceived)
                     );
                 context.ReceiverPort = frameListener.LocalEndPoint.Port;
             }
@@ -298,27 +296,35 @@ namespace SoundMetrics.Aris.Connection
             }
         }
 
-        private MachineEvent MakeEvent(MachineEventType eventType) =>
-            eventType switch
-            {
-                MachineEventType.Compound =>
-                    throw new ArgumentException($"Call not valid for event type {eventType}"),
+        private void PostEvent(StateMachineEventType eventType)
+        {
+            var stateMacineEvent =
+                eventType switch
+                {
+                    StateMachineEventType.Compound =>
+                        throw new ArgumentException($"Call not valid for event type {eventType}"),
 
-                _ => new MachineEvent(
-                        eventType,
-                        DateTimeOffset.Now,
-                        targetAddress),
-            };
+                    _ => new StateMachineEvent(
+                            eventType,
+                            DateTimeOffset.Now,
+                            targetAddress),
+                };
+            events.Post(stateMacineEvent);
+        }
 
-        private MachineEvent MakeEvent(ICompoundMachineEvent compoundEvent) =>
-            new MachineEvent(
-                MachineEventType.Compound,
-                DateTimeOffset.Now,
-                targetAddress,
-                compoundEvent);
+        private void PostEvent(ICompoundMachineEvent compoundEvent)
+        {
+            var stateMachineEvent =
+                new StateMachineEvent(
+                    StateMachineEventType.Compound,
+                    DateTimeOffset.Now,
+                    targetAddress,
+                    compoundEvent);
+            events.Post(stateMachineEvent);
+        }
 
         private readonly HandlerMap stateHandlers;
-        private readonly BufferedMessageQueue<MachineEvent> events;
+        private readonly BufferedMessageQueue<StateMachineEvent> events;
         private readonly Timer tickSource;
         private readonly string serialNumber;
         private readonly Subject<Frame> frameSubject = new Subject<Frame>();

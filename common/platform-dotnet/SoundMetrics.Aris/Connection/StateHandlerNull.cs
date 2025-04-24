@@ -7,7 +7,7 @@ internal sealed class StateHandlerNull : IStateHandler
         // Do nothing.
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
     {
         // Do nothing.
         return IStateHandler.NoStateChange;

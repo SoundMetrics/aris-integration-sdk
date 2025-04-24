@@ -6,7 +6,7 @@ internal interface IStateHandler
 
     ConnectionState? DoProcessing(
         StateMachineContext context,
-        in MachineEvent ev);
+        in StateMachineEvent ev);
 
     void OnLeave(StateMachineContext context);
 

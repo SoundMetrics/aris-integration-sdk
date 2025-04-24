@@ -8,7 +8,7 @@
             context.CommandConnection = null;
         }
 
-        public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+        public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
         {
             throw new System.NotImplementedException();
         }

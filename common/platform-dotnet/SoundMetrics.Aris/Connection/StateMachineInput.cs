@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
 {
-    internal enum MachineEventType
+    internal enum StateMachineEventType
     {
         /// <summary>
         /// Represents a clock tick. Some states need to observe
@@ -21,10 +21,10 @@ namespace SoundMetrics.Aris.Connection
     }
 
     // Simple events are stored within a struct, so no extra allocations.
-    internal struct MachineEvent
+    internal struct StateMachineEvent
     {
-        public MachineEvent(
-            MachineEventType eventType,
+        public StateMachineEvent(
+            StateMachineEventType eventType,
             DateTimeOffset timestamp,
             IPAddress? deviceAddress,
             ICompoundMachineEvent? compoundEvent = null)
@@ -35,7 +35,7 @@ namespace SoundMetrics.Aris.Connection
             CompoundEvent = compoundEvent;
         }
 
-        public MachineEventType EventType { get; set; }
+        public StateMachineEventType EventType { get; set; }
         public DateTimeOffset Timestamp { get; }
         public IPAddress? DeviceAddress { get; }
         public ICompoundMachineEvent? CompoundEvent { get; }
@@ -46,7 +46,7 @@ namespace SoundMetrics.Aris.Connection
         public string EventName =>
             EventType switch
             {
-                MachineEventType.Compound => $"Compound '{CompoundName}'",
+                StateMachineEventType.Compound => $"Compound '{CompoundName}'",
                 _ => $"{EventType}",
             };
     }

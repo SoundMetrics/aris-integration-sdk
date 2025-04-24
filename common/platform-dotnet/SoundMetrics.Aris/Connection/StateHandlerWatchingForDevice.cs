@@ -10,11 +10,11 @@ internal sealed class StateHandlerWatchingForDevice : IStateHandler
         Log.Information("Watching for device");
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
     {
         switch (ev.EventType, ev.DeviceAddress)
         {
-            case (MachineEventType.Tick, IPAddress deviceAddress):
+            case (StateMachineEventType.Tick, IPAddress deviceAddress):
                 Log.Debug("Watching for device address {deviceAddress}", deviceAddress);
 
                 context.DeviceAddress = deviceAddress;

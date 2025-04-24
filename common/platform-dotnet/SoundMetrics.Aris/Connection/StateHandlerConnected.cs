@@ -16,22 +16,22 @@ internal sealed class StateHandlerConnected : IStateHandler
         ApplySettingsRequest(context, context.LatestSettingsRequest);
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
     {
         switch (ev.EventType, ev.CompoundEvent)
         {
-            case (MachineEventType.Compound, ApplySettingsRequest request):
+            case (StateMachineEventType.Compound, ApplySettingsRequest request):
                 ApplySettingsRequest(context, request);
                 break;
 
-            case (MachineEventType.Compound, DeviceAddressChanged _):
+            case (StateMachineEventType.Compound, DeviceAddressChanged _):
                 return ConnectionState.ConnectionTerminated;
 
-            case (MachineEventType.MarkFrameDataReceived, _):
+            case (StateMachineEventType.MarkFrameDataReceived, _):
                 context.LatestFramePartTimestamp = ev.Timestamp;
                 break;
 
-            case (MachineEventType.Tick, _):
+            case (StateMachineEventType.Tick, _):
                 if (ev.Timestamp >
                     context.LatestFramePartTimestamp + FramePartReceiptTimeout)
                 {

@@ -12,7 +12,7 @@ internal sealed class StateHandlerConnectionTerminated : IStateHandler
         context.CommandConnection = null;
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in MachineEvent ev)
+    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
     {
         return IStateHandler.NoStateChange;
     }
