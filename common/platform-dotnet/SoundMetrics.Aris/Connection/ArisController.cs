@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Availability;
-using SoundMetrics.Aris.Connection;
 using SoundMetrics.Aris.Core.Raw;
 using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
@@ -10,7 +9,7 @@ using System.Net;
 using System.Reactive.Linq;
 using System.Threading;
 
-namespace SoundMetrics.Aris
+namespace SoundMetrics.Aris.Connection
 {
     [DebuggerDisplay("ArisController for {SerialNumber}")]
     public sealed class ArisController : IDisposable
@@ -37,13 +36,13 @@ namespace SoundMetrics.Aris
                 throw new ArgumentNullException(nameof(syncContext));
             }
 
-            this.serialNumber = arisBeacon.SerialNumber;
+            serialNumber = arisBeacon.SerialNumber;
 
             // Create the state machine before setting up the inputs
             // that drive it.
             stateMachine = new StateMachine(serialNumber, arisBeacon.SystemType);
 
-            availability = new Availability.AvailabilityStatus(
+            availability = new AvailabilityStatus(
                 TimeSpan.FromSeconds(5),
                 syncContext);
             availabilitySub =
@@ -85,7 +84,7 @@ namespace SoundMetrics.Aris
                     var beacon = notice.LatestBeacon;
                     var isNew = lastObservedAddress is null;
                     var addressChanged =
-                        !isNew && !Object.Equals(lastObservedAddress, beacon.IPAddress);
+                        !isNew && !Equals(lastObservedAddress, beacon.IPAddress);
                     var version = beacon.SoftwareVersion;
 
                     if (isNew || addressChanged)
