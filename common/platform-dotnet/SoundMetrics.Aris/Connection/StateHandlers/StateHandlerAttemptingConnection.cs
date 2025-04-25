@@ -52,6 +52,8 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
                         {
                             try
                             {
+                                Log.Debug("Attempting to connect to {receiverEndPoint}", receiverEndPoint);
+
                                 context.CommandConnection =
                                     CommandConnection.Create(
                                         context.DeviceAddress,

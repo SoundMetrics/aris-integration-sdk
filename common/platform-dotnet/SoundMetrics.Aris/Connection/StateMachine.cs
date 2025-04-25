@@ -273,7 +273,9 @@ namespace SoundMetrics.Aris.Connection
 
             if (!(newTargetAddress is null))
             {
-                frameListener = new FrameListener(IPAddress.Any, frameSubject);
+                var listenerAddress =
+                    NetworkSupport.FindLocalIPAddress(newTargetAddress, IPAddress.Any);
+                frameListener = new FrameListener(listenerAddress, frameSubject);
                 validPacketSub =
                     frameListener.ValidPacketReceived
                         // Sample every second for marking receipt; this

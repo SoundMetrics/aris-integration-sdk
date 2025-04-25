@@ -26,15 +26,12 @@ namespace SoundMetrics.Aris.Connection
             ArisBeacon arisBeacon,
             SynchronizationContext syncContext)
         {
-            if (!uint.TryParse(serialNumber, out var _))
+            if (!uint.TryParse(arisBeacon.SerialNumber, out var _))
             {
                 throw new ArgumentException("Cannot parse", nameof(serialNumber));
             }
 
-            if (syncContext is null)
-            {
-                throw new ArgumentNullException(nameof(syncContext));
-            }
+            ArgumentNullException.ThrowIfNull(syncContext);
 
             serialNumber = arisBeacon.SerialNumber;
 
