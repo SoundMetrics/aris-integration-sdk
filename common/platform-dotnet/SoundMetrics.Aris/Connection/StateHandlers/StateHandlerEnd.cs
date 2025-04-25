@@ -1,4 +1,4 @@
-﻿namespace SoundMetrics.Aris.Connection
+﻿namespace SoundMetrics.Aris.Connection.StateHandlers
 {
     internal sealed class StateHandlerEnd : IStateHandler
     {

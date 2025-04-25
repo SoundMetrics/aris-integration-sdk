@@ -1,15 +1,19 @@
-﻿namespace SoundMetrics.Aris.Connection;
+﻿using Serilog;
 
-internal sealed class StateHandlerNull : IStateHandler
+namespace SoundMetrics.Aris.Connection.StateHandlers;
+
+internal sealed class StateHandlerConnectionTerminated : IStateHandler
 {
     public void OnEnter(StateMachineContext context)
     {
-        // Do nothing.
+        Log.Information("Connection terminated");
+
+        context.CommandConnection?.Dispose();
+        context.CommandConnection = null;
     }
 
     public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
     {
-        // Do nothing.
         return IStateHandler.NoStateChange;
     }
 

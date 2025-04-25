@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.Net;
 
-namespace SoundMetrics.Aris.Connection;
+namespace SoundMetrics.Aris.Connection.StateHandlers;
 
 internal sealed class StateHandlerWatchingForDevice : IStateHandler
 {

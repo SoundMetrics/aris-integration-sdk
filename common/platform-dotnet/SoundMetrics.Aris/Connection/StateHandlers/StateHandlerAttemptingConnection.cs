@@ -5,7 +5,7 @@ using SoundMetrics.Aris.Network;
 using System.Net.Sockets;
 using System.Net;
 
-namespace SoundMetrics.Aris.Connection;
+namespace SoundMetrics.Aris.Connection.StateHandlers;
 
 internal sealed class StateHandlerAttemptingConnection : IStateHandler
 {
@@ -110,8 +110,8 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
                 var hasAlreadyTried = !(mostRecentAttempt is null);
                 var tryNow =
                     !hasAlreadyTried
-                    || (mostRecentAttempt is DateTimeOffset latestAttempt
-                        && timestamp >= latestAttempt + backoffPeriod);
+                    || mostRecentAttempt is DateTimeOffset latestAttempt
+                        && timestamp >= latestAttempt + backoffPeriod;
                 return tryNow;
             }
         }

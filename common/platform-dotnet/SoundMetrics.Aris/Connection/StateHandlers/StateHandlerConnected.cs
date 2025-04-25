@@ -3,7 +3,7 @@ using SoundMetrics.Aris.Connection.Commands;
 using System;
 using System.Globalization;
 
-namespace SoundMetrics.Aris.Connection;
+namespace SoundMetrics.Aris.Connection.StateHandlers;
 
 internal sealed class StateHandlerConnected : IStateHandler
 {
