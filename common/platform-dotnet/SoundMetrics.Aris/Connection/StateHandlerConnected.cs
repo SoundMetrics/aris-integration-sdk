@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Connection.Commands;
 using System;
 using System.Globalization;
 
@@ -52,7 +53,6 @@ internal sealed class StateHandlerConnected : IStateHandler
         if (request is ApplySettingsRequest req
             && context.CommandConnection is CommandConnection connection)
         {
-            Log.Debug("Sending settings type [{settingsType}]", req.SettingsType.Name);
             connection.SendCommand(req);
         }
     }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System;
 using SoundMetrics.Aris.Network;
 using System.Net.Sockets;
+using System.Net;
 
 namespace SoundMetrics.Aris.Connection;
 
@@ -47,7 +48,7 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
 
                     if (!(context.DeviceAddress is null))
                     {
-                        if (context.ReceiverPort is int port)
+                        if (context.ReceiverEndPoint is IPEndPoint receiverEndPoint)
                         {
                             try
                             {
@@ -55,7 +56,7 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
                                     CommandConnection.Create(
                                         context.DeviceAddress,
                                         context.SystemType,
-                                        port,
+                                        receiverEndPoint,
                                         context.Salinity);
                                 return ConnectionState.Connected;
                             }
@@ -96,7 +97,7 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
                         else
                         {
                             Log.Error(
-                                $"{nameof(context.DeviceAddress)} is set but {nameof(context.ReceiverPort)} is not");
+                                $"{nameof(context.DeviceAddress)} is set but {nameof(context.ReceiverEndPoint)} is not");
                         }
                     }
                 }

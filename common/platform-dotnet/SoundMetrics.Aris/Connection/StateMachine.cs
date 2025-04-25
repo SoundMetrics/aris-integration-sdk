@@ -1,5 +1,7 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Connection.Commands;
 using SoundMetrics.Aris.Core;
+using SoundMetrics.Aris.Core.Raw;
 using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
 using System;
@@ -44,10 +46,10 @@ namespace SoundMetrics.Aris.Connection
                         targetAddress));
         }
 
-        public int ApplySettings(ISettings settings)
+        public int ApplySettings(AcousticSettingsRaw settings)
         {
             var newSettingsCookie = Interlocked.Increment(ref settingsCookie);
-            PostEvent(new ApplySettingsRequest(newSettingsCookie, settings));
+            PostEvent(new ApplySettingsRequest((uint)newSettingsCookie, settings));
             return newSettingsCookie;
         }
 
@@ -280,7 +282,7 @@ namespace SoundMetrics.Aris.Connection
                         .Subscribe(timestamp =>
                             PostEvent(StateMachineEventType.MarkFrameDataReceived)
                     );
-                context.ReceiverPort = frameListener.LocalEndPoint.Port;
+                context.ReceiverEndPoint = frameListener.LocalEndPoint;
             }
         }
 

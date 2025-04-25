@@ -1,4 +1,5 @@
-﻿using SoundMetrics.Aris.Core;
+﻿using SoundMetrics.Aris.Connection.Commands;
+using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Network;
 using System;
 using System.Net;
@@ -11,7 +12,7 @@ namespace SoundMetrics.Aris.Connection
         public static CommandConnection Create(
             IPAddress deviceAddress,
             SystemType systemType,
-            int receiverPort,
+            IPEndPoint ReceiverEndPoint,
             Salinity salinity)
         {
             // ARIS is currently IPv4 only. We don't need to specify this when
@@ -35,8 +36,8 @@ namespace SoundMetrics.Aris.Connection
                 {
                     tcp = null;
 
-                    InitializeSimplifiedProtocol(
-                        io, DateTimeOffset.Now, receiverPort, salinity);
+                    Initialize(
+                        io, DateTimeOffset.Now, ReceiverEndPoint, salinity);
                     return new CommandConnection(io);
                 }
                 catch
@@ -72,26 +73,20 @@ namespace SoundMetrics.Aris.Connection
             this.io = io;
         }
 
-        private static void InitializeSimplifiedProtocol(
+        private static void Initialize(
             ConnectionIO io,
             DateTimeOffset currentTime,
-            int receiverPort,
+            IPEndPoint ReceiverEndPoint,
             Salinity salinity)
         {
             var initializeCommand =
-                new InitializeCommand(currentTime, receiverPort, salinity);
-            var response = io.SendCommand(initializeCommand);
-
-            if (!response.IsSuccessful)
-            {
-                var joinedResponseText = string.Join("\n", response.ResponseText);
-                throw new Exception("Protocol initialization failed: " + joinedResponseText);
-            }
+                new InitializeDeviceConnection(currentTime, ReceiverEndPoint, salinity);
+            io.SendCommand(initializeCommand);
         }
 
-        public CommandResponse SendCommand(ICommand command)
+        public void SendCommand(IOutgoingCommand command)
         {
-            return io.SendCommand(command);
+            io.SendCommand(command);
         }
 
         private void Dispose(bool disposing)

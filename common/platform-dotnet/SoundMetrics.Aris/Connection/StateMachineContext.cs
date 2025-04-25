@@ -1,4 +1,5 @@
-﻿using SoundMetrics.Aris.Core;
+﻿using SoundMetrics.Aris.Connection.Commands;
+using SoundMetrics.Aris.Core;
 using System;
 using System.Net;
 
@@ -17,9 +18,9 @@ namespace SoundMetrics.Aris.Connection
         public SystemType SystemType { get; set; }
 
         /// <summary>
-        /// The UDP port on which we wish to receive frames.
+        /// The IPAddress and UDP port on which we wish to receive frames.
         /// </summary>
-        public int? ReceiverPort { get; set;  }
+        public IPEndPoint? ReceiverEndPoint { get; set;  }
 
         /// <summary>
         /// The salinity of the surrounding water.

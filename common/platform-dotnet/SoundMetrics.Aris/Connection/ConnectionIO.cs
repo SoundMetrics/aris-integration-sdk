@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SoundMetrics.Aris.Connection.Commands;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,13 +23,9 @@ namespace SoundMetrics.Aris.Connection
             try
             {
                 stream = new NetworkStream(tcp.Client);
-                reader = new StreamReader(stream, Encoding.ASCII);
-                writer = new StreamWriter(stream, Encoding.ASCII);
             }
             catch
             {
-                reader?.Dispose();
-                writer?.Dispose();
                 stream?.Dispose();
                 tcp.Dispose();
                 throw;
@@ -50,51 +47,14 @@ namespace SoundMetrics.Aris.Connection
 
         public IPEndPoint LocalEndpoint { get; }
 
-        public CommandResponse SendCommand(ICommand command)
+        public void SendCommand(IOutgoingCommand command)
         {
-            foreach (var line in command.GenerateCommand())
+            var messageParts = OutgoingCommandGenerator.GenerateOutgoingCommands(command);
+            Debug.Assert(messageParts.Count > 0);
+
+            foreach (var messagePart in messageParts)
             {
-                Log.Debug("Sending: [{commandSegment}]", line);
-                writer.WriteLine(line);
-            }
-
-            // An empty line delimits messages in the SimplifiedProtocol.
-            writer.WriteLine("");
-            writer.Flush();
-
-            var response = ReceiveResponse(command is ISettings);
-            Log.Information(
-                "Response: [{response}]",
-                string.Join("\n", response.ResponseText));
-            return response;
-        }
-
-        private CommandResponse ReceiveResponse(bool isSettingsCommand)
-        {
-            var lines = new List<string>();
-            string? line;
-
-            while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
-            {
-                lines.Add(line);
-            }
-
-            if (line is null)
-            {
-                throw new Exception("Connection failed");
-            }
-
-            var success = GetStatusCode() == "200";
-            return
-                isSettingsCommand
-                    ? new SettingsRequestResponse(success, lines)
-                    : new CommandResponse(success, lines);
-
-            string GetStatusCode()
-            {
-                var firstLine = lines[0].Trim();
-                var firstWS = firstLine.IndexOfAny(new[] { ' ', '\t' });
-                return (firstWS < 0) ? "" : firstLine.Substring(0, firstWS);
+                stream.Write(messagePart);
             }
         }
 
@@ -104,8 +64,6 @@ namespace SoundMetrics.Aris.Connection
             {
                 if (disposing)
                 {
-                    reader.Dispose();
-                    writer.Dispose();
                     stream.Dispose();
                     tcp.Dispose();
                 }
@@ -124,8 +82,6 @@ namespace SoundMetrics.Aris.Connection
 
         private readonly TcpClient tcp;
         private readonly NetworkStream stream;
-        private readonly StreamReader reader;
-        private readonly StreamWriter writer;
 
         private bool disposed;
     }

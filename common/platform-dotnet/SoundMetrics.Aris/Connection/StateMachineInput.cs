@@ -70,32 +70,6 @@ namespace SoundMetrics.Aris.Connection
     }
 
     /// <summary>
-    /// Represents a request for new settings.
-    /// </summary>
-    internal sealed class ApplySettingsRequest : ICompoundMachineEvent, ICommand
-    {
-        public ApplySettingsRequest(int settingsCookie, ISettings settings)
-        {
-            SettingsCookie = settingsCookie;
-            this.settings = settings;
-        }
-
-        public int SettingsCookie { get; }
-
-        public Type SettingsType => settings.GetType();
-
-        public string[] GenerateCommand()
-        {
-            // Command verb is supplied by GenerateCommand()
-            return ((ICommand)settings).GenerateCommand()
-                    .Concat(new[] { $"settings_cookie {SettingsCookie}" })
-                    .ToArray();
-        }
-
-        private readonly ISettings settings;
-    }
-
-    /// <summary>
     /// Indicates that frame data was received.
     /// This is used to detect when the ARIS has stopped sending frame packets.
     /// The command connection uses keep-alives, but in limited scenarios--

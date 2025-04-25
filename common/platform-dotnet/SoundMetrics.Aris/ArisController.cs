@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Availability;
 using SoundMetrics.Aris.Connection;
+using SoundMetrics.Aris.Core.Raw;
 using SoundMetrics.Aris.Data;
 using SoundMetrics.Aris.Network;
 using System;
@@ -52,7 +53,7 @@ namespace SoundMetrics.Aris
                     .Subscribe(OnBeacon);
         }
 
-        public int ApplySettings(ISettings settings)
+        public int ApplySettings(AcousticSettingsRaw settings)
         {
             return stateMachine.ApplySettings(settings);
         }
