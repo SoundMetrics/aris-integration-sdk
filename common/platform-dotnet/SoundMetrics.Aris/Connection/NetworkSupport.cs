@@ -88,18 +88,13 @@ internal static class NetworkSupport
             foreach (var nic in NetworkInterface.GetAllNetworkInterfaces()
                                     .Where(IsADesiredInterfaceType))
             {
-                if (nic.Name.Contains("My External Switch"))
-                {
-                    Debugger.Break();
-                }
-
                 if (nic.OperationalStatus == OperationalStatus.Up)
                 {
                     var ipProps = nic.GetIPProperties();
                     foreach (var uni in ipProps.UnicastAddresses)
                     {
                         var mask = uni.IPv4Mask;
-                        Log.Debug("NIC {nicName} has mask {mask}", nic.Name, mask);
+                        Log.Debug("NIC {nicName} has mask {mask}; addr={uniAddress}", nic.Name, mask, uni.Address);
                         if (IsInSameSubnet(remoteIPAddress, uni.Address, mask))
                         {
                             yield return uni.Address;
