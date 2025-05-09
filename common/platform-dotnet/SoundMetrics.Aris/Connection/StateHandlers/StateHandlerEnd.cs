@@ -13,7 +13,8 @@
             StateMachineContext context,
             in StateMachineEvent ev)
         {
-            throw new System.NotImplementedException();
+            // Do nothing.
+            return IStateHandler.NoStateChange;
         }
 
         public void OnLeave(StateMachineContext context)
