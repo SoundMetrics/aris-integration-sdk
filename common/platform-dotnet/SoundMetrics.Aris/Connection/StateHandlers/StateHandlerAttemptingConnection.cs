@@ -1,9 +1,9 @@
 ﻿using Serilog;
-using System.Diagnostics;
-using System;
 using SoundMetrics.Aris.Network;
-using System.Net.Sockets;
+using System;
+using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 
 namespace SoundMetrics.Aris.Connection.StateHandlers;
 
@@ -26,18 +26,27 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
         failureLogCountdown = 5;
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
+    public ConnectionState? DoProcessing(
+        ConnectionState currentState,
+        StateMachineContext context,
+        in StateMachineEvent ev)
     {
         return (ev.EventType, ev.CompoundEvent) switch
         {
-            (StateMachineEventType.Compound, DeviceAddressChanged _) =>
-                ConnectionState.ConnectionTerminated,
+            (StateMachineEventType.Compound, DeviceAddressChanged change) =>
+                NoteNewDeviceAddress(change),
 
             (StateMachineEventType.Tick, _) =>
                 AttemptConnection(ev.Timestamp),
 
             _ => default
         };
+
+        ConnectionState NoteNewDeviceAddress(DeviceAddressChanged change)
+        {
+            context.DeviceAddress = change.DeviceAddress;
+            return ConnectionState.DeviceAddressChanged;
+        }
 
         ConnectionState? AttemptConnection(DateTimeOffset timestamp)
         {
@@ -140,7 +149,6 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
 
     public void OnLeave(StateMachineContext context)
     {
-        InitializeState();
     }
 
     private static readonly TimeSpan MaxBackoffTime = TimeSpan.FromSeconds(5.0);

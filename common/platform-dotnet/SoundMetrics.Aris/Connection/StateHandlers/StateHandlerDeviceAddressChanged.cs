@@ -1,10 +1,9 @@
 ﻿namespace SoundMetrics.Aris.Connection.StateHandlers;
 
-internal sealed class StateHandlerNull : IStateHandler
+internal sealed class StateHandlerDeviceAddressChanged : IStateHandler
 {
     public void OnEnter(StateMachineContext context)
     {
-        // Do nothing.
     }
 
     public ConnectionState? DoProcessing(
@@ -12,12 +11,10 @@ internal sealed class StateHandlerNull : IStateHandler
         StateMachineContext context,
         in StateMachineEvent ev)
     {
-        // Do nothing.
-        return IStateHandler.NoStateChange;
+        return ConnectionState.WatchingForDevice;
     }
 
     public void OnLeave(StateMachineContext context)
     {
-        // Do nothing.
     }
 }

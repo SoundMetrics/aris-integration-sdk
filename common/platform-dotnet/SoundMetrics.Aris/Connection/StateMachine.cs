@@ -168,9 +168,10 @@ namespace SoundMetrics.Aris.Connection
 
                 stateHandlers[oldState].OnLeave(context);
                 state = next;
+                Log.Debug("Entering state [{newState}]", next);
                 stateHandlers[next].OnEnter(context);
 
-                nextState = stateHandlers[next].DoProcessing(context, ev);
+                nextState = stateHandlers[next].DoProcessing(state, context, ev);
             }
 
             return true;
@@ -180,7 +181,7 @@ namespace SoundMetrics.Aris.Connection
         {
             try
             {
-                var requestedState = stateHandlers[state].DoProcessing(context, ev);
+                var requestedState = stateHandlers[state].DoProcessing(state, context, ev);
                 if (requestedState is ConnectionState newState)
                 {
                     Transition(newState, context, ev);
@@ -190,7 +191,7 @@ namespace SoundMetrics.Aris.Connection
             {
                 Log.Warning($"Exception during state transition: [{ex.Message}]");
                 Log.Warning("Terminating connection");
-                Transition(ConnectionState.ConnectionTerminated, context, ev);
+                Transition(ConnectionState.ConnectionLost, context, ev);
             }
         }
 
@@ -202,9 +203,10 @@ namespace SoundMetrics.Aris.Connection
                     { ConnectionState.WatchingForDevice, new StateHandlerWatchingForDevice() },
                     { ConnectionState.AttemptingConnection, new StateHandlerAttemptingConnection() },
                     { ConnectionState.Connected, new StateHandlerConnected() },
+                    { ConnectionState.DeviceAddressChanged, new FastTransitionTo(ConnectionState.WatchingForDevice) },
                     { ConnectionState.End, new StateHandlerEnd() },
-                    { ConnectionState.ConnectionTerminated, new StateHandlerConnectionTerminated() }
-            };
+                    { ConnectionState.ConnectionLost, new StateHandlerConnectionLost() }
+                };
         }
 
         private void Dispose(bool disposing)

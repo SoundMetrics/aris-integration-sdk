@@ -17,7 +17,10 @@ internal sealed class StateHandlerConnected : IStateHandler
         ApplySettingsRequest(context, context.LatestSettingsRequest);
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
+    public ConnectionState? DoProcessing(
+        ConnectionState currentState,
+        StateMachineContext context,
+        in StateMachineEvent ev)
     {
         switch (ev.EventType, ev.CompoundEvent)
         {
@@ -25,8 +28,11 @@ internal sealed class StateHandlerConnected : IStateHandler
                 ApplySettingsRequest(context, request);
                 break;
 
-            case (StateMachineEventType.Compound, DeviceAddressChanged _):
-                return ConnectionState.ConnectionTerminated;
+            case (StateMachineEventType.Compound, DeviceAddressChanged change):
+                {
+                    context.DeviceAddress = change.DeviceAddress;
+                    return ConnectionState.DeviceAddressChanged;
+                }
 
             case (StateMachineEventType.MarkFrameDataReceived, _):
                 context.LatestFramePartTimestamp = ev.Timestamp;
@@ -37,9 +43,9 @@ internal sealed class StateHandlerConnected : IStateHandler
                     context.LatestFramePartTimestamp + FramePartReceiptTimeout)
                 {
                     Log.Information(
-                        "Terminating, no frame parts received since {LatestFramePartTimestamp}",
+                        "Disconnecting, no frame parts received since {LatestFramePartTimestamp}",
                         context.LatestFramePartTimestamp.ToString("o", CultureInfo.InvariantCulture));
-                    return ConnectionState.ConnectionTerminated;
+                    return ConnectionState.ConnectionLost;
                 }
                 break;
         }

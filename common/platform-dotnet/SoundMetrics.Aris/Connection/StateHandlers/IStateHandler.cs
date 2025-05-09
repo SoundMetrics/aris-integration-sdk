@@ -5,6 +5,7 @@ internal interface IStateHandler
     void OnEnter(StateMachineContext context);
 
     ConnectionState? DoProcessing(
+        ConnectionState currentState,
         StateMachineContext context,
         in StateMachineEvent ev);
 

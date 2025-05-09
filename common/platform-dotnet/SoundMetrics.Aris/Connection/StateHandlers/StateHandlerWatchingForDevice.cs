@@ -10,7 +10,10 @@ internal sealed class StateHandlerWatchingForDevice : IStateHandler
         Log.Information("Watching for device");
     }
 
-    public ConnectionState? DoProcessing(StateMachineContext context, in StateMachineEvent ev)
+    public ConnectionState? DoProcessing(
+        ConnectionState currentState,
+        StateMachineContext context,
+        in StateMachineEvent ev)
     {
         switch (ev.EventType, ev.DeviceAddress)
         {

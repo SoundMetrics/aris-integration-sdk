@@ -2,6 +2,7 @@
 using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Network;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
@@ -68,8 +69,7 @@ namespace SoundMetrics.Aris.Connection
 
         private CommandConnection(ConnectionIO io)
         {
-            if (io is null) throw new ArgumentNullException(nameof(io));
-
+            ArgumentNullException.ThrowIfNull(io);
             this.io = io;
         }
 

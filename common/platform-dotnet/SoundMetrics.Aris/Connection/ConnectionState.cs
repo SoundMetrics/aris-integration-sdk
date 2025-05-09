@@ -29,7 +29,8 @@
         WatchingForDevice,
         AttemptingConnection,
         Connected,
-        ConnectionTerminated,
+        DeviceAddressChanged,
+        ConnectionLost,
         End,
     }
 }
