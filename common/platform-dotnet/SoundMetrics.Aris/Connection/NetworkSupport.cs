@@ -52,10 +52,6 @@ internal static class NetworkSupport
         foreach (var nic in NetworkInterface.GetAllNetworkInterfaces()
                                 .Where(nic => nic.OperationalStatus == OperationalStatus.Up))
         {
-            Log.Debug("### NIC [{nicName}]: isDesirable=[{isDesirable}]",
-                nic.Name,
-                IsADesiredInterfaceType(nic));
-
             var ipProps = nic.GetIPProperties();
             foreach (var uni in ipProps.UnicastAddresses)
             {
