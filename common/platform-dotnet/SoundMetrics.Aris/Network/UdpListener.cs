@@ -35,8 +35,10 @@ namespace SoundMetrics.Aris.Network
         public UdpListener(
             IPAddress address,
             int port,
-            bool reuseAddress)
+            bool reuseAddress,
+            string context)
         {
+            this.context = context;
             LocalEndPoint = GetSafeLocalEndPoint(udp);
 
             udp.Client.SetSocketOption(
@@ -76,14 +78,21 @@ namespace SoundMetrics.Aris.Network
         private async void Listen(int localPort)
         {
             bool keepGoing = true;
+            CancellationToken ct = cts.Token;
 
-            while (keepGoing)
+            while (keepGoing && !ct.IsCancellationRequested)
             {
                 try
                 {
-                    var received = await udp.ReceiveAsync().ConfigureAwait(true);
+                    var received = await udp.ReceiveAsync(ct).ConfigureAwait(true);
                     var timestamp = DateTimeOffset.Now;
                     ReceivePacket(new UdpReceived(timestamp, received, localPort));
+                }
+                catch (OperationCanceledException)
+                {
+                    // The cancellation token is cancelled.
+                    Log.Information("{function}: UdpListener was cancelled ({context})", nameof(Listen), context);
+                    keepGoing = false; // Redundant, but okay.
                 }
                 catch (ObjectDisposedException)
                 {
@@ -118,6 +127,8 @@ namespace SoundMetrics.Aris.Network
             {
                 if (disposing)
                 {
+                    cts.Cancel();
+
                     udp.Dispose();
 
                     doneSignal.WaitOne();
@@ -125,6 +136,8 @@ namespace SoundMetrics.Aris.Network
 
                     receivedSubject.OnCompleted();
                     receivedSubject.Dispose();
+
+                    cts.Dispose();
                 }
 
                 // no unmanaged resources
@@ -139,9 +152,12 @@ namespace SoundMetrics.Aris.Network
             GC.SuppressFinalize(this);
         }
 
+        private readonly string context;
         private readonly UdpClient udp = new UdpClient();
         private readonly ManualResetEvent doneSignal = new ManualResetEvent(false);
         private readonly Subject<UdpReceived> receivedSubject = new Subject<UdpReceived>();
+        private readonly CancellationTokenSource cts = new();
+
         private bool disposed;
     }
 }

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace SoundMetrics.Aris.Network
 {
@@ -17,7 +16,8 @@ namespace SoundMetrics.Aris.Network
             udpListener = new UdpListener(
                 address: ipAddress,
                 port: 0,
-                reuseAddress: false);
+                reuseAddress: false,
+                context: nameof(FrameListener));
             packetSub = udpListener.Packets.Subscribe(OnPacketReceived);
         }
 

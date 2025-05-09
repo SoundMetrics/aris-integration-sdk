@@ -36,7 +36,8 @@ namespace SoundMetrics.Aris.Network
                 new UdpListener(
                     IPAddress.Any,
                     NetworkConstants.ArisAvailabilityListenerPortV2,
-                    reuseAddress: true),
+                    reuseAddress: true,
+                    context: nameof(BeaconListener)),
                 // Not currently supported.
                 //new UdpListener(
                 //    IPAddress.Any,
