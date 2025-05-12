@@ -1,10 +1,14 @@
 ﻿using Google.Protobuf;
+using Serilog;
 using SoundMetrics.Aris.Connection.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using static Aris.Command.Types;
+
+using aris = global::Aris;
+
 
 namespace SoundMetrics.Aris.Connection;
 
@@ -25,11 +29,63 @@ internal static class OutgoingCommandGenerator
         };
     }
 
-    private static List<byte[]> Generate(ApplySettingsRequest settingsRequest)
+    private static List<byte[]> Generate(InitializeDeviceConnection initializeCommand)
+    {
+        Log.Debug("Sending Framestream receiver as [{ep}]", initializeCommand.ReceiverEndPoint);
+
+        return GenerateMessageParts(
+            MakeSetSalinityCommand(initializeCommand.Salinity),
+            MakeSetFrameStreamReceiverCommand(initializeCommand.ReceiverEndPoint),
+            MakeSetDateTimeCommand(initializeCommand.Timestamp),
+            MakeSettingsRequestCommand(initializeCommand.ApplySettingsRequest)
+            );
+    }
+
+    private static List<byte[]> Generate(ApplySettingsRequest applySettingsRequest)
+    {
+        var command = MakeSettingsRequestCommand(applySettingsRequest);
+        return GenerateMessageParts(command);
+    }
+
+    private static aris.Command MakeSetSalinityCommand(Core.Salinity salinity)
+    {
+        return new aris.Command
+        {
+            Type = aris.Command.Types.CommandType.SetSalinity,
+            Salinity = new SetSalinity
+            {
+                Salinity = (SetSalinity.Types.Salinity)salinity,
+            },
+        };
+    }
+
+    private static aris.Command MakeSetFrameStreamReceiverCommand(IPEndPoint receiverEndPoint)
+    {
+        return new aris.Command
+        {
+            Type = aris.Command.Types.CommandType.SetFramestreamReceiver,
+            FrameStreamReceiver = new SetFrameStreamReceiver
+            {
+                Ip = GetIPv4AddressString(receiverEndPoint),
+                Port = (uint)receiverEndPoint.Port,
+            },
+        };
+    }
+
+    private static aris.Command MakeSetDateTimeCommand(DateTimeOffset dateTime)
+    {
+        var formattedDateTime = FormatDateTime(dateTime);
+        return new aris.Command
+        {
+            Type = aris.Command.Types.CommandType.SetDatetime,
+            DateTime = new SetDateTime { DateTime = formattedDateTime },
+        };
+    }
+
+    private static aris.Command MakeSettingsRequestCommand(ApplySettingsRequest settingsRequest)
     {
         var settings = settingsRequest.Settings;
-
-        SetAcousticSettings message = new()
+        var settingsPart = new SetAcousticSettings()
         {
             Cookie = settingsRequest.SettingsCookie,
             FrameRate = (float)settings.FrameRate.Hz,
@@ -43,33 +99,16 @@ internal static class OutgoingCommandGenerator
             Enable150Volts = settings.Enable150Volts,
             ReceiverGain = settings.ReceiverGain,
             Frequency =
-                settings.Frequency == SoundMetrics.Aris.Core.Frequency.Low
-                        ? SetAcousticSettings.Types.Frequency.Low
-                        : SetAcousticSettings.Types.Frequency.High,
+            settings.Frequency == SoundMetrics.Aris.Core.Frequency.Low
+                    ? SetAcousticSettings.Types.Frequency.Low
+                    : SetAcousticSettings.Types.Frequency.High,
         };
 
-        return GenerateMessageParts(message);
-    }
-
-    private static List<byte[]> Generate(InitializeDeviceConnection initializeCommand)
-    {
-        SetSalinity setSalinity = new()
+        return new aris.Command
         {
-            Salinity = (SetSalinity.Types.Salinity)initializeCommand.Salinity,
+            Type = aris.Command.Types.CommandType.SetAcoustics,
+            Settings = settingsPart,
         };
-
-        SetFrameStreamReceiver setFrameStreamReceiver = new()
-        {
-            Ip = GetIPv4AddressString(initializeCommand.ReceiverEndPoint),
-            Port = (uint)initializeCommand.ReceiverEndPoint.Port,
-        };
-
-        SetDateTime setDateTime = new()
-        {
-            DateTime = FormatTimestamp(initializeCommand.Timestamp),
-        };
-
-        return GenerateMessageParts(setSalinity, setFrameStreamReceiver, setDateTime);
     }
 
     private static List<byte[]> GenerateMessageParts(params IMessage[] messages)
@@ -102,7 +141,7 @@ internal static class OutgoingCommandGenerator
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
 
-    private static string FormatTimestamp(DateTimeOffset timestamp) =>
-        $"{timestamp.Year}-{MonthAbbreviations[timestamp.Month - 1]}-{timestamp.Day:D02} "
-        + $"{timestamp.Hour:D02}:{timestamp.Minute:D02}:{timestamp.Second:D02}";
+    private static string FormatDateTime(DateTimeOffset dateTime) =>
+        dateTime.ToLocalTime().ToString("yyyy'-'MMM'-'dd HH':'mm':'ss",
+                                    System.Globalization.CultureInfo.InvariantCulture);
 }

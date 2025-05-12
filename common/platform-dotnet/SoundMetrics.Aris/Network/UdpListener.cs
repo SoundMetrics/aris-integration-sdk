@@ -33,13 +33,12 @@ namespace SoundMetrics.Aris.Network
     internal sealed class UdpListener : IDisposable
     {
         public UdpListener(
-            IPAddress address,
+            IPAddress listeningAddress,
             int port,
             bool reuseAddress,
             string context)
         {
             this.context = context;
-            LocalEndPoint = GetSafeLocalEndPoint(udp);
 
             udp.Client.SetSocketOption(
                 SocketOptionLevel.Socket,
@@ -48,27 +47,27 @@ namespace SoundMetrics.Aris.Network
 
             try
             {
-                var localEndpoint = new IPEndPoint(address, port);
+                var localEndpoint = new IPEndPoint(listeningAddress, port);
                 udp.Client.Bind(localEndpoint);
+                if (udp.Client.LocalEndPoint is IPEndPoint ep)
+                {
+                    LocalEndPoint = ep;
+                    Log.Information("Bound {type} to {ep} ({context})",
+                        nameof(UdpListener), ep, context);
+                }
+                else
+                {
+                    throw new Exception($"Couldn't get local endpoint on {localEndpoint} for {nameof(UdpListener)}");
+                }
             }
             catch (Exception ex)
             {
                 Log.Error("Binding failed on {address}:{port}; {message}",
-                    address, port, ex.Message);
+                    listeningAddress, port, ex.Message);
                 throw;
             }
 
             Task.Run(() => Listen(port));
-        }
-
-
-        private static IPEndPoint GetSafeLocalEndPoint(UdpClient udp)
-        {
-            ArgumentNullException.ThrowIfNull(udp);
-            Debug.Assert(udp.Client is not null);
-
-            var ep = udp.Client.LocalEndPoint;
-            return ep is null ? new IPEndPoint(IPAddress.Loopback, 42) : (IPEndPoint)ep;
         }
 
         public IPEndPoint LocalEndPoint { get; }

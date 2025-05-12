@@ -14,7 +14,7 @@ namespace SoundMetrics.Aris.Network
         {
             this.frameSubject = frameSubject;
             udpListener = new UdpListener(
-                address: ipAddress,
+                listeningAddress: ipAddress,
                 port: 0,
                 reuseAddress: false,
                 context: nameof(FrameListener));

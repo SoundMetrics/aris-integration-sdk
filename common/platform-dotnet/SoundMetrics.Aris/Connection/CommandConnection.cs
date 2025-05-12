@@ -1,10 +1,12 @@
-﻿using SoundMetrics.Aris.Connection.Commands;
+﻿using Serilog;
+using SoundMetrics.Aris.Connection.Commands;
 using SoundMetrics.Aris.Core;
+using SoundMetrics.Aris.Core.Raw;
 using SoundMetrics.Aris.Network;
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace SoundMetrics.Aris.Connection
 {
@@ -13,7 +15,7 @@ namespace SoundMetrics.Aris.Connection
         public static CommandConnection Create(
             IPAddress deviceAddress,
             SystemType systemType,
-            IPEndPoint ReceiverEndPoint,
+            IPEndPoint receiverEndPoint,
             Salinity salinity)
         {
             // ARIS is currently IPv4 only. We don't need to specify this when
@@ -32,14 +34,20 @@ namespace SoundMetrics.Aris.Connection
 
                 ControlTcpKeepAlive(tcp.Client);
 
+                var settingsCookieFactory = new CookieFactory();
                 var io = new ConnectionIO(tcp);
                 try
                 {
                     tcp = null;
 
                     Initialize(
-                        io, DateTimeOffset.Now, ReceiverEndPoint, salinity);
-                    return new CommandConnection(io);
+                        io,
+                        DateTimeOffset.Now,
+                        systemType,
+                        receiverEndPoint,
+                        salinity,
+                        settingsCookieFactory);
+                    return new CommandConnection(io, settingsCookieFactory);
                 }
                 catch
                 {
@@ -67,26 +75,52 @@ namespace SoundMetrics.Aris.Connection
             client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 1);
         }
 
-        private CommandConnection(ConnectionIO io)
+        private CommandConnection(ConnectionIO io, CookieFactory settingsCookieFactory)
         {
             ArgumentNullException.ThrowIfNull(io);
             this.io = io;
+            this.settingsCookieFactory = settingsCookieFactory;
         }
 
         private static void Initialize(
             ConnectionIO io,
             DateTimeOffset currentTime,
-            IPEndPoint ReceiverEndPoint,
-            Salinity salinity)
+            SystemType systemType,
+            IPEndPoint receiverEndPoint,
+            Salinity salinity,
+            CookieFactory settingsCookieFactory)
         {
             var initializeCommand =
-                new InitializeDeviceConnection(currentTime, ReceiverEndPoint, salinity);
+                new InitializeDeviceConnection(
+                    currentTime,
+                    receiverEndPoint,
+                    salinity,
+                    MakeInitialSettings(systemType, salinity, settingsCookieFactory));
             io.SendCommand(initializeCommand);
         }
 
-        public void SendCommand(IOutgoingCommand command)
+        private static ApplySettingsRequest MakeInitialSettings(
+            SystemType systemType,
+            Salinity salinity,
+            CookieFactory settingsCookieFactory)
         {
-            io.SendCommand(command);
+            var configuration = SystemConfiguration.GetConfiguration(systemType);
+
+            // ### TODO override default observed conditions after first frame
+            AcousticSettingsRaw rawSettings = configuration.GetDefaultSettings(ObservedConditions.Default, salinity);
+            var cookie = settingsCookieFactory.GetNextCookie();
+            return new ApplySettingsRequest(SettingsCookie: cookie, Settings: rawSettings);
+        }
+
+        public void RequestAcousticSettings(AcousticSettingsRaw acousticSettingsRaw)
+        {
+            io.SendCommand(
+                new ApplySettingsRequest(GetNextSettingsCookie(), acousticSettingsRaw));
+        }
+
+        private uint GetNextSettingsCookie()
+        {
+            return (uint)Interlocked.Increment(ref nextSettingsCookie);
         }
 
         private void Dispose(bool disposing)
@@ -111,7 +145,9 @@ namespace SoundMetrics.Aris.Connection
         }
 
         private readonly ConnectionIO io;
+        private readonly CookieFactory settingsCookieFactory;
 
         private bool disposed;
+        private int nextSettingsCookie = 2;
     }
 }

@@ -344,7 +344,7 @@ namespace SoundMetrics.Aris.Connection
         private IPAddress? targetAddress;
         private FrameListener? frameListener;
         private FrameListenerMetrics frameListenerMetrics = default;
-        private int settingsCookie;
+        private int settingsCookie = 2;
 
         private ConnectionState state = ConnectionState.Start;
     }

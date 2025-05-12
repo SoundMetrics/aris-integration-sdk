@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using SoundMetrics.Aris.Connection.Commands;
+using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Globalization;
 
@@ -59,7 +60,7 @@ internal sealed class StateHandlerConnected : IStateHandler
         if (request is ApplySettingsRequest req
             && context.CommandConnection is CommandConnection connection)
         {
-            connection.SendCommand(req);
+            connection.RequestAcousticSettings(req.Settings);
         }
     }
 

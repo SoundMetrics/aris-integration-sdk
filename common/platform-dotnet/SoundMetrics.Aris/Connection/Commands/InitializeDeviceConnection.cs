@@ -7,5 +7,6 @@ namespace SoundMetrics.Aris.Connection.Commands;
 internal record InitializeDeviceConnection(
         DateTimeOffset Timestamp,
         IPEndPoint ReceiverEndPoint,
-        Salinity Salinity)
+        Salinity Salinity,
+        ApplySettingsRequest ApplySettingsRequest)
     : ICompoundMachineEvent, IOutgoingCommand;
