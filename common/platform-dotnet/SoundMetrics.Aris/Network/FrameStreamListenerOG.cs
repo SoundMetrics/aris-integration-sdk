@@ -122,9 +122,13 @@ internal sealed class FrameStreamListenerOG : IDisposable
                         frameAssembler.ProcessPacket(udpReceiveResult, timestamp);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Try again.
+                    // Using UdpClient.Receive() causes an exception on shutdown, but it's
+                    // prefered for performance. Log that it's okay and try again.
+                    Log.Information(
+                        "Ignoring expected exception of type [{exceptionType}] on shutdown.",
+                        ex.GetType().Name);
                 }
             }
         }
