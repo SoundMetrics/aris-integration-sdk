@@ -11,6 +11,7 @@ internal sealed class StateHandlerDeviceAddressChanged : IStateHandler
         StateMachineContext context,
         in StateMachineEvent ev)
     {
+        context.ClearConnection();
         return ConnectionState.WatchingForDevice;
     }
 

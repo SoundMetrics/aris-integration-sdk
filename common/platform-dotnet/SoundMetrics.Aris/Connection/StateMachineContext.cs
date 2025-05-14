@@ -36,13 +36,19 @@ namespace SoundMetrics.Aris.Connection
         /// </summary>
         public CommandConnection? CommandConnection { get; set; }
 
+        public void ClearConnection()
+        {
+            CommandConnection?.Dispose();
+            CommandConnection = null;
+        }
+
         private void Dispose(bool disposing)
         {
             if (!disposed)
             {
                 if (disposing)
                 {
-                    CommandConnection?.Dispose();
+                    ClearConnection();
                 }
 
                 // no unmanaged resources

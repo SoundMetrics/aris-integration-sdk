@@ -84,6 +84,14 @@ namespace SoundMetrics.Aris.Connection
 
         public IObservable<Frame> Frames => frameSubject;
 
+        private void OnNewFrame(Frame frame)
+        {
+            if (frameSubject.HasObservers)
+            {
+                frameSubject.OnNext(frame);
+            }
+        }
+
         private void OnTimerTick(object? _) => PostEvent(StateMachineEventType.Tick);
 
         private void DispatchEvent(StateMachineEvent ev)
@@ -249,7 +257,7 @@ namespace SoundMetrics.Aris.Connection
             StopFrameListener();
         }
 
-        public FrameListenerMetrics Stop()
+        public ProtocolMetricsOG Stop()
         {
             ShutDown();
             return frameListenerMetrics;
@@ -277,7 +285,12 @@ namespace SoundMetrics.Aris.Connection
             {
                 var listenerAddress =
                     NetworkSupport.FindLocalIPAddress(newTargetAddress, IPAddress.Any);
-                frameListener = new FrameListener(listenerAddress, frameSubject);
+                frameListener =
+                    new FrameStreamListenerOG(
+                        listenerAddress,
+                        OnNewFrame,
+                        FrameStreamReliabilityPolicy.DropPartialFrames);
+
                 validPacketSub =
                     frameListener.ValidPacketReceived
                         // Sample every second for marking receipt; this
@@ -293,7 +306,7 @@ namespace SoundMetrics.Aris.Connection
 
         private void StopFrameListener()
         {
-            if (frameListener is FrameListener)
+            if (frameListener is not null)
             {
                 validPacketSub?.Dispose();
                 validPacketSub = null;
@@ -342,8 +355,8 @@ namespace SoundMetrics.Aris.Connection
         private bool disposed;
         private IDisposable? validPacketSub;
         private IPAddress? targetAddress;
-        private FrameListener? frameListener;
-        private FrameListenerMetrics frameListenerMetrics = default;
+        private FrameStreamListenerOG? frameListener;
+        private ProtocolMetricsOG frameListenerMetrics = ProtocolMetricsOG.Empty;
         private int settingsCookie = 2;
 
         private ConnectionState state = ConnectionState.Start;

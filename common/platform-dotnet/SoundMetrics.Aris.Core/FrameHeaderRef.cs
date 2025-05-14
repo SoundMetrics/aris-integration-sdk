@@ -1,4 +1,6 @@
-﻿namespace SoundMetrics.Aris.Core
+﻿using System.Numerics;
+
+namespace SoundMetrics.Aris.Core
 {
     /// <summary>
     /// Read-only reference-based container for FrameHeader for ease of
@@ -10,6 +12,9 @@
         {
             this.frameHeader = frameHeader;
         }
+
+        public static implicit operator FrameHeaderRef(in FrameHeader frameHeader)
+            => new(frameHeader);
 
         public ref readonly FrameHeader Value => ref frameHeader;
 

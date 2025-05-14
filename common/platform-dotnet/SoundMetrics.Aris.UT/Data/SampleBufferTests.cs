@@ -103,7 +103,7 @@ namespace SoundMetrics.Aris
         {
             ReadOnlySpan<byte> source = new byte[] { 1, 2, 3 };
             var expected = source;
-            var actual = ReadOnlySampleBuffer.Create(source);
+            var actual = ReadOnlySampleBuffer.CopyFrom(source);
 
             CollectionAssert.AreEqual(expected.ToArray(), actual.Span.ToArray());
         }

@@ -8,8 +8,7 @@ internal sealed class StateHandlerConnectionLost : IStateHandler
 
     public ConnectionState? DoProcessing(ConnectionState currentState, StateMachineContext context, in StateMachineEvent ev)
     {
-        context.CommandConnection?.Dispose();
-        context.CommandConnection = null;
+        context.ClearConnection();
 
         return ConnectionState.WatchingForDevice;
     }

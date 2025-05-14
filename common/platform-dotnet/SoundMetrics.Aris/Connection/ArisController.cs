@@ -58,7 +58,7 @@ namespace SoundMetrics.Aris.Connection
 
         public IObservable<Frame> Frames => stateMachine.Frames;
 
-        public FrameListenerMetrics Stop() => stateMachine.Stop();
+        public ProtocolMetricsOG Stop() => stateMachine.Stop();
 
         private static SynchronizationContext ValidateSynchronizationContext(
             SynchronizationContext? syncContext,

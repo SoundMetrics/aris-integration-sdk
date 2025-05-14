@@ -85,7 +85,7 @@ public sealed class ReadOnlySampleBuffer
         return new ReadOnlySampleBuffer(writeableBuffer);
     }
 
-    public static ReadOnlySampleBuffer Create(ReadOnlySpan<byte> source)
+    public static ReadOnlySampleBuffer CopyFrom(ReadOnlySpan<byte> source)
     {
         var writeableBuffer = new SampleBuffer(source.Length);
         source.CopyTo(writeableBuffer.Span);
