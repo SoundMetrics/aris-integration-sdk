@@ -74,9 +74,6 @@ internal sealed class FrameAssemblerOG : IDisposable
             flush(false);
         }
 
-        Trace.TraceInformation($"Reset currentFrameIndex to {currentFrameIndex}");
-        Log.Verbose("Reset current frame index to {incomingFrameIndex}", incomingFrameIndex);
-
         currentFrameIndex = incomingFrameIndex;
         expectedDataOffset = 0;
     }
@@ -348,6 +345,9 @@ internal sealed class FrameAssemblerOG : IDisposable
         }
         else if (workUnit is Drain drain)
         {
+            Log.Debug($"{nameof(ProcessWorkUnit)}: Drain request received");
+            Log.Debug($"{nameof(ProcessWorkUnit)}: TaskCompletionSource is [{drain.TaskCompletionSource}]");
+
             if (drain.TaskCompletionSource is TaskCompletionSource source)
             {
                 source.SetResult();
@@ -355,7 +355,9 @@ internal sealed class FrameAssemblerOG : IDisposable
         }
         else
         {
-            throw new ArgumentException($"Unexpected work unit type: {workUnit.GetType().Name}");
+            string message = $"Unexpected work unit type: {workUnit.GetType().Name}";
+            Log.Error(message);
+            throw new ArgumentException(message);
         }
     }
 
