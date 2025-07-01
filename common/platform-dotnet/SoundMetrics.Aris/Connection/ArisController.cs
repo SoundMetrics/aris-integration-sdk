@@ -12,7 +12,7 @@ using System.Threading;
 namespace SoundMetrics.Aris.Connection
 {
     [DebuggerDisplay("ArisController for {SerialNumber}")]
-    public sealed class ArisController : IDisposable
+    public sealed class ArisController : IArisFrameSource, IDisposable
     {
         public ArisController(ArisBeacon arisBeacon)
             : this(arisBeacon,
@@ -26,11 +26,6 @@ namespace SoundMetrics.Aris.Connection
             ArisBeacon arisBeacon,
             SynchronizationContext syncContext)
         {
-            if (!uint.TryParse(arisBeacon.SerialNumber, out var _))
-            {
-                throw new ArgumentException("Cannot parse", nameof(serialNumber));
-            }
-
             ArgumentNullException.ThrowIfNull(syncContext);
 
             serialNumber = arisBeacon.SerialNumber;
@@ -54,7 +49,7 @@ namespace SoundMetrics.Aris.Connection
             return stateMachine.ApplySettings(settings);
         }
 
-        public string SerialNumber => serialNumber;
+        public uint SerialNumber => serialNumber;
 
         public IObservable<Frame> Frames => stateMachine.Frames;
 
@@ -135,7 +130,7 @@ namespace SoundMetrics.Aris.Connection
             GC.SuppressFinalize(this);
         }
 
-        private readonly string serialNumber;
+        private readonly uint serialNumber;
         private readonly AvailabilityStatus availability;
         private readonly IDisposable availabilitySub;
         private readonly StateMachine stateMachine;

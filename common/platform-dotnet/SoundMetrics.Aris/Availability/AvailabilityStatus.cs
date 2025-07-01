@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace SoundMetrics.Aris.Availability
 {
-    using SerialNumber = String;
+    using SerialNumber = uint;
 
     public enum AvailabilityChangeType
     {

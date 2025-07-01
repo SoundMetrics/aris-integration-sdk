@@ -12,7 +12,7 @@ namespace SoundMetrics.Aris.Availability
             DateTimeOffset timestamp,
             IPAddress ipAddress,
             SystemType systemType,
-            string serialNumber,
+            uint serialNumber,
             OnboardSoftwareVersion softwareVersion,
             ConnectionAvailability availability,
             float cpuTemp,
@@ -32,7 +32,7 @@ namespace SoundMetrics.Aris.Availability
         public DateTimeOffset Timestamp { get; }
         public IPAddress IPAddress { get; }
         public SystemType SystemType { get; }
-        public string SerialNumber { get; }
+        public uint SerialNumber { get; }
         public OnboardSoftwareVersion SoftwareVersion { get; }
         public ConnectionAvailability Availability { get; }
         public float CpuTemp { get; }

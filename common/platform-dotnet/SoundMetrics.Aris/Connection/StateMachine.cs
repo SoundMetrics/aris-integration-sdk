@@ -20,7 +20,7 @@ namespace SoundMetrics.Aris.Connection
 
     internal sealed partial class StateMachine : IDisposable
     {
-        public StateMachine(string serialNumber, SystemType systemType)
+        public StateMachine(uint serialNumber, SystemType systemType)
         {
             Log.Debug("ARIS {serialNumber} StateMachine.ctor", serialNumber);
 
@@ -348,7 +348,7 @@ namespace SoundMetrics.Aris.Connection
         private readonly HandlerMap stateHandlers;
         private readonly BufferedMessageQueue<StateMachineEvent> events;
         private readonly Timer tickSource;
-        private readonly string serialNumber;
+        private readonly uint serialNumber;
         private readonly Subject<Frame> frameSubject = new Subject<Frame>();
         private readonly StateMachineContext context = new StateMachineContext();
 

@@ -94,7 +94,7 @@ namespace SoundMetrics.Aris.Network
                                             udpReceived.Timestamp,
                                             udpReceived.Received.RemoteEndPoint.Address,
                                             systemType,
-                                            beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
+                                            beacon.SerialNumber,
                                             onboardVersion,
                                             (ConnectionAvailability)beacon.ConnectionState,
                                             beacon.CpuTemp)
@@ -107,7 +107,7 @@ namespace SoundMetrics.Aris.Network
                                             udpReceived.Timestamp,
                                             udpReceived.Received.RemoteEndPoint.Address,
                                             systemType,
-                                            beacon.SerialNumber.ToString(CultureInfo.InvariantCulture),
+                                            beacon.SerialNumber,
                                             onboardVersion,
                                             (ConnectionAvailability)beacon.ConnectionState,
                                             beacon.CpuTemp)
