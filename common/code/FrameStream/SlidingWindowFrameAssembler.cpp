@@ -113,7 +113,7 @@ void SlidingWindowFrameAssembler::ProcessPacket(const_buffer data) {
   recursive_mutex::scoped_lock lock(stateGuard);
 
   frame_stream::FramePart framePart;
-  if (!framePart.ParseFromArray(buffer_cast<const uint8_t *>(data),
+  if (!framePart.ParseFromArray(static_cast<const uint8_t *>(data.data()),
                                 static_cast<int>(buffer_size(data)))) {
     invalidPacket = true;
     return;

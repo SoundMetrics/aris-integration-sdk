@@ -53,7 +53,7 @@ private:
 
 class FrameStreamListener {
 public:
-  FrameStreamListener(boost::asio::io_service &io
+  FrameStreamListener(boost::asio::io_context &io
                       , std::function<void(FrameBuilder &)> onFrameComplete
                       , std::function<size_t()> getReadBufferSize // network buffer size
                       , boost::asio::ip::address targetSonar

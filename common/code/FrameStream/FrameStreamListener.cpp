@@ -32,7 +32,7 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 
 FrameStreamListener::FrameStreamListener(
-    io_service &io
+    io_context &io
     , std::function<void(FrameBuilder &)> onFrameComplete
     , std::function<size_t()> getReadBufferSize
     , address targetSonar
@@ -84,7 +84,7 @@ FrameStreamListener::HandlePacketFrom(const boost::system::error_code &error,
   switch (error.value()) {
   case boost::system::errc::success: {
     if (!sonarFilter.has_value() || remoteEndpoint.address() == sonarFilter.value()) {
-      frameAssembler.ProcessPacket(const_buffers_1(readBuffer.data(), bytesRead));
+      frameAssembler.ProcessPacket(const_buffer(readBuffer.data(), bytesRead));
     }
     StartReceiveAsync();
   } break;

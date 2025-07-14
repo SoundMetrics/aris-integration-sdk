@@ -33,8 +33,8 @@ struct bad_frame_builder_inputs_exception : std::exception {};
 FrameBuilder::FrameBuilder(int frameIndex, const_buffer header,
                            const_buffer firstDataFragment, size_t totalDataSize)
     : frameIndex(frameIndex), totalDataSize(totalDataSize),
-      header(buffer_cast<const uint8_t *>(header),
-             buffer_cast<const uint8_t *>(header) + buffer_size(header)),
+      header(static_cast<const uint8_t*>(header.data()),
+          static_cast<const uint8_t*>(header.data()) + buffer_size(header)),
       data(totalDataSize), dataReceived(0) {
   ValidateInputs();
   AppendFrameData(0, firstDataFragment);
