@@ -2,18 +2,19 @@
 
 internal sealed class StateHandlerConnectionLost : IStateHandler
 {
-    public void OnEnter(StateMachineContext context)
-    {
-    }
-
-    public ConnectionState? DoProcessing(ConnectionState currentState, StateMachineContext context, in StateMachineEvent ev)
+    public StateEventStatus OnEnter(StateMachineContext context)
     {
         context.ClearConnection();
-
-        return ConnectionState.WatchingForDevice;
+        return StateEventStatus.Okay;
     }
 
-    public void OnLeave(StateMachineContext context)
+    public StateProcessingResult DoProcessing(ConnectionState currentState, StateMachineContext context, in StateMachineEvent ev)
     {
+        return new(StateEventStatus.Okay, ConnectionState.WatchingForDevice);
+    }
+
+    public StateEventStatus OnLeave(StateMachineContext context)
+    {
+        return StateEventStatus.Okay;
     }
 }

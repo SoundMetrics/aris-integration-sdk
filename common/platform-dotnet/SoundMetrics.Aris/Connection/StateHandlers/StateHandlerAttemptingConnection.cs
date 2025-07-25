@@ -9,14 +9,17 @@ namespace SoundMetrics.Aris.Connection.StateHandlers;
 
 internal sealed class StateHandlerAttemptingConnection : IStateHandler
 {
-    public void OnEnter(StateMachineContext context)
+    public StateEventStatus OnEnter(StateMachineContext context)
     {
+        StateEventStatus status = StateEventStatus.Okay;
+
         Log.Information(
             "Attempting connection to {deviceAddress}",
             context.DeviceAddress);
-        Debug.Assert(context.CommandConnection is null);
 
         InitializeState();
+
+        return status;
     }
 
     private void InitializeState()
@@ -26,7 +29,7 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
         failureLogCountdown = 5;
     }
 
-    public ConnectionState? DoProcessing(
+    public StateProcessingResult DoProcessing(
         ConnectionState currentState,
         StateMachineContext context,
         in StateMachineEvent ev)
@@ -42,13 +45,16 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
             _ => default
         };
 
-        ConnectionState NoteNewDeviceAddress(DeviceAddressChanged change)
+        StateProcessingResult NoteNewDeviceAddress(DeviceAddressChanged change)
         {
             context.DeviceAddress = change.DeviceAddress;
-            return ConnectionState.DeviceAddressChanged;
+            return 
+                new StateProcessingResult(
+                    StateEventStatus.Okay,
+                    ConnectionState.DeviceAddressChanged);
         }
 
-        ConnectionState? AttemptConnection(DateTimeOffset timestamp)
+        StateProcessingResult AttemptConnection(DateTimeOffset timestamp)
         {
             if (context.CommandConnection is null)
             {
@@ -69,7 +75,7 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
                                         context.SystemType,
                                         receiverEndPoint,
                                         context.Salinity);
-                                return ConnectionState.Connected;
+                                return new(StateEventStatus.Okay, ConnectionState.Connected);
                             }
                             catch (SocketException socketEx)
                             {
@@ -86,9 +92,9 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
                                 Log.Information("Couldn't connect to {ipAddress}: {exMessage}",
                                     context.DeviceAddress, errorMessage);
                             }
-#pragma warning disable CA1031 // Do not catch general exception types
+//#pragma warning disable CA1031 // Do not catch general exception types
                             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
+//#pragma warning restore CA1031 // Do not catch general exception types
                             {
                                 if (failureLogCountdown > 0)
                                 {
@@ -147,8 +153,9 @@ internal sealed class StateHandlerAttemptingConnection : IStateHandler
         }
     }
 
-    public void OnLeave(StateMachineContext context)
+    public StateEventStatus OnLeave(StateMachineContext context)
     {
+        return StateEventStatus.Okay;
     }
 
     private static readonly TimeSpan MaxBackoffTime = TimeSpan.FromSeconds(5.0);

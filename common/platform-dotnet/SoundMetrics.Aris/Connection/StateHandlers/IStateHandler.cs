@@ -2,14 +2,14 @@
 
 internal interface IStateHandler
 {
-    void OnEnter(StateMachineContext context);
+    StateEventStatus OnEnter(StateMachineContext context);
 
-    ConnectionState? DoProcessing(
+    StateProcessingResult DoProcessing(
         ConnectionState currentState,
         StateMachineContext context,
         in StateMachineEvent ev);
 
-    void OnLeave(StateMachineContext context);
+    StateEventStatus OnLeave(StateMachineContext context);
 
-    public static readonly ConnectionState? NoStateChange = default;
+    public static readonly StateProcessingResult NoStateChange = new(StateEventStatus.Okay, default);
 }

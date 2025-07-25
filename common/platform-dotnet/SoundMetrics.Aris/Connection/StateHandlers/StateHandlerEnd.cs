@@ -2,13 +2,14 @@
 {
     internal sealed class StateHandlerEnd : IStateHandler
     {
-        public void OnEnter(StateMachineContext context)
+        public StateEventStatus OnEnter(StateMachineContext context)
         {
             context.CommandConnection?.Dispose();
             context.CommandConnection = null;
+            return StateEventStatus.Okay;
         }
 
-        public ConnectionState? DoProcessing(
+        public StateProcessingResult DoProcessing(
             ConnectionState currentState,
             StateMachineContext context,
             in StateMachineEvent ev)
@@ -17,9 +18,10 @@
             return IStateHandler.NoStateChange;
         }
 
-        public void OnLeave(StateMachineContext context)
+        public StateEventStatus OnLeave(StateMachineContext context)
         {
             // Do nothing.
+            return StateEventStatus.Okay;
         }
     }
 }

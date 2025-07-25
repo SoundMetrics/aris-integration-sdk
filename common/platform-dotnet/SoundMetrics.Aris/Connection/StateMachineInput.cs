@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -8,11 +7,18 @@ namespace SoundMetrics.Aris.Connection
 {
     internal enum StateMachineEventType
     {
+        StartStateMachine,
+
         /// <summary>
         /// Represents a clock tick. Some states need to observe
         /// the passage of time.
         /// </summary>
         Tick,
+
+        /// <summary>
+        /// Represents a follow-on change within the state change loop,
+        /// </summary>
+        ContinuingStateChange,
 
         MarkFrameDataReceived,
         NetworkAddressChanged,
@@ -26,18 +32,15 @@ namespace SoundMetrics.Aris.Connection
         public StateMachineEvent(
             StateMachineEventType eventType,
             DateTimeOffset timestamp,
-            IPAddress? deviceAddress,
             ICompoundMachineEvent? compoundEvent = null)
         {
             EventType = eventType;
             Timestamp = timestamp;
-            DeviceAddress = deviceAddress;
             CompoundEvent = compoundEvent;
         }
 
         public StateMachineEventType EventType { get; set; }
         public DateTimeOffset Timestamp { get; }
-        public IPAddress? DeviceAddress { get; }
         public ICompoundMachineEvent? CompoundEvent { get; }
 
         private string CompoundName =>
@@ -49,6 +52,8 @@ namespace SoundMetrics.Aris.Connection
                 StateMachineEventType.Compound => $"Compound '{CompoundName}'",
                 _ => $"{EventType}",
             };
+
+        public override string ToString() => EventName;
     }
 
     internal interface ICompoundMachineEvent { }
@@ -108,6 +113,14 @@ namespace SoundMetrics.Aris.Connection
 
         public IPAddress? OldAddress { get; }
         public IPAddress? DeviceAddress { get; }
+    }
+
+    /// <summary>
+    /// Indicates the the frame stream receiver endpoint has changed.
+    /// </summary>
+    internal sealed class NewReceiverEndPoint(IPEndPoint? newReceiverEndPoint) : ICompoundMachineEvent
+    {
+        public IPEndPoint? EndPoint => newReceiverEndPoint;
     }
 
     /// <summary>

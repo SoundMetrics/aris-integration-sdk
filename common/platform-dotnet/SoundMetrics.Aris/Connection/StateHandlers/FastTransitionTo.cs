@@ -3,18 +3,22 @@
     internal sealed class FastTransitionTo(ConnectionState nextState)
         : IStateHandler
     {
-        public void OnEnter(StateMachineContext context)
+        public StateEventStatus OnEnter(StateMachineContext context)
         {
+            return StateEventStatus.Okay;
         }
 
-        public ConnectionState? DoProcessing(
+        public StateProcessingResult DoProcessing(
             ConnectionState currentState,
             StateMachineContext context,
             in StateMachineEvent ev)
-            => nextState;
-
-        public void OnLeave(StateMachineContext context)
         {
+            return new(StateEventStatus.Okay, nextState);
+        }
+
+        public StateEventStatus OnLeave(StateMachineContext context)
+        {
+            return StateEventStatus.Okay;
         }
     }
 }

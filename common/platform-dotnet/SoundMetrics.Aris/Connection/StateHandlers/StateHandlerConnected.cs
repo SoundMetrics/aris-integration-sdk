@@ -8,7 +8,7 @@ namespace SoundMetrics.Aris.Connection.StateHandlers;
 
 internal sealed class StateHandlerConnected : IStateHandler
 {
-    public void OnEnter(StateMachineContext context)
+    public StateEventStatus OnEnter(StateMachineContext context)
     {
         Log.Information("Connected to device at {deviceAddress} from {localEndpoint}",
             context.DeviceAddress, context.CommandConnection?.LocalEndpoint);
@@ -16,9 +16,10 @@ internal sealed class StateHandlerConnected : IStateHandler
         context.LatestFramePartTimestamp = DateTimeOffset.Now;
 
         ApplySettingsRequest(context, context.LatestSettingsRequest);
+        return StateEventStatus.Okay;
     }
 
-    public ConnectionState? DoProcessing(
+    public StateProcessingResult DoProcessing(
         ConnectionState currentState,
         StateMachineContext context,
         in StateMachineEvent ev)
@@ -32,7 +33,7 @@ internal sealed class StateHandlerConnected : IStateHandler
             case (StateMachineEventType.Compound, DeviceAddressChanged change):
                 {
                     context.DeviceAddress = change.DeviceAddress;
-                    return ConnectionState.DeviceAddressChanged;
+                    return new(StateEventStatus.Okay, ConnectionState.DeviceAddressChanged);
                 }
 
             case (StateMachineEventType.MarkFrameDataReceived, _):
@@ -46,7 +47,7 @@ internal sealed class StateHandlerConnected : IStateHandler
                     Log.Information(
                         "Disconnecting, no frame parts received since {LatestFramePartTimestamp}",
                         context.LatestFramePartTimestamp.ToString("o", CultureInfo.InvariantCulture));
-                    return ConnectionState.ConnectionLost;
+                    return new(StateEventStatus.Okay, ConnectionState.ConnectionLost);
                 }
                 break;
         }
@@ -64,9 +65,10 @@ internal sealed class StateHandlerConnected : IStateHandler
         }
     }
 
-    public void OnLeave(StateMachineContext context)
+    public StateEventStatus OnLeave(StateMachineContext context)
     {
-        // Do nothing.
+        context.ClearConnection();
+        return StateEventStatus.Okay;
     }
 
     private static readonly TimeSpan FramePartReceiptTimeout = TimeSpan.FromSeconds(5);

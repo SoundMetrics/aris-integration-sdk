@@ -2,12 +2,13 @@
 
 internal sealed class StateHandlerNull : IStateHandler
 {
-    public void OnEnter(StateMachineContext context)
+    public StateEventStatus OnEnter(StateMachineContext context)
     {
         // Do nothing.
+        return StateEventStatus.Okay;
     }
 
-    public ConnectionState? DoProcessing(
+    public StateProcessingResult DoProcessing(
         ConnectionState currentState,
         StateMachineContext context,
         in StateMachineEvent ev)
@@ -16,8 +17,9 @@ internal sealed class StateHandlerNull : IStateHandler
         return IStateHandler.NoStateChange;
     }
 
-    public void OnLeave(StateMachineContext context)
+    public StateEventStatus OnLeave(StateMachineContext context)
     {
         // Do nothing.
+        return StateEventStatus.Okay;
     }
 }

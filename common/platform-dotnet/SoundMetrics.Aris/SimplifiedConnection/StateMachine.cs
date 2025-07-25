@@ -305,7 +305,7 @@ namespace SoundMetrics.Aris.SimplifiedConnection
                         // at a period greater than the sample period.
                         .Sample(TimeSpan.FromSeconds(1))
                         .Subscribe(timestamp =>
-                        events.Post(MakeEvent(MachineEventType.MarkFrameDataReceived))
+                            events.Post(MakeEvent(MachineEventType.MarkFrameDataReceived))
                     );
                 context.ReceiverPort = frameListener.LocalEndPoint.Port;
             }
