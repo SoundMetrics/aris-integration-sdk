@@ -100,7 +100,7 @@ internal sealed class StateTransitionLog
         foreach (var logEntry in logEntries)
         {
             buf.Append(logEntry.Timestamp);
-            buf.Append(" ");
+            buf.Append(' ');
             buf.AppendLine(logEntry.GetDescription());
         }
 
@@ -113,10 +113,6 @@ internal sealed class StateTransitionLog
         {
             logEntries.RemoveAt(logEntries.Count - 1);
         }
-
-#if DEBUG
-        Trace.TraceInformation($"### Posting entry: {getDescription()}");
-#endif
 
         logEntries.Add(new(timestamp, getDescription));
     }
