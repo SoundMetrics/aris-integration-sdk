@@ -27,12 +27,11 @@ namespace SoundMetrics.Aris.Connection
 
             try
             {
-                tcp.Client.SetSocketOption(
-                    SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                //tcp.Client.SetSocketOption(
+                //    SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                ControlTcpKeepAlive(tcp.Client);
                 tcp.Connect(
                     deviceAddress, NetworkConstants.ArisSonarTcpNOListenPort);
-
-                ControlTcpKeepAlive(tcp.Client);
 
                 var settingsCookieFactory = new CookieFactory();
                 var io = new ConnectionIO(tcp);
@@ -90,6 +89,8 @@ namespace SoundMetrics.Aris.Connection
             Salinity salinity,
             CookieFactory settingsCookieFactory)
         {
+            Log.Debug("Initializing: receiverEndPoint=[{receiverEndPoint}]", receiverEndPoint);
+
             var initializeCommand =
                 new InitializeDeviceConnection(
                     currentTime,

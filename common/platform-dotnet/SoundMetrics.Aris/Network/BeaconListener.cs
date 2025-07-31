@@ -1,9 +1,9 @@
-﻿using SoundMetrics.Aris.Availability;
+﻿using Serilog;
+using SoundMetrics.Aris.Availability;
 using SoundMetrics.Aris.Core;
 using SoundMetrics.Aris.Data;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
@@ -87,7 +87,15 @@ namespace SoundMetrics.Aris.Network
 
                                 bool isVoyager = variants.Contains(VariantFlags.VoyagerVariant);
 
-                                if (isVoyager)
+                                // Address issue https://github.com/SoundMetrics/aris-integration-sdk/issues/166
+                                IPAddress deviceAddress = udpReceived.Received.RemoteEndPoint.Address;
+                                bool isLoopbackAddress = IPAddress.IsLoopback(deviceAddress);
+
+                                if (isLoopbackAddress)
+                                {
+                                    Log.Debug("Dropping beacon on loopback address");
+                                }
+                                else if (isVoyager)
                                 {
                                     beaconSubject.OnNext(
                                         new VoyagerBeacon(
@@ -172,6 +180,7 @@ namespace SoundMetrics.Aris.Network
         private readonly UdpListener[] udpListeners;
         private readonly IDisposable[] beaconSubscriptions;
         private readonly BufferedMessageQueue<UdpReceived> bufferedQueue;
+
         private bool disposed;
     }
 }
