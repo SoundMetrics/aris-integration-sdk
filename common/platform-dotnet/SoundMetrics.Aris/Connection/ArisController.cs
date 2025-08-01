@@ -2,7 +2,6 @@
 using SoundMetrics.Aris.Availability;
 using SoundMetrics.Aris.Core.Raw;
 using SoundMetrics.Aris.Data;
-using SoundMetrics.Aris.Network;
 using System;
 using System.Diagnostics;
 using System.Net;
@@ -14,16 +13,42 @@ namespace SoundMetrics.Aris.Connection
     [DebuggerDisplay("ArisController for {SerialNumber}")]
     public sealed class ArisController : IArisFrameSource, IDisposable
     {
-        public ArisController(ArisBeacon arisBeacon)
+        /// <summary>
+        /// Constructs an ArisController.
+        /// </summary>
+        /// <param name="arisBeacon">
+        /// A beacon from the ARIS to be controlled.
+        /// </param>
+        /// <param name="availability">
+        /// An availability status object. The application owns this object
+        /// and passes a reference here; ArisController does not own or
+        /// dispose of this object.
+        /// </param>
+        public ArisController(
+            ArisBeacon arisBeacon,
+            AvailabilityStatus availability)
             : this(arisBeacon,
+                   availability,
                    ValidateSynchronizationContext(
                       SynchronizationContext.Current,
                       "There is no current SynchronizationContext"))
         {
         }
 
+        /// <summary>
+        /// Constructs an ArisController.
+        /// </summary>
+        /// s<param name="arisBeacon">
+        /// A beacon from the ARIS to be controlled.
+        /// </param>
+        /// <param name="availability">
+        /// An availability status object. The application owns this object
+        /// and passes a reference here; ArisController does not own or
+        /// dispose of this object.
+        /// </param>
         public ArisController(
             ArisBeacon arisBeacon,
+            AvailabilityStatus availability,
             SynchronizationContext syncContext)
         {
             ArgumentNullException.ThrowIfNull(syncContext);
@@ -34,9 +59,7 @@ namespace SoundMetrics.Aris.Connection
             // that drive it.
             stateMachine = new StateMachine(serialNumber, arisBeacon.SystemType);
 
-            availability = new AvailabilityStatus(
-                TimeSpan.FromSeconds(5),
-                syncContext);
+            this.availability = availability;
             availabilitySub =
                 availability.Changes
                     .Where(change => change.LatestBeacon.SerialNumber == SerialNumber)
@@ -113,8 +136,6 @@ namespace SoundMetrics.Aris.Connection
                 if (disposing)
                 {
                     availabilitySub.Dispose();
-                    availability.Dispose();
-
                     stateMachine?.Dispose();
                 }
 
