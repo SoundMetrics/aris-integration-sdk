@@ -30,14 +30,14 @@ namespace SoundMetrics.Aris.Availability
         public ArisBeacon LatestBeacon { get; private set; }
     }
 
-    public sealed class AvailabilityStatus : IDisposable
+    public sealed class AvailabilityStatusReporter : IDisposable
     {
-        public AvailabilityStatus(TimeSpan timeout)
+        public AvailabilityStatusReporter(TimeSpan timeout)
             : this(timeout, SynchronizationContext.Current)
         {
         }
 
-        public AvailabilityStatus(TimeSpan timeout, SynchronizationContext? syncContext)
+        public AvailabilityStatusReporter(TimeSpan timeout, SynchronizationContext? syncContext)
         {
             if (syncContext is null)
             {

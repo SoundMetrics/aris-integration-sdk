@@ -26,7 +26,7 @@ namespace SoundMetrics.Aris.Connection
         /// </param>
         public ArisController(
             ArisBeacon arisBeacon,
-            AvailabilityStatus availability)
+            AvailabilityStatusReporter availability)
             : this(arisBeacon,
                    availability,
                    ValidateSynchronizationContext(
@@ -48,7 +48,7 @@ namespace SoundMetrics.Aris.Connection
         /// </param>
         public ArisController(
             ArisBeacon arisBeacon,
-            AvailabilityStatus availability,
+            AvailabilityStatusReporter availability,
             SynchronizationContext syncContext)
         {
             ArgumentNullException.ThrowIfNull(syncContext);
@@ -152,7 +152,7 @@ namespace SoundMetrics.Aris.Connection
         }
 
         private readonly uint serialNumber;
-        private readonly AvailabilityStatus availability;
+        private readonly AvailabilityStatusReporter availability;
         private readonly IDisposable availabilitySub;
         private readonly StateMachine stateMachine;
 
