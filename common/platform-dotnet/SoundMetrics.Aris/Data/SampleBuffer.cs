@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.Data;
 
@@ -20,53 +19,33 @@ namespace SoundMetrics.Aris.Data;
 public sealed class SampleBuffer
 {
     public SampleBuffer(int length)
+        : this(new AlignedNativeBuffer(VectorByteSize, length))
     {
-        int alignment = VectorByteSize;
-        int alignedBufferSize = CalculateLengthWithAlignmentAndPadding(length);
-        var buffer = Marshal.AllocHGlobal(alignedBufferSize);
-
-        alignedBuffer = AlignBufferStart(buffer, alignment);
-        handle = new HGlobalSafeHandle(buffer);
-        this.length = length;
     }
 
-    public int Length => length;
-
-    public Span<byte> Span
+    public SampleBuffer(AlignedNativeBuffer alignedNativeBuffer)
     {
-        get
+        int expectedAlignment = VectorByteSize;
+
+        if (alignedNativeBuffer.Alignment != expectedAlignment)
         {
-            unsafe
-            {
-                return new Span<byte>(alignedBuffer.ToPointer(), length);
-            }
+            throw new Exception(
+                $"Alignment value [{alignedNativeBuffer.Alignment}] of native buffer "
+                + $"is not the expected alignment of [{expectedAlignment}]");
         }
+
+        this.alignedNativeBuffer = alignedNativeBuffer;
     }
 
-    internal IntPtr UnsafeBuffer => alignedBuffer;
+    public int Length => alignedNativeBuffer.Length;
 
-    // Allows for alignment at buffer start and for a complete stride overrun at the
-    // end of the buffer (where stride is Vector<byte>.Count).
-    private static int CalculateLengthWithAlignmentAndPadding(int length) => length + (2 * VectorByteSize);
+    public static int Alignment => VectorByteSize;
 
-    private static IntPtr AlignBufferStart(IntPtr buffer, int alignment)
-    {
-        long bufAddr = buffer.ToInt64();
-        long startAddr = ((bufAddr + alignment - 1) / alignment) * alignment;
-        return new IntPtr(startAddr);
-    }
+    public Span<byte> Span => alignedNativeBuffer.Span;
+
+    internal IntPtr UnsafeBuffer => alignedNativeBuffer.UnsafeBuffer;
 
     private static readonly int VectorByteSize = Vector<byte>.Count;
 
-    // The allocation is owned by this SafeHandle which, on its own, will
-    // be finalized when there are no more references to this instance of
-    // SampleBuffer.
-    //
-    // This handle must be kept as it is indirectly referenced by the buffer code.
-#pragma warning disable IDE0052 // Remove unread private members
-    private readonly HGlobalSafeHandle handle;
-#pragma warning restore IDE0052 // Remove unread private members
-
-    private readonly IntPtr alignedBuffer;
-    private readonly int length;
+    private readonly AlignedNativeBuffer alignedNativeBuffer;
 }

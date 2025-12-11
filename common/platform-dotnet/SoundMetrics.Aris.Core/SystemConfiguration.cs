@@ -4,6 +4,7 @@ using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SoundMetrics.Aris.Core
@@ -107,7 +108,10 @@ namespace SoundMetrics.Aris.Core
 
         public InclusiveValueRange<Distance> WindowLimits { get; internal set; }
 
-        public static bool TryGetSampleGeometry(in FrameHeader frameHeader, out SampleGeometry? sampleGeometry)
+        public static bool TryGetSampleGeometry(
+            in FrameHeader frameHeader,
+            [NotNullWhen(returnValue: true)]
+            out SampleGeometry? sampleGeometry)
         {
             try
             {
