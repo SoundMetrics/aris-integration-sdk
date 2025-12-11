@@ -1,6 +1,8 @@
 ﻿using SoundMetrics.Aris.Core;
 using System;
 
+using FrameHeader = global::Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.Data.Wrappers
 {
 #pragma warning disable CA1815 // Override equals and operator equals on value types
@@ -12,7 +14,8 @@ namespace SoundMetrics.Aris.Data.Wrappers
             this.frameHeader = frameHeader;
         }
 
-        public bool HasValidSignature { get => frameHeader[0].Version == Core.FrameHeader.ArisFrameSignature; }
+        public bool HasValidSignature
+            => frameHeader[0].Version == global::Aris.FileTypes.ArisFrameHeader.ArisFrameSignature;
 
         public ArisFrameHeaderIdentity Identity { get => new ArisFrameHeaderIdentity(this); }
         public ArisFrameHeaderTime Time { get => new ArisFrameHeaderTime(this); }

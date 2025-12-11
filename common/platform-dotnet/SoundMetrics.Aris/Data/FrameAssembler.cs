@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.Data
 {
     internal sealed class FrameAssembler

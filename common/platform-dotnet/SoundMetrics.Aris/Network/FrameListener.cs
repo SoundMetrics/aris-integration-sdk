@@ -6,6 +6,8 @@ using System.Net;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.Network
 {
     internal sealed class FrameListener : IDisposable

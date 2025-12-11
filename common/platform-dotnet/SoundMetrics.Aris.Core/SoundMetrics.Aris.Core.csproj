@@ -15,4 +15,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\aris-file-sdk\file-utility-code\SoundMetrics.Aris.Headers\SoundMetrics.Aris.Headers.csproj" />
+  </ItemGroup>
+
 </Project>

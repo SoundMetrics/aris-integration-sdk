@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.File
 {
     using static Serialization;

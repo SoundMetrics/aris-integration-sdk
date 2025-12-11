@@ -4,6 +4,8 @@ using SoundMetrics.Aris.Data;
 using System;
 using System.IO;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris
 {
     [TestClass]

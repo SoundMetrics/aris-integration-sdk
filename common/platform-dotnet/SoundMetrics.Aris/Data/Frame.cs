@@ -1,6 +1,8 @@
 ﻿using SoundMetrics.Aris.Core;
 using System;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.Data
 {
     public record class Frame(

@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\aris-file-sdk\file-utility-code\SoundMetrics.Aris.Headers\SoundMetrics.Aris.Headers.csproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Core\SoundMetrics.Aris.Core.csproj" />
     <ProjectReference Include="..\SoundMetrics.Aris.Messages\SoundMetrics.Aris.Messages.csproj" />
   </ItemGroup>

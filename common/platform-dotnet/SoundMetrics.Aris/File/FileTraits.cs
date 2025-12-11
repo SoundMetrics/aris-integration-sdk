@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.File
 {
     public record class FileTraits(

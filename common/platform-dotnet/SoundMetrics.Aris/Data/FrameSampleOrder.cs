@@ -3,6 +3,8 @@
 using SoundMetrics.Aris.Core;
 using System;
 
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
+
 namespace SoundMetrics.Aris.Data
 {
     internal static class FrameSampleOrder

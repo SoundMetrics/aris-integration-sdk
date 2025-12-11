@@ -3,9 +3,10 @@
 using SoundMetrics.Aris.Core.Raw;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+
+using FrameHeader = Aris.FileTypes.ArisFrameHeader;
 
 namespace SoundMetrics.Aris.Core
 {

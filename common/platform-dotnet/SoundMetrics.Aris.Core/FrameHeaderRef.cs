@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+﻿using FrameHeader = Aris.FileTypes.ArisFrameHeader;
 
 namespace SoundMetrics.Aris.Core
 {
