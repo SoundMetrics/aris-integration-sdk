@@ -84,7 +84,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
         {
             get
             {
-                return FrameHeaderExtensions.SonarOffsetToDateTime(parts.FrameHeader[0].sonarTimeStamp);
+                return FrameHeaderExtensions.SonarOffsetToDateTime(parts.FrameHeader[0].FrameTime);
             }
         }
 
@@ -97,7 +97,7 @@ namespace SoundMetrics.Aris.Data.Wrappers
             }
         }
 
-        public ulong TopsideTime { get => parts.FrameHeader[0].FrameTime; }
+        public ulong TopsideTime { get => parts.FrameHeader[0].PCTimeStamp; }
         public DateTime TopsideTimestamp
         {
             get
