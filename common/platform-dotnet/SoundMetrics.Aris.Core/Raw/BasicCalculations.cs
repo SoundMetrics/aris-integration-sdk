@@ -1,108 +1,107 @@
-﻿// Copyright (c) 2010-2023 Sound Metrics Corp.
+﻿// Copyright (c) 2010-2026 Sound Metrics Corp.
 
 using System;
 
-namespace SoundMetrics.Aris.Core.Raw
+namespace SoundMetrics.Aris.Core.Raw;
+
+public static class BasicCalculations
 {
-    public static class BasicCalculations
+    public static Distance CalculateWindowStart(
+        FineDuration sampleStartDelay,
+        Salinity salinity,
+        ObservedConditions observedConditions)
+        => CalculateWindowStart(sampleStartDelay, observedConditions.SpeedOfSound(salinity));
+
+    public static Distance CalculateWindowStart(
+        FineDuration sampleStartDelay,
+        Velocity speedOfSound)
+        => sampleStartDelay * speedOfSound / 2;
+
+    public static Distance CalculateWindowLength(
+        int sampleCount,
+        FineDuration samplePeriod,
+        Salinity salinity,
+        ObservedConditions observedConditions)
+        => sampleCount * samplePeriod * observedConditions.SpeedOfSound(salinity) / 2;
+
+    public static Distance CalculateWindowLength(
+        int sampleCount,
+        FineDuration samplePeriod,
+        Velocity speedOfSound)
+        => samplePeriod * sampleCount * speedOfSound / 2;
+
+    public static Distance CalculateMinimumWindowLength(
+        SystemConfiguration systemConfiguration,
+        ObservedConditions observedConditions,
+        Salinity salinity,
+        in InclusiveValueRange<int> sampleCountLimits)
     {
-        internal static Distance CalculateWindowStart(
-            FineDuration sampleStartDelay,
-            Salinity salinity,
-            ObservedConditions observedConditions)
-            => CalculateWindowStart(sampleStartDelay, observedConditions.SpeedOfSound(salinity));
+        if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
+        if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
-        internal static Distance CalculateWindowStart(
-            FineDuration sampleStartDelay,
-            Velocity speedOfSound)
-            => sampleStartDelay * speedOfSound / 2;
+        return BasicCalculations.CalculateWindowLength(
+            sampleCountLimits.Minimum,
+            systemConfiguration.RawConfiguration.SamplePeriodLimits.Minimum,
+            observedConditions.SpeedOfSound(salinity));
+    }
 
-        internal static Distance CalculateWindowLength(
-            int sampleCount,
-            FineDuration samplePeriod,
-            Salinity salinity,
-            ObservedConditions observedConditions)
-            => sampleCount * samplePeriod * observedConditions.SpeedOfSound(salinity) / 2;
+    public static Distance CalculateMinimumWindowLength(
+        SystemConfiguration systemConfiguration,
+        ObservedConditions observedConditions,
+        Salinity salinity,
+        in InclusiveValueRange<int> sampleCountLimits,
+        FineDuration samplePeriod)
+    {
+        if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
+        if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
 
-        internal static Distance CalculateWindowLength(
-            int sampleCount,
-            FineDuration samplePeriod,
-            Velocity speedOfSound)
-            => samplePeriod * sampleCount * speedOfSound / 2;
+        return BasicCalculations.CalculateWindowLength(
+            sampleCountLimits.Minimum,
+            samplePeriod,
+            observedConditions.SpeedOfSound(salinity));
+    }
 
-        internal static Distance CalculateMinimumWindowLength(
-            SystemConfiguration systemConfiguration,
-            ObservedConditions observedConditions,
-            Salinity salinity,
-            in InclusiveValueRange<int> sampleCountLimits)
-        {
-            if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
-            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
-
-            return BasicCalculations.CalculateWindowLength(
-                sampleCountLimits.Minimum,
-                systemConfiguration.RawConfiguration.SamplePeriodLimits.Minimum,
+    public static FineDuration CalculateSampleStartDelay(
+        Distance windowStart,
+        Salinity salinity,
+        ObservedConditions observedConditions)
+        => CalculateSampleStartDelay(
+                windowStart,
                 observedConditions.SpeedOfSound(salinity));
-        }
 
-        public static Distance CalculateMinimumWindowLength(
-            SystemConfiguration systemConfiguration,
-            ObservedConditions observedConditions,
-            Salinity salinity,
-            in InclusiveValueRange<int> sampleCountLimits,
-            FineDuration samplePeriod)
-        {
-            if (systemConfiguration is null) throw new ArgumentNullException(nameof(systemConfiguration));
-            if (observedConditions is null) throw new ArgumentNullException(nameof(observedConditions));
+    public static FineDuration CalculateSampleStartDelay(
+        Distance windowStart,
+        Velocity speedOfSound)
+    {
+        return 2 * windowStart / speedOfSound;
+    }
 
-            return BasicCalculations.CalculateWindowLength(
-                sampleCountLimits.Minimum,
-                samplePeriod,
-                observedConditions.SpeedOfSound(salinity));
-        }
+    public static FineDuration CalculateSampleStartDelay(
+        in WindowBounds windowBounds,
+        Velocity speedOfSound)
+        => CalculateSampleStartDelay(windowBounds.WindowStart, speedOfSound);
 
-        internal static FineDuration CalculateSampleStartDelay(
-            Distance windowStart,
-            Salinity salinity,
-            ObservedConditions observedConditions)
-            => CalculateSampleStartDelay(
-                    windowStart,
-                    observedConditions.SpeedOfSound(salinity));
+    public static int FitSampleCountTo(
+        in WindowBounds windowBounds,
+        FineDuration samplePeriod,
+        Velocity speedOfSound)
+        => FitSampleCountTo(windowBounds.WindowLength, samplePeriod, speedOfSound);
 
-        internal static FineDuration CalculateSampleStartDelay(
-            Distance windowStart,
-            Velocity speedOfSound)
-        {
-            return 2 * windowStart / speedOfSound;
-        }
+    public static int FitSampleCountTo(
+        Distance windowLength,
+        FineDuration samplePeriod,
+        Velocity speedOfSound)
+        => (int)MathSupport.RoundAway(2 * windowLength / (samplePeriod * speedOfSound));
 
-        internal static FineDuration CalculateSampleStartDelay(
-            in WindowBounds windowBounds,
-            Velocity speedOfSound)
-            => CalculateSampleStartDelay(windowBounds.WindowStart, speedOfSound);
+    public static FineDuration FitSamplePeriodTo(
+        in WindowBounds windowBounds,
+        int sampleCount,
+        Velocity speedOfSound)
+    {
+        // (2 * WL) / (N * SSPD)
+        var samplePeriod = ((2 * windowBounds.WindowLength) / (sampleCount * speedOfSound));
+        var roundedSamplePeriod = samplePeriod.Ceiling;
 
-        internal static int FitSampleCountTo(
-            in WindowBounds windowBounds,
-            FineDuration samplePeriod,
-            Velocity speedOfSound)
-            => FitSampleCountTo(windowBounds.WindowLength, samplePeriod, speedOfSound);
-
-        internal static int FitSampleCountTo(
-            Distance windowLength,
-            FineDuration samplePeriod,
-            Velocity speedOfSound)
-            => (int)MathSupport.RoundAway(2 * windowLength / (samplePeriod * speedOfSound));
-
-        internal static FineDuration FitSamplePeriodTo(
-            in WindowBounds windowBounds,
-            int sampleCount,
-            Velocity speedOfSound)
-        {
-            // (2 * WL) / (N * SSPD)
-            var samplePeriod = ((2 * windowBounds.WindowLength) / (sampleCount * speedOfSound));
-            var roundedSamplePeriod = samplePeriod.Ceiling;
-
-            return roundedSamplePeriod;
-        }
+        return roundedSamplePeriod;
     }
 }
