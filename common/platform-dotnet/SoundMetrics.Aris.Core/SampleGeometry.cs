@@ -9,5 +9,8 @@ namespace SoundMetrics.Aris.Core
         int PingsPerFrame)
     {
         public static readonly SampleGeometry Invalid = new(0, 0, 0, 0);
+
+        public override string ToString()
+            => $"[geometry: beams={BeamCount}; samples={SampleCount}; pings={PingsPerFrame}]";
     }
 }
