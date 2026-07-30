@@ -69,7 +69,7 @@ namespace SoundMetrics.Aris.Core
 
         private void CheckInvariants()
         {
-            if (!(WindowStart < WindowEnd))
+            if (WindowStart > WindowEnd)
             {
                 var errorMessage =
                     $"{nameof(WindowEnd)} must be greater than {nameof(WindowStart)}";
