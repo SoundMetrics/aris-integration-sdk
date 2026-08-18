@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace SoundMetrics.Aris.Data
 {
-    internal static class Serialization
+    public static class Serialization
     {
         public static unsafe bool ReadStruct<T>(this Stream stream, out T t)
             where T : unmanaged
